@@ -4,7 +4,7 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from . import terrain
+from . import osm, terrain
 from .regions import REGIONS
 
 app = FastAPI(title="Tiny Atlas")
@@ -25,6 +25,17 @@ def terrain_mesh(region: str, size: int = 256):
     w, h = terrain.bbox_size_m(bbox)
     head = np.array([hm.shape[0], hm.shape[1]], dtype="<u4").tobytes() + np.array([w, h], dtype="<f4").tobytes()
     return Response(head + hm.astype("<f4").tobytes(), media_type="application/octet-stream")
+
+
+@app.get("/api/features/{region}")
+def region_features(region: str, buildings: bool = False):
+    """OSM polylines in normalised (u east, v south) coords, grouped by kind."""
+    if region not in REGIONS:
+        raise HTTPException(404, "unknown region")
+    try:
+        return osm.features(REGIONS[region]["bbox"], buildings=buildings)
+    except RuntimeError as exc:
+        raise HTTPException(502, str(exc))
 
 
 WEB = Path(__file__).resolve().parents[2] / "web"
