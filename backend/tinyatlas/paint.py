@@ -1,0 +1,122 @@
+"""Procedural illustrated texture: hillshade + toon-banded elevation colours + water + roads.
+
+This is the GPU-free baseline. Everything is derived from the DEM/OSM, so nothing is invented;
+a ComfyUI img2img pass can later restyle these textures using the depth/line passes as guides.
+"""
+from pathlib import Path
+
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter
+
+from . import osm, terrain, tiles
+
+# (elevation m, RGB) - valley greens -> tan -> rock -> snow
+RAMP = [
+    (1000, (150, 172, 96)),
+    (2000, (168, 176, 100)),
+    (2800, (196, 176, 120)),
+    (3600, (188, 160, 118)),
+    (4400, (160, 150, 138)),
+    (5200, (200, 196, 190)),
+    (5900, (250, 250, 252)),
+]
+ROCK = np.array([140, 128, 116], dtype=np.float64)
+SNOW = np.array([250, 250, 255], dtype=np.float64)
+WATER = np.array([74, 144, 196], dtype=np.float64)
+ROAD_INK, ROAD_FILL = (92, 62, 40), (246, 232, 196)
+
+
+def smoothstep(a: float, b: float, x: np.ndarray) -> np.ndarray:
+    t = np.clip((x - a) / (b - a), 0, 1)
+    return t * t * (3 - 2 * t)
+
+
+def blur(a: np.ndarray, sigma: float) -> np.ndarray:
+    """Separable gaussian blur for float arrays (PIL's filter doesn't take float images)."""
+    r = max(1, int(3 * sigma))
+    k = np.exp(-(np.arange(-r, r + 1) ** 2) / (2 * sigma**2))
+    k /= k.sum()
+    h, w = a.shape
+    p = np.pad(a, r, mode="edge")
+    rows = sum(k[i] * p[i : i + h, :] for i in range(2 * r + 1))
+    return sum(k[i] * rows[:, i : i + w] for i in range(2 * r + 1))
+
+
+def ramp_colors(elev: np.ndarray) -> np.ndarray:
+    xs = [p[0] for p in RAMP]
+    return np.stack([np.interp(elev, xs, [p[1][c] for p in RAMP]) for c in range(3)], axis=-1)
+
+
+def slope_and_shade(hm: np.ndarray, dx: float, dy: float, az_deg: float = 315.0, alt_deg: float = 42.0):
+    """hm rows run north->south. Returns (slope radians, hillshade 0..1) for a light at
+    azimuth az (clockwise from north) and altitude alt."""
+    gy, gx = np.gradient(hm, dy, dx)          # d/d(row south), d/d(col east)
+    dz_e, dz_n = gx, -gy
+    slope = np.arctan(np.hypot(dz_e, dz_n))
+    n = np.stack([-dz_e, -dz_n, np.ones_like(hm)], axis=-1)
+    n /= np.linalg.norm(n, axis=-1, keepdims=True)
+    az, alt = np.radians(az_deg), np.radians(alt_deg)
+    light = np.array([np.cos(alt) * np.sin(az), np.cos(alt) * np.cos(az), np.sin(alt)])
+    return slope, np.clip(n @ light, 0, 1)
+
+
+def colorize(hm: np.ndarray, slope: np.ndarray, shade: np.ndarray, bands: int = 5) -> np.ndarray:
+    """Base colour by elevation, rock on steep faces, snow high and gentle, then toon-banded light."""
+    deg = np.degrees(slope)[..., None]
+    col = ramp_colors(hm)
+    col = col * (1 - smoothstep(28, 48, deg)) + ROCK * smoothstep(28, 48, deg)
+    snow = smoothstep(4900, 5500, hm)[..., None] * (1 - smoothstep(48, 62, deg))
+    col = col * (1 - snow) + SNOW * snow
+    toon = np.floor(shade * bands + 0.5) / bands
+    light = 0.5 + 0.7 * (0.45 * shade + 0.55 * toon)
+    return np.clip(col * light[..., None], 0, 255)
+
+
+def paint_tile(tile: tiles.Tile, feats: dict, region_bbox, size: int = 1024, z: int = 13) -> Image.Image:
+    hm = terrain.heightmap(tile.bbox, z=z, size=size)
+    wm, hm_m = terrain.bbox_size_m(tile.bbox)
+    hm = blur(hm, 1.2)
+    slope, shade = slope_and_shade(hm, wm / size, hm_m / size)
+    rgb = colorize(hm, slope, shade)
+
+    water = np.asarray(tiles.water_mask(tile, feats, region_bbox, size).filter(ImageFilter.GaussianBlur(0.8)), dtype=np.float64) / 255
+    wshade = (0.85 + 0.15 * shade)[..., None]
+    rgb = rgb * (1 - water[..., None]) + WATER * wshade * water[..., None]
+
+    img = Image.fromarray(rgb.astype(np.uint8), "RGB")
+    d = ImageDraw.Draw(img)
+    to_px = tiles._px_mapper(tile, region_bbox, size)
+    for line in feats.get("road", []):
+        pts = [to_px(u, v) for u, v in line]
+        d.line(pts, fill=ROAD_INK, width=4, joint="curve")
+    for line in feats.get("road", []):
+        pts = [to_px(u, v) for u, v in line]
+        d.line(pts, fill=ROAD_FILL, width=2, joint="curve")
+    return img
+
+
+def core_box(tile: tiles.Tile, region_bbox, nx: int, ny: int, size: int) -> tuple[int, int, int, int]:
+    """Pixel box (l, t, r, b) of the tile's non-overlap core inside its own image."""
+    w, s, e, n = region_bbox
+    cw, ch = (e - w) / nx, (n - s) / ny
+    c_w, c_n = w + tile.ix * cw, n - tile.iy * ch
+    tw, ts, te, tn = tile.bbox
+    px = lambda lon: (lon - tw) / (te - tw) * size
+    py = lambda lat: (tn - lat) / (tn - ts) * size
+    return round(px(c_w)), round(py(c_n)), round(px(c_w + cw)), round(py(c_n - ch))
+
+
+def paint_region(name: str, bbox, nx: int = 3, ny: int = 3, size: int = 1024, core: int = 800,
+                 out: Path = tiles.OUT) -> Path:
+    """Paint all tiles, crop overlaps, mosaic into one texture. Row 0 = north, col 0 = west."""
+    feats = osm.features(bbox)
+    mosaic = Image.new("RGB", (nx * core, ny * core))
+    for t in tiles.tile_grid(bbox, nx, ny):
+        img = paint_tile(t, feats, bbox, size)
+        crop = img.crop(core_box(t, bbox, nx, ny, size)).resize((core, core), Image.LANCZOS)
+        mosaic.paste(crop, (t.ix * core, t.iy * core))
+    d = out / name
+    d.mkdir(parents=True, exist_ok=True)
+    path = d / "texture.png"
+    mosaic.save(path)
+    return path

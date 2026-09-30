@@ -55,7 +55,12 @@ geo.rotateX(-Math.PI / 2); // row 0 = north = -z
 const pos = geo.attributes.position;
 for (let i = 0; i < pos.count; i++) pos.setY(i, (hm[i] - min) * EXAG);
 geo.computeVertexNormals();
-const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0xc8b48a, flatShading: false, roughness: 1 }));
+const tex = await new THREE.TextureLoader().loadAsync(`/api/texture/${region}`).catch(() => null);
+if (tex) { tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); }
+// The texture already carries baked hillshade, so light it evenly (MeshBasic) to avoid double shading.
+const mesh = new THREE.Mesh(geo, tex
+  ? new THREE.MeshBasicMaterial({ map: tex })
+  : new THREE.MeshStandardMaterial({ color: 0xc8b48a, roughness: 1 }));
 scene.add(mesh);
 
 // Bilinear terrain height at normalised (u east, v south) coords, in scene units.
@@ -81,8 +86,12 @@ for (const [kind, color] of Object.entries(STYLES)) {
   if (!segs.length) continue;
   const g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.Float32BufferAttribute(segs, 3));
-  scene.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color })));
+  const lines = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color }));
+  lines.visible = !tex; // painted texture already shows them; keep as a fallback / debug overlay
+  lines.userData.osm = true;
+  scene.add(lines);
 }
+window.toggleOsm = (on) => scene.traverse(o => { if (o.userData.osm) o.visible = on; });
 
 camera.position.set(0, widthM * 0.5, heightM * 0.7);
 controls.target.set(0, 2000, 0);

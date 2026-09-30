@@ -54,20 +54,44 @@ def depth_image(tile: Tile, lo: float, hi: float, size: int = 1024, z: int = 13)
     return Image.fromarray((g * 255).astype(np.uint8), "L")
 
 
-def line_image(tile: Tile, feats: dict, region_bbox, size: int = 1024) -> Image.Image:
-    """Rasterise region-normalised OSM polylines into this tile's pixel space."""
+WIDTHS = {"lake": 2, "river": 4, "road": 3}
+
+
+def _px_mapper(tile: Tile, region_bbox, size: int):
     rw, rs, re_, rn = region_bbox
     tw, ts, te, tn = tile.bbox
-    img = Image.new("L", (size, size), 0)
-    d = ImageDraw.Draw(img)
 
     def to_px(u, v):
         lon, lat = rw + u * (re_ - rw), rn - v * (rn - rs)
         return (lon - tw) / (te - tw) * (size - 1), (tn - lat) / (tn - ts) * (size - 1)
 
-    for kind, width in (("lake", 2), ("river", 4), ("road", 3)):
+    return to_px
+
+
+def line_image(tile: Tile, feats: dict, region_bbox, size: int = 1024, kinds=("lake", "river", "road"),
+               widths: dict | None = None) -> Image.Image:
+    """Rasterise region-normalised OSM polylines into this tile's pixel space."""
+    to_px = _px_mapper(tile, region_bbox, size)
+    w = {**WIDTHS, **(widths or {})}
+    img = Image.new("L", (size, size), 0)
+    d = ImageDraw.Draw(img)
+    for kind in kinds:
         for line in feats.get(kind, []):
-            d.line([to_px(u, v) for u, v in line], fill=255, width=width, joint="curve")
+            d.line([to_px(u, v) for u, v in line], fill=255, width=w[kind], joint="curve")
+    return img
+
+
+def water_mask(tile: Tile, feats: dict, region_bbox, size: int = 1024) -> Image.Image:
+    """Filled lakes (closed ways) plus river lines, for painting water."""
+    to_px = _px_mapper(tile, region_bbox, size)
+    img = line_image(tile, feats, region_bbox, size, kinds=("river",), widths={"river": 5})
+    d = ImageDraw.Draw(img)
+    for line in feats.get("lake", []):
+        pts = [to_px(u, v) for u, v in line]
+        if len(pts) >= 4 and line[0] == line[-1]:
+            d.polygon(pts, fill=255)
+        else:
+            d.line(pts, fill=255, width=3)
     return img
 
 
