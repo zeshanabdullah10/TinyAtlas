@@ -72,3 +72,12 @@ def test_itinerary_visits_all_and_starts_west():
            {"slug": "c", "name": "C", "u": 0.4, "v": 0.5}]
     it = guide.itinerary(lms)
     assert [s["slug"] for s in it["stops"]] == ["a", "c", "b"] and len(it["route"]) == 3
+
+
+def test_itinerary_skips_sights_far_from_any_road():
+    road = [[(0.0, 0.0), (0.5, 0.0), (1.0, 0.0)]]
+    lms = [{"slug": "a", "name": "A", "u": 0.0, "v": 0.001}, {"slug": "peak", "name": "Peak", "u": 0.5, "v": 0.9},
+           {"slug": "b", "name": "B", "u": 1.0, "v": 0.001}]
+    it = guide.itinerary(lms, road, (10000.0, 10000.0))
+    assert [s["slug"] for s in it["stops"]] == ["a", "b"]      # the peak is 9 km from the road
+    assert all(p[1] < 0.01 for p in it["route"])

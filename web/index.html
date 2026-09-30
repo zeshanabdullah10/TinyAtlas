@@ -25,7 +25,7 @@
   #ask input { flex: 1; font: inherit; padding: 6px 8px; border: 1px solid #b8a67e; border-radius: 6px; min-width: 0; }
   #ask button { font: inherit; padding: 6px 10px; border: 0; background: #7a4b2a; color: #fff; border-radius: 6px; cursor: pointer; }
   #mode { font-size: 11px; color: #8a7a55; margin-top: 4px; }
-  #attr { position: fixed; bottom: 6px; left: 12px; right: 12px; font-size: 11px; color: #555; }
+  #attr { position: fixed; bottom: 6px; left: 12px; max-width: calc(100vw - 24px); box-sizing: border-box; font-size: 11px; color: #4a4030; background: #fffaf0d9; padding: 3px 8px; border-radius: 6px; width: fit-content; }
   .hidden { display: none !important; }
   @media (max-width: 700px) { #panel { top: auto; height: 46vh; bottom: 34px; } }
 </style>
@@ -57,7 +57,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const region = new URLSearchParams(location.search).get("region") || "hunza";
+const qs = new URLSearchParams(location.search);
+const region = qs.get("region") || "hunza";
+// ?clean=1 hides the UI (video/poster export); the attribution line stays.
+if (qs.get("clean")) for (const id of ["hud", "panel"]) document.getElementById(id).classList.add("hidden");
 const $ = (id) => document.getElementById(id);
 const getJSON = (url) => fetch(url).then(r => r.ok ? r.json() : Promise.reject(new Error(url + " " + r.status)));
 
@@ -187,7 +190,7 @@ const stops = (itin.route || []).map(([u, v]) => world(u, v, 0));
 let curve = null;
 if (stops.length >= 2) {
   curve = new THREE.CatmullRomCurve3(stops, false, "centripetal");
-  const N = 400, pts = [];
+  const N = 1200, pts = [];
   for (let i = 0; i < N; i++) {
     const p = curve.getPointAt(i / (N - 1));
     const u = p.x / widthM + 0.5, v = p.z / heightM + 0.5;
@@ -195,7 +198,7 @@ if (stops.length >= 2) {
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
-  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xc0392b, size: S * 0.55, sizeAttenuation: true })));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xc0392b, size: S * 0.4, sizeAttenuation: true })));
 }
 
 // ---------- interaction: click a landmark -> story + camera focus ----------
@@ -241,6 +244,12 @@ window.__open = (slug) => {   // test/automation hook: same path as clicking the
   return h ? openLandmark(h.userData.landmark, h.position) : null;
 };
 
+window.__project = (slug) => {   // test hook: landmark position in CSS pixels
+  const h = markers.children.find(m => m.userData.landmark.slug === slug); if (!h) return null;
+  const v = h.position.clone().add(new THREE.Vector3(0, S * 1.5, 0)).project(camera);
+  return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight };
+};
+
 // ---------- guide chat ----------
 const history = [];
 $("ask").addEventListener("submit", async (e) => {
@@ -269,21 +278,58 @@ $("ask").addEventListener("submit", async (e) => {
 const home = { pos: new THREE.Vector3(0, widthM * 0.5, heightM * 0.7), target: new THREE.Vector3(0, 2000, 0) };
 camera.position.copy(home.pos); controls.target.copy(home.target); controls.update();
 
-function flyPose(t) {
+// Precomputed camera path along the route. For every sample the camera trails the route point and is raised
+// until its line of sight to the look-ahead target clears the terrain; heights are max-filtered then blurred
+// (so smoothing never dips below clearance) and x/z/look positions are blurred for steady motion.
+const camPath = (() => {
   if (!curve) return null;
-  const ease = t * t * (3 - 2 * t);
-  const p = curve.getPointAt(ease), ahead = curve.getPointAt(Math.min(ease + 0.05, 1));
-  const dir = ahead.clone().sub(p).setY(0).normalize();
-  const cam = p.clone().addScaledVector(dir, -S * 26).add(new THREE.Vector3(0, S * 16, 0));
-  cam.y = Math.max(cam.y, heightAt(cam.x / widthM + 0.5, cam.z / heightM + 0.5) + S * 8);
-  return { cam, look: ahead.clone().add(new THREE.Vector3(0, S * 2, 0)) };
+  const M = 600, BACK = S * 30, AHEAD = 0.04, MARGIN = S * 3;
+  const groundAt = (x, z) => heightAt(x / widthM + 0.5, z / heightM + 0.5);
+  const cam = [], look = [];
+  let last = new THREE.Vector3(1, 0, 0);
+  for (let i = 0; i < M; i++) {
+    const t = i / (M - 1);
+    const p = curve.getPointAt(t), ahead = curve.getPointAt(Math.min(t + AHEAD, 1));
+    const d = ahead.clone().sub(p).setY(0);
+    if (d.lengthSq() > 1e-6) last = d.normalize().clone();
+    const cx = p.x - last.x * BACK, cz = p.z - last.z * BACK;
+    const ly = groundAt(ahead.x, ahead.z) + S * 2;
+    // at least ~28 degrees of downward pitch toward the look target, and never inside the ground
+    let y = Math.max(groundAt(p.x, p.z) + S * 10, groundAt(cx, cz) + S * 6, ly + Math.hypot(ahead.x - cx, ahead.z - cz) * 0.53);
+    for (let k = 1; k <= 12; k++) {           // line of sight cam -> look target must clear the ground
+      const f = k / 13;
+      const gy = groundAt(cx + (ahead.x - cx) * f, cz + (ahead.z - cz) * f) + MARGIN;
+      y = Math.max(y, (gy - f * ly) / (1 - f));
+    }
+    cam.push(new THREE.Vector3(cx, y, cz));
+    look.push(new THREE.Vector3(ahead.x, ly, ahead.z));
+  }
+  const maxFilter = (arr, r) => arr.map((_, i) => Math.max(...arr.slice(Math.max(0, i - r), i + r + 1)));
+  const blur = (arr, sigma) => {
+    const r = Math.ceil(sigma * 3), w = []; for (let k = -r; k <= r; k++) w.push(Math.exp(-(k * k) / (2 * sigma * sigma)));
+    return arr.map((_, i) => { let a = 0, ws = 0; for (let k = -r; k <= r; k++) { const j = Math.min(M - 1, Math.max(0, i + k)); a += arr[j] * w[k + r]; ws += w[k + r]; } return a / ws; });
+  };
+  const ys = blur(maxFilter(cam.map(c => c.y), 14), 8);
+  const xs = blur(cam.map(c => c.x), 8), zs = blur(cam.map(c => c.z), 8);
+  const lx = blur(look.map(c => c.x), 6), ly2 = blur(look.map(c => c.y), 6), lz = blur(look.map(c => c.z), 6);
+  return { cam: xs.map((x, i) => new THREE.Vector3(x, ys[i], zs[i])), look: lx.map((x, i) => new THREE.Vector3(x, ly2[i], lz[i])) };
+})();
+
+function flyPose(t) {
+  if (!camPath) return null;
+  const ease = t * t * (3 - 2 * t), f = ease * (camPath.cam.length - 1);
+  const i = Math.min(Math.floor(f), camPath.cam.length - 2), a = f - i;
+  return { cam: camPath.cam[i].clone().lerp(camPath.cam[i + 1], a), look: camPath.look[i].clone().lerp(camPath.look[i + 1], a) };
 }
 let flying = null;
 function renderFrame(t) {           // t in [0,1]; renders exactly one frame at that point of the flight
   const f = flyPose(t); if (!f) return;
   camera.position.copy(f.cam); camera.lookAt(f.look); renderer.render(scene, camera);
 }
-window.renderFrame = renderFrame;
+// External drivers (video export) take over the camera: the animation loop must stop re-aiming it.
+let manual = false;
+window.renderFrame = (t) => { manual = true; renderFrame(t); };
+window.__flyPose = (t) => { const f = flyPose(t); return f && { cam: f.cam.toArray(), look: f.look.toArray(), widthM, heightM }; };
 window.__flyDuration = 20;
 $("fly").onclick = () => { if (curve) flying = performance.now(); };
 $("fly").disabled = !curve;
@@ -293,6 +339,7 @@ addEventListener("resize", () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 renderer.setAnimationLoop((now) => {
+  if (manual) return;
   if (flying !== null) {
     const t = (now - flying) / (window.__flyDuration * 1000);
     if (t >= 1) { flying = null; controls.target.copy(home.target); camera.position.copy(home.pos); }

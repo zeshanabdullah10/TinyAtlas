@@ -8,7 +8,7 @@ import math
 import re
 from collections import Counter
 
-from . import llm, sources
+from . import llm, routing, sources
 
 STOP = set("a an and are as at be but by can did do does for from how i if in is it its me my of on or so than that the "
            "their there this to was we what when where which who why will with you your about tell".split())
@@ -106,17 +106,23 @@ def story(landmark: dict, chunks: list[dict]) -> dict:
     return {"story": _first_sentences(landmark["summary"], 3), "mode": "extractive"}
 
 
-def itinerary(lms: list[dict]) -> dict:
-    """Nearest-neighbour route through the landmarks, starting at the westernmost one.
-    Returns ordered stops plus a polyline of (u, v) points for the dotted route."""
+MAX_ROAD_SNAP_M = 2000     # a sight farther than this from any road is a viewpoint, not a route stop
+
+
+def itinerary(lms: list[dict], roads=None, size_m=None) -> dict:
+    """Order the landmarks by shortest road distance (exhaustive for <= 8), starting at the westernmost one.
+    Returns ordered stops plus a polyline of (u, v) points for the dotted route; with `roads`
+    (OSM polylines) and `size_m` the polyline follows the road network between stops."""
+    if roads and size_m:
+        graph = routing.build_graph(roads, size_m)
+        lms = [l for l in lms if routing.snap_distance_m(graph, (l["u"], l["v"]), size_m) <= MAX_ROAD_SNAP_M]
     if not lms:
         return {"stops": [], "route": []}
-    left = sorted(lms, key=lambda l: l["u"])
-    order = [left.pop(0)]
-    while left:
-        last = order[-1]
-        nxt = min(left, key=lambda l: (l["u"] - last["u"]) ** 2 + (l["v"] - last["v"]) ** 2)
-        left.remove(nxt)
-        order.append(nxt)
-    return {"stops": [{"slug": l["slug"], "name": l["name"]} for l in order],
-            "route": [[l["u"], l["v"]] for l in order]}
+    west = min(range(len(lms)), key=lambda i: lms[i]["u"])
+    pts = [(l["u"], l["v"]) for l in lms]
+    size = size_m or (1.0, 1.0)
+    idx = routing.best_order(pts, roads or [], size, start=west)
+    order = [lms[i] for i in idx]
+    pts = [(l["u"], l["v"]) for l in order]
+    route = routing.route_through(pts, roads, size_m) if roads and size_m else [list(p) for p in pts]
+    return {"stops": [{"slug": l["slug"], "name": l["name"]} for l in order], "route": route}

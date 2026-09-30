@@ -91,7 +91,12 @@ def ask_guide(region: str, body: Ask):
 
 @app.get("/api/itinerary/{region}")
 def region_itinerary(region: str):
-    return guide.itinerary(region_landmarks(region))
+    bbox = _region(region)["bbox"]
+    try:
+        roads = osm.features(bbox)["road"]
+    except RuntimeError:
+        roads = None            # Overpass down and nothing cached: fall back to straight legs
+    return guide.itinerary(region_landmarks(region), roads, terrain.bbox_size_m(bbox))
 
 
 @app.get("/api/status")
