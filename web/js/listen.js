@@ -10,8 +10,8 @@ export function makeListen({ api, slug }) {
   const audio = new Audio();
   audio.preload = "none";
   let clips = null, lang = stored("tinyatlas.lang") || "en", current = null;   // current: the clip object playing
-  const rows = new Set();                                                       // live placard rows, re-synced on every change
-  const sync = () => { for (const r of [...rows]) r.isConnected ? r() : rows.delete(r); };
+  const rows = new Set();                                                       // live placard rows: { el, paint }, re-synced on change
+  const sync = () => { for (const r of [...rows]) r.el.isConnected ? r.paint() : rows.delete(r); };
   api.audio(slug).then((a) => { clips = a; sync(); }).catch(() => {});
 
   function pick(lm) {
@@ -49,7 +49,7 @@ export function makeListen({ api, slug }) {
         h("details", { class: "listen-text" }, h("summary", {}, "Read along"),
           h("p", { dir: c.file.endsWith(".ur.m4a") ? "rtl" : "auto", lang: c.file.match(/\.(\w+)\.m4a$/)?.[1] }, c.text)));
     };
-    rows.add(paint); paint();
+    rows.add({ el, paint }); paint();
     return el;
   }
 

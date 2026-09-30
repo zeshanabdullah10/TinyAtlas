@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { h, fill, icon, kindIcon, KIND_LABEL, toast, fmtKm, fmtM, clamp } from "./dom.js";
-import { api } from "./api.js";
+import { api, BASE } from "./api.js";
 import { Diorama } from "./scene.js";
 import { sunPosition, riseSet, localInstant, utcOffsetMin, clock } from "./sun.js";
 import { openPanorama } from "./panorama.js";
@@ -13,7 +13,7 @@ const ATTRIBUTION = "Elevation: Mapzen and AWS Terrain Tiles. Map data © OpenSt
 
 const fatal = (root, title, text) => root.replaceChildren(h("div", { class: "place" }, h("div", { class: "chrome" },
   h("div", { class: "label fatal", style: "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)" },
-    h("h2", {}, title), h("p", {}, text), h("a", { class: "btn", href: "/" }, icon("i-back"), "All places")))));
+    h("h2", {}, title), h("p", {}, text), h("a", { class: "btn", href: `${BASE}` }, icon("i-back"), "All places")))));
 
 export async function mountPlace(root, slug, { lm: initialLm = null, clean = false } = {}) {
   document.body.classList.toggle("clean", clean);
@@ -100,7 +100,7 @@ export async function mountPlace(root, slug, { lm: initialLm = null, clean = fal
     if (innerWidth <= 900) openSheet("route", true);
   };
 
-  const back = h("a", { class: "btn back", href: "/", "aria-label": "All places" }, icon("i-back"), h("span", { class: "back-text" }, "All places"));
+  const back = h("a", { class: "btn back", href: `${BASE}`, "aria-label": "All places" }, icon("i-back"), h("span", { class: "back-text" }, "All places"));
   const left = h("div", { class: "left" }, back,
     h("header", { class: "label titleblock" }, h("h1", {}, info.name), info.subtitle && h("p", { class: "sub" }, info.subtitle)),
     els.rail);
@@ -333,7 +333,15 @@ export async function mountPlace(root, slug, { lm: initialLm = null, clean = fal
   const uvOf = (la, lo) => ({ u: (lo - bw) / (be - bw), v: (bn - la) / (bn - bs) });
   // offline: the whole place (terrain, previews, audio, models) into the browser's cache, for the valley with no signal
   const saveBtn = mkIcon("i-down", "Save this place for offline", async () => {
-    const sw = navigator.serviceWorker?.controller;
+    let sw = navigator.serviceWorker?.controller;
+    if (!sw && navigator.serviceWorker) {          // on a first visit the worker claims the page a moment after load
+      try {
+        sw = await new Promise((res) => {
+          const t = setTimeout(res, 4000);
+          navigator.serviceWorker.addEventListener("controllerchange", () => { clearTimeout(t); res(navigator.serviceWorker.controller); }, { once: true });
+        });
+      } catch { /* fall through to the hint */ }
+    }
     if (!sw) { toast("Offline saving needs this page to be opened once more, then try again"); return; }
     saveBtn.disabled = true; saveBtn.title = "Preparing…";
     const urls = await api.offlineUrls(slug), id = Math.random().toString(36).slice(2);

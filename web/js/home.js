@@ -1,5 +1,5 @@
 import { h, icon, toast } from "./dom.js";
-import { api, STATIC } from "./api.js";
+import { api, STATIC, BASE } from "./api.js";
 
 const ACTIVE_JOB = "tinyatlas.job";
 const wordmark = () => {
@@ -33,7 +33,7 @@ export async function mountHome(root) {
     ["i-go", "An audio guide that works offline", "Stories in English, Urdu and Mandarin that start as you arrive, with no signal needed."],
   ];
   root.append(h("div", { class: "home" },
-    h("header", { class: "home-head" }, h("a", { class: "mark", href: "/" }, wordmark(), "Tiny Atlas"),
+    h("header", { class: "home-head" }, h("a", { class: "mark", href: `${BASE}` }, wordmark(), "Tiny Atlas"),
       h("a", { class: "btn", href: "#valleys" }, "The valleys")),
     h("section", { class: "hero2" },
       h("figure", { class: "hero-fig" }, heroImg, heroCap),
@@ -41,7 +41,7 @@ export async function mountHome(root) {
         h("p", { class: "kicker" }, "Northern Pakistan, free"),
         h("h1", {}, "See the valley before you go."),
         h("p", { class: "lead" }, "3D miniatures of Hunza, Skardu, Fairy Meadows and more, built from real terrain. Preview the view from the best spots in any season, plan a trip on the real roads, and carry an audio guide that works with no signal."),
-        h("div", { class: "hero-cta" }, h("a", { class: "btn btn-primary", href: "/?region=hunza" }, "Explore Hunza"), h("a", { class: "btn", href: "#valleys" }, "All valleys")))),
+        h("div", { class: "hero-cta" }, h("a", { class: "btn btn-primary", href: `${BASE}?region=hunza` }, "Explore Hunza"), h("a", { class: "btn", href: "#valleys" }, "All valleys")))),
     h("ul", { class: "features" }, ...FEATURES.map(([ic, t, d]) => h("li", {}, icon(ic), h("h3", {}, t), h("p", {}, d)))),
     h("h2", { class: "shelf-title", id: "valleys" }, "The valleys"),
     shelf,
@@ -68,7 +68,7 @@ export async function mountHome(root) {
         h("img", { class: "inset", src: api.thumbUrl(slug, 240), alt: "", loading: "lazy", width: 120, height: 120 }))
       : h("div", { class: "mat" }, h("img", { src: api.thumbUrl(slug, 640), alt: "", loading: "lazy", width: 640, height: 480 }));
     return h("li", { class: "frame" },
-      h("a", { href: `/?region=${encodeURIComponent(slug)}`, "aria-label": `Open ${r.name}` },
+      h("a", { href: `${BASE}?region=${encodeURIComponent(slug)}`, "aria-label": `Open ${r.name}` },
         pic,
         h("div", { class: "plate" },
           h("h2", {}, r.name),
@@ -125,7 +125,7 @@ export async function mountHome(root) {
     note.textContent = "";
     try {
       const res = await api.build({ query: place.name, name: place.name, subtitle: place.subtitle, lat: place.lat, lon: place.lon });
-      if (res.status === "done") { location.href = `/?region=${encodeURIComponent(res.result)}`; return; }
+      if (res.status === "done") { location.href = `${BASE}?region=${encodeURIComponent(res.result)}`; return; }
       input.value = "";
       follow(res.id, place.name);
     } catch (e) { note.textContent = e.message; }
