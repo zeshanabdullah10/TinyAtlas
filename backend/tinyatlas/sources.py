@@ -32,12 +32,13 @@ def _cached(key: str, fetch):
 
 
 def fetch_page(host: str, title: str, client: httpx.Client | None = None) -> dict:
-    """{title, url, text, lat, lon} for a wiki page (coords are None if the page has none)."""
+    """{title, url, text, lat, lon, image, description} for a wiki page (None where the page has none)."""
     def go():
         c = client or httpx
         r = c.get(f"https://{host}/w/api.php", headers=HEADERS, timeout=30, params={
-            "action": "query", "prop": "extracts|coordinates|info", "inprop": "url", "explaintext": 1,
-            "exlimit": 1, "colimit": 1, "redirects": 1, "titles": title, "format": "json", "formatversion": 2,
+            "action": "query", "prop": "extracts|coordinates|info|pageimages|description", "inprop": "url",
+            "explaintext": 1, "exlimit": 1, "colimit": 1, "piprop": "thumbnail", "pithumbsize": 720,
+            "redirects": 1, "titles": title, "format": "json", "formatversion": 2,
         })
         r.raise_for_status()
         pages = r.json()["query"]["pages"]
@@ -49,9 +50,11 @@ def fetch_page(host: str, title: str, client: httpx.Client | None = None) -> dic
             "text": (p.get("extract") or "")[:MAX_CHARS],
             "lat": coord.get("lat"),
             "lon": coord.get("lon"),
+            "image": (p.get("thumbnail") or {}).get("source"),
+            "description": p.get("description", ""),
             "missing": bool(p.get("missing")),
         }
-    return _cached(f"{host.split('.')[1]}_{slugify(title)}", go)
+    return _cached(f"{host.split('.')[1]}_{slugify(title)}_v2", go)
 
 
 def to_uv(lat: float, lon: float, bbox) -> tuple[float, float] | None:
@@ -82,6 +85,7 @@ def landmarks(region: dict, client: httpx.Client | None = None) -> list[dict]:
             "slug": slugify(lm["title"]), "name": page["title"], "kind": lm["kind"],
             "lat": page["lat"], "lon": page["lon"], "u": uv[0], "v": uv[1],
             "summary": text.split("\n\n")[0][:600], "url": page["url"],
+            "image": page.get("image"), "description": page.get("description", ""),
         })
     return out
 

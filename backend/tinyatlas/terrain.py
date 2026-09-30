@@ -4,6 +4,8 @@ Uses AWS Terrarium tiles (open data, no key): elevation_m = R*256 + G + B/256 - 
 """
 import io
 import math
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import httpx
@@ -33,9 +35,20 @@ def fetch_tile(z: int, x: int, y: int, client: httpx.Client | None = None) -> np
         c = client or httpx
         r = c.get(TILE_URL.format(z=z, x=x, y=y), timeout=30)
         r.raise_for_status()
-        path.write_bytes(r.content)
+        tmp = path.with_suffix(f".{threading.get_ident()}.tmp")
+        tmp.write_bytes(r.content)
+        tmp.replace(path)                      # atomic: readers never see a half-written tile
     img = Image.open(io.BytesIO(path.read_bytes())).convert("RGB")
     return decode_terrarium(np.asarray(img))
+
+
+def prefetch(z: int, xs, ys, workers: int = 8) -> None:
+    """Download any missing tiles in parallel (they are then read from the disk cache)."""
+    missing = [(x, y) for y in ys for x in xs if not (CACHE / f"{z}_{x}_{y}.png").exists()]
+    if len(missing) < 2:
+        return
+    with httpx.Client(timeout=30) as client, ThreadPoolExecutor(workers) as pool:
+        list(pool.map(lambda t: fetch_tile(z, t[0], t[1], client), missing))
 
 
 def heightmap(bbox: tuple[float, float, float, float], z: int = 11, size: int = 256) -> np.ndarray:
@@ -46,6 +59,7 @@ def heightmap(bbox: tuple[float, float, float, float], z: int = 11, size: int = 
     x1, y1 = lonlat_to_tile(e, s, z)
     tx0, tx1 = int(math.floor(x0)), int(math.floor(x1))
     ty0, ty1 = int(math.floor(y0)), int(math.floor(y1))
+    prefetch(z, range(tx0, tx1 + 1), range(ty0, ty1 + 1))
     rows = []
     for ty in range(ty0, ty1 + 1):
         rows.append(np.hstack([fetch_tile(z, tx, ty) for tx in range(tx0, tx1 + 1)]))
