@@ -1,13 +1,37 @@
 import numpy as np
+from functools import lru_cache
+
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from pydantic import BaseModel
 
-from . import osm, paint, terrain, tiles
+from . import guide, llm, osm, paint, sources, terrain, tiles
 from .regions import REGIONS
 
 app = FastAPI(title="Tiny Atlas")
+
+
+def _region(name: str) -> dict:
+    if name not in REGIONS:
+        raise HTTPException(404, "unknown region")
+    return REGIONS[name]
+
+
+@lru_cache(maxsize=None)
+def _landmarks(name: str) -> list[dict]:
+    return sources.landmarks(_region(name))
+
+
+@lru_cache(maxsize=None)
+def _chunks(name: str) -> list[dict]:
+    return sources.chunks(_region(name))
+
+
+class Ask(BaseModel):
+    question: str
+    history: list[dict] = []
 
 
 @app.get("/api/regions")
@@ -36,6 +60,43 @@ def region_features(region: str, buildings: bool = False):
         return osm.features(REGIONS[region]["bbox"], buildings=buildings)
     except RuntimeError as exc:
         raise HTTPException(502, str(exc))
+
+
+@app.get("/api/landmarks/{region}")
+def region_landmarks(region: str):
+    try:
+        models = Path(__file__).resolve().parents[2] / "web" / "models"
+        return [{**l, "model": (models / f"{l['slug']}.glb").exists()} for l in _landmarks(region)]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(502, f"could not load landmarks: {exc}")
+
+
+@app.get("/api/story/{region}/{slug}")
+def landmark_story(region: str, slug: str):
+    lm = next((l for l in region_landmarks(region) if l["slug"] == slug), None)
+    if lm is None:
+        raise HTTPException(404, "unknown landmark")
+    return {**guide.story(lm, _chunks(region)), "name": lm["name"], "url": lm["url"]}
+
+
+@app.post("/api/guide/{region}")
+def ask_guide(region: str, body: Ask):
+    question = body.question.strip()[:500]
+    if not question:
+        raise HTTPException(400, "empty question")
+    return guide.answer(question, _chunks(region), body.history)
+
+
+@app.get("/api/itinerary/{region}")
+def region_itinerary(region: str):
+    return guide.itinerary(region_landmarks(region))
+
+
+@app.get("/api/status")
+def status():
+    return {"llm": llm.available(), "model": llm.model(), "usage": llm.usage_totals()}
 
 
 @app.get("/api/texture/{region}")
