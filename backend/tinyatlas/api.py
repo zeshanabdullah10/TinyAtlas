@@ -105,10 +105,18 @@ def status():
 
 
 @app.get("/api/texture/{region}")
-def region_texture(region: str):
-    """Painted region texture (row 0 = north). Generated on first request, then cached on disk."""
+def region_texture(region: str, style: str = "auto"):
+    """Region texture (row 0 = north). style=ai|painted|auto; auto prefers the AI-stylised texture when it exists.
+    The painted texture is generated on first request, then cached on disk."""
     if region not in REGIONS:
         raise HTTPException(404, "unknown region")
+    if style not in ("auto", "ai", "painted"):
+        raise HTTPException(400, "style must be auto, ai or painted")
+    ai = tiles.OUT / region / "texture_ai.png"
+    if style == "ai" and not ai.exists():
+        raise HTTPException(404, "no AI texture for this region yet (run backend/tools/stylize.py)")
+    if style in ("auto", "ai") and ai.exists():
+        return FileResponse(ai, media_type="image/png")
     path = tiles.OUT / region / "texture.png"
     if not path.exists():
         path = paint.paint_region(region, REGIONS[region]["bbox"])

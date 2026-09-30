@@ -44,3 +44,16 @@ def test_itinerary_and_status(client):
     it = client.get("/api/itinerary/hunza").json()
     assert [s["slug"] for s in it["stops"]] == ["baltit-fort", "attabad-lake"]
     assert client.get("/api/status").json()["llm"] is False
+
+
+def test_texture_prefers_ai_then_falls_back_to_painted(client, monkeypatch, tmp_path):
+    from PIL import Image
+    monkeypatch.setattr(api.tiles, "OUT", tmp_path)
+    (tmp_path / "hunza").mkdir()
+    Image.new("RGB", (4, 4), (255, 0, 0)).save(tmp_path / "hunza" / "texture.png")
+    assert client.get("/api/texture/hunza?style=ai").status_code == 404
+    assert Image.open(__import__("io").BytesIO(client.get("/api/texture/hunza").content)).getpixel((0, 0)) == (255, 0, 0)
+    Image.new("RGB", (4, 4), (0, 0, 255)).save(tmp_path / "hunza" / "texture_ai.png")
+    assert Image.open(__import__("io").BytesIO(client.get("/api/texture/hunza").content)).getpixel((0, 0)) == (0, 0, 255)
+    assert Image.open(__import__("io").BytesIO(client.get("/api/texture/hunza?style=painted").content)).getpixel((0, 0)) == (255, 0, 0)
+    assert client.get("/api/texture/hunza?style=bogus").status_code == 400
