@@ -109,15 +109,24 @@ def story(landmark: dict, chunks: list[dict]) -> dict:
 
 
 MAX_ROAD_SNAP_M = 2000     # a sight farther than this from any road is a viewpoint, not a route stop
+VIEWPOINT_SNAP_M = 800     # summits and glaciers must have the road or path right beside them
+VIEWPOINT_KINDS = {"peak", "glacier"}
 
 
-def itinerary(lms: list[dict], roads=None, size_m=None) -> dict:
+def itinerary(lms: list[dict], roads=None, size_m=None, trails=None) -> dict:
     """Order the landmarks by shortest road distance (exhaustive for <= 8), starting at the westernmost one.
     Returns ordered stops plus a polyline of (u, v) points for the dotted route; with `roads`
     (OSM polylines) and `size_m` the polyline follows the road network between stops."""
     if roads and size_m:
-        graph = routing.build_graph(roads, size_m)
-        lms = [l for l in lms if routing.snap_distance_m(graph, (l["u"], l["v"]), size_m) <= MAX_ROAD_SNAP_M]
+        def near(net):
+            graph = routing.build_graph(net, size_m)
+            limit = lambda l: VIEWPOINT_SNAP_M if l.get("kind") in VIEWPOINT_KINDS else MAX_ROAD_SNAP_M
+            return [l for l in lms if routing.snap_distance_m(graph, (l["u"], l["v"]), size_m) <= limit(l)]
+        stops = near(roads)
+        if len(stops) < 2 and trails:            # car-free or hiking country: walk the footpaths instead
+            roads = roads + trails
+            stops = near(roads)
+        lms = stops
     if not lms:
         return {"stops": [], "route": []}
     west = min(range(len(lms)), key=lambda i: lms[i]["u"])

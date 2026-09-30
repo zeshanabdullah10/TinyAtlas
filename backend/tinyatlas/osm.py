@@ -20,6 +20,7 @@ HEADERS = {"User-Agent": "TinyAtlas/0.1 (open-source hobby project)", "Accept": 
 CACHE = Path(__file__).resolve().parents[2] / "data" / "osm"
 
 ROAD_CLASSES = {"motorway", "trunk", "primary", "secondary", "tertiary", "unclassified", "residential", "track", "service"}
+TRAIL_CLASSES = {"path", "footway", "pedestrian", "cycleway", "bridleway", "steps"}
 WATER_WAYS = {"river", "stream", "canal"}
 
 
@@ -71,12 +72,14 @@ def classify(tags: dict) -> str | None:
         return "lake"
     if tags.get("highway") in ROAD_CLASSES:
         return "road"
+    if tags.get("highway") in TRAIL_CLASSES:
+        return "trail"
     return None
 
 
 def normalise(raw: dict, bbox) -> dict[str, list[list[tuple[float, float]]]]:
     w, s, e, n = bbox
-    out: dict[str, list] = {"road": [], "river": [], "lake": [], "building": []}
+    out: dict[str, list] = {"road": [], "trail": [], "river": [], "lake": [], "building": []}
     for el in raw.get("elements", []):
         if el.get("type") != "way" or "geometry" not in el:
             continue

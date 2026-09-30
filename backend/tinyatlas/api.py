@@ -84,7 +84,7 @@ def region_details(region: str):
             continue
         paras = [p.strip() for p in page["text"].split("\n\n") if len(p.strip()) > 80 and not p.startswith("=")]
         if paras and not page["missing"]:
-            intro, url = paras[0][:420], page["url"]
+            intro, url = sources.clean_lead(paras[0])[:420], page["url"]
             break
     return {**_summary(region, cfg), "intro": intro, "intro_url": url}
 
@@ -197,10 +197,11 @@ def ask_guide(region: str, body: Ask):
 def region_itinerary(region: str):
     bbox = _region(region)["bbox"]
     try:
-        roads = osm.features(bbox)["road"]
+        feats = osm.features(bbox)
+        roads, trails = feats["road"], feats.get("trail")
     except RuntimeError:
-        roads = None            # Overpass down and nothing cached: fall back to straight legs
-    return guide.itinerary(region_landmarks(region), roads, terrain.bbox_size_m(bbox))
+        roads, trails = None, None            # Overpass down and nothing cached: fall back to straight legs
+    return guide.itinerary(region_landmarks(region), roads, terrain.bbox_size_m(bbox), trails)
 
 
 @app.get("/api/status")

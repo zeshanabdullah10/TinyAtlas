@@ -143,3 +143,18 @@ def test_pick_caps_kinds_and_count():
     cands = [_cand(f"Peak {i}", 0.1 * i + 0.05, 0.1 * i + 0.05) for i in range(9)]
     info = {c["title"]: {"length": 5000, "description": "Mountain in X", "extract": "", "thumb": "x"} for c in cands}
     assert len(discover.pick(cands, info, bbox, n=5, min_sep_km=1)) == 5
+
+
+def test_search_dedupes_repeated_records_for_one_place(tmp_path, monkeypatch):
+    monkeypatch.setattr(geocode, "CACHE", tmp_path)
+    rec = lambda lat, sub: {"display_name": f"Cappadocia, {sub}", "name": "Cappadocia", "lat": str(lat), "lon": "13.3", "type": "village", "importance": 0.3}
+
+    class C:
+        def get(self, url, **kw):
+            class R:
+                def raise_for_status(self): pass
+                def json(self_): return [rec(42.0, "Abruzzo, Italy"), rec(42.001, "Abruzzo, Italy"), rec(38.6, "Central Anatolia Region, Turkey")]
+            return R()
+
+    got = geocode.search("Cappadocia", client=C())
+    assert [g["subtitle"] for g in got] == ["Abruzzo, Italy", "Central Anatolia Region, Turkey"]

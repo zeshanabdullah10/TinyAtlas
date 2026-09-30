@@ -58,3 +58,10 @@ def test_chunks_keep_source_and_respect_size(tmp_path, monkeypatch):
     assert {c["source"] for c in cs} == {"Baltit Fort", "Hunza Valley"}
     assert all(c["url"].startswith("https://") for c in cs)
     assert max(len(c["text"]) for c in cs if c["source"] == "Hunza Valley") <= 1010
+
+
+def test_clean_lead_removes_pronunciations_and_fixes_spacing():
+    raw = "Zermatt (German: [tsɛrˈmat] ; Swiss: [x]) is a municipality in Valais (Switzerland), with 5,800 people ."
+    assert sources.clean_lead(raw) == "Zermatt is a municipality in Valais, with 5,800 people."
+    assert sources.clean_lead("Plain sentence.") == "Plain sentence."
+    assert sources.clean_lead("A (b (c)) d.") == "A d."                       # nested groups

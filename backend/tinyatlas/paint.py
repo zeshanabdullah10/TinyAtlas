@@ -8,22 +8,22 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
-from . import osm, terrain, tiles
+from . import osm, regions, terrain, tiles
 
-# (elevation m, RGB) - valley greens -> tan -> rock -> snow
+# (t, RGB) with t = 0 at the region's lowest ground and 1 at the snowline: valley green -> tan -> rock -> snow
 RAMP = [
-    (1000, (150, 172, 96)),
-    (2000, (168, 176, 100)),
-    (2800, (196, 176, 120)),
-    (3600, (188, 160, 118)),
-    (4400, (160, 150, 138)),
-    (5200, (200, 196, 190)),
-    (5900, (250, 250, 252)),
+    (0.00, (150, 172, 96)),
+    (0.22, (168, 176, 100)),
+    (0.44, (196, 176, 120)),
+    (0.64, (188, 160, 118)),
+    (0.80, (160, 150, 138)),
+    (0.93, (200, 196, 190)),
+    (1.10, (250, 250, 252)),
 ]
 ROCK = np.array([140, 128, 116], dtype=np.float64)
 SNOW = np.array([250, 250, 255], dtype=np.float64)
 WATER = np.array([74, 144, 196], dtype=np.float64)
-ROAD_INK, ROAD_FILL = (92, 62, 40), (246, 232, 196)
+ROAD_INK, ROAD_FILL, TRAIL = (92, 62, 40), (246, 232, 196), (128, 88, 58)
 
 
 def smoothstep(a: float, b: float, x: np.ndarray) -> np.ndarray:
@@ -42,9 +42,19 @@ def blur(a: np.ndarray, sigma: float) -> np.ndarray:
     return sum(k[i] * rows[:, i : i + w] for i in range(2 * r + 1))
 
 
-def ramp_colors(elev: np.ndarray) -> np.ndarray:
+def climate(bbox, snowline: float | None = None) -> tuple[float, float]:
+    """(lowest ground, snowline) in metres for a region. The snowline falls with latitude unless the region
+    sets its own (dry continental ranges like the Karakoram keep snow far higher than the Alps)."""
+    lat = abs((bbox[1] + bbox[3]) / 2)
+    lo = float(np.percentile(terrain.heightmap(bbox, z=11, size=96), 1))
+    sn = snowline or max(900.0, 4800.0 - 50.0 * max(0.0, lat - 15.0))
+    return lo, max(sn, lo + 800.0)
+
+
+def ramp_colors(elev: np.ndarray, lo: float = 1000.0, snow: float = 5500.0) -> np.ndarray:
+    t = (elev - lo) / (snow - lo)
     xs = [p[0] for p in RAMP]
-    return np.stack([np.interp(elev, xs, [p[1][c] for p in RAMP]) for c in range(3)], axis=-1)
+    return np.stack([np.interp(t, xs, [p[1][c] for p in RAMP]) for c in range(3)], axis=-1)
 
 
 def slope_and_shade(hm: np.ndarray, dx: float, dy: float, az_deg: float = 315.0, alt_deg: float = 42.0):
@@ -60,24 +70,27 @@ def slope_and_shade(hm: np.ndarray, dx: float, dy: float, az_deg: float = 315.0,
     return slope, np.clip(n @ light, 0, 1)
 
 
-def colorize(hm: np.ndarray, slope: np.ndarray, shade: np.ndarray, bands: int = 5) -> np.ndarray:
+def colorize(hm: np.ndarray, slope: np.ndarray, shade: np.ndarray, bands: int = 5,
+             lo: float = 1000.0, snowline: float = 5500.0) -> np.ndarray:
     """Base colour by elevation, rock on steep faces, snow high and gentle, then toon-banded light."""
     deg = np.degrees(slope)[..., None]
-    col = ramp_colors(hm)
+    col = ramp_colors(hm, lo, snowline)
     col = col * (1 - smoothstep(28, 48, deg)) + ROCK * smoothstep(28, 48, deg)
-    snow = smoothstep(4900, 5500, hm)[..., None] * (1 - smoothstep(48, 62, deg))
+    snow = smoothstep(0.87, 1.02, (hm - lo) / (snowline - lo))[..., None] * (1 - smoothstep(38, 55, deg))
     col = col * (1 - snow) + SNOW * snow
     toon = np.floor(shade * bands + 0.5) / bands
     light = 0.5 + 0.7 * (0.45 * shade + 0.55 * toon)
     return np.clip(col * light[..., None], 0, 255)
 
 
-def paint_tile(tile: tiles.Tile, feats: dict, region_bbox, size: int = 1024, z: int = 13) -> Image.Image:
+def paint_tile(tile: tiles.Tile, feats: dict, region_bbox, size: int = 1024, z: int = 13,
+               clim: tuple[float, float] | None = None) -> Image.Image:
+    lo, snowline = clim or climate(region_bbox)
     hm = terrain.heightmap(tile.bbox, z=z, size=size)
     wm, hm_m = terrain.bbox_size_m(tile.bbox)
     hm = blur(hm, 1.2)
     slope, shade = slope_and_shade(hm, wm / size, hm_m / size)
-    rgb = colorize(hm, slope, shade)
+    rgb = colorize(hm, slope, shade, lo=lo, snowline=snowline)
 
     water = np.asarray(tiles.water_mask(tile, feats, region_bbox, size).filter(ImageFilter.GaussianBlur(0.8)), dtype=np.float64) / 255
     wshade = (0.85 + 0.15 * shade)[..., None]
@@ -86,6 +99,8 @@ def paint_tile(tile: tiles.Tile, feats: dict, region_bbox, size: int = 1024, z: 
     img = Image.fromarray(rgb.astype(np.uint8), "RGB")
     d = ImageDraw.Draw(img)
     to_px = tiles._px_mapper(tile, region_bbox, size)
+    for line in feats.get("trail", []):           # footpaths: a thin, quiet line under the roads
+        d.line([to_px(u, v) for u, v in line], fill=TRAIL, width=1)
     for line in feats.get("road", []):
         pts = [to_px(u, v) for u, v in line]
         d.line(pts, fill=ROAD_INK, width=4, joint="curve")
@@ -110,9 +125,10 @@ def paint_region(name: str, bbox, nx: int = 3, ny: int = 3, size: int = 1024, co
                  out: Path = tiles.OUT) -> Path:
     """Paint all tiles, crop overlaps, mosaic into one texture. Row 0 = north, col 0 = west."""
     feats = osm.features(bbox)
+    clim = climate(bbox, regions.REGIONS[name].get("snowline") if name in regions.REGIONS else None)
     mosaic = Image.new("RGB", (nx * core, ny * core))
     for t in tiles.tile_grid(bbox, nx, ny):
-        img = paint_tile(t, feats, bbox, size)
+        img = paint_tile(t, feats, bbox, size, clim=clim)
         crop = img.crop(core_box(t, bbox, nx, ny, size)).resize((core, core), Image.LANCZOS)
         mosaic.paste(crop, (t.ix * core, t.iy * core))
     d = out / name

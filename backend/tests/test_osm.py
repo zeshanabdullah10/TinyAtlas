@@ -8,7 +8,7 @@ def test_classify():
     assert osm.classify({"waterway": "river"}) == "river"
     assert osm.classify({"natural": "water"}) == "lake"
     assert osm.classify({"highway": "residential"}) == "road"
-    assert osm.classify({"highway": "footway"}) is None
+    assert osm.classify({"highway": "footway"}) == "trail" and osm.classify({"highway": "proposed"}) is None
 
 
 def test_normalise_maps_corners():

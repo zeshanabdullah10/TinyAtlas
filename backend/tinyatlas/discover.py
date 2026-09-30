@@ -24,7 +24,7 @@ NOISE = re.compile(r"\b(railway station|train station|metro station|bus stop|hal
                    r"accident|crash|disaster|battle|massacre|festival|film|album|song|episode|season|"
                    r"championship|tournament|election|radar|weather station|transmitter|antenna|species|genus|"
                    r"constituency|electoral|road|highway|expressway|census-designated place|unincorporated|"
-                   r"amusement park|theme park|water park|zoo|golf|diocese|archdiocese|parish|bishopric|"
+                   r"amusement park|theme park|water park|roller coaster|amusement ride|zoo|golf|diocese|archdiocese|parish|bishopric|"
                    r"ship|shipwreck|wreck|steamship|liner|submarine|warship)\b", re.I)
 # The first sentence often mentions districts and cantons for perfectly good landmarks, so only hard noise counts there.
 NOISE_SENT = re.compile(r"\b(railway station|train station|metro station|airport|heliport|hotel|hostel|hospital|"

@@ -81,3 +81,53 @@ def test_itinerary_skips_sights_far_from_any_road():
     it = guide.itinerary(lms, road, (10000.0, 10000.0))
     assert [s["slug"] for s in it["stops"]] == ["a", "b"]      # the peak is 9 km from the road
     assert all(p[1] < 0.01 for p in it["route"])
+
+
+def test_itinerary_uses_trails_only_when_roads_cannot_connect_two_stops():
+    size = (10000.0, 10000.0)
+    road = [[(0.0, 0.0), (0.05, 0.0)]]                         # a short road near neither hiking sight
+    trail = [[(0.5, 0.5), (0.9, 0.5)], [(0.1, 0.5), (0.5, 0.5)]]
+    hikes = [{"slug": "a", "name": "A", "u": 0.12, "v": 0.5}, {"slug": "b", "name": "B", "u": 0.88, "v": 0.5}]
+    assert guide.itinerary(hikes, road, size)["stops"] == []                       # roads alone: nothing reachable
+    it = guide.itinerary(hikes, road, size, trails=trail)
+    assert [s["slug"] for s in it["stops"]] == ["a", "b"] and len(it["route"]) >= 3
+    # with a real road connecting the sights, trails are ignored
+    big_road = [[(0.1, 0.5), (0.9, 0.5)]]
+    again = guide.itinerary(hikes, big_road, size, trails=trail)
+    assert [s["slug"] for s in again["stops"]] == ["a", "b"]
+
+
+def test_summits_are_only_route_stops_when_the_road_passes_right_by():
+    road = [[(i / 20, 0.5) for i in range(21)]]                  # vertices every 500 m, like real OSM ways
+    size = (10000.0, 10000.0)                                    # 1 unit = 10 km
+    lms = [{"slug": "a", "name": "A", "kind": "fort", "u": 0.0, "v": 0.5},
+           {"slug": "near", "name": "Near peak", "kind": "peak", "u": 0.5, "v": 0.505},        # 50 m from the road
+           {"slug": "far", "name": "Far peak", "kind": "peak", "u": 0.6, "v": 0.6},            # 1 km away
+           {"slug": "town", "name": "Town", "kind": "town", "u": 0.9, "v": 0.6}]               # 1 km away, but a town
+    it = guide.itinerary(lms, road, size)
+    assert {s["slug"] for s in it["stops"]} == {"a", "near", "town"}
+
+
+def test_empty_model_answer_is_not_cached_or_served(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    replies = iter(["", "A real answer."])
+
+    class R:
+        def __init__(self, text): self.text = text
+        def raise_for_status(self): pass
+        def json(self): return {"choices": [{"message": {"content": self.text}}], "usage": {}}
+
+    class C:
+        def post(self, url, **kw): return R(next(replies))
+
+    msgs = [{"role": "user", "content": "hi"}]
+    with pytest.raises(llm.LLMUnavailable):
+        llm.complete(msgs, client=C())                     # empty -> failure, nothing cached
+    assert llm.complete(msgs, client=C()) == "A real answer."
+
+
+def test_story_falls_back_when_the_model_is_empty(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setattr(llm, "complete", lambda *a, **k: (_ for _ in ()).throw(llm.LLMUnavailable("empty")))
+    s = guide.story({"name": "X", "summary": "X is a place. It is nice. Really.", "url": "u"}, [])
+    assert s["mode"] == "extractive" and s["story"].startswith("X is a place.")

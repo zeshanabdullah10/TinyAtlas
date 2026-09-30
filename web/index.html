@@ -2,33 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tiny Atlas</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 26 12 8l6 10 4-6 8 14z' fill='%23b89b6a'/%3E%3C/svg%3E">
-<style>
-  html, body { margin: 0; height: 100%; background: #e9e2d0; font-family: system-ui, sans-serif; color: #2b2418; overflow: hidden; }
-  #hud { position: fixed; top: 12px; left: 12px; padding: 8px 12px; background: #fffaf0e6; border-radius: 8px; font-size: 14px; display: flex; gap: 12px; align-items: center; box-shadow: 0 1px 4px #0002; }
-  #hud label { font-size: 12px; color: #6b5f48; cursor: pointer; }
-  #hud button { font: inherit; font-size: 12px; padding: 3px 10px; border: 1px solid #b8a67e; background: #fff; border-radius: 6px; cursor: pointer; }
-  #panel { position: fixed; top: 12px; right: 12px; bottom: 34px; width: min(340px, calc(100vw - 24px)); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-  .card { background: #fffaf0f2; border-radius: 10px; padding: 12px 14px; box-shadow: 0 1px 6px #0003; pointer-events: auto; font-size: 13px; line-height: 1.45; }
-  #story h2 { margin: 0 0 4px; font-size: 16px; }
-  #story .kind { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #8a7a55; }
-  #story a, #log a { color: #7a4b2a; }
-  #chat { display: flex; flex-direction: column; min-height: 0; flex: 0 1 auto; max-height: 42vh; }
-  #chat h3 { margin: 0 0 6px; font-size: 13px; }
-  #log { overflow-y: auto; flex: 0 1 auto; min-height: 40px; max-height: 26vh; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
-  .q { align-self: flex-end; background: #ead9b5; padding: 5px 9px; border-radius: 10px 10px 2px 10px; max-width: 90%; }
-  .a { background: #fff; padding: 6px 9px; border-radius: 10px 10px 10px 2px; max-width: 95%; border: 1px solid #eadfc4; }
-  .src { font-size: 11px; color: #8a7a55; margin-top: 3px; }
-  #ask { display: flex; gap: 6px; }
-  #ask input { flex: 1; font: inherit; padding: 6px 8px; border: 1px solid #b8a67e; border-radius: 6px; min-width: 0; }
-  #ask button { font: inherit; padding: 6px 10px; border: 0; background: #7a4b2a; color: #fff; border-radius: 6px; cursor: pointer; }
-  #mode { font-size: 11px; color: #8a7a55; margin-top: 4px; }
-  #attr { position: fixed; bottom: 6px; left: 12px; max-width: calc(100vw - 24px); box-sizing: border-box; font-size: 11px; color: #4a4030; background: #fffaf0d9; padding: 3px 8px; border-radius: 6px; width: fit-content; }
-  .hidden { display: none !important; }
-  @media (max-width: 700px) { #panel { top: auto; height: 46vh; bottom: 34px; } }
-</style>
+<meta name="description" content="Miniature 3D maps of real places, drawn from open elevation and map data, with a guide that only tells you what its sources say.">
+<meta name="theme-color" content="#cfd3cb">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f5c52'/%3E%3Cpath d='M5 24 13 9l5 8 3-4 6 11H5Z' fill='%23fbfaf6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/app.css">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -37,326 +20,47 @@
 </script>
 </head>
 <body>
-<div id="hud">
-  <span>Tiny Atlas: <b id="name">loading…</b></span>
-  <label><input type="checkbox" id="osm"> OSM lines</label>
-  <button id="fly">Fly the route</button>
-</div>
-<div id="panel">
-  <div id="story" class="card hidden"></div>
-  <div id="chat" class="card">
-    <h3>Ask the guide</h3>
-    <div id="log"><div class="a">Tap a landmark, or ask me about this region. I only answer from Wikipedia/Wikivoyage text.</div></div>
-    <form id="ask"><input id="q" placeholder="e.g. How did Attabad Lake form?" autocomplete="off" maxlength="300"><button>Ask</button></form>
-    <div id="mode"></div>
-  </div>
-</div>
-<div id="attr">Elevation: Mapzen/AWS Terrain Tiles · Map data © OpenStreetMap contributors (ODbL) · Landmark text © Wikipedia / Wikivoyage contributors (CC BY-SA)</div>
-<script type="module">
-import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-
-const qs = new URLSearchParams(location.search);
-const region = qs.get("region") || "hunza";
-// ?clean=1 hides the UI (video/poster export); the attribution line stays.
-if (qs.get("clean")) for (const id of ["hud", "panel"]) document.getElementById(id).classList.add("hidden");
-const $ = (id) => document.getElementById(id);
-const getJSON = (url) => fetch(url).then(r => r.ok ? r.json() : Promise.reject(new Error(url + " " + r.status)));
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xe9e2d0);
-const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 10, 400000);
-const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-renderer.setSize(innerWidth, innerHeight);
-document.body.appendChild(renderer.domElement);
-const controls = new OrbitControls(camera, renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xffffff, 0x998877, 1.0));
-const sun = new THREE.DirectionalLight(0xfff2d0, 2.0);
-sun.position.set(-1, 1.2, 0.6);
-scene.add(sun);
-
-const [meta, buf, feats, landmarks, itin, status] = await Promise.all([
-  getJSON("/api/regions"),
-  fetch(`/api/terrain/${region}?size=256`).then(r => r.arrayBuffer()),
-  getJSON(`/api/features/${region}`).catch(() => ({})),
-  getJSON(`/api/landmarks/${region}`).catch(() => []),
-  getJSON(`/api/itinerary/${region}`).catch(() => ({ stops: [], route: [] })),
-  getJSON("/api/status").catch(() => ({ llm: false })),
-]);
-$("name").textContent = meta[region].name;
-$("mode").textContent = status.llm ? `Guide: LLM (${status.model})` : "Guide: quoting sources directly (no LLM key set)";
-
-// ---------- terrain ----------
-const dv = new DataView(buf);
-const rows = dv.getUint32(0, true), cols = dv.getUint32(4, true);
-const widthM = dv.getFloat32(8, true), heightM = dv.getFloat32(12, true);
-const hm = new Float32Array(buf, 16, rows * cols);
-let min = Infinity; for (const h of hm) if (h < min) min = h;
-
-const EXAG = 1.5;
-const geo = new THREE.PlaneGeometry(widthM, heightM, cols - 1, rows - 1);
-geo.rotateX(-Math.PI / 2); // row 0 = north = -z
-const pos = geo.attributes.position;
-for (let i = 0; i < pos.count; i++) pos.setY(i, (hm[i] - min) * EXAG);
-geo.computeVertexNormals();
-
-const tex = await new THREE.TextureLoader().loadAsync(`/api/texture/${region}`).catch(() => null);
-if (tex) { tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); }
-// The texture carries baked hillshade, so light it evenly (MeshBasic) to avoid double shading.
-scene.add(new THREE.Mesh(geo, tex
-  ? new THREE.MeshBasicMaterial({ map: tex })
-  : new THREE.MeshStandardMaterial({ color: 0xc8b48a, roughness: 1 })));
-
-// Bilinear terrain height at normalised (u east, v south), in scene units.
-function heightAt(u, v) {
-  const x = Math.min(Math.max(u, 0), 1) * (cols - 1), y = Math.min(Math.max(v, 0), 1) * (rows - 1);
-  const x0 = Math.floor(x), y0 = Math.floor(y), x1 = Math.min(x0 + 1, cols - 1), y1 = Math.min(y0 + 1, rows - 1);
-  const fx = x - x0, fy = y - y0, g = (r, c) => hm[r * cols + c];
-  const h = (g(y0, x0) * (1 - fx) + g(y0, x1) * fx) * (1 - fy) + (g(y1, x0) * (1 - fx) + g(y1, x1) * fx) * fy;
-  return (h - min) * EXAG;
-}
-const world = (u, v, lift = 0) => new THREE.Vector3((u - 0.5) * widthM, heightAt(u, v) + lift, (v - 0.5) * heightM);
-
-// OSM polylines draped on the terrain (debug overlay; the painted texture already shows them).
-const osmGroup = new THREE.Group();
-osmGroup.visible = !tex;
-for (const [kind, color] of Object.entries({ road: 0x7a4b2a, river: 0x2f7fc1, lake: 0x2f7fc1 })) {
-  const segs = [];
-  for (const line of feats[kind] || []) for (let i = 0; i < line.length - 1; i++)
-    for (const [u, v] of [line[i], line[i + 1]]) { const p = world(u, v, 25); segs.push(p.x, p.y, p.z); }
-  if (!segs.length) continue;
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.Float32BufferAttribute(segs, 3));
-  osmGroup.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color })));
-}
-scene.add(osmGroup);
-$("osm").checked = osmGroup.visible;
-$("osm").onchange = (e) => { osmGroup.visible = e.target.checked; };
-
-// ---------- landmarks: small procedural models (a GLB in /models/<slug>.glb replaces them) ----------
-const S = widthM * 0.008;   // one "unit" of landmark size, in metres
-const mat = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8, flatShading: true });
-const CREAM = 0xf1e2bd, RED = 0xb8452e, STONE = 0xa8998a, WHITE = 0xffffff, WOOD = 0x7a4b2a;
-
-function modelFor(kind) {
-  const g = new THREE.Group();
-  const add = (geometry, color, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(geometry, mat(color)); m.position.set(x, y, z); g.add(m); return m; };
-  if (kind === "fort") {
-    add(new THREE.BoxGeometry(3 * S, 1.6 * S, 3 * S), CREAM, 0, 0.8 * S, 0);
-    for (const [x, z] of [[-1.5, -1.5], [1.5, -1.5], [-1.5, 1.5], [1.5, 1.5]]) {
-      add(new THREE.CylinderGeometry(0.5 * S, 0.6 * S, 2.6 * S, 8), STONE, x * S, 1.3 * S, z * S);
-      add(new THREE.ConeGeometry(0.65 * S, 0.7 * S, 8), RED, x * S, 2.95 * S, z * S);
-    }
-    add(new THREE.BoxGeometry(1.4 * S, 1.6 * S, 1.4 * S), STONE, 0, 2.4 * S, 0);
-    add(new THREE.CylinderGeometry(0.04 * S, 0.04 * S, 2 * S, 6), WOOD, 0, 4.2 * S, 0);
-    add(new THREE.BoxGeometry(1 * S, 0.6 * S, 0.05 * S), RED, 0.5 * S, 4.7 * S, 0);
-  } else if (kind === "peak") {
-    add(new THREE.ConeGeometry(2 * S, 5 * S, 6), STONE, 0, 2.5 * S, 0);
-    add(new THREE.ConeGeometry(1 * S, 2.4 * S, 6), WHITE, 0, 3.8 * S, 0);
-  } else if (kind === "bridge") {
-    for (const x of [-2, 2]) add(new THREE.CylinderGeometry(0.15 * S, 0.2 * S, 2.2 * S, 6), WOOD, x * S, 1.1 * S, 0);
-    add(new THREE.BoxGeometry(4.6 * S, 0.12 * S, 0.5 * S), WOOD, 0, 0.2 * S, 0);
-    const cable = new THREE.Mesh(new THREE.TorusGeometry(2 * S, 0.04 * S, 4, 24, Math.PI), mat(0x444444));
-    cable.rotation.z = Math.PI; cable.position.y = 2.2 * S; g.add(cable);
-  } else { // lake / default: a pin
-    add(new THREE.ConeGeometry(0.8 * S, 2.2 * S, 10), RED, 0, 1.1 * S, 0).rotation.x = Math.PI;
-    add(new THREE.SphereGeometry(0.9 * S, 12, 10), RED, 0, 3 * S, 0);
-  }
-  return g;
-}
-
-const markers = new THREE.Group();
-scene.add(markers);
-const glb = new GLTFLoader();
-for (const lm of landmarks) {
-  const holder = new THREE.Group();
-  holder.position.copy(world(lm.u, lm.v, 0));
-  holder.userData.landmark = lm;
-  const procedural = modelFor(lm.kind);
-  holder.add(procedural);
-  // Optional generated model (e.g. from Hunyuan3D): the API says whether web/models/<slug>.glb exists.
-  if (lm.model) glb.load(`/models/${lm.slug}.glb`, (gltf) => {
-    holder.remove(procedural);
-    const m = gltf.scene, size = new THREE.Box3().setFromObject(m).getSize(new THREE.Vector3());
-    m.scale.setScalar(6 * S / Math.max(size.x, size.y, size.z));
-    holder.add(m);
-  }, undefined, () => {});
-  markers.add(holder);
-}
-
-// ---------- dotted itinerary route, draped on the terrain ----------
-const stops = (itin.route || []).map(([u, v]) => world(u, v, 0));
-let curve = null;
-if (stops.length >= 2) {
-  curve = new THREE.CatmullRomCurve3(stops, false, "centripetal");
-  const N = 1200, pts = [];
-  for (let i = 0; i < N; i++) {
-    const p = curve.getPointAt(i / (N - 1));
-    const u = p.x / widthM + 0.5, v = p.z / heightM + 0.5;
-    pts.push(p.x, heightAt(u, v) + 30, p.z);
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
-  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xc0392b, size: S * 0.4, sizeAttenuation: true })));
-}
-
-// ---------- interaction: click a landmark -> story + camera focus ----------
-const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
-function pick(ev) {
-  const r = renderer.domElement.getBoundingClientRect();
-  ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
-  ray.setFromCamera(ndc, camera);
-  const hit = ray.intersectObjects(markers.children, true)[0];
-  if (!hit) return null;
-  let o = hit.object; while (o && !o.userData.landmark) o = o.parent;
-  return o || null;
-}
-let down = null;
-renderer.domElement.addEventListener("pointerdown", (e) => { down = [e.clientX, e.clientY]; });
-renderer.domElement.addEventListener("pointerup", (e) => {
-  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return; // it was a drag
-  const m = pick(e); if (m) openLandmark(m.userData.landmark, m.position);
-});
-renderer.domElement.addEventListener("pointermove", (e) => { renderer.domElement.style.cursor = pick(e) ? "pointer" : ""; });
-
-let focus = null;
-async function openLandmark(lm, at) {
-  focus = { from: controls.target.clone(), to: at.clone(), t: 0, camFrom: camera.position.clone(),
-            camTo: at.clone().add(new THREE.Vector3(0, S * 14, S * 22)) };
-  const card = $("story");
-  card.classList.remove("hidden");
-  card.replaceChildren();
-  const h = document.createElement("h2"); h.textContent = lm.name;
-  const k = document.createElement("div"); k.className = "kind"; k.textContent = lm.kind;
-  const p = document.createElement("p"); p.textContent = "Loading story…";
-  card.append(k, h, p);
-  try {
-    const s = await getJSON(`/api/story/${region}/${lm.slug}`);
-    p.textContent = s.story;
-    const a = document.createElement("a"); a.href = s.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Source: Wikipedia";
-    card.append(a);
-  } catch { p.textContent = lm.summary; }
-}
-
-window.__open = (slug) => {   // test/automation hook: same path as clicking the landmark
-  const h = markers.children.find(m => m.userData.landmark.slug === slug);
-  return h ? openLandmark(h.userData.landmark, h.position) : null;
-};
-
-window.__project = (slug) => {   // test hook: landmark position in CSS pixels
-  const h = markers.children.find(m => m.userData.landmark.slug === slug); if (!h) return null;
-  const v = h.position.clone().add(new THREE.Vector3(0, S * 1.5, 0)).project(camera);
-  return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight };
-};
-
-// ---------- guide chat ----------
-const history = [];
-$("ask").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const q = $("q").value.trim(); if (!q) return;
-  $("q").value = "";
-  const log = $("log");
-  const qd = document.createElement("div"); qd.className = "q"; qd.textContent = q; log.append(qd);
-  const ad = document.createElement("div"); ad.className = "a"; ad.textContent = "…"; log.append(ad);
-  log.scrollTop = log.scrollHeight;
-  try {
-    const r = await fetch(`/api/guide/${region}`, { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: q, history }) }).then(x => x.ok ? x.json() : Promise.reject(x.status));
-    ad.textContent = r.answer;
-    if (r.sources.length) {
-      const s = document.createElement("div"); s.className = "src"; s.append("Sources: ");
-      r.sources.forEach((c, i) => { if (i) s.append(", "); const a = document.createElement("a"); a.href = c.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = `[${c.n}] ${c.source}`; s.append(a); });
-      ad.append(s);
-    }
-    history.push({ role: "user", content: q }, { role: "assistant", content: r.answer });
-  } catch { ad.textContent = "Sorry, the guide is unavailable right now."; }
-  log.scrollTop = log.scrollHeight;
-});
-
-// ---------- flyover: deterministic camera path (window.renderFrame(t) is used by the video export) ----------
-const home = { pos: new THREE.Vector3(0, widthM * 0.5, heightM * 0.7), target: new THREE.Vector3(0, 2000, 0) };
-camera.position.copy(home.pos); controls.target.copy(home.target); controls.update();
-
-// Precomputed camera path along the route. For every sample the camera trails the route point and is raised
-// until its line of sight to the look-ahead target clears the terrain; heights are max-filtered then blurred
-// (so smoothing never dips below clearance) and x/z/look positions are blurred for steady motion.
-const camPath = (() => {
-  if (!curve) return null;
-  const M = 600, BACK = S * 30, AHEAD = 0.04, MARGIN = S * 3;
-  const groundAt = (x, z) => heightAt(x / widthM + 0.5, z / heightM + 0.5);
-  const cam = [], look = [];
-  let last = new THREE.Vector3(1, 0, 0);
-  for (let i = 0; i < M; i++) {
-    const t = i / (M - 1);
-    const p = curve.getPointAt(t), ahead = curve.getPointAt(Math.min(t + AHEAD, 1));
-    const d = ahead.clone().sub(p).setY(0);
-    if (d.lengthSq() > 1e-6) last = d.normalize().clone();
-    const cx = p.x - last.x * BACK, cz = p.z - last.z * BACK;
-    const ly = groundAt(ahead.x, ahead.z) + S * 2;
-    // at least ~28 degrees of downward pitch toward the look target, and never inside the ground
-    let y = Math.max(groundAt(p.x, p.z) + S * 10, groundAt(cx, cz) + S * 6, ly + Math.hypot(ahead.x - cx, ahead.z - cz) * 0.53);
-    for (let k = 1; k <= 12; k++) {           // line of sight cam -> look target must clear the ground
-      const f = k / 13;
-      const gy = groundAt(cx + (ahead.x - cx) * f, cz + (ahead.z - cz) * f) + MARGIN;
-      y = Math.max(y, (gy - f * ly) / (1 - f));
-    }
-    cam.push(new THREE.Vector3(cx, y, cz));
-    look.push(new THREE.Vector3(ahead.x, ly, ahead.z));
-  }
-  const maxFilter = (arr, r) => arr.map((_, i) => Math.max(...arr.slice(Math.max(0, i - r), i + r + 1)));
-  const blur = (arr, sigma) => {
-    const r = Math.ceil(sigma * 3), w = []; for (let k = -r; k <= r; k++) w.push(Math.exp(-(k * k) / (2 * sigma * sigma)));
-    return arr.map((_, i) => { let a = 0, ws = 0; for (let k = -r; k <= r; k++) { const j = Math.min(M - 1, Math.max(0, i + k)); a += arr[j] * w[k + r]; ws += w[k + r]; } return a / ws; });
-  };
-  const ys = blur(maxFilter(cam.map(c => c.y), 14), 8);
-  const xs = blur(cam.map(c => c.x), 8), zs = blur(cam.map(c => c.z), 8);
-  const lx = blur(look.map(c => c.x), 6), ly2 = blur(look.map(c => c.y), 6), lz = blur(look.map(c => c.z), 6);
-  return { cam: xs.map((x, i) => new THREE.Vector3(x, ys[i], zs[i])), look: lx.map((x, i) => new THREE.Vector3(x, ly2[i], lz[i])) };
-})();
-
-function flyPose(t) {
-  if (!camPath) return null;
-  const ease = t * t * (3 - 2 * t), f = ease * (camPath.cam.length - 1);
-  const i = Math.min(Math.floor(f), camPath.cam.length - 2), a = f - i;
-  return { cam: camPath.cam[i].clone().lerp(camPath.cam[i + 1], a), look: camPath.look[i].clone().lerp(camPath.look[i + 1], a) };
-}
-let flying = null;
-function renderFrame(t) {           // t in [0,1]; renders exactly one frame at that point of the flight
-  const f = flyPose(t); if (!f) return;
-  camera.position.copy(f.cam); camera.lookAt(f.look); renderer.render(scene, camera);
-}
-// External drivers (video export) take over the camera: the animation loop must stop re-aiming it.
-let manual = false;
-window.renderFrame = (t) => { manual = true; renderFrame(t); };
-window.__flyPose = (t) => { const f = flyPose(t); return f && { cam: f.cam.toArray(), look: f.look.toArray(), widthM, heightM }; };
-window.__flyDuration = 20;
-$("fly").onclick = () => { if (curve) flying = performance.now(); };
-$("fly").disabled = !curve;
-
-addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-});
-renderer.setAnimationLoop((now) => {
-  if (manual) return;
-  if (flying !== null) {
-    const t = (now - flying) / (window.__flyDuration * 1000);
-    if (t >= 1) { flying = null; controls.target.copy(home.target); camera.position.copy(home.pos); }
-    else { renderFrame(t); return; }
-  }
-  if (focus) {
-    focus.t = Math.min(1, focus.t + 0.04);
-    const e = focus.t * focus.t * (3 - 2 * focus.t);
-    controls.target.lerpVectors(focus.from, focus.to, e);
-    camera.position.lerpVectors(focus.camFrom, focus.camTo, e);
-    if (focus.t >= 1) focus = null;
-  }
-  controls.update();
-  renderer.render(scene, camera);
-});
-window.__ready = true;
-window.__landmarks = landmarks.length;
-</script>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-fly" viewBox="0 0 24 24"><path d="M3 11.5 21 4l-6.5 16-3-6.5L3 11.5ZM11.5 13.5 21 4"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3-9 5 9 5 9-5-9-5ZM3 12.5l9 5 9-5M3 16.5l9 5 9-5"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1ZM12 10.2a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6Z"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5M12 16.6v.1"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5 7.5 12l7 7"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-4 16-4.5-6.5L4 12Z"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><path d="M8 17h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="5" r="2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-4-4"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5-12-7.5Z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="k-fort" viewBox="0 0 24 24"><path d="M4 20V9h3V6h2v3h2V6h2v3h2V6h2v3h3v11M10 20v-5h4v5"/></symbol>
+    <symbol id="k-temple" viewBox="0 0 24 24"><path d="m12 3 8 5H4l8-5ZM6 8v9M10 8v9M14 8v9M18 8v9M4 20h16"/></symbol>
+    <symbol id="k-peak" viewBox="0 0 24 24"><path d="M3 19 10 6l3.5 6 2-3L21 19H3Z"/></symbol>
+    <symbol id="k-glacier" viewBox="0 0 24 24"><path d="m4 19 4-10 3 4 3-6 6 12H4ZM8 15l2 4M14 13l1 6"/></symbol>
+    <symbol id="k-lake" viewBox="0 0 24 24"><path d="M3 15c3-3 6 3 9 0s6 3 9 0M3 19c3-3 6 3 9 0s6 3 9 0M12 4c2 3 4 4 4 6.5a4 4 0 0 1-8 0C8 8 10 7 12 4Z"/></symbol>
+    <symbol id="k-waterfall" viewBox="0 0 24 24"><path d="M6 4h12M9 4v9M12 4v11M15 4v9M6 19c2-2 4 2 6 0s4 2 6 0"/></symbol>
+    <symbol id="k-bridge" viewBox="0 0 24 24"><path d="M2 16h20M4 16V8M20 16V8M4 8c4 6 12 6 16 0M8 16v-4M12 16v-4.5M16 16v-4"/></symbol>
+    <symbol id="k-museum" viewBox="0 0 24 24"><path d="m12 3-9 5v2h18V8l-9-5ZM6 10v8M10 10v8M14 10v8M18 10v8M3 21h18"/></symbol>
+    <symbol id="k-tower" viewBox="0 0 24 24"><path d="m9 21 1-13h4l1 13M8 8h8l-1.5-4h-5L8 8ZM12 4V2"/></symbol>
+    <symbol id="k-ruins" viewBox="0 0 24 24"><path d="M4 20V11h4v9M12 20v-6h4v6M3 20h18"/></symbol>
+    <symbol id="k-monument" viewBox="0 0 24 24"><path d="m12 3 3 17H9L12 3ZM7 20h10"/></symbol>
+    <symbol id="k-park" viewBox="0 0 24 24"><path d="M12 3c4 3 6 6 6 9a6 6 0 0 1-12 0c0-3 2-6 6-9ZM12 18v3"/></symbol>
+    <symbol id="k-town" viewBox="0 0 24 24"><path d="M4 20V11l4-3 4 3v9M12 20v-8l4-3 4 3v8M3 20h18"/></symbol>
+    <symbol id="k-rail" viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1ZM5 10h14M8 20l2-3M16 20l-2-3"/></symbol>
+    <symbol id="k-pin" viewBox="0 0 24 24"><path d="M12 21s6-5.6 6-11a6 6 0 1 0-12 0c0 5.4 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+  </defs>
+</svg>
+<a class="skip" href="#app">Skip to content</a>
+<div id="wall" aria-hidden="true"></div>
+<main id="app"></main>
+<div id="toasts" role="status" aria-live="polite"></div>
+<script type="module" src="/js/main.js"></script>
+<noscript><p style="padding:2rem;font-family:system-ui">Tiny Atlas draws 3D maps in the browser, so it needs JavaScript.</p></noscript>
 </body>
 </html>

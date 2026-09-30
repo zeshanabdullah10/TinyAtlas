@@ -50,7 +50,9 @@ def complete(messages: list[dict], max_tokens: int = 500, temperature: float = 0
     digest = hashlib.sha256(json.dumps([m, messages, max_tokens, temperature], sort_keys=True).encode()).hexdigest()[:24]
     path = CACHE / f"{digest}.json"
     if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))["text"]
+        cached = json.loads(path.read_text(encoding="utf-8")).get("text", "")
+        if cached.strip():                    # an empty completion is never a valid answer, so never serve one
+            return cached
     if not key:
         raise LLMUnavailable("OPENROUTER_API_KEY not set")
     try:
@@ -59,7 +61,9 @@ def complete(messages: list[dict], max_tokens: int = 500, temperature: float = 0
                    json={"model": m, "messages": messages, "max_tokens": max_tokens, "temperature": temperature})
         r.raise_for_status()
         data = r.json()
-        text = data["choices"][0]["message"]["content"].strip()
+        text = (data["choices"][0]["message"].get("content") or "").strip()
+        if not text:
+            raise ValueError("the model returned an empty answer")
     except Exception as exc:
         raise LLMUnavailable(f"OpenRouter call failed: {exc}") from exc
     CACHE.mkdir(parents=True, exist_ok=True)

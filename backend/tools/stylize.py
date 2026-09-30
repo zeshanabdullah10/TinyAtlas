@@ -32,6 +32,7 @@ out = tiles.OUT / a.region
 (out / "styled").mkdir(parents=True, exist_ok=True)
 lo, hi = tiles.region_range(bbox)
 feats = osm.features(bbox)
+clim = paint.climate(bbox, REGIONS[a.region].get("snowline"))
 grid = tiles.tile_grid(bbox, a.nx, a.ny)
 
 with httpx.Client() as client:
@@ -42,7 +43,7 @@ with httpx.Client() as client:
         if dst.exists():
             print(f"tile {t.name}: cached")
             continue
-        base = paint.paint_tile(t, feats, bbox, a.size)
+        base = paint.paint_tile(t, feats, bbox, a.size, clim=clim)
         depth = tiles.depth_image(t, lo, hi, a.size).convert("RGB")
         line = tiles.line_image(t, feats, bbox, a.size).convert("RGB")
         names = [stylize.upload(im, f"{a.region}_{t.name}_{k}.png", client) for k, im in

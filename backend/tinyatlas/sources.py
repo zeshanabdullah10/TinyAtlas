@@ -57,6 +57,19 @@ def fetch_page(host: str, title: str, client: httpx.Client | None = None) -> dic
     return _cached(f"{host.split('.')[1]}_{slugify(title)}_v2", go)
 
 
+PAREN = re.compile(r"\s*\([^()]*\)")
+SPACE_BEFORE_PUNCT = re.compile(r"\s+([,.;:])")
+
+
+def clean_lead(text: str) -> str:
+    """Display version of a lead paragraph: parentheses hold pronunciations, native names and dates that read as
+    noise in a caption ("Zermatt (German: [tsɛrˈmat]; ...) is a municipality"). Retrieval keeps the full text."""
+    for _ in range(3):                       # nested groups
+        text = PAREN.sub("", text)
+    text = re.sub(r"\s{2,}", " ", text)
+    return SPACE_BEFORE_PUNCT.sub(r"\1", text).strip()
+
+
 def to_uv(lat: float, lon: float, bbox) -> tuple[float, float] | None:
     """(u east, v south) in [0,1], or None if outside the bbox."""
     w, s, e, n = bbox

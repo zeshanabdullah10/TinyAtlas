@@ -55,11 +55,15 @@ def search(query: str, limit: int = 5, client: httpx.Client | None = None) -> li
     r = c.get(URL, headers=HEADERS, timeout=30, params={
         "q": query, "format": "jsonv2", "limit": limit, "addressdetails": 0, "accept-language": "en"})
     r.raise_for_status()
-    out = []
+    out, seen = [], set()
     for x in r.json():
         name = x.get("name") or x["display_name"].split(",")[0]
-        out.append({"name": name, "subtitle": _subtitle(x["display_name"], name), "lat": float(x["lat"]),
-                    "lon": float(x["lon"]), "kind": x.get("type", ""), "importance": float(x.get("importance", 0))})
+        sub = _subtitle(x["display_name"], name)
+        if (name.lower(), sub.lower()) in seen:        # Nominatim often returns several records for one place
+            continue
+        seen.add((name.lower(), sub.lower()))
+        out.append({"name": name, "subtitle": sub, "lat": float(x["lat"]), "lon": float(x["lon"]),
+                    "kind": x.get("type", ""), "importance": float(x.get("importance", 0))})
     CACHE.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, ensure_ascii=False), encoding="utf-8")
     return out

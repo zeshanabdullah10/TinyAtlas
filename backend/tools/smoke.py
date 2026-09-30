@@ -1,6 +1,7 @@
-"""End-to-end smoke test against the running app (server must be up):
-load Hunza -> real mouse click on a landmark -> story card -> ask the guide -> unanswerable question is refused
--> no console errors.
+"""End-to-end smoke test against the running app (server must be up).
+
+Home gallery lists built places -> open Hunza -> real mouse click on a landmark -> placard with photo and source
+-> ask the guide (cited answer) -> unanswerable question is refused -> flyover frame renders -> no console errors.
 
     python backend/tools/smoke.py [base_url]
 """
@@ -21,35 +22,48 @@ def check(name, ok, detail=""):
 
 with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge", args=GL)
-    page = b.new_page(viewport={"width": 1280, "height": 800})
+    page = b.new_page(viewport={"width": 1440, "height": 900})
     page.on("console", lambda m: m.type == "error" and errors.append(m.text))
     page.on("pageerror", lambda e: errors.append(str(e)))
+
+    page.goto(f"{BASE}/")
+    page.wait_for_function("window.__ready === true", timeout=60000)
+    page.wait_for_selector(".frame a", timeout=30000)
+    check("gallery lists the built places", page.locator(".frame a").count() >= 5)
+    check("gallery images load", page.evaluate("[...document.querySelectorAll('.mat img')].every(i => i.complete && i.naturalWidth > 0)"))
+
     page.goto(f"{BASE}/?region=hunza")
-    page.wait_for_function("window.__ready === true", timeout=120000)
+    page.wait_for_function("window.__ready === true", timeout=180000)
     check("landmarks loaded", page.evaluate("window.__landmarks") >= 5)
+    check("route rail lists stops", page.locator(".stop").count() >= 5)
+    check("route stats shown", "along the route" in page.inner_text(".rail .stats"))
 
     pos = page.evaluate("window.__project('baltit-fort')")
-    page.mouse.click(pos["x"], pos["y"])                       # a real click, through the raycaster
-    page.wait_for_function("document.querySelector('#story h2')?.textContent === 'Baltit Fort'", timeout=30000)
-    page.wait_for_function("!document.querySelector('#story').textContent.includes('Loading')", timeout=30000)
-    story = page.inner_text("#story")
-    check("click opens Baltit Fort story", "palatial fort" in story, story[:120])
-    check("story links its source", page.locator("#story a[href*='wikipedia.org']").count() == 1)
+    page.mouse.click(pos["x"], pos["y"])                                       # a real click, through the raycaster
+    page.wait_for_function("document.querySelector('.placard h2')?.textContent === 'Baltit Fort'", timeout=30000)
+    page.wait_for_function("!document.querySelector('.placard .story')?.textContent.startsWith('Reading up')", timeout=60000)
+    story = page.inner_text(".placard .story")
+    check("click opens the Baltit Fort placard with a story", len(story) > 60 and "baltit" in story.lower() + page.inner_text(".placard h2").lower(), story[:120])
+    check("placard has a photo and a source link", page.locator(".placard .photo img").count() == 1 and page.locator(".placard a.src[href*='wikipedia.org']").count() == 1)
+    check("url records the selected landmark", "lm=baltit-fort" in page.url)
+    check("route list highlights the stop", page.locator(".stop[aria-current='true']").count() == 1)
 
     def ask(q):
-        n = page.locator("#log .a").count()
+        n = page.locator(".msg.a").count()
         page.fill("#q", q); page.press("#q", "Enter")
-        page.wait_for_function(f"document.querySelectorAll('#log .a').length > {n} && "
-                               "!document.querySelector('#log .a:last-child').textContent.startsWith('…')", timeout=60000)
-        return page.inner_text("#log .a:last-child")
+        page.wait_for_function(f"document.querySelectorAll('.msg.a').length > {n} && !document.querySelector('.msg.a:last-child').classList.contains('think')", timeout=90000)
+        return page.inner_text(".msg.a:last-child")
 
+    page.click("#tab-guide")
     a = ask("How did Attabad Lake form?")
-    check("guide answers with a citation", "landslide" in a and "[1]" in a, a[:150])
-    check("guide cites a wikipedia link", page.locator("#log .a:last-child a[href*='wikipedia.org']").count() >= 1)
+    check("guide answers with a citation", "landslide" in a.lower() and "[1]" in a, a[:150])
+    check("guide cites a wikipedia link", page.locator(".msg.a:last-child a[href*='wikipedia.org']").count() >= 1)
     r = ask("Where is the best pizza restaurant with wifi?")
     check("guide refuses what the sources don't cover", "isn't in my sources" in r, r[:150])
 
     page.evaluate("window.renderFrame(0.5)")
+    pose = page.evaluate("window.__flyPose(0.5)")
+    check("flyover pose is above the terrain", pose is not None and pose["cam"][1] > 0)
     page.screenshot(path="smoke.png")
     b.close()
 

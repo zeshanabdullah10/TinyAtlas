@@ -30,6 +30,7 @@ BUILTIN = {
         ],
         # Extra guide text (Wikivoyage) used for retrieval-grounded answers.
         "guide_pages": [("en.wikivoyage.org", "Hunza"), ("en.wikivoyage.org", "Karakoram Highway")],
+        "snowline": 5300,       # dry continental range: permanent snow sits far higher than at the same latitude in the Alps
         "builtin": True,
     },
 }
