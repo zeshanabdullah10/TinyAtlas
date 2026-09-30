@@ -43,3 +43,16 @@ def test_best_order_is_a_permutation_starting_at_start():
     pts = [(0.1, 0.1), (0.5, 0.5), (0.9, 0.1), (0.3, 0.8)]
     o = routing.best_order(pts, L_ROAD, SIZE, start=2)
     assert sorted(o) == [0, 1, 2, 3] and o[0] == 2
+
+
+def test_detour_legs_flags_paths_that_leave_the_map_and_return():
+    legs = [12000.0, 107000.0, 8000.0, float("inf")]
+    straights = [10000.0, 20000.0, 9000.0, 5000.0]
+    assert routing.detour_legs(legs, straights) == [1, 3]           # 107 km for a 20 km hop; no connection at all
+    assert routing.detour_legs([25000.0], [1000.0]) == []            # long but under the 30 km floor: a real long walk
+
+
+def test_leg_lengths_are_road_distances_and_inf_when_unconnected():
+    legs = routing.leg_lengths([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0)], L_ROAD, SIZE)
+    assert abs(legs[0] - 1000) < 1 and abs(legs[1] - 1000) < 1
+    assert routing.leg_lengths([(0.0, 0.0), (1.0, 1.0)], [], SIZE) == [float("inf")]

@@ -111,7 +111,7 @@ export class Diorama {
     const w = this.container.clientWidth || innerWidth, hh = this.container.clientHeight || innerHeight;
     this.renderer.setSize(w, hh, false);
     this.camera.aspect = w / hh;
-    if (this.viewShift) this.camera.setViewOffset(w, hh, this.viewShift, 0, w, hh); else this.camera.clearViewOffset();
+    if (this.viewShift || this.viewShiftY) this.camera.setViewOffset(w, hh, this.viewShift || 0, this.viewShiftY || 0, w, hh); else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
     this.size = { w, h: hh };
   }
@@ -133,7 +133,8 @@ export class Diorama {
     this.depth = S * 3;
     const strata = strataTexture(), wood = woodTexture();
     strata.repeat.set(1, 1);
-    this.skirtMat = new THREE.MeshStandardMaterial({ map: strata, roughness: 0.95, side: THREE.DoubleSide });
+    // unlit like the terrain (the wall geometry carries no normals), tinted a little to sit in shade
+    this.skirtMat = new THREE.MeshBasicMaterial({ map: strata, color: 0xd9d6cc, side: THREE.DoubleSide });
     // four walls; each keeps the indices of its terrain edge so the wall follows the relief
     const idx = (r, c) => r * this.cols + c;
     const edge = (n, at) => Array.from({ length: n }, (_, i) => at(i));

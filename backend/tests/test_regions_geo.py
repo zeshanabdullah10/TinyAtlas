@@ -109,6 +109,11 @@ def test_classify_regressions_from_real_pages():
     assert discover.classify("Place in Valais, Switzerland") == "town"
 
 
+def test_classify_drops_events_by_title():
+    assert discover.classify("", "The event is held yearly.", title="Men's Olympic Downhill (East Summit)") is None
+    assert discover.classify("Mountain in Alberta", title="Mount Temple (Alberta)") == "peak"
+
+
 def _cand(title, lat, lon):
     return {"title": title, "lat": lat, "lon": lon}
 

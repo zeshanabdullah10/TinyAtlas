@@ -131,3 +131,13 @@ def test_story_falls_back_when_the_model_is_empty(monkeypatch):
     monkeypatch.setattr(llm, "complete", lambda *a, **k: (_ for _ in ()).throw(llm.LLMUnavailable("empty")))
     s = guide.story({"name": "X", "summary": "X is a place. It is nice. Really.", "url": "u"}, [])
     assert s["mode"] == "extractive" and s["story"].startswith("X is a place.")
+
+
+def test_itinerary_is_empty_when_the_only_leg_is_a_nonsense_detour():
+    # a U-shaped road: two stops 2 km apart as the crow flies, about 100 km apart by road
+    corners = [(0.0, 0.5), (0.0, 0.0), (0.02, 0.0), (0.02, 0.5)]
+    road = []
+    for a, b in zip(corners, corners[1:]):
+        road += [(a[0] + (b[0] - a[0]) * i / 20, a[1] + (b[1] - a[1]) * i / 20) for i in range(21)]
+    lms = [{"slug": "a", "name": "A", "kind": "fort", "u": 0.0, "v": 0.5}, {"slug": "b", "name": "B", "kind": "fort", "u": 0.02, "v": 0.5}]
+    assert guide.itinerary(lms, [road], (100000.0, 100000.0)) == {"stops": [], "route": []}

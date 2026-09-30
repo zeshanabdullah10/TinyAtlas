@@ -134,6 +134,17 @@ def itinerary(lms: list[dict], roads=None, size_m=None, trails=None) -> dict:
     size = size_m or (1.0, 1.0)
     idx = routing.best_order(pts, roads or [], size, start=west)
     order = [lms[i] for i in idx]
+    while len(order) >= 2:                      # a leg that leaves the map and returns means the stops aren't really connected
+        pts = [(l["u"], l["v"]) for l in order]
+        legs = routing.leg_lengths(pts, roads or [], size)
+        straights = [math.hypot((a[0] - b[0]) * size[0], (a[1] - b[1]) * size[1]) for a, b in zip(pts, pts[1:])]
+        bad = routing.detour_legs(legs, straights) if roads else []
+        if not bad:
+            break
+        if len(order) == 2:                     # the only leg is nonsense: there is no honest route to draw
+            order = []
+            break
+        order.pop(bad[0] + 1)
     pts = [(l["u"], l["v"]) for l in order]
     route = routing.route_through(pts, roads, size_m) if roads and size_m else [list(p) for p in pts]
     return {"stops": [{"slug": l["slug"], "name": l["name"]} for l in order], "route": route}

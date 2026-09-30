@@ -138,7 +138,7 @@ export async function mountPlace(root, slug, { lm: initialLm = null, clean = fal
     const url = new URL(location.href);
     s ? url.searchParams.set("lm", s) : url.searchParams.delete("lm");
     history.replaceState(null, "", url);
-    if (s) { showTab("place"); renderPlacard(byslug.get(s)); openSheet("place"); }
+    if (s) { showTab("place"); renderPlacard(byslug.get(s)); if (innerWidth <= 900) openSheet("place", true); }
     else renderRegionCard();
     if (s) stopBtn.get(s)?.scrollIntoView({ block: "nearest" });
   }
@@ -226,10 +226,12 @@ export async function mountPlace(root, slug, { lm: initialLm = null, clean = fal
   els.hint = h("p", { class: "hint" }, "Drag to turn it, scroll to zoom, click a landmark.");
   setTimeout(() => els.hint.classList.add("gone"), 9000);
   const sheetBtns = {};
-  const openSheet = (name) => {
+  const openSheet = (name, force = false) => {          // dock buttons toggle; selecting a landmark always opens
     const cur = document.body.dataset.sheet;
-    const next = cur === name ? "" : name;
+    const next = !force && cur === name ? "" : name;
     document.body.classList.toggle("sheet-open", !!next); document.body.dataset.sheet = next;
+    dio.viewShiftY = next && innerWidth <= 900 ? Math.round(innerHeight * 0.24) : 0;      // keep the model above the sheet
+    dio.resize();
     for (const [n, b] of Object.entries(sheetBtns)) pressed(b, n === next);
     if (next === "guide") showTab("guide"); if (next === "place") showTab("place");
   };
@@ -265,7 +267,7 @@ export async function mountPlace(root, slug, { lm: initialLm = null, clean = fal
     if (k === "f" && route) state.flying ? dio.stopFly() : dio.startFly();
     else if (k === "r") { dio.resetView(); select(null, { focus: false }); }
     else if (k === "l") { const on = !dio.labelsOn; dio.setLabels(on); layerPop.querySelector("input").checked = on; }
-    else if (k === "/") { e.preventDefault(); showTab("guide"); openSheet("guide"); }
+    else if (k === "/") { e.preventDefault(); showTab("guide"); if (innerWidth <= 900) openSheet("guide", true); }
     else if (k === "?") help();
     else if (k === "escape") { if (state.flying) dio.stopFly(); else if (selected) select(null, { focus: false }); for (const [p, b] of popBtns) { p.classList.add("hidden"); pressed(b, false); } }
   });

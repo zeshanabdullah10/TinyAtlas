@@ -31,6 +31,9 @@ NOISE_SENT = re.compile(r"\b(railway station|train station|metro station|airport
                         r"school|ski area|ski resort|stadium|list of|disambiguation|speedway|race ?track|"
                         r"racing circuit|radar|weather station|amusement park|theme park|shipwreck|"
                         r"ship (?:that|which)|diocese)\b", re.I)
+# Titles of races, results and events: never places, whatever their description says.
+NOISE_TITLE = re.compile(r"\b(downhill|slalom|super-g|men\'s|women\'s|championships?|grand prix|flight \d+|"
+                         r"olympics?|paralympics|world cup|tournament|season|election)\b", re.I)
 KINDS = [
     ("waterfall", r"\b(waterfall|falls)\b"),
     ("bridge", r"\b(bridge|viaduct|aqueduct)\b"),
@@ -67,12 +70,12 @@ def _subject(first: str) -> str:
     return CUT.split(m.group(1), maxsplit=1)[0]        # stop at the first preposition or comma
 
 
-def classify(description: str, extract: str = "") -> str | None:
+def classify(description: str, extract: str = "", title: str = "") -> str | None:
     """Kind for a page, or None when it is noise. Uses the short description first, then what the first sentence
     says the page is; 'pin' when no kind is recognised."""
     first = re.split(r"(?<=[.!?])\s", (extract or "").strip())[0] if extract else ""
     text = f"{description or ''}. {first}"
-    if NOISE.search(description or "") or NOISE_SENT.search(first[:120]):
+    if NOISE.search(description or "") or NOISE_SENT.search(first[:120]) or NOISE_TITLE.search(title or ""):
         return None
     for kind, pat in KINDS:
         if re.search(pat, description or "", re.I):
@@ -140,7 +143,7 @@ def pick(cands: list[dict], info: dict[str, dict], bbox, n: int = 8, min_sep_km:
         d = info.get(g["title"])
         if not d:
             continue
-        kind = classify(d["description"], d["extract"])
+        kind = classify(d["description"], d["extract"], g["title"])
         if kind is None or d["length"] < 400:
             continue
         score = (math.log10(d["length"]) + (0.6 if d["thumb"] else 0) + KIND_BONUS.get(kind, 0)

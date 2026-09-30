@@ -130,3 +130,22 @@ def _nearest_neighbour(points, start, size_m) -> list[int]:
         left.remove(nxt)
         order.append(nxt)
     return order
+
+
+def leg_lengths(points, polylines, size_m) -> list[float]:
+    """Road distance in metres of each leg between consecutive points (inf when there is no connection)."""
+    graph = build_graph(polylines, size_m)
+    if not graph:
+        return [math.inf] * max(len(points) - 1, 0)
+    snapped = [nearest_node(graph, tuple(p), size_m) for p in points]
+    out = []
+    for a, b in zip(snapped, snapped[1:]):
+        leg = shortest_path(graph, a, b)
+        out.append(path_length(leg, size_m) if leg else math.inf)
+    return out
+
+
+def detour_legs(legs, straights, ratio: float = 4.0, min_m: float = 30000.0) -> list[int]:
+    """Indices of legs that are absurdly long compared with the straight line: the network is clipped or broken
+    between those stops, so the path leaves the map and comes back."""
+    return [i for i, (l, s) in enumerate(zip(legs, straights)) if l > max(min_m, ratio * s)]

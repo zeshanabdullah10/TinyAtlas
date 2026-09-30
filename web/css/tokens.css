@@ -13,7 +13,7 @@
   /* ink */
   --ink: #2c3733;
   --ink-2: #4d5a55;      /* secondary text, 6.9:1 on paper */
-  --ink-3: #6b7873;      /* tertiary, 4.6:1 on paper: labels and hints only */
+  --ink-3: #5c6964;      /* tertiary, 5.4:1 on paper */
   --line: rgba(44, 55, 51, .16);
   --line-strong: rgba(44, 55, 51, .32);
 
@@ -23,7 +23,8 @@
   --teal-wash: #dbe8e3;
   --brass: #9c7628;
   --walnut: #7a5a3a;
-  --route: #d2452b;      /* the route on the map, nothing else */
+  --route: #d2452b;      /* the route on the map */
+  --route-ink: #b73a21;  /* the same hue, deep enough for text and badges (5.6:1 on paper) */
 
   /* type */
   --font-ui: "Schibsted Grotesk", "Segoe UI Variable Text", system-ui, -apple-system, "Segoe UI", sans-serif;

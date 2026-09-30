@@ -13,6 +13,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+import httpx
 from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 
@@ -63,8 +64,10 @@ def font(size: int):
     return ImageFont.load_default()
 
 
-def poster(region: str, scale: int, title: str) -> Path:
+def poster(region: str, scale: int) -> Path:
     OUT.mkdir(parents=True, exist_ok=True)
+    info = httpx.get(f"{BASE}/api/region/{region}", timeout=30).json()
+    title = info["name"] + (f", {info['subtitle']}" if info.get("subtitle") else "")
     png = OUT / f"{region}_poster_raw.png"
     with sync_playwright() as p:
         b = p.chromium.launch(channel="msedge", args=GL)
@@ -76,10 +79,10 @@ def poster(region: str, scale: int, title: str) -> Path:
         b.close()
     art = Image.open(png).convert("RGB")
     band = art.height // 9
-    sheet = Image.new("RGB", (art.width, art.height + band), (233, 226, 208))
+    sheet = Image.new("RGB", (art.width, art.height + band), (220, 223, 214))
     sheet.paste(art, (0, band))
     d = ImageDraw.Draw(sheet)
-    d.text((art.width // 2, band // 2), title, fill=(43, 36, 24), font=font(band // 2), anchor="mm")
+    d.text((art.width // 2, band // 2), title, fill=(44, 55, 51), font=font(band // 2), anchor="mm")
     pdf = OUT / f"{region}_poster.pdf"
     sheet.save(pdf, resolution=art.width / 16)          # 16 in wide
     sheet.resize((1600, round(1600 * sheet.height / sheet.width))).save(OUT / f"{region}_poster_preview.png")
@@ -98,4 +101,4 @@ if __name__ == "__main__":
     if a.what == "video":
         print("wrote", video(a.region, a.seconds, a.fps))
     else:
-        print("wrote", poster(a.region, a.scale, a.region.capitalize() + " Valley - Tiny Atlas"))
+        print("wrote", poster(a.region, a.scale))
