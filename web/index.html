@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiny Atlas</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #e9e2d0; font-family: system-ui, sans-serif; }
+  #hud { position: fixed; top: 12px; left: 12px; padding: 8px 12px; background: #fffaf0cc; border-radius: 8px; font-size: 14px; }
+  #attr { position: fixed; bottom: 6px; right: 10px; font-size: 11px; color: #555; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="hud">Tiny Atlas: <span id="name">loading…</span></div>
+<div id="attr">Elevation: Mapzen/AWS Terrain Tiles · Map data © OpenStreetMap contributors</div>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const region = new URLSearchParams(location.search).get("region") || "hunza";
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xe9e2d0);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 10, 400000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x998877, 1.0));
+const sun = new THREE.DirectionalLight(0xfff2d0, 2.0);
+sun.position.set(-1, 1.2, 0.6);
+scene.add(sun);
+
+const [meta, buf] = await Promise.all([
+  fetch("/api/regions").then(r => r.json()),
+  fetch(`/api/terrain/${region}?size=256`).then(r => r.arrayBuffer()),
+]);
+document.getElementById("name").textContent = meta[region].name;
+
+const dv = new DataView(buf);
+const rows = dv.getUint32(0, true), cols = dv.getUint32(4, true);
+const widthM = dv.getFloat32(8, true), heightM = dv.getFloat32(12, true);
+const hm = new Float32Array(buf, 16, rows * cols);
+let min = Infinity; for (const h of hm) if (h < min) min = h;
+
+const EXAG = 1.5;
+const geo = new THREE.PlaneGeometry(widthM, heightM, cols - 1, rows - 1);
+geo.rotateX(-Math.PI / 2); // row 0 = north = -z
+const pos = geo.attributes.position;
+for (let i = 0; i < pos.count; i++) pos.setY(i, (hm[i] - min) * EXAG);
+geo.computeVertexNormals();
+const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0xc8b48a, flatShading: false, roughness: 1 }));
+scene.add(mesh);
+
+camera.position.set(0, widthM * 0.5, heightM * 0.7);
+controls.target.set(0, 2000, 0);
+controls.update();
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+renderer.setAnimationLoop(() => renderer.render(scene, camera));
+window.__ready = true;
+</script>
+</body>
+</html>

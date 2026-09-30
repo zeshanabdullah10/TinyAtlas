@@ -1,0 +1,6 @@
+numpy
+pillow
+httpx
+fastapi
+uvicorn
+pytest
