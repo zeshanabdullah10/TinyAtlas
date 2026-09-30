@@ -34,9 +34,11 @@ def tokenize(text: str) -> list[str]:
     return [stem(w) for w in re.findall(r"[a-z0-9]+", text.lower()) if w not in STOP and len(w) > 1]
 
 
-def retrieve(query: str, chunks: list[dict], k: int = 4, min_coverage: float = 0.5) -> list[dict]:
+def retrieve(query: str, chunks: list[dict], k: int = 4, min_coverage: float = 0.5, strict: bool = True) -> list[dict]:
     """BM25 ranking, but a chunk only counts as relevant if it contains at least `min_coverage`
-    of the query's meaningful terms. That is what lets the guide say "not in my sources"."""
+    of the query's meaningful terms. That is what lets the guide say "not in my sources".
+    strict=True also refuses when a third or more of the terms occur nowhere in the sources; the LLM path turns
+    that off (synonyms like crops/apricots) and relies on the prompt to refuse when excerpts don't answer."""
     q = set(tokenize(query))
     if not q or not chunks:
         return []
@@ -44,7 +46,7 @@ def retrieve(query: str, chunks: list[dict], k: int = 4, min_coverage: float = 0
     avg = sum(map(len, docs)) / len(docs)
     df = Counter(t for d in docs for t in set(d))
     n = len(docs)
-    if sum(1 for t in q if df[t] == 0) / len(q) >= 1 / 3:
+    if strict and sum(1 for t in q if df[t] == 0) / len(q) >= 1 / 3:
         return []      # too much of the question is about things the sources never mention
     scored = []
     for c, d in zip(chunks, docs):
@@ -76,7 +78,7 @@ def _best_sentences(question: str, text: str, n: int = 2) -> str:
 
 
 def answer(question: str, chunks: list[dict], history: list[dict] | None = None) -> dict:
-    hits = retrieve(question, chunks)
+    hits = retrieve(question, chunks, strict=not llm.available())
     if not hits:
         return {"answer": NOT_FOUND, "sources": [], "mode": "none"}
     cites = [{"n": i + 1, "source": c["source"], "url": c["url"]} for i, c in enumerate(hits)]

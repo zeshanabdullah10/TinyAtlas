@@ -27,8 +27,11 @@ everything under `data/` (gitignored). Later loads are instant.
 - "Fly the route" camera flight, plus exports (below)
 
 ## LLM (optional)
-Without a key the guide quotes the best-matching source sentences (`mode: extractive`), which is
-literal and cannot bridge synonyms (the sources say "apricots", a question about "crops" is refused).
+Without a key the guide quotes the best-matching source sentences (`mode: extractive`). That is literal: it
+cannot bridge synonyms, and it refuses when much of the question's vocabulary never appears in the sources
+("crops" vs the sources' "apricots"). With a key (`mode: llm`) the model answers from the top 4 retrieved
+excerpts with citations, bridges synonyms, and is told to refuse when the excerpts don't answer; questions
+with no keyword overlap at all are still refused before any model call.
 To use an LLM:
 ```
 # .env in the repo root (gitignored)
