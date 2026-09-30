@@ -19,14 +19,14 @@ def test_registry_merges_builtin_and_saved_regions(store):
     z = regions.REGIONS["zermatt"]
     assert z["bbox"] == (7.5, 45.9, 8.0, 46.1) and z["guide_pages"] == [("en.wikivoyage.org", "Zermatt")]
     assert z["builtin"] is False and regions.REGIONS["hunza"]["builtin"] is True
-    assert set(regions.REGIONS) == {"hunza", "zermatt"}
+    assert set(regions.REGIONS) == {*regions.BUILTIN, "zermatt"}
 
 
 def test_corrupt_region_file_is_skipped_not_fatal(store):
     store.mkdir(parents=True)
     (store / "broken.json").write_text("{not json", encoding="utf-8")
     (store / "partial.json").write_text(json.dumps({"name": "No bbox"}), encoding="utf-8")
-    assert list(regions.REGIONS) == ["hunza"]
+    assert list(regions.REGIONS) == list(regions.BUILTIN)
 
 
 def test_remove_only_touches_saved_regions(store):
@@ -38,8 +38,8 @@ def test_remove_only_touches_saved_regions(store):
 def test_slugify_handles_accents_and_symbols():
     assert regions.slugify("Zermatt") == "zermatt"
     assert regions.slugify("Machu Picchu, Peru!") == "machu-picchu-peru"
-    assert regions.slugify("Café del Mar") == "caf-del-mar"
-    assert regions.slugify("東京") == "place"          # nothing ASCII left: still a valid slug
+    assert regions.slugify("CafÃ© del Mar") == "caf-del-mar"
+    assert regions.slugify("æ±äº¬") == "place"          # nothing ASCII left: still a valid slug
 
 
 # ---------- geocoding ----------
@@ -163,3 +163,19 @@ def test_search_dedupes_repeated_records_for_one_place(tmp_path, monkeypatch):
 
     got = geocode.search("Cappadocia", client=C())
     assert [g["subtitle"] for g in got] == ["Abruzzo, Italy", "Central Anatolia Region, Turkey"]
+
+
+def test_curated_region_wins_over_a_saved_one_with_the_same_slug(store):
+    regions.save("skardu", {"name": "Old Skardu", "bbox": [0, 0, 1, 1], "landmarks": []})
+    assert regions.REGIONS["skardu"]["name"] == "Skardu" and list(regions.REGIONS)[0] == "hunza"
+
+
+def test_curated_tours_only_name_their_own_landmarks():
+    for slug, cfg in regions.BUILTIN.items():
+        titles = {l["title"] for l in cfg["landmarks"]}
+        for tour in cfg.get("tours", []):
+            assert set(tour["stops"]) <= titles, (slug, tour["name"])
+        w, s, e, n = cfg["bbox"]
+        for l in cfg["landmarks"]:
+            if "lat" in l:
+                assert w <= l["lon"] <= e and s <= l["lat"] <= n, (slug, l["title"])

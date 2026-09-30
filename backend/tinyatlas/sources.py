@@ -80,9 +80,12 @@ def to_uv(lat: float, lon: float, bbox) -> tuple[float, float] | None:
 
 def _landmark_pages(region: dict, client: httpx.Client | None = None):
     """(landmark cfg, page, (u, v)) for pages that exist and sit inside the region's bbox.
-    Drops same-named pages elsewhere in the world and sights outside this map."""
+    Drops same-named pages elsewhere in the world and sights outside this map. A landmark config may carry its
+    own `lat`/`lon` (from OpenStreetMap) for the many places whose Wikipedia page has no coordinates."""
     for lm in region["landmarks"]:
         page = fetch_page("en.wikipedia.org", lm["title"], client)
+        if lm.get("lat") is not None:
+            page = {**page, "lat": lm["lat"], "lon": lm["lon"]}
         if page["missing"] or page["lat"] is None:
             continue
         uv = to_uv(page["lat"], page["lon"], region["bbox"])
@@ -95,7 +98,7 @@ def landmarks(region: dict, client: httpx.Client | None = None) -> list[dict]:
     for lm, page, uv in _landmark_pages(region, client):
         text = page["text"]
         out.append({
-            "slug": slugify(lm["title"]), "name": page["title"], "kind": lm["kind"],
+            "slug": slugify(lm["title"]), "name": lm.get("name") or page["title"], "kind": lm["kind"],
             "lat": page["lat"], "lon": page["lon"], "u": uv[0], "v": uv[1],
             "summary": text.split("\n\n")[0][:600], "url": page["url"],
             "image": page.get("image"), "description": page.get("description", ""),

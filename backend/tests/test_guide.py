@@ -108,9 +108,50 @@ def test_summits_are_only_route_stops_when_the_road_passes_right_by():
     assert {s["slug"] for s in it["stops"]} == {"a", "near", "town"}
 
 
+def test_summits_reached_only_by_trail_are_never_route_stops():
+    size = (10000.0, 10000.0)
+    road = [[(0.0, 0.0), (0.05, 0.0)]]
+    trail = [[(0.1, 0.5), (0.5, 0.5), (0.9, 0.5)]]
+    lms = [{"slug": "a", "name": "A", "kind": "town", "u": 0.1, "v": 0.5},
+           {"slug": "top", "name": "Top", "kind": "peak", "u": 0.5, "v": 0.5},           # the trail runs over it
+           {"slug": "b", "name": "B", "kind": "museum", "u": 0.9, "v": 0.5}]
+    it = guide.itinerary(lms, road, size, trails=trail)
+    assert [s["slug"] for s in it["stops"]] == ["a", "b"]
+
+
+def test_curated_tour_is_drawn_as_given():
+    road = [[(i / 20, 0.5) for i in range(21)]]
+    lms = [{"slug": s, "name": s.upper(), "kind": "peak", "u": u, "v": 0.5} for s, u in (("a", 0.1), ("b", 0.5), ("c", 0.9))]
+    it = guide.itinerary(lms, road, (10000.0, 10000.0), tour=["c", "missing", "a"])
+    assert [s["slug"] for s in it["stops"]] == ["c", "a"] and it["curated"]
+    assert it["route"][0][0] > it["route"][-1][0]              # drawn east to west, as the tour says
+
+
+def test_curated_tour_never_starts_at_a_distant_road():
+    size = (10000.0, 10000.0)
+    highway = [[(i / 20, 0.9) for i in range(21)] * 1]                            # a long road 8 km south
+    track = [[(0.1, 0.2), (0.3, 0.2), (0.5, 0.2)]]                               # a short jeep track, not joined to it
+    lms = [{"slug": "a", "name": "A", "kind": "bridge", "u": 0.1, "v": 0.2},
+           {"slug": "b", "name": "B", "kind": "park", "u": 0.5, "v": 0.2}]
+    it = guide.itinerary(lms, highway + track, size, tour=["a", "b"])
+    assert all(abs(p[1] - 0.2) < 1e-9 for p in it["route"])                      # follows the track, not the highway
+    stranded = [{"slug": "a", "name": "A", "kind": "bridge", "u": 0.1, "v": 0.5}, *lms[1:]]  # 3 km from any road
+    assert guide.itinerary(stranded, highway + track, size, tour=["a", "b"])["route"][0] == [0.1, 0.5]
+
+
+def test_walking_legs_longer_than_a_day_hike_are_dropped():
+    size = (100000.0, 100000.0)                                  # 1 unit = 100 km
+    road = [[(0.0, 0.0), (0.01, 0.0)]]
+    trail = [[(0.1, 0.5), (0.15, 0.5), (0.5, 0.5)]]
+    lms = [{"slug": "a", "name": "A", "kind": "town", "u": 0.1, "v": 0.5},
+           {"slug": "b", "name": "B", "kind": "hut", "u": 0.15, "v": 0.5},              # 5 km on foot
+           {"slug": "far", "name": "Far", "kind": "temple", "u": 0.5, "v": 0.5}]         # 35 km more on foot
+    assert [s["slug"] for s in guide.itinerary(lms, road, size, trails=trail)["stops"]] == ["a", "b"]
+
+
 def test_empty_model_answer_is_not_cached_or_served(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
-    replies = iter(["", "A real answer."])
+    replies = iter(["", "", "A real answer."])                # empty twice (with its one retry), then fine
 
     class R:
         def __init__(self, text): self.text = text

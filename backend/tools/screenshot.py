@@ -7,6 +7,8 @@
 --ask    open the guide and ask a question, waiting for the answer
 --frame  render flyover frame T in [0, 1] instead of the orbit view
 --click  click a CSS selector before the screenshot (e.g. ".toolbar .btn")
+--sun    light with the real sun at "YYYY-MM-DD HH:MM" on the place's clock
+--eval   run JavaScript in the page first, e.g. "window.__view(36.329, 74.666, 'Karimabad')"
 """
 import argparse
 
@@ -20,6 +22,8 @@ ap.add_argument("--ask")
 ap.add_argument("--frame", type=float)
 ap.add_argument("--size", default="1280x800")
 ap.add_argument("--click")
+ap.add_argument("--eval", help="run this JavaScript in the page before the screenshot")
+ap.add_argument("--sun", help='light with the real sun at "YYYY-MM-DD HH:MM" on the place\'s clock')
 ap.add_argument("--wait", type=int, default=600)
 a = ap.parse_args()
 w, h = (int(v) for v in a.size.split("x"))
@@ -41,6 +45,12 @@ with sync_playwright() as p:
         page.fill("#q", a.ask)
         page.press("#q", "Enter")
         page.wait_for_function("document.querySelector('.msg.a:last-child') && !document.querySelector('.msg.a:last-child').classList.contains('think')", timeout=90000)
+    if a.sun:
+        date, _, hhmm = a.sun.partition(" ")
+        page.evaluate(f"window.__sun({date!r}, {hhmm!r})")
+        page.wait_for_timeout(400)            # shadows are cast on the next frame
+    if a.eval:
+        page.evaluate(a.eval)
     if a.click:
         page.click(a.click)
     if a.frame is not None:

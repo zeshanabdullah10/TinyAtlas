@@ -2,7 +2,8 @@
 
     POD_ID=... POD_JUPYTER_TOKEN=... python backend/tools/pod_run.py "nvidia-smi"
 
-Reads the token from the environment so it never appears in argv or shell history.
+Reads POD_ID and the token from the environment or the repo's .env, so the token never appears in argv or
+shell history.
 Exit status is the remote command's.
 """
 import json
@@ -14,7 +15,10 @@ import uuid
 import httpx
 from websocket import create_connection
 
-pod, token = os.environ["POD_ID"], os.environ["POD_JUPYTER_TOKEN"]
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from tinyatlas.llm import _env  # noqa: E402  (env var first, then the gitignored .env)
+
+pod, token = _env("POD_ID"), _env("POD_JUPYTER_TOKEN")
 host = f"{pod}-8888.proxy.runpod.net"
 auth = {"Authorization": f"token {token}"}
 cmd = sys.argv[1]

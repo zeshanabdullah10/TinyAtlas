@@ -1,7 +1,8 @@
 """End-to-end smoke test against the running app (server must be up).
 
 Home gallery lists built places -> open Hunza -> real mouse click on a landmark -> placard with photo and source
--> ask the guide (cited answer) -> unanswerable question is refused -> flyover frame renders -> no console errors.
+-> ask the guide (cited answer) -> unanswerable question is refused -> real sun and autumn -> panorama from Karimabad
+-> view previews -> go mode -> flyover frame renders -> no console errors.
 
     python backend/tools/smoke.py [base_url]
 """
@@ -30,7 +31,11 @@ with sync_playwright() as p:
     page.wait_for_function("window.__ready === true", timeout=60000)
     page.wait_for_selector(".frame a", timeout=30000)
     check("gallery lists the built places", page.locator(".frame a").count() >= 5)
-    check("gallery images load", page.evaluate("[...document.querySelectorAll('.mat img')].every(i => i.complete && i.naturalWidth > 0)"))
+    page.mouse.wheel(0, 4000)                                  # lazy thumbnails below the fold only load on scroll
+    page.wait_for_function("[...document.querySelectorAll('.mat img')].length > 0 && "
+                           "[...document.querySelectorAll('.mat img')].every(i => i.complete && i.naturalWidth > 0)",
+                           timeout=60000)
+    check("gallery images load", True)
 
     page.goto(f"{BASE}/?region=hunza")
     page.wait_for_function("window.__ready === true", timeout=180000)
@@ -60,6 +65,37 @@ with sync_playwright() as p:
     check("guide cites a wikipedia link", page.locator(".msg.a:last-child a[href*='wikipedia.org']").count() >= 1)
     r = ask("Where is the best pizza restaurant with wifi?")
     check("guide refuses what the sources don't cover", "isn't in my sources" in r, r[:150])
+
+    # real sun and seasons: an October evening lights the terrain and switches to the autumn texture
+    page.evaluate("window.__sun('2026-10-12', '17:00')")
+    page.wait_for_timeout(1500)
+    check("real sun lights the terrain", page.evaluate("window.__dio.terrain.material.uniforms.uReal.value") == 1)
+    check("the date picks the autumn season", page.locator(".segs.seasons .seg[aria-pressed='true']").inner_text() == "Autumn")
+
+    # what can I see from Karimabad: Rakaposhi and Diran to the south
+    page.evaluate("window.__view(36.329, 74.666, 'Karimabad')")
+    page.wait_for_selector(".pano-peaks .chip", timeout=60000)
+    peaks = page.inner_text(".pano-peaks")
+    check("panorama names Rakaposhi and Diran from Karimabad", "Rakaposhi" in peaks and "Diran" in peaks, peaks[:200])
+    page.keyboard.press("Escape")
+
+    # see the view before you go
+    if page.locator("#tab-views").count():
+        page.click("#tab-views")
+        page.wait_for_function("[...document.querySelectorAll('.vfig img')].some(i => i.complete && i.naturalWidth > 0)", timeout=30000)
+        check("views tab shows labelled previews", page.locator(".vfig .vlabel").count() >= 1)
+    else:
+        check("views tab exists (run backend/tools/previews.py)", False)
+
+    # the audio guide plays from the landmark placard
+    page.evaluate("window.__open('baltit-fort')")
+    page.click("#tab-place")
+    page.wait_for_selector(".placard .listen", timeout=30000)
+    page.click(".placard .listen-play")
+    page.wait_for_function("window.__listen().playing", timeout=30000)
+    check("placard plays the audio guide", True)
+    check("placard offers languages and read-along", page.locator(".placard .listen-langs .seg").count() >= 2
+          and page.locator(".placard .listen-text summary").count() == 1)
 
     page.evaluate("window.renderFrame(0.5)")
     pose = page.evaluate("window.__flyPose(0.5)")

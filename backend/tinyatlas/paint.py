@@ -20,6 +20,14 @@ RAMP = [
     (0.93, (200, 196, 190)),
     (1.10, (250, 250, 252)),
 ]
+# Seasons change the valley colours (t < 0.5 of the ramp) and how far the snow comes down. Snowline offsets are
+# typical, not measured for a particular year; the viewer labels seasonal textures as illustrations.
+SEASONS = {
+    "summer": {"snow": 0.0, "valley": None},
+    "spring": {"snow": -1100.0, "valley": [(0.00, (160, 184, 110)), (0.22, (184, 190, 124)), (0.44, (200, 182, 128))]},
+    "autumn": {"snow": -500.0, "valley": [(0.00, (206, 150, 64)), (0.22, (196, 162, 88)), (0.44, (190, 166, 118))]},
+    "winter": {"snow": None, "valley": [(0.00, (214, 212, 204)), (0.22, (222, 222, 218)), (0.44, (212, 206, 196))]},
+}
 ROCK = np.array([140, 128, 116], dtype=np.float64)
 SNOW = np.array([250, 250, 255], dtype=np.float64)
 WATER = np.array([74, 144, 196], dtype=np.float64)
@@ -51,10 +59,21 @@ def climate(bbox, snowline: float | None = None) -> tuple[float, float]:
     return lo, max(sn, lo + 800.0)
 
 
-def ramp_colors(elev: np.ndarray, lo: float = 1000.0, snow: float = 5500.0) -> np.ndarray:
+def season_climate(clim: tuple[float, float], season: str) -> tuple[float, float]:
+    """(lowest ground, snowline) for a season. Winter snow reaches most of the valley floor."""
+    lo, snow = clim
+    off = SEASONS[season]["snow"]
+    if off is None:
+        return lo, lo + 700.0
+    return lo, max(snow + off, lo + 800.0)
+
+
+def ramp_colors(elev: np.ndarray, lo: float = 1000.0, snow: float = 5500.0, season: str = "summer") -> np.ndarray:
     t = (elev - lo) / (snow - lo)
-    xs = [p[0] for p in RAMP]
-    return np.stack([np.interp(t, xs, [p[1][c] for p in RAMP]) for c in range(3)], axis=-1)
+    valley = SEASONS[season]["valley"]
+    ramp = RAMP if not valley else [*valley, *[p for p in RAMP if p[0] > valley[-1][0]]]
+    xs = [p[0] for p in ramp]
+    return np.stack([np.interp(t, xs, [p[1][c] for p in ramp]) for c in range(3)], axis=-1)
 
 
 def slope_and_shade(hm: np.ndarray, dx: float, dy: float, az_deg: float = 315.0, alt_deg: float = 42.0):
@@ -71,10 +90,10 @@ def slope_and_shade(hm: np.ndarray, dx: float, dy: float, az_deg: float = 315.0,
 
 
 def colorize(hm: np.ndarray, slope: np.ndarray, shade: np.ndarray, bands: int = 5,
-             lo: float = 1000.0, snowline: float = 5500.0) -> np.ndarray:
+             lo: float = 1000.0, snowline: float = 5500.0, season: str = "summer") -> np.ndarray:
     """Base colour by elevation, rock on steep faces, snow high and gentle, then toon-banded light."""
     deg = np.degrees(slope)[..., None]
-    col = ramp_colors(hm, lo, snowline)
+    col = ramp_colors(hm, lo, snowline, season)
     col = col * (1 - smoothstep(28, 48, deg)) + ROCK * smoothstep(28, 48, deg)
     snow = smoothstep(0.87, 1.02, (hm - lo) / (snowline - lo))[..., None] * (1 - smoothstep(38, 55, deg))
     col = col * (1 - snow) + SNOW * snow
@@ -84,13 +103,13 @@ def colorize(hm: np.ndarray, slope: np.ndarray, shade: np.ndarray, bands: int = 
 
 
 def paint_tile(tile: tiles.Tile, feats: dict, region_bbox, size: int = 1024, z: int = 13,
-               clim: tuple[float, float] | None = None) -> Image.Image:
-    lo, snowline = clim or climate(region_bbox)
+               clim: tuple[float, float] | None = None, season: str = "summer") -> Image.Image:
+    lo, snowline = season_climate(clim or climate(region_bbox), season)
     hm = terrain.heightmap(tile.bbox, z=z, size=size)
     wm, hm_m = terrain.bbox_size_m(tile.bbox)
     hm = blur(hm, 1.2)
     slope, shade = slope_and_shade(hm, wm / size, hm_m / size)
-    rgb = colorize(hm, slope, shade, lo=lo, snowline=snowline)
+    rgb = colorize(hm, slope, shade, lo=lo, snowline=snowline, season=season)
 
     water = np.asarray(tiles.water_mask(tile, feats, region_bbox, size).filter(ImageFilter.GaussianBlur(0.8)), dtype=np.float64) / 255
     wshade = (0.85 + 0.15 * shade)[..., None]
@@ -122,17 +141,18 @@ def core_box(tile: tiles.Tile, region_bbox, nx: int, ny: int, size: int) -> tupl
 
 
 def paint_region(name: str, bbox, nx: int = 3, ny: int = 3, size: int = 1024, core: int = 800,
-                 out: Path = tiles.OUT) -> Path:
-    """Paint all tiles, crop overlaps, mosaic into one texture. Row 0 = north, col 0 = west."""
+                 out: Path = tiles.OUT, season: str = "summer") -> Path:
+    """Paint all tiles, crop overlaps, mosaic into one texture. Row 0 = north, col 0 = west.
+    Summer is texture.png; other seasons are texture_<season>.png."""
     feats = osm.features(bbox)
     clim = climate(bbox, regions.REGIONS[name].get("snowline") if name in regions.REGIONS else None)
     mosaic = Image.new("RGB", (nx * core, ny * core))
     for t in tiles.tile_grid(bbox, nx, ny):
-        img = paint_tile(t, feats, bbox, size, clim=clim)
+        img = paint_tile(t, feats, bbox, size, clim=clim, season=season)
         crop = img.crop(core_box(t, bbox, nx, ny, size)).resize((core, core), Image.LANCZOS)
         mosaic.paste(crop, (t.ix * core, t.iy * core))
     d = out / name
     d.mkdir(parents=True, exist_ok=True)
-    path = d / "texture.png"
+    path = d / ("texture.png" if season == "summer" else f"texture_{season}.png")
     mosaic.save(path)
     return path

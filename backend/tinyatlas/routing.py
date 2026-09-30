@@ -11,8 +11,9 @@ from collections import defaultdict, deque
 Node = tuple[float, float]
 
 
-def build_graph(polylines, size_m: tuple[float, float]) -> dict[Node, list[tuple[Node, float]]]:
-    """Adjacency of the largest connected component. Edge weight = metres (size_m = region w, h)."""
+def build_graph(polylines, size_m: tuple[float, float], largest: bool = True) -> dict[Node, list[tuple[Node, float]]]:
+    """Adjacency of the largest connected component (or of everything, largest=False). Edge weight = metres
+    (size_m = region w, h)."""
     w, h = size_m
     adj: dict[Node, list] = defaultdict(list)
     for line in polylines:
@@ -23,6 +24,8 @@ def build_graph(polylines, size_m: tuple[float, float]) -> dict[Node, list[tuple
             d = math.hypot((a[0] - b[0]) * w, (a[1] - b[1]) * h)
             adj[a].append((b, d))
             adj[b].append((a, d))
+    if not largest:
+        return dict(adj)
     seen, best = set(), []
     for start in adj:
         if start in seen:
@@ -77,17 +80,23 @@ def shortest_path(graph, src: Node, dst: Node) -> list[Node]:
     return path[::-1]
 
 
-def route_through(points, polylines, size_m, min_step: float = 0.0015) -> list[list[float]]:
+def route_through(points, polylines, size_m, min_step: float = 0.0015, largest: bool = True,
+                  max_snap_m: float = float("inf")) -> list[list[float]]:
     """Polyline (list of [u, v]) that visits `points` in order along roads.
-    Each stop snaps to the nearest road vertex; unreachable legs fall back to a straight segment.
+    Each stop snaps to the nearest road vertex; unreachable legs fall back to a straight segment. A stop farther
+    than `max_snap_m` from any road keeps its own position, so the line never starts somewhere else.
     Points closer than `min_step` (normalised) are dropped to keep the result light."""
-    graph = build_graph(polylines, size_m)
+    graph = build_graph(polylines, size_m, largest)
     if not graph or len(points) < 2:
         return [list(p) for p in points]
-    snapped = [nearest_node(graph, tuple(p), size_m) for p in points]
+    snapped = []
+    for p in points:
+        n = nearest_node(graph, tuple(p), size_m)
+        near = math.hypot((n[0] - p[0]) * size_m[0], (n[1] - p[1]) * size_m[1]) <= max_snap_m
+        snapped.append(n if near else tuple(p))
     out: list[Node] = []
     for a, b in zip(snapped, snapped[1:]):
-        leg = shortest_path(graph, a, b) or [a, b]
+        leg = (shortest_path(graph, a, b) if a in graph and b in graph else []) or [a, b]
         out.extend(leg if not out else leg[1:])
     slim = [out[0]]
     for p in out[1:-1]:

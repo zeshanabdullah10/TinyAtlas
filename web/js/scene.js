@@ -1,7 +1,9 @@
 import * as THREE from "three";
+import { BASE } from "./api.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { h, kindIcon, clamp, reducedMotion } from "./dom.js";
 import { makeModel, selectionRing } from "./models.js";
+import { LightMap, terrainMaterial, sunDir, sunColors } from "./light.js";
 
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const easeOutBack = (t) => { const c = 1.6; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
@@ -51,6 +53,7 @@ export class Diorama {
     this.container = container;
     this.handlers = handlers;
     this.landmarks = data.landmarks;
+    this.viewFrom = data.viewFrom ?? 180;
     this.exag = 1.5;
     this.rise = 0;                 // 0..1: terrain rising out of the plinth on entry
     this.reveal = 0;               // 0..1: landmarks and route appearing after the rise
@@ -100,10 +103,11 @@ export class Diorama {
     Object.assign(this.controls, { enableDamping: true, dampingFactor: 0.07, minDistance: this.S * 12, maxDistance: this.widthM * 3.2,
       maxPolarAngle: 1.42, screenSpacePanning: false, zoomSpeed: 0.9, rotateSpeed: 0.7 });
     this.controls.listenToKeyEvents(r.domElement);
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xa89c88, 1.05));
-    const sun = new THREE.DirectionalLight(0xfff1d6, 1.9);
-    sun.position.set(-this.widthM, this.widthM * 1.2, this.heightM * 0.7);
-    this.scene.add(sun);
+    this.hemi = new THREE.HemisphereLight(0xffffff, 0xa89c88, 1.05);
+    this.sunLight = new THREE.DirectionalLight(0xfff1d6, 1.9);
+    this.studioSun = new THREE.Vector3(-this.widthM, this.widthM * 1.2, this.heightM * 0.7);
+    this.sunLight.position.copy(this.studioSun);
+    this.scene.add(this.hemi, this.sunLight);
     this.resize();
   }
 
@@ -123,8 +127,8 @@ export class Diorama {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
     }
-    this.terrain = new THREE.Mesh(geo, texture ? new THREE.MeshBasicMaterial({ map: texture })
-      : new THREE.MeshStandardMaterial({ color: 0xc8b48a, roughness: 1 }));
+    this.lightMap = new LightMap(this.hm, this.rows, this.cols, this.widthM, this.heightM);
+    this.terrain = new THREE.Mesh(geo, terrainMaterial(texture, this.lightMap));
     this.scene.add(this.terrain);
   }
 
@@ -181,8 +185,36 @@ export class Diorama {
       holder.add(makeModel(lm.kind, this.S));
       holder.scale.setScalar(0.001);
       this.markers.add(holder);
+      if (lm.model) this.loadModel(holder, lm);
     }
     this.scene.add(this.ring);
+  }
+
+  /** Swap the procedural model for web/models/<slug>.glb: a plaster maquette of the same size, sitting on the ground. */
+  async loadModel(holder, lm) {
+    try {
+      const { GLTFLoader } = await import("three/addons/loaders/GLTFLoader.js");
+      const gltf = await new GLTFLoader().loadAsync(`${BASE}models/${lm.slug}.glb`);
+      const obj = gltf.scene;
+      const plaster = new THREE.MeshStandardMaterial({ color: 0xf1ece0, roughness: 0.85, metalness: 0, side: THREE.DoubleSide });
+      obj.traverse((o) => {                            // generated meshes come without normals: light needs them
+        if (o.isMesh) { o.geometry.computeVertexNormals(); o.material = plaster; o.castShadow = false; }
+      });
+      const box = new THREE.Box3().setFromObject(obj), size = box.getSize(new THREE.Vector3());
+      const k = (this.S * 4.5) / Math.max(size.y, Math.max(size.x, size.z) * 0.7, 1e-6);   // like the other models
+      obj.scale.setScalar(k);
+      box.setFromObject(obj);
+      obj.position.set(-(box.min.x + box.max.x) / 2, -box.min.y, -(box.min.z + box.max.z) / 2);
+      holder.clear(); holder.add(obj);
+    } catch { /* keep the procedural model */ }
+  }
+
+  /** Replace the drawn route (a planned day, or back to the place's tour). */
+  setItinerary(itin) {
+    this.stopFly(true);
+    for (const m of [this.routeHalo, this.routeDots, this.traveler]) if (m) { this.scene.remove(m); m.geometry.dispose(); }
+    this.routeHalo = this.routeDots = this.traveler = null;
+    this.buildRoute(itin); this.buildCameraPath(); this.drapeRoute();
   }
 
   buildRoute(itin) {
@@ -290,20 +322,69 @@ export class Diorama {
     }
   }
 
+  /** Light the miniature with the real sun at {az, alt} (degrees), or null for the studio light. Shadows are
+   *  recomputed on the next frame, so dragging a time slider stays smooth. */
+  setSun(sun) {
+    const u = this.terrain.material.uniforms;
+    this.sun = sun;
+    if (!sun) {
+      u.uReal.value = 0; this.sunLight.position.copy(this.studioSun); this.sunLight.color.set(0xfff1d6);
+      this.sunLight.intensity = 1.9; this.hemi.intensity = 1.05; this.skirtMat.color.set(0xd9d6cc);
+      return;
+    }
+    const dir = sunDir(sun.az, sun.alt), c = sunColors(sun.alt);
+    u.uReal.value = 1; u.uSun.value.copy(dir); u.uDirect.value.copy(c.direct); u.uAmb.value.copy(c.amb);
+    this.sunLight.position.copy(dir).multiplyScalar(this.widthM * 2);
+    this.sunLight.color.copy(c.direct).multiplyScalar(1 / Math.max(0.05, Math.max(c.direct.r, c.direct.g, c.direct.b)));
+    this.sunLight.intensity = 2.6 * Math.max(c.direct.r, c.direct.g, c.direct.b);
+    this.hemi.intensity = 0.35 + 0.8 * c.day;
+    this.skirtMat.color.copy(c.amb).multiplyScalar(1.6).add(c.direct.clone().multiplyScalar(0.5));
+    this.shadowDue = true;
+  }
+
+  setTexture(texture) {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+    const u = this.terrain.material.uniforms;
+    u.map.value = texture; u.uHasMap.value = 1;
+  }
+
   setExag(v) { this.exag = v; this.applyHeights(); }
   setLabels(on) { this.labelsOn = on; }
   setRoute(on) { this.routeOn = on; this.drapeRoute(); }
 
   /* ---------------- camera ---------------- */
+  /** The opening view: from the compass bearing `viewFrom` (180 = standing south, looking north). */
   homePose() {
-    const cy = (this.max - this.min) * this.exag * 0.32;
-    return { target: new THREE.Vector3(0, cy, 0), pos: new THREE.Vector3(0, this.widthM * 0.56 + cy, this.heightM * 0.92) };
+    const cy = (this.max - this.min) * this.exag * 0.32, b = (this.viewFrom * Math.PI) / 180;
+    const d = Math.hypot(this.widthM * Math.sin(b), this.heightM * Math.cos(b)) * 0.92;
+    return { target: new THREE.Vector3(0, cy, 0), pos: new THREE.Vector3(Math.sin(b) * d, this.widthM * 0.56 + cy, -Math.cos(b) * d) };
   }
   placeCamera(pos, target) { this.camera.position.copy(pos); this.controls.target.copy(target); this.camera.lookAt(target); this.controls.update(); }
 
   tween(pos, target, ms = 900) {
     if (reducedMotion()) { this.placeCamera(pos, target); return; }
     this.focusTween = { t0: performance.now(), ms, fromP: this.camera.position.clone(), fromT: this.controls.target.clone(), toP: pos.clone(), toT: target.clone() };
+  }
+  /** A marker for a live position on the map (blue dot with a soft ring), or null to hide it. */
+  setMe(u, v) {
+    if (!this.me) {
+      this.me = new THREE.Group();
+      this.me.add(new THREE.Mesh(new THREE.SphereGeometry(this.S * 0.7, 16, 12), new THREE.MeshBasicMaterial({ color: 0x2f7fd0 })));
+      const ring = new THREE.Mesh(new THREE.RingGeometry(this.S * 1.2, this.S * 1.6, 32), new THREE.MeshBasicMaterial({ color: 0x2f7fd0, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
+      ring.rotation.x = -Math.PI / 2; this.me.add(ring);
+      this.scene.add(this.me);
+    }
+    this.me.visible = u != null;
+    if (u != null) this.me.position.copy(this.world(u, v, this.S * 0.8));
+  }
+
+  /** Fly to just above the ground at (u, v), looking along compass `heading` (degrees). */
+  lookFrom(u, v, heading) {
+    this.stopFly(true);
+    const a = (heading * Math.PI) / 180, p = this.world(u, v, this.S * 14);
+    const t = p.clone().add(new THREE.Vector3(Math.sin(a) * this.widthM * 0.22, -this.S * 6, -Math.cos(a) * this.widthM * 0.22));
+    this.tween(p, t, 1500);
   }
   resetView() { this.stopFly(); this.tween(this.homePose().pos, this.homePose().target, 1000); }
   northUp() { const t = this.controls.target, off = this.camera.position.clone().sub(t); const d = Math.hypot(off.x, off.z); this.tween(new THREE.Vector3(t.x, this.camera.position.y, t.z + d), t.clone(), 600); }
@@ -399,6 +480,7 @@ export class Diorama {
   /** Deterministic single frame at t in [0, 1] for the video export: freezes the interactive loop. */
   renderFrame(t) {
     this.manual = true;
+    if (this.shadowDue && this.sun) { this.shadowDue = false; this.lightMap.shade(this.sun.az, this.sun.alt); }
     if (this.introT0) this.finishIntro();
     if (!this.camPath) this.rebuildCameraHeights();
     const f = this.flyPose(t); if (!f) return;
@@ -426,10 +508,15 @@ export class Diorama {
     el.addEventListener("pointerdown", (e) => { down = [e.clientX, e.clientY]; this.interrupt(); });
     el.addEventListener("pointerup", (e) => {
       if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return;
+      if (this.onGround) {                              // "stand here" mode: the next tap on the relief is a place
+        const g = this.pickGround(e);
+        if (g) { const f = this.onGround; this.onGround = null; el.style.cursor = ""; f(g); }
+        return;
+      }
       const lm = this.pick(e);
       if (lm) this.handlers.onSelect?.(lm.slug); else this.handlers.onSelect?.(null);
     });
-    el.addEventListener("pointermove", (e) => { if (e.buttons === 0) el.style.cursor = this.pick(e) ? "pointer" : ""; });
+    el.addEventListener("pointermove", (e) => { if (e.buttons === 0) el.style.cursor = this.onGround ? "crosshair" : this.pick(e) ? "pointer" : ""; });
     el.addEventListener("wheel", () => this.interrupt(), { passive: true });
     this.ro = new ResizeObserver(() => this.resize());
     this.ro.observe(this.container);
@@ -447,6 +534,14 @@ export class Diorama {
     if (!hit) return null;
     let o = hit.object; while (o && !o.userData.lm) o = o.parent;
     return o?.userData.lm || null;
+  }
+  /** {u, v} (0..1, east / south) of the relief under the pointer, or null. */
+  pickGround(e) {
+    const r = this.renderer.domElement.getBoundingClientRect();
+    this.ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    this.ray.setFromCamera(this.ndc, this.camera);
+    const hit = this.ray.intersectObject(this.terrain, false)[0];
+    return hit ? { u: hit.point.x / this.widthM + 0.5, v: hit.point.z / this.heightM + 0.5 } : null;
   }
   project(slug) {
     const hd = this.markers.children.find((m) => m.userData.lm.slug === slug); if (!hd) return null;
@@ -487,6 +582,7 @@ export class Diorama {
   }
 
   tick(now) {
+    if (this.shadowDue && this.sun) { this.shadowDue = false; this.lightMap.shade(this.sun.az, this.sun.alt); }
     if (this.manual) return;
     // entry: the relief rises out of the plinth while the camera settles, then landmarks pop and the route draws
     if (this.introT0) {

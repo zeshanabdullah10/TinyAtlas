@@ -87,7 +87,7 @@ def answer(question: str, chunks: list[dict], history: list[dict] | None = None)
         msgs = [{"role": "system", "content": SYSTEM}, *(history or [])[-4:],
                 {"role": "user", "content": f"Excerpts:\n{excerpts}\n\nQuestion: {question}"}]
         try:
-            return {"answer": llm.complete(msgs, max_tokens=350), "sources": cites, "mode": "llm"}
+            return {"answer": llm.complete(msgs, max_tokens=350, task="guide"), "sources": cites, "mode": "llm"}
         except llm.LLMUnavailable:
             pass
     return {"answer": f"{_best_sentences(question, hits[0]['text'])} [1]", "sources": cites[:1], "mode": "extractive"}
@@ -102,7 +102,7 @@ def story(landmark: dict, chunks: list[dict]) -> dict:
                  "using ONLY the facts in the text. Do not add facts, names or dates that are not present."},
                 {"role": "user", "content": f"{landmark['name']}:\n{text[:3500]}"}]
         try:
-            return {"story": llm.complete(msgs, max_tokens=250, temperature=0.5), "mode": "llm"}
+            return {"story": llm.complete(msgs, max_tokens=250, temperature=0.5, task="guide"), "mode": "llm"}
         except llm.LLMUnavailable:
             pass
     return {"story": _first_sentences(landmark["summary"], 3), "mode": "extractive"}
@@ -111,21 +111,36 @@ def story(landmark: dict, chunks: list[dict]) -> dict:
 MAX_ROAD_SNAP_M = 2000     # a sight farther than this from any road is a viewpoint, not a route stop
 VIEWPOINT_SNAP_M = 800     # summits and glaciers must have the road or path right beside them
 VIEWPOINT_KINDS = {"peak", "glacier"}
+MAX_WALK_LEG_M = 15000     # the longest leg a sightseeing route may walk
 
 
-def itinerary(lms: list[dict], roads=None, size_m=None, trails=None) -> dict:
+def itinerary(lms: list[dict], roads=None, size_m=None, trails=None, tour: list[str] | None = None) -> dict:
     """Order the landmarks by shortest road distance (exhaustive for <= 8), starting at the westernmost one.
     Returns ordered stops plus a polyline of (u, v) points for the dotted route; with `roads`
-    (OSM polylines) and `size_m` the polyline follows the road network between stops."""
+    (OSM polylines) and `size_m` the polyline follows the road network between stops.
+    `tour` (landmark slugs, in order) is a hand-curated route: it is drawn as given, never reordered or pruned."""
+    if tour:
+        by = {l["slug"]: l for l in lms}
+        order = [by[s] for s in tour if s in by]
+        net = (roads or []) + (trails or [])
+        pts = [(l["u"], l["v"]) for l in order]
+        # every piece of the network counts (a jeep track need not join the highway), and a stop with no road
+        # nearby keeps its true position rather than being dragged to a road kilometres away
+        route = (routing.route_through(pts, net, size_m, largest=False, max_snap_m=MAX_ROAD_SNAP_M)
+                 if net and size_m else [list(p) for p in pts])
+        return {"stops": [{"slug": l["slug"], "name": l["name"]} for l in order], "route": route, "curated": True}
+    on_foot = False
     if roads and size_m:
-        def near(net):
+        def near(net, summits=True):
             graph = routing.build_graph(net, size_m)
             limit = lambda l: VIEWPOINT_SNAP_M if l.get("kind") in VIEWPOINT_KINDS else MAX_ROAD_SNAP_M
-            return [l for l in lms if routing.snap_distance_m(graph, (l["u"], l["v"]), size_m) <= limit(l)]
+            return [l for l in lms if (summits or l.get("kind") not in VIEWPOINT_KINDS)
+                    and routing.snap_distance_m(graph, (l["u"], l["v"]), size_m) <= limit(l)]
         stops = near(roads)
         if len(stops) < 2 and trails:            # car-free or hiking country: walk the footpaths instead
-            roads = roads + trails
-            stops = near(roads)
+            roads, on_foot = roads + trails, True
+            # every summit has a path to its top; on foot a summit is a climb, not a stop on a sightseeing route
+            stops = near(roads, summits=False)
         lms = stops
     if not lms:
         return {"stops": [], "route": []}
@@ -139,6 +154,8 @@ def itinerary(lms: list[dict], roads=None, size_m=None, trails=None) -> dict:
         legs = routing.leg_lengths(pts, roads or [], size)
         straights = [math.hypot((a[0] - b[0]) * size[0], (a[1] - b[1]) * size[1]) for a, b in zip(pts, pts[1:])]
         bad = routing.detour_legs(legs, straights) if roads else []
+        if on_foot:                             # walking legs longer than a day hike are expeditions, not sightseeing
+            bad = sorted(set(bad) | {i for i, l in enumerate(legs) if l > MAX_WALK_LEG_M})
         if not bad:
             break
         if len(order) == 2:                     # the only leg is nonsense: there is no honest route to draw

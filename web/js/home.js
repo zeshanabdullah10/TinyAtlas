@@ -1,5 +1,5 @@
 import { h, icon, toast } from "./dom.js";
-import { api } from "./api.js";
+import { api, STATIC } from "./api.js";
 
 const ACTIVE_JOB = "tinyatlas.job";
 const wordmark = () => {
@@ -22,16 +22,33 @@ export async function mountHome(root) {
     h("div", { class: "search-box" }, icon("i-search"), input, h("button", { class: "btn btn-primary", type: "submit" }, "Search")),
     list, note);
 
+  const heroImg = h("img", { class: "hero-img", alt: "", fetchpriority: "high" });
+  const heroCap = h("figcaption", { class: "hero-cap" });
+  const others = h("ul", { class: "shelf", "aria-label": "More places" });
+  const othersSec = h("section", { class: "more hidden" }, h("h2", { class: "shelf-title" }, "Elsewhere in the collection"), others);
+  const FEATURES = [
+    ["i-eye", "See the view before you go", "Stand anywhere and see which summits are in view, and how the scene looks at sunrise or in October."],
+    ["i-sun", "Light, seasons and sunsets", "The real sun on the real terrain, for any date: when does Rakaposhi turn gold?"],
+    ["i-route", "Plan on real roads", "Tell the planner who's coming and how long you have. Every distance and time is measured, never guessed."],
+    ["i-go", "An audio guide that works offline", "Stories in English, Urdu and Mandarin that start as you arrive, with no signal needed."],
+  ];
   root.append(h("div", { class: "home" },
-    h("header", { class: "home-head" }, h("a", { class: "mark", href: "/" }, wordmark(), "Tiny Atlas")),
-    h("section", { class: "hero" },
-      h("h1", {}, "Real places, built small."),
-      h("div", { class: "hero-side" },
-        h("p", { class: "lead" }, "Each miniature is drawn from open elevation and map data. Tap a landmark to read about it, follow a route along real roads, or ask the guide, which only answers from its sources."),
-        form)),
-    h("h2", { class: "shelf-title" }, "The collection"),
+    h("header", { class: "home-head" }, h("a", { class: "mark", href: "/" }, wordmark(), "Tiny Atlas"),
+      h("a", { class: "btn", href: "#valleys" }, "The valleys")),
+    h("section", { class: "hero2" },
+      h("figure", { class: "hero-fig" }, heroImg, heroCap),
+      h("div", { class: "hero-copy" },
+        h("p", { class: "kicker" }, "Northern Pakistan, free"),
+        h("h1", {}, "See the valley before you go."),
+        h("p", { class: "lead" }, "3D miniatures of Hunza, Skardu, Fairy Meadows and more, built from real terrain. Preview the view from the best spots in any season, plan a trip on the real roads, and carry an audio guide that works with no signal."),
+        h("div", { class: "hero-cta" }, h("a", { class: "btn btn-primary", href: "/?region=hunza" }, "Explore Hunza"), h("a", { class: "btn", href: "#valleys" }, "All valleys")))),
+    h("ul", { class: "features" }, ...FEATURES.map(([ic, t, d]) => h("li", {}, icon(ic), h("h3", {}, t), h("p", {}, d)))),
+    h("h2", { class: "shelf-title", id: "valleys" }, "The valleys"),
     shelf,
-    h("p", { class: "foot" }, "Elevation from Mapzen and AWS Terrain Tiles. Roads and water from OpenStreetMap contributors (ODbL). Landmark and guide text from Wikipedia and Wikivoyage contributors (CC BY-SA), linked from every answer.")));
+    othersSec,
+    !STATIC && h("section", { class: "build" }, h("h2", { class: "shelf-title" }, "Build any place"),
+      h("p", { class: "lead" }, "Search a town, mountain or landmark anywhere, and Tiny Atlas builds its miniature from open data in about a minute."), form),
+    h("p", { class: "foot" }, "Elevation from Mapzen and AWS Terrain Tiles. Roads, water and summits from OpenStreetMap contributors (ODbL). Landmark and guide text from Wikipedia and Wikivoyage contributors (CC BY-SA), linked from every answer. View previews are painted by an AI model over the real skyline.")));
 
   let building = null;                       // {id, name, steps, error}
 
@@ -46,14 +63,18 @@ export async function mountHome(root) {
         try { await api.remove(slug); toast(`Removed ${r.name}`); refresh(); } catch (e) { toast(e.message); }
       } }, "Remove"),
       h("button", { class: "btn", type: "button", onclick: () => { confirmBox.classList.add("hidden"); removeBtn.classList.remove("hidden"); } }, "Keep")));
+    const pic = r.cover
+      ? h("div", { class: "mat photo" }, h("img", { src: api.viewImageUrl(slug, r.cover.image), alt: `The view from ${r.cover.view}`, loading: "lazy", width: 640, height: 438 }),
+        h("img", { class: "inset", src: api.thumbUrl(slug, 240), alt: "", loading: "lazy", width: 120, height: 120 }))
+      : h("div", { class: "mat" }, h("img", { src: api.thumbUrl(slug, 640), alt: "", loading: "lazy", width: 640, height: 480 }));
     return h("li", { class: "frame" },
       h("a", { href: `/?region=${encodeURIComponent(slug)}`, "aria-label": `Open ${r.name}` },
-        h("div", { class: "mat" }, h("img", { src: `/api/thumb/${slug}?w=640`, alt: "", loading: "lazy", width: 640, height: 480 })),
+        pic,
         h("div", { class: "plate" },
           h("h2", {}, r.name),
           r.subtitle && h("p", { class: "sub" }, r.subtitle),
-          h("p", { class: "meta" }, `${r.size_km[0]} by ${r.size_km[1]} km, ${r.landmarks} landmarks`))),
-      !r.builtin && removeBtn, !r.builtin && confirmBox);
+          h("p", { class: "meta" }, r.cover ? `View from ${r.cover.view} · ${r.size_km[0]} by ${r.size_km[1]} km miniature` : `${r.size_km[0]} by ${r.size_km[1]} km, ${r.landmarks} landmarks`))),
+      !r.builtin && !STATIC && removeBtn, !r.builtin && !STATIC && confirmBox);
   };
 
   const buildingFrame = () => h("li", { class: "frame building", "aria-live": "polite" },
@@ -66,11 +87,15 @@ export async function mountHome(root) {
 
   let regions = {};
   const paint = () => {
-    shelf.replaceChildren();
-    if (building) shelf.append(buildingFrame());
+    shelf.replaceChildren(); others.replaceChildren();
+    if (building) others.append(buildingFrame());
     const entries = Object.entries(regions).filter(([, r]) => r.ready);
-    for (const [slug, r] of entries) shelf.append(frame(slug, r));
-    if (!entries.length && !building) shelf.append(h("li", { class: "empty" }, "Nothing here yet. Search for a place above to build the first miniature."));
+    for (const [slug, r] of entries) (r.builtin && r.tz === "Asia/Karachi" ? shelf : others).append(frame(slug, r));
+    othersSec.classList.toggle("hidden", !others.children.length);
+    if (!entries.length && !building) shelf.append(h("li", { class: "empty" }, "Nothing here yet. Search for a place below to build the first miniature."));
+    const hero = regions.hunza?.cover || entries.map(([, r]) => r.cover).find(Boolean);
+    const heroSlug = regions.hunza?.cover ? "hunza" : entries.find(([, r]) => r.cover)?.[0];
+    if (hero && !heroImg.src) { heroImg.src = api.viewImageUrl(heroSlug, hero.image); heroCap.textContent = `The view from ${hero.view}: an AI preview painted over the real skyline, ${hero.labels.map((l) => l.name).join(", ") || "Hunza"} in view.`; }
   };
   const refresh = async () => { regions = await api.regions(); paint(); };
 

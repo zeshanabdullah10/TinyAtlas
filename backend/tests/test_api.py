@@ -32,6 +32,18 @@ def test_story_extractive_and_404(client):
     assert client.get("/api/story/hunza/nope").status_code == 404
 
 
+def test_guide_is_rate_limited_per_visitor(client, monkeypatch):
+    monkeypatch.setattr(api, "LIMITS", {**api.LIMITS, "guide": (2, 3600)})
+    monkeypatch.setattr(api, "_calls", {})
+    codes = [client.post("/api/guide/hunza", json={"question": "Attabad Lake?"}).status_code for _ in range(3)]
+    assert codes == [200, 200, 429]
+
+
+def test_planner_needs_a_model(client):
+    r = client.post("/api/plan/hunza", json={"request": "2 days"})
+    assert r.status_code == 503
+
+
 def test_guide_grounded_and_refuses_unsupported(client):
     ok = client.post("/api/guide/hunza", json={"question": "how did Attabad Lake form?"}).json()
     assert ok["sources"][0]["url"] == "https://w/Attabad" and "landslide" in ok["answer"]

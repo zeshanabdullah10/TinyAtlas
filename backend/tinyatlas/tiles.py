@@ -54,7 +54,7 @@ def depth_image(tile: Tile, lo: float, hi: float, size: int = 1024, z: int = 13)
     return Image.fromarray((g * 255).astype(np.uint8), "L")
 
 
-WIDTHS = {"lake": 2, "river": 4, "road": 3}
+WIDTHS = {"lake": 2, "river": 4, "stream": 1, "road": 3}
 
 
 def _px_mapper(tile: Tile, region_bbox, size: int):
@@ -68,7 +68,7 @@ def _px_mapper(tile: Tile, region_bbox, size: int):
     return to_px
 
 
-def line_image(tile: Tile, feats: dict, region_bbox, size: int = 1024, kinds=("lake", "river", "road"),
+def line_image(tile: Tile, feats: dict, region_bbox, size: int = 1024, kinds=("lake", "river", "stream", "road"),
                widths: dict | None = None) -> Image.Image:
     """Rasterise region-normalised OSM polylines into this tile's pixel space."""
     to_px = _px_mapper(tile, region_bbox, size)
@@ -82,9 +82,10 @@ def line_image(tile: Tile, feats: dict, region_bbox, size: int = 1024, kinds=("l
 
 
 def water_mask(tile: Tile, feats: dict, region_bbox, size: int = 1024) -> Image.Image:
-    """Filled lakes (closed ways) plus river lines, for painting water."""
+    """Filled lakes (closed ways) plus river lines, for painting water. Streams are hairlines so a mountainside
+    reads as terrain, not a web of blue veins."""
     to_px = _px_mapper(tile, region_bbox, size)
-    img = line_image(tile, feats, region_bbox, size, kinds=("river",), widths={"river": 5})
+    img = line_image(tile, feats, region_bbox, size, kinds=("river", "stream"), widths={"river": 5, "stream": 2})
     d = ImageDraw.Draw(img)
     for line in feats.get("lake", []):
         pts = [to_px(u, v) for u, v in line]

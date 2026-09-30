@@ -16,6 +16,12 @@ export function h(tag, props = {}, ...kids) {
   return el;
 }
 
+/** replaceChildren that skips null/false/undefined like h() does (the native one would print "null"). */
+export function fill(el, ...kids) {
+  el.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));
+  return el;
+}
+
 const SVG = "http://www.w3.org/2000/svg";
 
 /** An icon from the sprite in index.html (`i-*` for interface, `k-*` for landmark kinds). */

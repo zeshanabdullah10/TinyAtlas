@@ -40,6 +40,17 @@ def test_landmarks_filters_out_of_bbox_and_missing(tmp_path, monkeypatch):
     assert lms[0]["summary"] == "Intro para." and 0 < lms[0]["u"] < 0.5 and 0 < lms[0]["v"] < 1
 
 
+def test_config_coordinates_place_a_landmark_whose_page_has_none(tmp_path, monkeypatch):
+    monkeypatch.setattr(sources, "CACHE", tmp_path)
+    fake = FakeClient()
+    fake.PAGES = {**FakeClient.PAGES, "Karimabad": {"title": "Karimabad", "fullurl": "https://x/K", "extract": "A town."}}
+    region = {**REGION, "landmarks": [{"title": "Karimabad", "kind": "town", "lat": 36.333, "lon": 74.666},
+                                      {"title": "Hopper Glacier", "kind": "glacier", "lat": 36.4, "lon": 74.7}]}
+    lms = sources.landmarks(region, fake)
+    assert [l["slug"] for l in lms] == ["karimabad", "hopper-glacier"]       # config wins over the page's coordinates
+    assert lms[0]["lat"] == 36.333 and lms[1]["lon"] == 74.7
+
+
 def test_chunks_strip_headings_and_skip_non_content_sections(tmp_path, monkeypatch):
     monkeypatch.setattr(sources, "CACHE", tmp_path)
     fake = FakeClient()

@@ -67,7 +67,7 @@ def classify(tags: dict) -> str | None:
     if "building" in tags:
         return "building"
     if tags.get("waterway") in WATER_WAYS:
-        return "river"
+        return "stream" if tags["waterway"] == "stream" else "river"   # streams are drawn much thinner
     if tags.get("natural") == "water":
         return "lake"
     if tags.get("highway") in ROAD_CLASSES:
@@ -79,7 +79,7 @@ def classify(tags: dict) -> str | None:
 
 def normalise(raw: dict, bbox) -> dict[str, list[list[tuple[float, float]]]]:
     w, s, e, n = bbox
-    out: dict[str, list] = {"road": [], "trail": [], "river": [], "lake": [], "building": []}
+    out: dict[str, list] = {"road": [], "trail": [], "river": [], "stream": [], "lake": [], "building": []}
     for el in raw.get("elements", []):
         if el.get("type") != "way" or "geometry" not in el:
             continue
@@ -92,6 +92,30 @@ def normalise(raw: dict, bbox) -> dict[str, list[list[tuple[float, float]]]]:
         ]
         if len(pts) >= 2:
             out[kind].append(pts)
+    return out
+
+
+POI_KINDS = {"hospital": "hospital", "clinic": "hospital", "doctors": "hospital", "fuel": "fuel", "atm": "atm",
+             "bank": "atm", "police": "police"}
+
+
+def pois_query(bbox) -> str:
+    b = _bbox_str(bbox)
+    return (f'[out:json][timeout:60];(nwr["amenity"~"^({"|".join(POI_KINDS)})$"]({b}););out center tags;')
+
+
+def pois(bbox, client: httpx.Client | None = None) -> list[dict]:
+    """Hospitals and clinics, fuel, ATMs and banks, police: [{kind, name, u, v, lat, lon}] (best effort)."""
+    w, s, e, n = bbox
+    out = []
+    for el in _run(pois_query(bbox), client).get("elements", []):
+        t = el.get("tags", {})
+        lat, lon = el.get("lat", el.get("center", {}).get("lat")), el.get("lon", el.get("center", {}).get("lon"))
+        kind = POI_KINDS.get(t.get("amenity"))
+        if lat is None or kind is None or not (w <= lon <= e and s <= lat <= n):
+            continue
+        out.append({"kind": kind, "name": t.get("name:en") or t.get("name") or "", "lat": lat, "lon": lon,
+                    "u": round((lon - w) / (e - w), 5), "v": round((n - lat) / (n - s), 5)})
     return out
 
 

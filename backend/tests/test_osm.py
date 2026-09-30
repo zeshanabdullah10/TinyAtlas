@@ -5,7 +5,8 @@ BBOX = (10.0, 20.0, 12.0, 22.0)
 
 def test_classify():
     assert osm.classify({"building": "yes"}) == "building"
-    assert osm.classify({"waterway": "river"}) == "river"
+    assert osm.classify({"waterway": "river"}) == "river" and osm.classify({"waterway": "canal"}) == "river"
+    assert osm.classify({"waterway": "stream"}) == "stream"
     assert osm.classify({"natural": "water"}) == "lake"
     assert osm.classify({"highway": "residential"}) == "road"
     assert osm.classify({"highway": "footway"}) == "trail" and osm.classify({"highway": "proposed"}) is None
