@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
@@ -18,6 +19,7 @@ from . import (builder, facts, geocode, guide, jobs, llm, osm, paint, planner, r
 from .regions import REGIONS
 
 app = FastAPI(title="Tiny Atlas")
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 ROOT = Path(__file__).resolve().parents[2]
 
 # The static site (a CDN) calls this server only for live AI features; list its origin(s) in TINYATLAS_CORS.
@@ -416,6 +418,10 @@ def region_thumb(region: str, w: int = 560):
         im.save(out, quality=86, optimize=True)
     return FileResponse(out, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=300"})
 
+
+PACKS = ROOT / "data" / "packs"
+PACKS.mkdir(parents=True, exist_ok=True)
+app.mount("/packs", StaticFiles(directory=PACKS), name="packs")   # Atlas packs (docs/atlas-pack-v1.md)
 
 WEB = ROOT / "web"
 if WEB.exists():

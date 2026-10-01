@@ -71,6 +71,8 @@ ap.add_argument("--res-scale", type=float, default=1.0)
 ap.add_argument("--paint-base", action="store_true", help="no directional rock strata, softer micro-bump: a cleaner base for the AI paint-over")
 ap.add_argument("--passes", action="store_true", help="also write depth/normal/segmentation EXRs to data/renders/swat/passes_<shot>/ "
                 "(use with --samples 16 --out <scratch.png>; then run backend/tools/passes_convert.py <shot>)")
+ap.add_argument("--bake-albedo", default="", help="atlas pack: bake per-chunk unlit albedo (384 px) + AO (96 px) of the near terrain to this dir, then exit")
+ap.add_argument("--bake-only", default="", help="with --bake-albedo: only these chunks, e.g. 5,8;6,8")
 A = ap.parse_args(argv)
 shot = dict(SHOTS[A.shot])
 EXAG = A.exag if A.exag is not None else shot.get("exag", 1.6)
@@ -161,12 +163,14 @@ log("heights")
 near_slope = slope_deg(near.h, near.res)
 far_slope = slope_deg(far.h, far.res)
 hn = near.h.copy()
+hn_noise = None
 if A.detail > 0:
     rng = np.random.default_rng(7)
     nz = sum(value_noise(hn.shape, c, rng) * a_ for c, a_ in ((24, 1.0), (9, 0.55), (4, 0.3))) / 1.85 - 0.5
     sw = np.clip((near_slope - 22) / 25, 0, 1)
     hn += (nz * 2 * (4 + 16 * sw) * A.detail).astype(np.float32)
 
+hn_noise = hn.copy()
 # hole rectangle in the far mesh, aligned to far vertex lines, shrunk inside the near extent
 RAMP = 1200.0
 fx0 = far.x0 + (np.ceil((near.x0 + 150 - far.x0) / far.res)) * far.res
@@ -182,6 +186,8 @@ hn = hn * (1 - w) + hfar_at_near * w
 hn = np.where(din <= 0, hfar_at_near - 20.0, hn).astype(np.float32)   # tucked under the far skirt
 del gxn, gyn, din, hfar_at_near, w
 near_h_final = hn
+if A.bake_albedo:
+    hn_bake = hn_noise   # true DEM + crag detail, no blend into the far mesh
 
 
 def ground(x, y):
@@ -290,7 +296,11 @@ def make_terrain_material(name, albedo_path, lc_path):
     tc = N(nt, "ShaderNodeTexCoord")
     img = bpy.data.images.load(str(albedo_path)); img.colorspace_settings.name = "sRGB"
     alb = N(nt, "ShaderNodeTexImage", image=img, interpolation="Linear", extension="EXTEND")
-    L(nt, tc.outputs["UV"], alb.inputs[0])
+    if A.bake_albedo:   # explicit uv layer: the bake target uses a second, per-chunk planar layer
+        _uvn = N(nt, "ShaderNodeUVMap", uv_map="UVMap"); uv_out = _uvn.outputs[0]
+    else:
+        uv_out = tc.outputs["UV"]
+    L(nt, uv_out, alb.inputs[0])
     # noises (object space, BU)
     n_big = N(nt, "ShaderNodeTexNoise", noise_dimensions="3D"); n_big.inputs["Scale"].default_value = 0.03
     n_big.inputs["Detail"].default_value = 6
@@ -306,7 +316,7 @@ def make_terrain_material(name, albedo_path, lc_path):
     sub = N(nt, "ShaderNodeVectorMath", operation="SUBTRACT"); sub.inputs[1].default_value = (0.5, 0.5, 0.5)
     L(nt, n_mid.outputs["Color"], sub.inputs[0]); L(nt, sub.outputs[0], wv.inputs[0])
     add = N(nt, "ShaderNodeVectorMath", operation="ADD")
-    L(nt, tc.outputs["UV"], add.inputs[0]); L(nt, wv.outputs[0], add.inputs[1])
+    L(nt, uv_out, add.inputs[0]); L(nt, wv.outputs[0], add.inputs[1])
     limg = bpy.data.images.load(str(lc_path)); limg.colorspace_settings.name = "Non-Color"
     lc = N(nt, "ShaderNodeTexImage", image=limg, interpolation="Closest", extension="EXTEND")
     L(nt, add.outputs[0], lc.inputs[0])
@@ -408,9 +418,91 @@ for w_ in osm["waterways"]:
             okk = (r2 >= 0) & (r2 < near.H) & (c2 >= 0) & (c2 < near.W)
             np.maximum.at(carve, (r2[okk], c2[okk]), wgt)
 hn -= (carve * 3.0).astype(np.float32)
+hn_noise -= (carve * 3.0).astype(np.float32)
 log("meshes")
 mat_near = make_terrain_material("terrain_near", near.path / "albedo.png", near.path / "landcover_hi.png")
 mat_far = make_terrain_material("terrain_far", far.path / "albedo.png", far.path / "landcover_hi.png")
+# ------------------------------------------------------------------ atlas albedo bake (--bake-albedo)
+def run_atlas_bake():
+    """Per 128-cell chunk: bake the material's base colour (DIFFUSE, COLOR only = unlit) at 384 px and AO (150 m) at 96 px.
+    The chunk mesh is extended by EXT cells so edge pixels see real neighbours; its 'BakeUV' layer maps the chunk's true
+    geographic extent to 0..1 (u east, v north, so image row 0 = north after flipping). Texture lookups keep the global 'UVMap'."""
+    out = Path(A.bake_albedo); (out / "raw").mkdir(parents=True, exist_ok=True)
+    CC, EXT, PX, APX = 128, 6, 384, 96
+    sc = bpy.context.scene
+    sc.render.engine = "CYCLES"
+    cyc = sc.cycles
+    try:
+        pr = bpy.context.preferences.addons["cycles"].preferences
+        pr.compute_device_type = "CUDA"; pr.get_devices()
+        for d in pr.devices: d.use = d.type == "CUDA"
+        cyc.device = "GPU"
+    except Exception as ex:
+        log("GPU setup failed", ex)
+    cyc.use_denoising = False; cyc.use_adaptive_sampling = False
+    if sc.world is None: sc.world = bpy.data.worlds.new("w")
+    sc.world.light_settings.distance = 150.0
+    sc.view_settings.view_transform = "Standard"
+    img = bpy.data.images.new("bake", PX, PX, alpha=False, float_buffer=False)
+    img.colorspace_settings.name = "sRGB"
+    nt = mat_near.node_tree
+    tgt = nt.nodes.new("ShaderNodeTexImage"); tgt.image = img
+    nt.nodes.active = tgt; tgt.select = True
+    ncx, ncy = -(-near.W // CC), -(-near.H // CC)
+    todo = [(cx, cy) for cy in range(ncy) for cx in range(ncx)]
+    if A.bake_only:
+        todo = [tuple(int(v) for v in t.split(",")) for t in A.bake_only.split(";")]
+    t_start = time.time()
+    for n_, (cx, cy) in enumerate(todo):
+        c0, c1 = cx * CC, min(cx * CC + CC, near.W); r0, r1 = cy * CC, min(cy * CC + CC, near.H)
+        xa, xb = near.x0 + c0 * near.res, near.x0 + c1 * near.res          # true extent (cell edges)
+        yb, ya = near.y1 - r0 * near.res, near.y1 - r1 * near.res
+        a0, a1 = max(c0 - EXT, 0), min(c1 + EXT, near.W - 1) + 1            # vertex ranges (pixel centres), extended
+        b0, b1 = max(r0 - EXT, 0), min(r1 + EXT, near.H - 1) + 1
+        hh = hn_bake[b0:b1, a0:a1]; Hh, Ww = hh.shape
+        X, Y = to_world(near.xs[a0:a1], near.ys[b0:b1])
+        co = np.empty((Hh * Ww, 3), np.float32)
+        co[:, 0] = np.tile(X, Hh); co[:, 1] = np.repeat(Y, Ww)
+        co[:, 2] = hh.ravel() * EXAG / BU
+        rr, cc = np.mgrid[0:Hh - 1, 0:Ww - 1]
+        idx = (rr * Ww + cc).ravel()
+        quads = np.stack([idx, idx + Ww, idx + Ww + 1, idx + 1], 1).astype(np.int32)
+        me = bpy.data.meshes.new("bk"); me.vertices.add(len(co)); me.vertices.foreach_set("co", co.ravel())
+        nq = len(quads); me.loops.add(nq * 4); me.polygons.add(nq)
+        me.loops.foreach_set("vertex_index", quads.ravel()); me.polygons.foreach_set("loop_start", np.arange(nq, dtype=np.int32) * 4)
+        me.update(calc_edges=True)
+        ux = near.xs[a0:a1]; uy = near.ys[b0:b1]
+        g_uv = np.empty((len(co), 2), np.float32)
+        g_uv[:, 0] = np.tile((np.arange(a0, a1) + 0.5) / near.W, Hh); g_uv[:, 1] = np.repeat(1 - (np.arange(b0, b1) + 0.5) / near.H, Ww)
+        b_uv = np.empty((len(co), 2), np.float32)
+        b_uv[:, 0] = np.tile((ux - xa) / (xb - xa), Hh); b_uv[:, 1] = np.repeat((uy - ya) / (yb - ya), Ww)
+        l1 = me.uv_layers.new(name="UVMap"); l1.data.foreach_set("uv", g_uv[quads.ravel()].ravel())
+        l2 = me.uv_layers.new(name="BakeUV"); l2.data.foreach_set("uv", b_uv[quads.ravel()].ravel())
+        l2.active = True; l2.active_render = True
+        for k, v in (("h", near.h[b0:b1, a0:a1]), ("slope", near_slope[b0:b1, a0:a1])):
+            at = me.attributes.new(k, "FLOAT", "POINT"); at.data.foreach_set("value", v.astype(np.float32).ravel())
+        me.shade_smooth()
+        me.materials.append(mat_near)
+        ob = bpy.data.objects.new("bk", me); sc.collection.objects.link(ob)
+        bpy.ops.object.select_all(action="DESELECT"); ob.select_set(True); bpy.context.view_layer.objects.active = ob
+        res = {}
+        for kind, px, smp in (("col", PX, 8), ("ao", APX, 24)):
+            img.scale(px, px); cyc.samples = smp
+            bpy.ops.object.bake(type="DIFFUSE" if kind == "col" else "AO", pass_filter={"COLOR"} if kind == "col" else set(),
+                                margin=8, margin_type="EXTEND", use_clear=True)
+            a = np.array(img.pixels[:], np.float32).reshape(px, px, 4)[::-1, :, :3]
+            np.save(out / "raw" / f"{kind}_{cx}_{cy}.npy", (np.clip(a, 0, 1) * 255 + 0.5).astype(np.uint8))
+        bpy.data.objects.remove(ob); bpy.data.meshes.remove(me)
+        if n_ % 10 == 0 or len(todo) < 12:
+            log(f"bake chunk {cx},{cy}  ({n_ + 1}/{len(todo)})  elapsed {time.time() - t_start:.0f}s")
+    (out / "bake_done.json").write_text(json.dumps({"chunks": len(todo), "seconds": time.time() - t_start}))
+    log("bake done")
+
+
+if A.bake_albedo:
+    run_atlas_bake()
+    sys.exit(0)
+
 obj_near = grid_mesh("terrain_near", near, hn, attrs={"h": near.h, "slope": near_slope})
 obj_near.data.materials.append(mat_near)
 log("near mesh", len(obj_near.data.vertices), "verts")
