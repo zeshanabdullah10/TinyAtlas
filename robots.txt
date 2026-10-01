@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://zeshanabdullah10.github.io/TinyAtlas/sitemap.xml
