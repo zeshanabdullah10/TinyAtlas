@@ -239,7 +239,8 @@ body.clean .chrome > *:not(#attr) { display: none !important; }
 
 /* in-scene labels: small placards on leader lines */
 #tags { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.tag { position: absolute; left: 0; top: 0; pointer-events: auto; transform: translate(-50%, -100%); padding-bottom: 20px; opacity: 0; transition: opacity 260ms var(--ease); will-change: transform; }
+.tag { position: absolute; left: 0; top: 0; pointer-events: none; transform: translate(-50%, -100%); padding-bottom: 20px; opacity: 0; transition: opacity 260ms var(--ease); will-change: transform; }
+.tag button { pointer-events: auto; }
 .tag.on { opacity: 1; }
 .tag button { display: flex; align-items: center; gap: 6px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 3px 9px 3px 6px; font-size: var(--fs-0); font-weight: 600; white-space: nowrap; box-shadow: var(--shadow-label); }
 .tag button .ic { width: 14px; height: 14px; color: var(--teal); }

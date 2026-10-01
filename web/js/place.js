@@ -177,7 +177,12 @@ export async function mountPlace(root, slug, { lm: initialLm = null, clean = fal
   }
 
   function select(s, { focus = true } = {}) {
-    if (s === selected) { if (s) dio.select(s, { focus }); return; }
+    if (s === selected) {
+      // on the phone, a tap on the map (the same landmark again, or open ground) closes the sheet
+      if (innerWidth <= 900 && document.body.classList.contains("sheet-open")) openSheet(document.body.dataset.sheet);
+      else if (s) dio.select(s, { focus });
+      return;
+    }
     selected = s;
     dio.select(s, { focus });
     for (const [k, b] of stopBtn) b.setAttribute("aria-current", String(k === s));
@@ -185,7 +190,10 @@ export async function mountPlace(root, slug, { lm: initialLm = null, clean = fal
     s ? url.searchParams.set("lm", s) : url.searchParams.delete("lm");
     history.replaceState(null, "", url);
     if (s) { showTab("place"); renderPlacard(byslug.get(s)); if (innerWidth <= 900) openSheet("place", true); }
-    else renderRegionCard();
+    else {
+      renderRegionCard();
+      if (innerWidth <= 900 && document.body.classList.contains("sheet-open")) openSheet(document.body.dataset.sheet);
+    }
     if (s) stopBtn.get(s)?.scrollIntoView({ block: "nearest" });
   }
 
