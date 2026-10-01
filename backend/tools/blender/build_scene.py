@@ -68,6 +68,9 @@ ap.add_argument("--no-blur", action="store_true")
 ap.add_argument("--tlat", type=float, default=None)
 ap.add_argument("--tlon", type=float, default=None)
 ap.add_argument("--res-scale", type=float, default=1.0)
+ap.add_argument("--paint-base", action="store_true", help="no directional rock strata, softer micro-bump: a cleaner base for the AI paint-over")
+ap.add_argument("--passes", action="store_true", help="also write depth/normal/segmentation EXRs to data/renders/swat/passes_<shot>/ "
+                "(use with --samples 16 --out <scratch.png>; then run backend/tools/passes_convert.py <shot>)")
 A = ap.parse_args(argv)
 shot = dict(SHOTS[A.shot])
 EXAG = A.exag if A.exag is not None else shot.get("exag", 1.6)
@@ -348,12 +351,16 @@ def make_terrain_material(name, albedo_path, lc_path):
     wave.inputs["Detail"].default_value = 3
     L(nt, tc.outputs["Object"], wave.inputs["Vector"])
     strata = wave.outputs["Fac"]
+    if A.paint_base:
+        vor = N(nt, "ShaderNodeTexVoronoi", voronoi_dimensions="3D"); vor.inputs["Scale"].default_value = 0.9
+        L(nt, tc.outputs["Object"], vor.inputs["Vector"])
+        strata = mth(nt, "MULTIPLY", mth(nt, "ADD", maprange(nt, vor.outputs["Distance"], 0.0, 0.9), mth(nt, "MULTIPLY", nm, 0.5)), 0.5)
     rock_base = mixc(nt, 0.8, base, (0.34, 0.21, 0.08, 1))
     rock_base = mixc(nt, 0.12, rock_base, (0.40, 0.34, 0.27, 1))
     rock_base = mixc(nt, 0.08, rock_base, (0.0, 0.0, 0.0, 1))
     _nr = N(nt, "ShaderNodeMix", data_type="RGBA", blend_type="MULTIPLY"); _nr.inputs[0].default_value = 1.0; L(nt, rock_base, _nr.inputs[6]); _nr.inputs[7].default_value = (1.09, 0.95, 0.72, 1)
     rock_base = _nr.outputs[2]
-    rock_col = mixc(nt, mth(nt, "MULTIPLY", strata, 0.65), rock_base, (0.06, 0.04, 0.03, 1))
+    rock_col = mixc(nt, mth(nt, "MULTIPLY", strata, 0.25 if A.paint_base else 0.65), rock_base, (0.06, 0.04, 0.03, 1))
     ao = N(nt, "ShaderNodeAmbientOcclusion"); ao.samples = 6; ao.inputs["Distance"].default_value = 6.0  # 60 m
     ptn = N(nt, "ShaderNodeNewGeometry").outputs["Pointiness"]
     shade = mixc(nt, ao.outputs["AO"], (0.55, 0.55, 0.55, 1), (1.0, 1.0, 1.0, 1))
@@ -377,7 +384,7 @@ def make_terrain_material(name, albedo_path, lc_path):
     bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.45, 0.25)
     bsdf.inputs["Subsurface Scale"].default_value = 0.1
     # bump
-    bh = mth(nt, "ADD", mth(nt, "MULTIPLY", nf, 0.5), mth(nt, "MULTIPLY", mth(nt, "MULTIPLY", strata, rock), 1.6))
+    bh = mth(nt, "ADD", mth(nt, "MULTIPLY", nf, 0.25 if A.paint_base else 0.5), mth(nt, "MULTIPLY", mth(nt, "MULTIPLY", strata, rock), 0.4 if A.paint_base else 1.6))
     bh = mth(nt, "ADD", bh, mth(nt, "MULTIPLY", nm, 0.8))
     bump = N(nt, "ShaderNodeBump"); bump.inputs["Strength"].default_value = 1.0; bump.inputs["Distance"].default_value = 0.6
     L(nt, bh, bump.inputs["Height"]); L(nt, bump.outputs[0], bsdf.inputs["Normal"])
@@ -1115,6 +1122,18 @@ for _x, _y in ((0.06, 0.04), (0.28, 0.22), (0.75, 0.80)):
 sc.view_settings.curve_mapping.update()
 vl = bpy.context.view_layer
 vl.use_pass_z = True
+if A.passes:
+    vl.use_pass_normal = True
+    for _an in ("sA", "sB", "sC"):
+        _a = vl.aovs.add(); _a.name = _an; _a.type = "COLOR"
+    SEG = {"lake": ("sB", (0, 1, 0)), "river": ("sB", (0, 1, 0)), "road": ("sB", (0, 0, 1)), "track": ("sB", (0, 0, 1)),
+           "tree": ("sB", (1, 0, 0)), "shrub": ("sB", (1, 0, 0)), "rockbit": ("sA", (0, 1, 0)),
+           "bld_walls": ("sC", (1, 0, 0)), "bld_roofs": ("sC", (1, 0, 0)), "trucks": ("sC", (1, 0, 0))}
+    for _m in bpy.data.materials:
+        if _m.name.split(".")[0] in SEG and _m.node_tree:
+            _n, _c = SEG[_m.name.split(".")[0]]
+            _ao = _m.node_tree.nodes.new("ShaderNodeOutputAOV"); _ao.aov_name = _n
+            _ao.inputs["Color"].default_value = (*_c, 1)
 
 # ------------------------------------------------------------------ compositor: haze + tilt-shift + grade
 g = bpy.data.node_groups.new("Comp", "CompositorNodeTree")
@@ -1186,6 +1205,17 @@ cc = N(g, "CompositorNodeColorCorrection")
 cc.inputs["Saturation"].default_value = 1.25; cc.inputs["Contrast"].default_value = 1.2
 L(g, cur, cc.inputs["Image"]); cur = cc.outputs["Image"]
 L(g, cur, out.inputs[0])
+if A.passes and not A.raw:
+    pdir = ROOT / "data" / "renders" / "swat" / f"passes_{A.shot}"
+    pdir.mkdir(parents=True, exist_ok=True)
+    fo = N(g, "CompositorNodeOutputFile")
+    fo.directory = str(pdir) + os.sep; fo.file_name = "p_"
+    fo.format.media_type = "IMAGE"; fo.format.file_format = "OPEN_EXR"; fo.format.color_depth = "32"
+    for nm_, so_ in (("depth", depth), ("normal", rl.outputs["Normal"]), ("sA", rl.outputs["sA"]), ("sB", rl.outputs["sB"]), ("sC", rl.outputs["sC"])):
+        fo.file_output_items.new("RGBA" if nm_ != "depth" else "FLOAT", nm_)
+        L(g, so_, fo.inputs[nm_])
+    mw = cam.rotation_euler.to_matrix()
+    (pdir / "camera.json").write_text(json.dumps({"R": [list(r) for r in mw], "res": [RX, RY]}), encoding="utf-8")
 
 # ------------------------------------------------------------------ save + render
 outdir = ROOT / "data" / "renders" / "swat"
