@@ -418,6 +418,49 @@ export async function mountPlace(root, slug, { lm: initialLm = null, clean = fal
   const attr = h("p", { id: "attr" }, ATTRIBUTION);
 
   chrome.append(left, toolbar, side, compass, els.hint, caption, dock, attr);
+
+  // ---------- poster mode (?poster=1): the place as an illustrated 3D road map ----------
+  // A fixed, framed view of the miniature: golden-hour light, saturated terrain, title, legend and the
+  // route's real distances — everything else measured, nothing painted in.
+  if (new URLSearchParams(location.search).get("poster") === "1") {
+    document.body.classList.add("poster");
+    Object.assign(light, { real: true, y: 2026, m: 8, d: 20, min: 17 * 60 + 35, pinned: true });
+    dateIn.value = "2026-09-20"; dayChips(); followDate(); applyLight();
+    // the poster frames the whole region from a high oblique angle, like a printed map
+    dio.controls.maxDistance = dio.widthM * 8;
+    const posterPose = () => {
+      if (dio.introT0 != null) dio.finishIntro();
+      dio.interrupt();
+      dio.placeCamera(new THREE.Vector3(0, dio.widthM * 1.5, dio.heightM * 0.75), new THREE.Vector3(0, 0, 0));
+    };
+    posterPose();
+    setTimeout(posterPose, 2500);      // and once the entry animation is done, so the framing always holds
+    dio.scene.background = new THREE.Color(0xd7dee2);
+    const legend = h("div", { class: "label poster-legend", "aria-hidden": "true" },
+      h("h3", {}, "Legend"),
+      h("ul", {},
+        h("li", {}, h("i", { class: "lg lg-route" }), "Tour route"),
+        h("li", {}, h("i", { class: "lg lg-road" }), "Road"),
+        h("li", {}, h("i", { class: "lg lg-water" }), "River or lake"),
+        h("li", {}, kindIcon("fort"), "Landmark"),
+        h("li", {}, kindIcon("peak"), "Summit"),
+        h("li", {}, kindIcon("lake"), "Lake")));
+    const rows = [...els.rail.querySelectorAll(".stop:not(.plain):not(.off)")].slice(0, 12).map((s) => {
+      const name = s.querySelector(".nm")?.textContent || "";
+      const d = (s.querySelector(".d")?.textContent || "").trim();
+      return h("li", {}, h("b", {}, name), h("span", {}, d ? d.replace(/^\+/, "") : "start"));
+    });
+    const distances = h("div", { class: "label poster-dist", "aria-hidden": "true" },
+      h("h3", {}, "Approx. distances"),
+      h("ul", {}, ...rows));
+    const furniture = h("div", { class: "poster-frame" },
+      h("div", { class: "label poster-title" },
+        h("h1", {}, info.name.toUpperCase()),
+        h("p", {}, "Complete 3D road map · real terrain, roads and distances"),
+        h("button", { class: "icon-btn", type: "button", "aria-label": "Exit poster", onclick: () => { const u = new URL(location.href); u.searchParams.delete("poster"); location.href = u; } }, icon("i-close"))),
+      legend, distances);
+    chrome.append(furniture);
+  }
   // labels must not hide under the panels: hand their screen rectangles to the scene
   const measure = () => { dio.occluders = [...chrome.querySelectorAll(".left .label, .side .label, .toolbar > *:not(.pop), .compass, .caption:not(.hidden)")]
     .filter((e) => e.offsetParent !== null).map((e) => e.getBoundingClientRect()); };

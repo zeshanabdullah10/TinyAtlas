@@ -417,3 +417,30 @@ kbd { font: 500 var(--fs-0) var(--font-ui); background: var(--paper-2); border: 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+/* ---------- poster mode (?poster=1): the place as an illustrated 3D map ---------- */
+body.poster .side, body.poster .dock, body.poster .hint, body.poster .left,
+body.poster .toolbar, body.poster .compass, body.poster #attr { display: none !important; }
+body.poster canvas { filter: saturate(1.32) contrast(1.06); }
+.poster-frame { position: absolute; inset: 0; pointer-events: none; z-index: 40; }
+.poster-frame .icon-btn { pointer-events: auto; }
+.poster-title { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); text-align: center;
+  padding: 14px 26px 16px; pointer-events: auto; }
+.poster-title h1 { font: 600 clamp(26px, 4.5vw, 44px)/1.05 'Schibsted Grotesk', system-ui; letter-spacing: .12em;
+  margin: 0; color: var(--ink); }
+.poster-title p { font: italic 400 14px/1.4 Literata, Georgia, serif; color: var(--ink-2); margin: 6px 0 0; }
+.poster-title .icon-btn { position: absolute; right: -14px; top: -14px; }
+.poster-legend, .poster-dist { position: absolute; bottom: 18px; padding: 12px 16px; font: 400 13px/1.5 var(--font-text); }
+.poster-legend { right: 18px; }
+.poster-dist { left: 18px; }
+.poster-legend h3, .poster-dist h3 { font: 600 12px 'Schibsted Grotesk', system-ui; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-2); margin: 0 0 6px; }
+.poster-legend ul, .poster-dist ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.poster-legend li, .poster-dist li { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.poster-dist li b { font-weight: 600; min-width: 150px; }
+.poster-dist li span { color: var(--ink-2); }
+.lg { width: 18px; height: 6px; border-radius: 3px; display: inline-block; }
+.lg-route { background: #d2452b; }
+.lg-road { background: #e8e2d2; outline: 1px solid var(--line); }
+.lg-water { background: #4a90c4; }
+.poster-legend .ic { width: 14px; height: 14px; color: var(--teal); }

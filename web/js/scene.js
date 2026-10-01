@@ -54,7 +54,8 @@ export class Diorama {
     this.handlers = handlers;
     this.landmarks = data.landmarks;
     this.viewFrom = data.viewFrom ?? 180;
-    this.exag = 1.5;
+    this.exag = 0.42;              // compressed relief: the map reads flat, like an illustrated atlas
+    this.place = 2.3;              // places are the heroes: landmarks are drawn far larger than life
     this.rise = 0;                 // 0..1: terrain rising out of the plinth on entry
     this.reveal = 0;               // 0..1: landmarks and route appearing after the rise
     this.selected = null;
@@ -177,12 +178,14 @@ export class Diorama {
   buildMarkers() {
     this.markers = new THREE.Group();
     this.scene.add(this.markers);
-    this.ring = selectionRing(this.S);
+    const BUILT = new Set(["fort", "temple", "bridge", "museum", "tower", "ruins", "monument", "town", "rail"]);
+    this.builtKinds = BUILT;
+    this.ring = selectionRing(this.S * 1.8);
     this.ring.visible = false;
     for (const lm of this.landmarks) {
       const holder = new THREE.Group();
       holder.userData.lm = lm;
-      holder.add(makeModel(lm.kind, this.S));
+      holder.add(makeModel(lm.kind, BUILT.has(lm.kind) ? this.S * this.place : this.S));
       holder.scale.setScalar(0.001);
       this.markers.add(holder);
       if (lm.model) this.loadModel(holder, lm);
@@ -201,7 +204,7 @@ export class Diorama {
         if (o.isMesh) { o.geometry.computeVertexNormals(); o.material = plaster; o.castShadow = false; }
       });
       const box = new THREE.Box3().setFromObject(obj), size = box.getSize(new THREE.Vector3());
-      const k = (this.S * 4.5) / Math.max(size.y, Math.max(size.x, size.z) * 0.7, 1e-6);   // like the other models
+      const k = (this.S * 4.5 * this.place) / Math.max(size.y, Math.max(size.x, size.z) * 0.7, 1e-6);   // like the other models
       obj.scale.setScalar(k);
       box.setFromObject(obj);
       obj.position.set(-(box.min.x + box.max.x) / 2, -box.min.y, -(box.min.z + box.max.z) / 2);
@@ -561,10 +564,11 @@ export class Diorama {
   }
   updateTags() {
     if (!this.tags) return;
-    const { w, h: hh } = this.size, placed = [], up = new THREE.Vector3(0, this.S * 5.8, 0);
+    const { w, h: hh } = this.size, placed = [];
+    const up = (lm) => new THREE.Vector3(0, this.S * 5.8 * (this.builtKinds?.has(lm.kind) ? this.place : 1), 0);
     const order = [...this.markers.children].sort((a, b) => (b.userData.lm.slug === this.selected) - (a.userData.lm.slug === this.selected));
     for (const hd of order) {
-      const lm = hd.userData.lm, tag = this.tags.get(lm.slug), p = hd.position.clone().add(up);
+      const lm = hd.userData.lm, tag = this.tags.get(lm.slug), p = hd.position.clone().add(up(lm));
       const v = p.clone().project(this.camera);
       let show = this.labelsOn && this.reveal > 0.85 && v.z < 1 && Math.abs(v.x) < 1.02 && v.y > -1 && v.y < 1.02 && !this.hidden(p.x, p.y, p.z);
       const sx = (v.x + 1) / 2 * w, sy = (1 - v.y) / 2 * hh;
