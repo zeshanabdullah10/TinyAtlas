@@ -1,2 +1,0 @@
-Procedural maquette generated for Tiny Atlas (backend/tools/blender/stupa.py).
-- gumbat-balo-kale-stupa.glb: podium ~6.6 m, stair 3.8 m (published, Wikipedia), rest estimated; arches not modelled; 628 tris; 0.68 MB; fidelity ~4/10.

@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { h } from "../dom.js";
 import { BASE } from "../api.js";
+import { MIN_MULT } from "./landmarks.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
 function compassSVG() {
@@ -42,6 +43,12 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   const bar = loading.querySelector("i"), label = loading.querySelector(".ld-l");
   const cart = h("header", { class: "cartouche" }, h("a", { class: "back", href: BASE || "./" }, "← All places"), h("h1", null, word(m.title)),
     h("p", { class: "sub" }, h("span", { class: "rule" }), h("em", null, m.subtitle || ""), h("span", { class: "rule" })));
+  // Phone: the cartouche is one compact line; tapping the title reveals the subtitle again.
+  const title = cart.querySelector("h1");
+  title.setAttribute("tabindex", "0"); title.setAttribute("role", "button"); title.setAttribute("aria-label", "Show the map subtitle");
+  const cartToggle = () => { if (matchMedia("(max-width: 700px)").matches) document.body.classList.toggle("cart-open"); };
+  title.addEventListener("click", cartToggle);
+  title.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cartToggle(); } });
 
   // ---- search
   const results = h("ul", { class: "results", role: "listbox", hidden: true });
@@ -57,23 +64,35 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   const search = h("div", { class: "search" }, svgIcon(ICON.search), input, results);
 
   // ---- settings popover (layers)
-  const row = (lab, inp, out) => h("label", { class: "row" }, h("span", null, lab), inp, out || null);
-  const slider = (min, max, step, val, on) => {
-    const out = h("output", null, ""), i = h("input", { type: "range", min, max, step, value: val });
-    i.addEventListener("input", () => { out.textContent = i.value; on(+i.value, false); });
-    i.addEventListener("change", () => on(+i.value, true));
-    out.textContent = i.value; return [i, out];
-  };
   const check = (lab, on, val = true) => { const i = h("input", { type: "checkbox", checked: val }); i.addEventListener("change", () => on(i.checked)); return h("label", { class: "row chk" }, i, h("span", null, lab)); };
-  const exS = slider(1, 2.2, 0.05, pack.exag, (v, fin) => settings.onExag(v, fin));
-  const trS = slider(0.5, 5, 0.1, settings.treeScale, (v) => settings.onTrees(v));
-  const lmS = slider(1, 80, 1, settings.landmarkScale, (v) => settings.onLandmarks(v));
+  const fmtV = (v, step) => (step >= 1 ? String(Math.round(v)) : String(+v.toFixed(2)));
+  /** One setting, two synced representations: a desktop slider row and a phone stepper row (44 px ± buttons). */
+  const paired = (lab, min, max, step, val, apply) => {
+    const sIn = h("input", { type: "range", min, max, step, value: val });
+    const sOut = h("output", null, fmtV(val, step)), pOut = h("output", null, fmtV(val, step));
+    const paint = (v) => { sIn.value = v; sOut.textContent = pOut.textContent = fmtV(v, step); };
+    const set = (v, fin) => { v = Math.min(max, Math.max(min, Math.round(v / step) * step)); paint(v); apply(v, fin); };
+    sIn.addEventListener("input", () => { paint(+sIn.value); apply(+sIn.value, false); });
+    sIn.addEventListener("change", () => apply(+sIn.value, true));
+    const stp = (t, d) => h("button", { class: "stp", type: "button", "aria-label": `${lab} ${d > 0 ? "more" : "less"}`, onClick: () => set(+sIn.value + d * step, true) }, t);
+    return [
+      h("label", { class: "row desk-only" }, h("span", null, lab), sIn, sOut),
+      h("div", { class: "row stp-row mob-only" }, h("span", null, lab), h("span", { class: "stp-grp" }, stp("−", -1), pOut, stp("+", 1))),
+    ];
+  };
+  const exP = paired("Height exaggeration", 1, 2.2, 0.05, pack.exag, (v, fin) => settings.onExag(v, fin));
+  const trP = paired("Tree size", 0.5, 5, 0.1, settings.treeScale, (v) => settings.onTrees(v));
+  const lmP = paired("Landmark size", MIN_MULT, 80, 5, settings.landmarkScale, (v) => settings.onLandmarks(v));
   const routesRow = check("Routes", settings.onRoutes, false), routesBox = routesRow.querySelector("input");
   const light2 = h("input", { type: "range", min: 0, max: 1, step: 0.004, value: sky.time, "aria-label": "Time of day" });
   const lt2 = h("output", { class: "lt2" }, "");
+  const lightStep = (t, d) => h("button", { class: "stp", type: "button", "aria-label": `Light ${d > 0 ? "later" : "earlier"}`,
+    onClick: () => { light.value = Math.min(1, Math.max(0, +light.value + d * 0.05)); settings.onTime(+light.value); upLight(); lt2s.textContent = lt2.textContent; } }, t);
+  const lt2s = h("output", { class: "lt2" }, "");
   const pop = h("div", { class: "settings", hidden: true, role: "group", "aria-label": "Map layers and scale" },
-    h("label", { class: "row mob-only" }, h("span", null, "Light"), light2, lt2),
-    row("Height exaggeration", exS[0], exS[1]), row("Tree size", trS[0], trS[1]), row("Landmark size", lmS[0], lmS[1]),
+    // Light as a stepper on phone (the pill slider is desktop-only; light2/lt2 stay as synced state holders)
+    h("div", { class: "row stp-row mob-only" }, h("span", null, "Light"), h("span", { class: "stp-grp" }, lightStep("−", -1), lt2s, lightStep("+", 1))),
+    ...exP, ...trP, ...lmP,
     check("Place labels", settings.onLabels), routesRow, check("Roads and buildings", settings.onRoads), check("Trees", settings.onTreesOn),
     h("p", { class: "tier" }, `Quality: ${tier}`));
   const gear = h("button", { class: "ibtn layers-btn", type: "button", "aria-label": "Layers and scale", "aria-expanded": "false", title: "Layers", onClick: () => { pop.hidden = !pop.hidden; gear.setAttribute("aria-expanded", String(!pop.hidden)); } }, svgIcon(ICON.layers));
@@ -101,6 +120,10 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   }
   const ARROW = { north: "↑", south: "↓", east: "→", west: "←" };
   for (const n of neighbors) dock.append(h("button", { type: "button", class: "nb", title: `Switch to ${n.title}`, onClick: () => onNeighbor(n.slug) }, `${n.title} ${ARROW[n.edge] || ""}`));
+  // The dock scrolls horizontally on a phone; a right-edge fade on the wrapper hints at it and disappears at the end.
+  const dockWrap = h("div", { class: "dockwrap" }, dock);
+  const dockEnd = () => dockWrap.classList.toggle("end", dock.scrollLeft + dock.clientWidth >= dock.scrollWidth - 6);
+  dock.addEventListener("scroll", dockEnd, { passive: true });
   const edgeBtn = h("button", { class: "edge-prompt", type: "button", hidden: true }, "");
   let edgeN = null;
   edgeBtn.addEventListener("click", () => edgeN && onNeighbor(edgeN.slug));
@@ -116,7 +139,8 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
 
   const foot = h("footer", { class: "attrib" }, (m.attribution || []).join(" · "), " · Heights exaggerated ×", h("span", { class: "exv" }, pack.exag.toFixed(1)));
   const stats = showFps ? h("pre", { class: "fps" }, "") : null;
-  root.append(cart, top, dock, edgeBtn, tools, foot, loading, stats);
+  root.append(cart, top, dockWrap, edgeBtn, tools, foot, loading, stats);
+  requestAnimationFrame(dockEnd);
   return {
     setProgress(f, text) { bar.style.width = `${Math.round(f * 100)}%`; if (text) label.textContent = `Loading ${text}`; },
     done() { loading.classList.add("gone"); setTimeout(() => loading.remove(), 700); },

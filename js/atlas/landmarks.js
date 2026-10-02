@@ -1,11 +1,12 @@
-// Landmark maquettes (place.model GLBs) as fixed-size heroes: displayed footprint HERO_M (at least real size, at most
-// CAP_M), shown inside 15 km with an opacity fade, standing on the lowest ground under the footprint.
+// Landmark maquettes (place.model GLBs) as fixed-size map markers: real size × a user multiplier (at least MIN_MULT
+// so they still read when the map is zoomed out, at most CAP_M), shown inside 15 km with an opacity fade, standing
+// on the lowest ground under the footprint.
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { shared } from "./material.js";
 
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-export const SHOW_KM = 15, CAP_M = 260, HERO_M = 110;
+export const SHOW_KM = 15, CAP_M = 1000, MIN_MULT = 20;
 
 /** Soft warm contact shadow: a radial gradient disc laid on the ground under a model. */
 function contactDisc() {
@@ -21,7 +22,7 @@ function contactDisc() {
 export class Landmarks {
   constructor(pack, scene, { tier = "high" } = {}) {
     this.pack = pack; this.group = new THREE.Group(); scene.add(this.group);
-    this.mult = 1;              // user multiplier on the hero factor
+    this.mult = MIN_MULT;      // user multiplier on real size (≥ MIN_MULT so landmarks never vanish when zoomed out)
     this.items = [];            // {place, obj, height, foot}
     this.tier = tier;
     this.loader = new GLTFLoader();
@@ -38,7 +39,15 @@ export class Landmarks {
           if (!o.isMesh) return;
           o.castShadow = this.tier === "high"; o.receiveShadow = true;
           o.userData.slug = pl.slug;
-          for (const m of [].concat(o.material)) { m.roughness = Math.max(m.roughness ?? 0.9, 0.8); m.metalness = 0; m.emissive?.set(0x4a2a12); m.emissiveIntensity = 0.45; }   // warm lift so they read on pale ground
+          // Keep the baked texture readable at map scale without flattening it: clamp roughness into a matte band
+          // (specular highlights survive, nothing goes mirror), drop TRELLIS's fake metalness (no env map → black),
+          // warm the shadows just enough to lift the model off pale ground, and sharpen textures at grazing angles.
+          for (const m of [].concat(o.material)) {
+            m.roughness = Math.min(0.95, Math.max(m.roughness ?? 0.85, 0.55));
+            m.metalness = 0;
+            m.emissive?.set(0x4a2a12); m.emissiveIntensity = 0.18;
+            for (const t of Object.values(m)) if (t?.isTexture) t.anisotropy = 8;
+          }
         });
         obj.userData.slug = pl.slug; obj.visible = false;
         const disc = contactDisc(); disc.visible = false;
@@ -50,12 +59,12 @@ export class Landmarks {
     onDone?.();
   }
 
-  /** Fixed hero scale (independent of the camera, so models never grow or shrink while zooming): the displayed
-   *  footprint is HERO_M metres, at least real size, at most CAP_M; times the user multiplier. Placement on the lowest
-   *  ground under the footprint is computed once per scale. */
+  /** Fixed scale (independent of the camera, so models never grow or shrink while zooming): real size × the
+   *  user multiplier, never below real size, displayed footprint at most CAP_M. Placement on the lowest ground
+   *  under the footprint is computed once per scale. */
   place(it) {
     const p = this.pack, x = it.place.x, z = it.place.z;
-    it.k = Math.max(1, Math.min((HERO_M / it.foot) * this.mult, CAP_M / it.foot));
+    it.k = Math.max(1, Math.min(this.mult, CAP_M / it.foot));
     const r = (it.foot * it.k) / 2;
     let lo = 1e9;
     for (const [u, v] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]]) lo = Math.min(lo, p.groundY(x + u * r, z + v * r));

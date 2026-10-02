@@ -13,6 +13,10 @@ export class MapControls {
       enableDamping: true, dampingFactor: 0.08, screenSpacePanning: false, zoomToCursor: true, zoomSpeed: 0.9, rotateSpeed: 0.6, panSpeed: 0.9,
       minDistance: 1000, maxDistance: 90000, minPolarAngle: rad(10), maxPolarAngle: rad(75),     // pitch -80 ... -15 degrees
     });
+    // The map-app gesture model on touch: one finger moves the map, pinch zooms, a two-finger twist rotates
+    // (rotation is deliberate, never the default drag). Mouse behaviour is unchanged.
+    c.touches.ONE = THREE.TOUCH.PAN;
+    c.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
     c.listenToKeyEvents(dom);
     this.tween = null;
     this.home = pack.meta.home_camera;

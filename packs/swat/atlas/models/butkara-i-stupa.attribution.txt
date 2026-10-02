@@ -1,2 +1,0 @@
-Procedural maquette generated for Tiny Atlas (backend/tools/blender/stupa.py).
-- butkara-i-stupa.glb: generic ~22 m plinth + ruined drum, all ESTIMATED and unverified; 1,130 tris; 0.78 MB; fidelity ~3/10.

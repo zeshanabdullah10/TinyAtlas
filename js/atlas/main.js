@@ -8,7 +8,7 @@ import { Sky } from "./sky.js";
 import { Trees } from "./trees.js";
 import { Water } from "./water.js";
 import { Roads } from "./roads.js";
-import { Landmarks, HERO_M, CAP_M } from "./landmarks.js";
+import { Landmarks, CAP_M, MIN_MULT } from "./landmarks.js";
 import { Labels } from "./labels.js";
 import { Panel } from "./panel.js";
 import { MapControls } from "./controls.js";
@@ -94,15 +94,26 @@ async function boot(slug, { base, time = null } = {}) {
   let clips = null;                                      // the place's audio guide; English clips from data/audio/<pack>/
   api.audio(pack.slug).then((a) => { clips = a || {}; panel.paintAudio(); }).catch(() => { clips = {}; });
   const audio = { has: (p) => !!clips?.[p.slug], row: (p) => listen.row(p) };
+  /** Fly so the anchor lands mid-screen — on a phone, in the free space ABOVE the peek card (target shifted
+   *  toward the camera, the same screen-space trick the planner's day ribbon uses). */
+  const flyToPlace = (ax, az, dist, ms) => {
+    const t = new THREE.Vector3(ax, pack.groundY(ax, az), az);
+    if (innerWidth <= 700) {
+      const hd = (controls.heading * Math.PI) / 180, s = 0.19 * innerHeight * ((2 * Math.tan((camera.fov * Math.PI) / 360)) * dist / innerHeight);
+      t.x -= Math.sin(hd) * s; t.z += Math.cos(hd) * s;
+    }
+    controls.flyTo(t, dist, controls.heading, controls.pitchDeg(), ms);
+  };
   const panel = new Panel(root, pack, {
     signal, audio, onPlan: (pl) => sheet.open(pl), onClose: () => { labels.select(null); labels.block = null; },
-    onFly: (pl) => { const [ax, az] = anchorOf(pl); controls.flyTo(new THREE.Vector3(ax, pack.groundY(ax, az), az), 2800, controls.heading, -28, 1800); },
+    onState: () => { labels.block = panel.rect(); },                          // peek <-> full changes the blocked rect
+    onFly: (pl) => { const [ax, az] = anchorOf(pl); flyToPlace(ax, az, 2800, 1800); panel.collapse(); },
   });
   const open = (pl, opener) => {
     sheet.close();
     labels.select(pl.slug); panel.open(pl, opener); labels.block = panel.rect();
     const [ax, az] = anchorOf(pl);
-    controls.flyTo(new THREE.Vector3(ax, pack.groundY(ax, az), az), Math.min(controls.distance, 9000), controls.heading, controls.pitchDeg(), 1100);
+    flyToPlace(ax, az, Math.min(controls.distance, 9000), 1100);
   };
   const labels = new Labels(pack, labelLayer, { onPick: (pl) => open(pl, document.activeElement), anchorLift: (s) => landmarks.heightOf(s) });
   roads.setRoutes(false);
@@ -120,7 +131,7 @@ async function boot(slug, { base, time = null } = {}) {
   labels.blockers = () => [...document.querySelectorAll(".topright .trow, .topright .light, .dock, .tools, .attrib, .cartouche h1, .cartouche .sub, .cartouche .back, .day-pill")]
     .map((e) => { const r = e.getBoundingClientRect(); return [r.left - 4, r.top - 4, r.right + 4, r.bottom + 4]; });
   const settings = {
-    time: sky.time, treeScale: trees.scale, landmarkScale: 1,
+    time: sky.time, treeScale: trees.scale, landmarkScale: MIN_MULT,   // landmark multiplier on real size (MIN_MULT = default)
     onTime: (v) => { sky.setTime(v); reshadeSoon(); },
     onExag: (v, final) => {
       pack.setExag(v); terrain.rebuildY(false); ui.exag(v);
@@ -140,7 +151,7 @@ async function boot(slug, { base, time = null } = {}) {
   let nDone = 0;
   await Promise.all(steps.map(([n, p]) => p.catch((e) => console.warn(n, e.message)).then(() => ui.setProgress(++nDone / steps.length, n))));
 
-  trees.clearings = landmarks.items.map((i) => ({ x: i.place.x, z: i.place.z, r: Math.min(CAP_M, Math.max(i.foot, HERO_M)) * 0.65 }));   // displayed footprint + 30 %
+  trees.clearings = landmarks.items.map((i) => ({ x: i.place.x, z: i.place.z, r: Math.min(CAP_M, i.foot * MIN_MULT) * 0.65 }));   // default displayed footprint + 30 %
 
   // ---- picking: tap a landmark, double-click the ground
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -154,6 +165,15 @@ async function boot(slug, { base, time = null } = {}) {
     if (hit) { const pl = pack.places.find((p) => p.slug === hit.object.userData.slug); if (pl) open(pl, canvas); }
   }, { signal });
   canvas.addEventListener("dblclick", (e) => { toNdc(e); const pt = controls.pick(ndc); if (pt) controls.flyToPoint(pt); }, { signal });
+  // Double-tap zoom (touch): the canvas eats touch events, so the browser never synthesizes dblclick from taps.
+  let lastTap = 0, lastPt = null;
+  canvas.addEventListener("pointerdown", (e) => {
+    if (e.pointerType !== "touch") return;
+    const now = performance.now();
+    if (now - lastTap < 300 && lastPt && Math.hypot(e.clientX - lastPt.x, e.clientY - lastPt.y) < 32) {
+      lastTap = 0; toNdc(e); const pt = controls.pick(ndc); if (pt) controls.flyToPoint(pt);
+    } else { lastTap = now; lastPt = { x: e.clientX, y: e.clientY }; }
+  }, { signal });
 
   // ---- adaptive quality: a few slow frames drop the high tier to low (unless the tier was forced)
   function applyTier(t) {

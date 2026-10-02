@@ -75,7 +75,8 @@ export class Labels {
     const blockers = [...(this.block ? [this.block] : []), ...(this.blockers?.() ?? [])];
     const taken = [];
     const pad = 5, clash = (r) => taken.some((o) => r[0] < o[2] + pad && r[2] > o[0] - pad && r[1] < o[3] + pad && r[3] > o[1] - pad);
-    const cand = this.items.filter((it) => it.onscreen && (it.place.slug === this.selected || camDist <= (TIER_MAX_DIST[TIER_KEY(it.tier)] ?? 15000)));
+    const cand = this.items.filter((it) => it.onscreen && it.sx > 0 && it.sx < W && it.sy > 0 && it.sy < H &&   // anchor dot must be in the viewport: a chip leadered 140 px in from an off-screen anchor points at nothing
+      (it.place.slug === this.selected || camDist <= (TIER_MAX_DIST[TIER_KEY(it.tier)] ?? 15000)));
     cand.sort((a, b) => (a.place.slug === this.selected ? -1 : b.place.slug === this.selected ? 1 : a.tier - b.tier || cp.distanceToSquared(a.pos) - cp.distanceToSquared(b.pos)));
     const show = new Set();
     for (const it of cand) {
