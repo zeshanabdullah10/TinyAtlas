@@ -63,17 +63,20 @@ export async function mountHome(root) {
         try { await api.remove(slug); toast(`Removed ${r.name}`); refresh(); } catch (e) { toast(e.message); }
       } }, "Remove"),
       h("button", { class: "btn", type: "button", onclick: () => { confirmBox.classList.add("hidden"); removeBtn.classList.remove("hidden"); } }, "Keep")));
-    const pic = r.cover
+    const atlas = r.atlas ? `${BASE}atlas.html?pack=${encodeURIComponent(r.atlas)}` : null;      // Atlas places open the illustrated map
+    const pic = r.atlas
+      ? h("div", { class: "mat" }, h("img", { src: `${BASE || "/"}packs/${encodeURIComponent(r.atlas)}/atlas/cover.webp`, alt: `Illustrated map of ${r.name}`, loading: "lazy", width: 640, height: 480 }))
+      : r.cover
       ? h("div", { class: "mat photo" }, h("img", { src: api.viewImageUrl(slug, r.cover.image), alt: `The view from ${r.cover.view}`, loading: "lazy", width: 640, height: 438 }),
         h("img", { class: "inset", src: api.thumbUrl(slug, 240), alt: "", loading: "lazy", width: 120, height: 120 }))
       : h("div", { class: "mat" }, h("img", { src: api.thumbUrl(slug, 640), alt: "", loading: "lazy", width: 640, height: 480 }));
     return h("li", { class: "frame" },
-      h("a", { href: `${BASE}?region=${encodeURIComponent(slug)}`, "aria-label": `Open ${r.name}` },
+      h("a", { href: atlas || `${BASE}?region=${encodeURIComponent(slug)}`, "aria-label": `Open ${r.name}` },
         pic,
         h("div", { class: "plate" },
           h("h2", {}, r.name),
           r.subtitle && h("p", { class: "sub" }, r.subtitle),
-          h("p", { class: "meta" }, r.cover ? `View from ${r.cover.view} · ${r.size_km[0]} by ${r.size_km[1]} km miniature` : `${r.size_km[0]} by ${r.size_km[1]} km, ${r.landmarks} landmarks`))),
+          h("p", { class: "meta" }, r.atlas ? `Illustrated relief map · ${r.size_km[0]} by ${r.size_km[1]} km` : r.cover ? `View from ${r.cover.view} · ${r.size_km[0]} by ${r.size_km[1]} km miniature` : `${r.size_km[0]} by ${r.size_km[1]} km, ${r.landmarks} landmarks`))),
       !r.builtin && !STATIC && removeBtn, !r.builtin && !STATIC && confirmBox);
   };
 
