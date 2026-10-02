@@ -275,11 +275,17 @@ def label_items(ctx):
     return items
 
 
-def label_elevation(it, items, near):
-    """Poster rule (build_scene.py labels): peaks = DEM max within 500 m; sourced value nearest it within 250 m, else DEM."""
+def label_elevation(it, items, near, ground, in_near=True):
+    """Poster rule (build_scene.py labels): peaks = DEM max within 500 m; sourced value nearest it within 250 m, else DEM.
+    Every other kind gets the same DEM sanity check against `ground` (the DEM at the point on the grid that actually
+    contains it — Grid.sample clamps out-of-bounds queries to the raster edge, so a far-grid place sampled against the
+    near raster returns mountain heights). Listed elevations can be wildly wrong (White Palace's Wikidata 2,175 m over
+    1,308 m of actual ground; stale town values from an older gazetteer), so beyond the tolerance the DEM wins. Lakes
+    get a wider tolerance: GLO-30 smooths small high cirque basins, so the ground under a lake reads lower than its
+    true water level; published lake levels are the better value."""
     x_, y_ = it["xy"]
     xs, zs = x_ - near.x0, near.y1 - y_
-    if it["kind"] in ("peak", "mountain", "volcano", "saddle"):
+    if in_near and it["kind"] in ("peak", "mountain", "volcano"):
         o = np.arange(-500, 501, 100.0)
         gx, gz = np.meshgrid(xs + o, zs + o)
         dem = float(near.sample(gx.ravel(), gz.ravel()).max())
@@ -294,7 +300,9 @@ def label_elevation(it, items, near):
         return (min(cands, key=lambda c: abs(c - dem)) if cands else round(dem, 1)), dem
     try: listed = float(str(it["ele"]).replace("m", "").strip()) if it["ele"] not in (None, "") else None
     except ValueError: listed = None
-    return (listed if listed is not None else round(float(near.sample(xs, zs)), 1)), None
+    tol = 500.0 if it["kind"] == "lake" else 250.0
+    if listed is not None and abs(listed - ground) > tol: listed = None
+    return (listed if listed is not None else round(ground, 1)), None
 
 
 def step_vectors(ctx):
@@ -427,10 +435,23 @@ def step_models(ctx):
     readme = (ROOT / "data/models3d/README.md").read_text(encoding="utf-8").splitlines()
     ctx["models"] = {}
     areas = ctx["cfg"]["areas"]
-    ok = None if areas is None else {g["slug"] for g in ctx["gaz"] if g.get("area") in areas}
+    # a model ships only with a place of this pack: same filter as step_places (gazetteer item, areas, near+far bbox)
+    items = {it["slug"]: it for it in label_items(ctx) if it.get("slug")}
+    near, far = ctx["near"], ctx["far"]
+    Wm, Hm = near.W * near.res, near.H * near.res
+    fx0, fz0 = far.x0 - near.x0, near.y1 - far.y1
+    fW, fH = far.W * far.res, far.H * far.res
+    keep = set()
     for f in sorted((ROOT / "data/models3d").glob("*.glb")):
         slug = f.stem
-        if ok is not None and slug not in ok: continue
+        it = items.get(slug)
+        if it is not None:
+            if areas is not None and (it["g"] or {}).get("area") not in areas: it = None
+            else:
+                x, z = it["xy"][0] - near.x0, near.y1 - it["xy"][1]
+                if not (0 <= x <= Wm and 0 <= z <= Hm or fx0 <= x <= fx0 + fW and fz0 <= z <= fz0 + fH): it = None
+        if it is None: continue
+        keep.update((f.name, f"{slug}.attribution.txt"))
         dst = out / "models" / f.name
         if slug in TRELLIS:
             info = normalise_glb(f, dst, SCALE_GUESS[slug]); info["estimated_scale"] = True
@@ -445,6 +466,9 @@ def step_models(ctx):
         (out / "models" / f"{slug}.attribution.txt").write_text(txt, encoding="utf-8")
         ctx["models"][slug] = info
         log("model", slug, info)
+    for old in (out / "models").iterdir():                 # drop models left by older builds (both packs shipped all 8)
+        if old.name not in keep and old.suffix in (".glb", ".txt"):
+            old.unlink(); log("model removed (no place in this pack)", old.name)
 
 
 # ---------------------------------------------------------------- places
@@ -488,13 +512,14 @@ def step_places(ctx):
         in_far = fx0 <= x <= fx0 + fW and fz0 <= z <= fz0 + fH
         if not (in_near or in_far):
             dropped.append(it["slug"] or it["name"]); continue
-        lab, dem_max = label_elevation(it, items, near)
+        ground = float(near.sample(x, z)) if in_near else float(far.sample(x - fx0, z - fz0))
+        lab, dem_max = label_elevation(it, items, near, ground=ground, in_near=in_near)
         if it["kind"] == "peak" and dem_max is not None:       # snap to the DEM summit within 500 m (poster rule)
             o = np.arange(-500, 501, 30.0)
             gx, gz = np.meshgrid(x + o, z + o)
             hh = near.sample(gx.ravel(), gz.ravel()); i = int(hh.argmax())
             x, z = float(gx.ravel()[i]), float(gz.ravel()[i])
-        ground = float(near.sample(x, z)) if in_near else float(far.sample(x - fx0, z - fz0))
+            ground = float(near.sample(x, z))                  # ground must match the snapped pin, not the raw node
         g = it["g"] or {}
         kind = it["kind"]
         if kind in ("town", "village"): tier = 1

@@ -22,7 +22,7 @@ content is summarised in §8 so you do not need it).
 | Data (gitignored, under `data/`) | bundles `swat`, `swat_far`, `swat_lower`, `swat_lower_far`; packs `data/packs/swat/atlas` (~104 MB), `data/packs/swat-lower/atlas` (~162 MB); research, photos, models, renders. |
 | RunPod | Old pod `t6t4cq301hjkuo` TERMINATED. TTS pod `s9p3rr2my88itr` (RTX A4000, $0.17/h) was RUNNING for the audio-guide job at the time of writing. **First action: check it with the RunPod `get-pod` tool; if the audio job is done or abandoned, stop + terminate it.** `.env` `POD_ID` / `POD_JUPYTER_TOKEN` point at it. |
 | In-flight work at handoff | Swat audio guide generation (narration + Kokoro/MMS TTS) by a subagent. Verify its outputs before relying on them (§10.3). |
-| Owner decisions | DONE: v2.0.0 released (main + tag + gh-pages). DONE (v2.1 cleanup): the app is Swat-only (Diorama, non-Swat regions, "Build any place" and dead modules removed; list in `docs/CLEANUP-v2.1.md`) and the main page is rebuilt in the Atlas style (`web/index.html`, `css/home.css`, `js/home.js`, data from `backend/tools/home_data.py` → `web/data/home.json`). Tests: 53 (removed tests covered deleted code). Model zoom bug fixed: fixed hero scale (`landmarks.js` HERO_M 110 m). Audio: English only, generated locally (Kokoro / Chatterbox bake-off in progress; MMS-TTS is CC-BY-NC and must not be used). |
+| Owner decisions | DONE: v2.0.0 released (main + tag + gh-pages). DONE (v2.1 cleanup): the app is Swat-only (Diorama, non-Swat regions, "Build any place" and dead modules removed; list in `docs/CLEANUP-v2.1.md`) and the main page is rebuilt in the Atlas style (`web/index.html`, `css/home.css`, `js/home.js`, data from `backend/tools/home_data.py` → `web/data/home.json`). Tests: 53 (removed tests covered deleted code). Model zoom bug fixed: fixed scale (`landmarks.js`: real size × user multiplier, minimum ×20 so landmarks read when zoomed out, displayed footprint capped 1 km). Audio: English only, generated locally (Kokoro / Chatterbox bake-off in progress; MMS-TTS is CC-BY-NC and must not be used). |
 | Known defects | §14. (The Explore-area heading drift between `meta.json` and `atlas_pack.py` was found while writing this document and is RESOLVED: generator updated, rebuilt `meta.json` parses to exactly the same JSON as the hand-fixed one.) |
 
 ---
@@ -334,9 +334,9 @@ gaussians), flexicubes submodule missing (stubbed), baker leaks VRAM → one pro
 below-ground parts. Front-facing direction is NOT verified.
 
 ### 6.3 Placement in the live map (`web/js/atlas/landmarks.js`)
-Distance-aware hero scale k = clamp(distance_km / 2, 1, 8), heritage minimum 42 px projected height, displayed
-footprint cap 260 m, shown within 15 km, stands on the lowest ground under its footprint, trees cleared within the
-displayed footprint + 30%, warm emissive lift + soft contact shadow.
+Fixed scale, camera-independent: real size × the user multiplier from the "Landmark size" slider (×20–×80, default
+×20, never below real size), displayed footprint cap 1 km, opacity fade out to 15 km, stands on the lowest ground
+under its footprint, trees cleared within the default displayed footprint + 30%, warm emissive lift + soft contact shadow.
 
 ---
 
@@ -383,9 +383,16 @@ Approved canvas (5 artboards: map home, place panel, trek, "Swat Through Time", 
   name 38 px + Urdu name on the right; 3 stats; summary in Literata 16 px; buttons Fly there (saffron primary), Plan a
   day, Listen; "From the sources" as `<details>` revealing the verbatim quote + source link; labels under the sheet
   hidden. Empty history = honest empty state (e.g. nearby region event), never filler.
-- **Phone (390×844):** dock = one horizontally scrollable row with scroll-snap (last item cut as a hint), toolbar
-  collapses to search + menu, Light slider moves into the menu sheet, place panel becomes a bottom sheet, controls
-  offset above the dock, labels respect controls and edges.
+- **Phone (390×844):** one finger MOVES the map (OrbitControls `touches.ONE = PAN`), pinch zooms + two-finger twist
+  rotates, double-tap flies to the tapped point (touch never synthesizes dblclick; detected in `main.js`); the title
+  cartouche is one compact line, tap it to reveal the subtitle; the dock is one horizontally scrollable row of
+  **44 px** pills inside `.dockwrap` (a right-edge fade hints at more items and hides at the scroll end), zoom/icon
+  buttons 44 px; the layers menu shows **steppers (± 44 px) and 44 px toggle rows** instead of sliders (`paired()` in
+  `ui.js` keeps the hidden desktop slider and the stepper in sync); the place panel is a **two-state sheet**: it opens
+  as a peek card (max-height 40 vh: grab handle, photo, name, stats, action row) — tap the grab handle or swipe up for
+  the full sheet, swipe down to collapse, again to close (`panel.js` `togglePeek` + drag states); label blockers track
+  the current state (`onState` → `labels.block`), and place flights shift the camera target so the anchor lands in the
+  free space above the card (`flyToPlace` in `main.js`, the planner ribbon's screen-space trick).
 - Accessibility: real `<button>`/`<a>`/`<input>`+`<label>`, `aria-label` on icon buttons, touch targets ≥ 44 px,
   text 4.5:1 (3:1 at ≥ 24 px), colours distinguished by lightness too.
 
@@ -527,12 +534,18 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
 
 ## 14. Known defects and open items (fix in this order)
 1. ~~Area camera headings not in the generator~~ — RESOLVED 2026-10-02 (see §4.5 and §11.3).
-2. **Audio guide**: verify the in-flight job (§9.1) and terminate the pod.
+2. **Audio guide**: local bake-off (Kokoro/Chatterbox) was in flight in the working tree (`audio_local.py`,
+   `tts_bakeoff.py`, `narration.py`, `listen.js`, `atlaspack.py` audio chunk slug) — uncommitted, not reviewed here.
+   The old RunPod TTS pod `s9p3rr2my88itr` no longer serves (proxy 404 on every endpoint; no RunPod API key in `.env`
+   to stop/terminate it) — if it still shows in the RunPod console, terminate it there.
 3. **Offline save** never exercised with a real service worker: test by hand in Chrome.
-4. **White Palace**: TRELLIS model orientation unverified and it may tilt on the slope; it sits over the stream. Check
-   the gazetteer coordinate and the listed 2,175 m against the DEM; verify front-facing; consider a flat pad under it.
-5. **Phone labels**: a chip can show while its anchor is off-screen (Andrab Lake) → drop chips whose anchor is outside
-   the viewport.
+4. **White Palace** — PARTLY RESOLVED 2026-10-02: the listed 2,175 m (Wikidata) was wrong; the DEM at the OSM pin is
+   1,308 m and the label now uses it (gazetteer note added). TRELLIS silhouette verified against the photo (colonnaded
+   veranda, central pediment, ~3:1 massing match); mesh artifacts at both flanks (floating fragments > the 2 % drop
+   threshold) don't read at map scale. Absolute size stays a flagged estimate (no published dimensions). The pin sits
+   33 m from an OSM stream — coordinate is sourced (OSM + Wikidata agree), so it stands; slope is 15°.
+5. ~~Phone labels: chip shows while its anchor is off-screen~~ — RESOLVED 2026-10-02 (`labels.js`: candidates require
+   the anchor dot inside the viewport).
 6. **Lower Swat poster**: lower third too dark, Mingora pale, Elum/Malam Jabba not prominent, Barikot at the edge;
    White Palace and Shingardar below the frame.
 7. **Close views** still darker than the posters in shade; trees read as simple cones up close.
@@ -541,6 +554,25 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
    never completed.
 10. Shingardar grass cap smaller/raggeder than the photo (cosmetic at map scale).
 11. Photos are ~43 MB of the upper pack: consider ≤ 1200 px and ≤ 4 per place for offline.
+
+### 14.1 Accuracy pass 2026-10-02 (label elevations + pack hygiene; packs rebuilt, diffs reviewed)
+- `label_elevation` now DEM-checks EVERY kind, not just peaks (±250 m, ±500 m for lakes — GLO-30 smooths cirque
+  basins so published lake levels are the better value), and receives the ground sampled on the grid that actually
+  contains the place (`Grid.sample` clamps out-of-bounds queries to the raster edge, so a far-grid place sampled
+  against the near raster returned mountain heights). Fixes shipped: White Palace 2,175→1,308; Malam Jabba 2,804→2,486
+  (pin is the hotel node); Lowari Tunnel 0→3,168 and Malakand Pass 0→1,088 (were literal zeros); Madyan 3,094→1,365,
+  Miandam 3,458→1,823, Sheringal 3,228→1,456, Fatehpur 4,092→1,289, Jarogo waterfall 3,792→2,409 (stale values from
+  an older gazetteer); Bashigram Lake 2,831→3,492; Ghochhar Sar label 4,497→6,249 with the summit snapped (dispute
+  note in the gazetteer) and tier 4→2. Passes use the ground at the point, not a summit search.
+- `step_models` now ships a model only with a place of that pack (areas + near/far bbox, same rule as `step_places`)
+  and deletes stale model files: the upper pack carries only the Thal mosque, the lower pack its 7 (~6 MB less per
+  pack, offline saves no longer cache dead models). Peak `ground_m` is sampled at the snapped pin.
+- Model audit (measured, not guessed): stupas match their sourced specs (Amluk-Dara 34 m base/18.6 m tall, Saidu
+  19.6 m plinth, Shingardar 18.6 m vs published 18 m, Gumbat podium 6.6 m); TRELLIS GLBs are 4.7–5.8 k tris with one
+  1024 px bake each. The `SCALE_GUESS` widths (40/25/45 m) remain the only size anchor for the TRELLIS three.
+- Live-map textures (`landmarks.js`): roughness clamped into a 0.55–0.95 matte band instead of forced ≥ 0.8, warm
+  emissive lift 0.45→0.18, texture anisotropy 8 — the baked 1024 textures now read up close without losing the
+  lift that makes maquettes visible against pale ground.
 
 ---
 
