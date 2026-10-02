@@ -27,14 +27,16 @@ PACKS = {
     "swat": dict(title="Swat Valley", subtitle="Kalam \u00b7 Utror \u00b7 Ushu \u00b7 Mahodand", shot=OV_SHOT, exag=1.6, bake_shot="overview",
                  areas=None, peak_tier2_min=5500, drop_empty_routes=False,
                  neighbors=[{"slug": "swat-lower", "title": "Lower Swat", "edge": "south"}],
-                 explore=[("Kalam & Ushu", 35.54, 72.64, 305, -30, 15000), ("Utror & Gabral", 35.50, 72.445, 305, -30, 11000),
-                          ("Mahodand", 35.708, 72.654, 305, -30, 9000), ("Kumrat", 35.52, 72.22, 305, -30, 14000)]),
+                 # Explore-dock cameras: (name, lat, lon, heading°, pitch°, distance m). Headings chosen by viewing each
+                 # framing: no ridge in front of the key places, sun (~215°) raking from the side, not into the camera.
+                 explore=[("Kalam & Ushu", 35.54, 72.64, 10, -30, 15000), ("Utror & Gabral", 35.50, 72.445, 15, -30, 11000),
+                          ("Mahodand", 35.708, 72.654, 345, -30, 9000), ("Kumrat", 35.52, 72.22, 20, -30, 14000)]),
     "swat_lower": dict(title="Lower Swat", subtitle="Mingora \u00b7 Udegram \u00b7 Malam Jabba \u00b7 Bahrain",
                        shot=dict(lat=34.84, lon=72.40, heading=25.0, pitch=-28.0, dist=36000.0, sun_az=238.0, sun_el=14.0, sun_color=(1.0, 0.76, 0.5)),
                        exag=1.8, bake_shot="lower", lowland=True, areas={"swat-lower", "swat-mid", "malam-jabba", "gateway"}, peak_tier2_min=2500,
                        drop_empty_routes=True, neighbors=[{"slug": "swat", "title": "Swat Valley", "edge": "north"}],
-                       explore=[("Mingora & Saidu Sharif", 34.76, 72.36, 305, -30, 9000), ("Udegram & Barikot", 34.72, 72.26, 305, -30, 14000),
-                                ("Malam Jabba", 34.805, 72.53, 305, -30, 12000), ("Madyan & Bahrain", 35.17, 72.54, 305, -30, 12000)]),
+                       explore=[("Mingora & Saidu Sharif", 34.76, 72.36, 25, -30, 9000), ("Udegram & Barikot", 34.72, 72.26, 25, -30, 14000),
+                                ("Malam Jabba", 34.805, 72.53, 25, -30, 12000), ("Madyan & Bahrain", 35.17, 72.54, 25, -30, 12000)]),
 }
 HWY_CLASS = {"motorway": "paved", "trunk": "paved", "primary": "paved", "secondary": "paved", "tertiary": "jeep",
              "unclassified": "minor", "residential": "minor", "service": "minor", "living_street": "minor",
