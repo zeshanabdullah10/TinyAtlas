@@ -106,6 +106,10 @@ def _leg(net, a, b) -> dict | None:
     path = _fastest(adj, *ends)
     if not path and ends[0] != ends[1]:
         return None
+    return _leg_from_path(adj, path, a, b)
+
+
+def _leg_from_path(adj, path, a, b) -> dict:
     road_m = foot_m = road_min = 0.0
     for p, q in zip(path, path[1:]):
         e = next(e for e in adj[p] if e[0] == q)
@@ -119,8 +123,54 @@ def _leg(net, a, b) -> dict | None:
             "path": [list(p) for p in path]}
 
 
+def _tree(adj, src):
+    """Dijkstra from one node over everything: (minutes, previous node)."""
+    import heapq
+    best, prev, pq = {src: 0.0}, {}, [(0.0, src)]
+    while pq:
+        t, n = heapq.heappop(pq)
+        if t > best.get(n, math.inf):
+            continue
+        for m, mins, _, _ in adj[n]:
+            if t + mins < best.get(m, math.inf):
+                best[m], prev[m] = t + mins, n
+                heapq.heappush(pq, (t + mins, m))
+    return best, prev
+
+
+@lru_cache(maxsize=4)
+def _atlas_catalog(slug: str, stops_key: tuple):
+    """catalog() for an Atlas region: heights, roads and stops come from its pack; one Dijkstra per stop."""
+    from . import atlaspack
+    stops = {s["slug"]: s for s in map(dict, stops_key)}
+    adj, size = atlaspack.network(slug)
+    ends = {}
+    for k, s in stops.items():
+        n = routing.nearest_node(adj, (s["u"], s["v"]), size) if adj else None
+        if n and math.hypot((n[0] - s["u"]) * size[0], (n[1] - s["v"]) * size[1]) <= MAX_SNAP_M:
+            ends[k] = n
+    legs = {}
+    for a, na in ends.items():
+        best, prev = _tree(adj, na)
+        for b, nb in ends.items():
+            if a == b or nb not in best:
+                continue
+            path = [nb]
+            while path[-1] != na:
+                path.append(prev[path[-1]])
+            legs[(a, b)] = _leg_from_path(adj, path[::-1], stops[a], stops[b])
+    return stops, legs
+
+
 def catalog(region: str, cfg: dict, landmarks: list[dict]) -> tuple[dict, dict]:
     """(stops by slug with elevation, legs {(a, b): leg}) for the region."""
+    if cfg.get("atlas"):
+        from . import atlaspack
+        stops = {l["slug"]: {**{k: l[k] for k in ("slug", "name", "kind", "u", "v", "lat", "lon")},
+                             "elev": round(atlaspack.elevation(cfg["atlas"], l["u"], l["v"])),
+                             "about": (l.get("description") or l.get("summary", "")[:140])} for l in landmarks}
+        key = tuple(tuple(sorted(s.items())) for s in stops.values())
+        return _atlas_catalog(cfg["atlas"], key)
     hm = terrain.heightmap(cfg["bbox"], z=11, size=256)
     stops = {}
     for l in landmarks:

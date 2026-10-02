@@ -1,6 +1,6 @@
 """Build an Atlas pack (docs/atlas-pack-v1.md) from a geo bundle + research data.
 
-    python backend/tools/atlas_pack.py <bundle> [--no-bake] [--only albedo,vectors,places,models,sky,terrain,trees,check]
+    python backend/tools/atlas_pack.py <bundle> [--no-bake] [--only albedo,vectors,places,models,sky,terrain,trees,check,files]
 
 <bundle> is a name in data/bundles/ (its far backdrop is <bundle>_far); the pack slug is the bundle name with "_" -> "-".
 Per-pack settings (title, home camera, place filter, neighbours) live in PACKS below.
@@ -577,6 +577,19 @@ def step_check(ctx):
     log("check written")
 
 
+def list_files(out):
+    """[{path, bytes}] for every file the renderer may fetch (not the _check.png debug image, _bake, or files.json itself)."""
+    skip = {"_check.png", "files.json"}
+    return [{"path": p.relative_to(out).as_posix(), "bytes": p.stat().st_size} for p in sorted(out.rglob("*"))
+            if p.is_file() and p.name not in skip and "_bake" not in p.relative_to(out).parts]
+
+
+def step_files(ctx):
+    files = list_files(ctx["out"])
+    jdump(ctx["out"] / "files.json", files)
+    log(f"files.json: {len(files)} files, {sum(f['bytes'] for f in files) / 1e6:.1f} MB")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("bundle")
@@ -591,7 +604,7 @@ def main():
     ctx = dict(slug=slug, bundle=bundle, cfg=PACKS[bundle], out=out, near=Grid(bundle), far=Grid(bundle + "_far"), tr=Transformer.from_crs("EPSG:4326", "EPSG:32643", always_xy=True),
                osm=json.loads((ROOT / f"data/bundles/{bundle}/osm.json").read_text(encoding="utf-8")),
                gaz=json.loads((ROOT / GAZETTEER).read_text(encoding="utf-8")))
-    steps = A.only.split(",") if A.only else ["terrain", "albedo", "trees", "vectors", "models", "places", "sky", "check"]
+    steps = A.only.split(",") if A.only else ["terrain", "albedo", "trees", "vectors", "models", "places", "sky", "check", "files"]
     for s in steps:
         if s == "albedo": step_albedo(ctx, bake=not A.no_bake)
         elif s == "terrain": step_terrain(ctx)
@@ -604,6 +617,7 @@ def main():
             step_places(ctx)
         elif s == "sky": step_sky(ctx)
         elif s == "check": step_check(ctx)
+        elif s == "files": step_files(ctx)
     if "seam" in ctx:
         print("SEAM", json.dumps(ctx["seam"]), "BAKE_SECONDS", ctx.get("bake_seconds"))
 

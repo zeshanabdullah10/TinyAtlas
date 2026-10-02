@@ -37,6 +37,7 @@ python backend/tools/smoke.py                             # end-to-end browser c
 ```
 Built-in places live in `backend/tinyatlas/regions.py`: Hunza, Skardu, Fairy Meadows, Naran and Kaghan, Deosai and
 Khunjerab, each with hand-checked landmarks, tours and viewpoints. Data is cached under `data/` (gitignored).
+Swat Valley and Lower Swat are Atlas places (`"atlas": "<pack>"` in `regions.py`): their cards open `/atlas.html?pack=<slug>`, the real-time illustrated map, with the same planner, audio guide and "save for offline" (`docs/atlas-pack-v1.md`).
 
 ## Static site (what goes public)
 ```

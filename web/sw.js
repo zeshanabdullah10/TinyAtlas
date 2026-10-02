@@ -8,7 +8,8 @@ const DATA = "tinyatlas-data-v1";
 const BASE = new URL(self.registration.scope).pathname;
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll([BASE, `${BASE}index.html`, `${BASE}css/tokens.css`, `${BASE}css/app.css`, `${BASE}manifest.webmanifest`]))
+  e.waitUntil(caches.open(SHELL).then((c) => c.addAll([BASE, `${BASE}index.html`, `${BASE}css/tokens.css`, `${BASE}css/app.css`, `${BASE}manifest.webmanifest`,
+    `${BASE}atlas.html`, `${BASE}css/atlas.css`]))   // the Atlas shell; js/atlas/*.js and the rest are cached as they are used, or by "Save for offline"
     .then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
@@ -44,7 +45,7 @@ self.addEventListener("fetch", (e) => {
       if (r.ok && (!isData || hit)) (await caches.open(isData ? DATA : SHELL)).put(req, r.clone());   // refresh what is saved
       return r;
     } catch {
-      return hit || (req.mode === "navigate" ? caches.match(`${BASE}index.html`) : Response.error());
+      return hit || (req.mode === "navigate" ? (await caches.match(req, { ignoreSearch: true })) || caches.match(`${BASE}index.html`) : Response.error());   // atlas.html?pack=… matches its saved page
     }
   })());
 });

@@ -20,7 +20,14 @@
 </script>
 </head>
 <body class="atlas">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <symbol id="i-route" viewBox="0 0 24 24"><path d="M8 17h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="5" r="2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5-12-7.5Z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M5 19h14"/></symbol>
+</svg>
 <main id="app"><canvas id="gl" tabindex="0" aria-label="Interactive relief map. Drag to turn, scroll to zoom, right-drag or arrow keys to move."></canvas><div id="labels"></div></main>
+<div id="toasts" role="status" aria-live="polite"></div>
 <script type="module" src="js/atlas/main.js"></script>
 <noscript><p style="padding:2rem;font-family:system-ui">This map is drawn in the browser, so it needs JavaScript.</p></noscript>
 </body>

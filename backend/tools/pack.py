@@ -173,14 +173,29 @@ def static_index(html: str, live_api: str | None, base: str = "") -> str:
     return html.replace("<script type=\"module\"", f"<script>window.TINYATLAS = {cfg};</script>\n<script type=\"module\"", 1)
 
 
+def write_atlas_pack(slug: str, out: Path, log=print) -> int:
+    """Copy an Atlas pack (data/packs/<slug>/atlas/) to out/packs/<slug>/atlas/; returns its size in bytes."""
+    src, dst = ROOT / "data" / "packs" / slug / "atlas", out / "packs" / slug / "atlas"
+    shutil.copytree(src, dst, ignore=shutil.ignore_patterns("_check.png", "_bake"))
+    size = sum(f.stat().st_size for f in dst.rglob("*") if f.is_file())
+    log(f"{slug}: Atlas pack, {size / 1e6:.1f} MB")
+    return size
+
+
 def build_site(slugs: list[str], out: Path, live_api: str | None = None, log=print, base_url: str = "") -> None:
     if (out / "packs").exists():
         shutil.rmtree(out / "packs")
     shutil.copytree(ROOT / "web", out, dirs_exist_ok=True)
     (out / "index.html").write_text(static_index((ROOT / "web" / "index.html").read_text(encoding="utf-8"), live_api,
                                                  _base_path(base_url)), encoding="utf-8")
+    atlas_html = static_index((ROOT / "web" / "atlas.html").read_text(encoding="utf-8"), live_api, _base_path(base_url))
+    (out / "atlas.html").write_text(atlas_html, encoding="utf-8")        # same static config: packs come from <base>/packs/
     index = {}
     for slug in slugs:
+        if regions.REGIONS[slug].get("atlas"):       # drawn by the Atlas: just its pack, no classic place page
+            write_atlas_pack(regions.REGIONS[slug]["atlas"], out, log)
+            index[slug] = api._summary(slug, regions.REGIONS[slug])
+            continue
         write_pack(slug, out, log)
         index[slug] = api._summary(slug, regions.REGIONS[slug])
         if index[slug]["cover"]:                                   # packs carry the previews as WebP
@@ -193,7 +208,7 @@ def build_site(slugs: list[str], out: Path, live_api: str | None = None, log=pri
         (out / "place" / slug).mkdir(parents=True, exist_ok=True)
         (out / "place" / slug / "index.html").write_text(page, encoding="utf-8")
     _write_json(out / "packs" / "index.json", index)
-    urls = [f"{base_url}/"] + [f"{base_url}/place/{s}/" for s in slugs]
+    urls = [f"{base_url}/"] + [f"{base_url}/place/{s}/" for s in slugs if not regions.REGIONS[s].get("atlas")]
     (out / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
                                      + "".join(f"<url><loc>{u}</loc></url>" for u in urls) + "</urlset>\n", encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base_url}/sitemap.xml\n", encoding="utf-8")

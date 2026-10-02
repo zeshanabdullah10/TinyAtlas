@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from PIL import Image
 from pydantic import BaseModel
 
-from . import (builder, facts, geocode, guide, jobs, llm, osm, paint, planner, regions, sources, terrain, tiles,
+from . import (atlaspack, builder, facts, geocode, guide, jobs, llm, osm, paint, planner, regions, sources, terrain, tiles,
                viewshed)
 from .regions import REGIONS
 
@@ -64,17 +64,19 @@ def _texture_path(name: str, style: str = "auto", season: str = "summer") -> Pat
 
 
 def _ready(name: str) -> bool:
-    return _texture_path(name) is not None
+    return _texture_path(name) is not None or atlaspack.available(REGIONS[name].get("atlas") if name in REGIONS else None)
 
 
 @lru_cache(maxsize=None)
 def _landmarks(name: str) -> list[dict]:
-    return sources.landmarks(_region(name))
+    cfg = _region(name)
+    return atlaspack.landmarks(cfg["atlas"], cfg) if cfg.get("atlas") else sources.landmarks(cfg)
 
 
 @lru_cache(maxsize=None)
 def _chunks(name: str) -> list[dict]:
-    return sources.chunks(_region(name))
+    cfg = _region(name)
+    return atlaspack.chunks(cfg["atlas"], cfg) if cfg.get("atlas") else sources.chunks(cfg)
 
 
 class Ask(BaseModel):
@@ -109,6 +111,7 @@ def _summary(name: str, cfg: dict) -> dict:
             "center": cfg.get("center"), "tz": cfg.get("tz"), "view_from": cfg.get("view_from"),
             "builtin": bool(cfg.get("builtin")), "ready": _ready(name),
             "seasons": [s for s in SEASONS if _texture_path(name, season=s)], "cover": _cover(name),
+            "atlas": cfg.get("atlas"), "atlas_cover": atlaspack.cover_url(cfg["atlas"]) if cfg.get("atlas") else None,
             "size_km": [round(w / 1000, 1), round(h / 1000, 1)], "landmarks": len(cfg.get("landmarks", []))}
 
 
@@ -349,7 +352,9 @@ def region_itinerary(region: str):
 @app.get("/api/facts/{region}")
 def region_facts(region: str):
     """Practical facts, each checked against a quote in its Wikivoyage/Wikipedia source (cached per region)."""
-    _region(region)
+    cfg = _region(region)
+    if cfg.get("atlas"):
+        return atlaspack.facts(cfg["atlas"], cfg)
     try:
         return facts.extract(region, _chunks(region))
     except llm.LLMUnavailable:

@@ -1,6 +1,7 @@
 // Chrome around the map: title cartouche, search, light pill, explore dock, compass/zoom/home, settings, attribution, loading, stats.
 import * as THREE from "three";
 import { h } from "../dom.js";
+import { BASE } from "../api.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
 function compassSVG() {
@@ -15,6 +16,7 @@ function compassSVG() {
 const ICON = {
   layers: "M12 3 3 8l9 5 9-5-9-5ZM3 12.5l9 5 9-5M3 16.5l9 5 9-5",
   menu: "M4 7h16M4 12h16M4 17h16",
+  down: "M12 3v12M7.5 10.5 12 15l4.5-4.5M5 19h14",
   search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-4-4",
 };
 function svgIcon(d) {
@@ -34,11 +36,11 @@ export function clockText(s, el) {
   return `${mood} · ${t}`;
 }
 
-export function buildUI(root, { pack, controls, settings, tier, showFps, sky, openPlace, areas, neighbors = [], onNeighbor }) {
+export function buildUI(root, { pack, controls, settings, tier, showFps, sky, openPlace, areas, neighbors = [], onNeighbor, onOffline }) {
   const m = pack.meta;
   const loading = h("div", { class: "loading", role: "status" }, h("p", { class: "ld-t" }, m.title), h("div", { class: "ld-bar" }, h("i")), h("p", { class: "ld-l" }, "Opening the map"));
   const bar = loading.querySelector("i"), label = loading.querySelector(".ld-l");
-  const cart = h("header", { class: "cartouche" }, h("h1", null, word(m.title)),
+  const cart = h("header", { class: "cartouche" }, h("a", { class: "back", href: BASE || "./" }, "← All places"), h("h1", null, word(m.title)),
     h("p", { class: "sub" }, h("span", { class: "rule" }), h("em", null, m.subtitle || ""), h("span", { class: "rule" })));
 
   // ---- search
@@ -87,7 +89,8 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   upLight();
   const pill = h("div", { class: "light" }, h("span", { class: "lbl-k" }, "Light"), light, lightTxt);
 
-  const top = h("div", { class: "topright" }, h("div", { class: "trow" }, search, gear, menu), pill, pop, about);
+  const offBtn = onOffline && h("button", { class: "ibtn off-btn", type: "button", "aria-label": `Save ${m.title} for offline`, title: `Save ${m.title} for offline`, onClick: () => onOffline() }, svgIcon(ICON.down));
+  const top = h("div", { class: "topright" }, h("div", { class: "trow" }, search, offBtn, gear, menu), pill, pop, about);
 
   // ---- explore dock
   const dock = h("nav", { class: "dock", "aria-label": "Explore" }, h("span", { class: "dk" }, "Explore"));

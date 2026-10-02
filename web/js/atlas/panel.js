@@ -5,8 +5,8 @@ const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : n
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return "source"; } };
 
 export class Panel {
-  constructor(root, pack, { onClose, onFly, signal } = {}) {
-    this.pack = pack; this.onClose = onClose; this.onFly = onFly; this.current = null; this.opener = null;
+  constructor(root, pack, { onClose, onFly, onPlan, audio, signal } = {}) {
+    this.pack = pack; this.onClose = onClose; this.onFly = onFly; this.onPlan = onPlan; this.audio = audio; this.current = null; this.opener = null;
     this.body = h("div", { class: "pn-body" });
     this.closeBtn = h("button", { class: "pn-close", type: "button", "aria-label": "Close", onClick: () => this.close() }, "×");
     this.el = h("aside", { class: "panel", role: "dialog", "aria-modal": "false", "aria-label": "Place details", tabindex: "-1", hidden: true }, this.closeBtn, this.body);
@@ -40,14 +40,32 @@ export class Panel {
         p.summary ? h("p", { class: "pn-sum" }, p.summary) : null,
         h("div", { class: "pn-actions" },
           h("button", { class: "primary", type: "button", onClick: () => this.onFly?.(p) }, "Fly there"),
-          h("button", { type: "button", onClick: () => dispatchEvent(new CustomEvent("atlas:plan", { detail: p })) }, "Plan a day"),
-          h("button", { type: "button", onClick: () => dispatchEvent(new CustomEvent("atlas:listen", { detail: p })) }, "Listen"))),
+          h("button", { type: "button", onClick: () => { dispatchEvent(new CustomEvent("atlas:plan", { detail: p })); this.onPlan?.(p); } }, "Plan a day"),
+          this.listenBtn = h("button", { type: "button", class: "listen-btn", onClick: () => this.toggleListen(p) }, "Listen")),
+        this.listenSlot = h("div", { class: "pn-listen" })),
       p.access ? h("section", null, h("h3", null, "Getting there"), h("p", null, p.access)) : null,
       this.timeline(p), this.sources(p),
       p.photos?.length > 1 ? this.gallery(p) : null);
+    this.paintAudio();
     this.el.hidden = false; document.body.classList.add("has-panel");
     requestAnimationFrame(() => { this.el.classList.add("open"); this.closeBtn.focus({ preventScroll: true }); });
     this.body.scrollTop = 0;
+  }
+
+  /** Listen: plays the place's clip through the shared player; with no clip yet the button says so and does nothing. */
+  paintAudio() {
+    const p = this.current, ok = !!(p && this.audio?.has(p));
+    if (!this.listenBtn) return;
+    this.listenBtn.disabled = !ok;
+    this.listenBtn.textContent = ok ? "Listen" : "Audio guide coming soon";
+    this.listenBtn.title = ok ? "" : "The audio guide for this place hasn't been recorded yet";
+    if (!ok) this.listenSlot.replaceChildren();
+  }
+
+  toggleListen(p) {
+    if (!this.audio?.has(p)) return;
+    if (this.listenSlot.firstChild) { this.listenSlot.replaceChildren(); return; }
+    this.listenSlot.replaceChildren(this.audio.row(p));
   }
 
   hero(p) {

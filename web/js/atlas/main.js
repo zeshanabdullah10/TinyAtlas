@@ -14,6 +14,14 @@ import { Panel } from "./panel.js";
 import { MapControls } from "./controls.js";
 import { buildUI, makeAreas } from "./ui.js";
 import { disposeScene } from "./dispose.js";
+import { BASE, api } from "../api.js";
+import { makeListen } from "../listen.js";
+import { DayRoute } from "./day.js";
+import { PlanSheet } from "./sheet.js";
+import { openOffline } from "./offline.js";
+
+// offline support (not in automated test browsers, which must always see fresh files)
+if ("serviceWorker" in navigator && !navigator.webdriver) navigator.serviceWorker.register(`${BASE}sw.js`).catch(() => {});
 
 const qs = new URLSearchParams(location.search);
 const forced = qs.get("tier");
@@ -42,7 +50,7 @@ async function boot(slug, { base, time = null } = {}) {
   const camera = new THREE.PerspectiveCamera(36, 1, 50, 600000);
   const loadingEl = document.createElement("div");
   loadingEl.className = "loading"; loadingEl.textContent = "Opening the map"; root.append(loadingEl);
-  const pack = await loadPack(base || `/packs/${slug}/atlas/`, (f, t) => { loadingEl.textContent = `Loading ${t}`; }).catch((e) => {
+  const pack = await loadPack(base || `${BASE || "/"}packs/${slug}/atlas/`, (f, t) => { loadingEl.textContent = `Loading ${t}`; }).catch((e) => {
     loadingEl.textContent = `Could not load the map pack (${e.message}).`; throw e;
   });
   loadingEl.remove();
@@ -82,25 +90,41 @@ async function boot(slug, { base, time = null } = {}) {
   addEventListener("resize", resize, { signal }); resize();
 
   const anchorOf = (pl) => [pl.anchor?.[0] ?? pl.x, pl.anchor?.[1] ?? pl.z];
+  const listen = makeListen({ api, slug: pack.slug });
+  let clips = null;                                      // the place's audio guide; none has been recorded for Swat yet
+  api.audio(pack.slug).then((a) => { clips = a || {}; panel.paintAudio(); }).catch(() => { clips = {}; });
+  const audio = { has: (p) => !!clips?.[p.slug], row: (p) => listen.row(p) };
   const panel = new Panel(root, pack, {
-    signal, onClose: () => { labels.select(null); labels.block = null; },
+    signal, audio, onPlan: (pl) => sheet.open(pl), onClose: () => { labels.select(null); labels.block = null; },
     onFly: (pl) => { const [ax, az] = anchorOf(pl); controls.flyTo(new THREE.Vector3(ax, pack.groundY(ax, az), az), 2800, controls.heading, -28, 1800); },
   });
   const open = (pl, opener) => {
+    sheet.close();
     labels.select(pl.slug); panel.open(pl, opener); labels.block = panel.rect();
     const [ax, az] = anchorOf(pl);
     controls.flyTo(new THREE.Vector3(ax, pack.groundY(ax, az), az), Math.min(controls.distance, 9000), controls.heading, controls.pitchDeg(), 1100);
   };
   const labels = new Labels(pack, labelLayer, { onPick: (pl) => open(pl, document.activeElement), anchorLift: (s) => landmarks.heightOf(s) });
   roads.setRoutes(false);
-  labels.blockers = () => [...document.querySelectorAll(".topright .trow, .topright .light, .dock, .tools, .attrib, .cartouche h1, .cartouche .sub")]
+  const day = new DayRoute(pack, scene, root);
+  const sheet = new PlanSheet(root, pack, {
+    signal, onOpen: () => { panel.close(); labels.block = sheet.rect(); }, onClose: () => { labels.block = null; },
+    onShowDay: (d) => {
+      const f = day.show(d); if (!f) return;
+      const hd = (controls.heading * Math.PI) / 180, side = innerWidth > 700 ? 220 : 0;      // keep the route clear of the sheet (right) and the dock (bottom)
+      const perPx = (1.03 * f.dist) / innerWidth, t = f.target;
+      t.x += Math.cos(hd) * side * perPx - Math.sin(hd) * f.dist * 0.07; t.z += Math.sin(hd) * side * perPx + Math.cos(hd) * f.dist * 0.07;
+      controls.flyTo(t, f.dist, controls.heading, -48, 1800);
+    },
+  });
+  labels.blockers = () => [...document.querySelectorAll(".topright .trow, .topright .light, .dock, .tools, .attrib, .cartouche h1, .cartouche .sub, .cartouche .back, .day-pill")]
     .map((e) => { const r = e.getBoundingClientRect(); return [r.left - 4, r.top - 4, r.right + 4, r.bottom + 4]; });
   const settings = {
     time: sky.time, treeScale: trees.scale, landmarkScale: 1,
     onTime: (v) => { sky.setTime(v); reshadeSoon(); },
     onExag: (v, final) => {
       pack.setExag(v); terrain.rebuildY(false); ui.exag(v);
-      if (final) { terrain.rebuildY(true); water.rebuild(); roads.rebuild(); trees.refresh(); labels.elevAnchor(); reshade(); }
+      if (final) { terrain.rebuildY(true); water.rebuild(); roads.rebuild(); trees.refresh(); labels.elevAnchor(); day.rebuild(); reshade(); }
     },
     onTrees: (v) => trees.setScale(v), onLandmarks: (v) => landmarks.setScale(v),
     onLabels: (on) => labels.setVisible(on), onRoutes: (on) => roads.setRoutes(on), onRoads: (on) => roads.setRoads(on),
@@ -109,7 +133,7 @@ async function boot(slug, { base, time = null } = {}) {
   const neighbors = pack.meta.neighbors || [];
   ui = buildUI(root, {
     pack, controls, settings, tier, showFps: qs.get("fps") === "1", sky, openPlace: (pl) => open(pl, canvas),
-    areas: makeAreas(pack, controls, () => ui.routes(true)), neighbors, onNeighbor: (s) => switchPack(s),
+    areas: makeAreas(pack, controls, () => ui.routes(true)), neighbors, onNeighbor: (s) => switchPack(s), onOffline: () => openOffline(pack),
   });
 
   const steps = [["sky", sky.load()], ["overview", terrain.loadOverview()], ["landmarks", landmarks.load(() => labels.elevAnchor())]];
@@ -162,6 +186,7 @@ async function boot(slug, { base, time = null } = {}) {
     trees.update(camera, terrain);
     landmarks.update(camera);
     labels.update(camera, sizeW, sizeH, dist, now);
+    day.update(camera, sizeW, sizeH);
     ui.compass(controls.heading);
     if (frameCount % 10 === 0) ui.edge(edgeNear());
     renderer.render(scene, camera);
@@ -185,7 +210,7 @@ async function boot(slug, { base, time = null } = {}) {
 
   const toScene = (e, n) => ({ x: e - pack.meta.origin_utm[0], z: pack.meta.origin_utm[1] - n });
   return {
-    slug, pack, sky, controls, labels, landmarks, terrain, trees, roads, water, panel, ui, settings, scene, camera, toScene, renderer, THREE, shared,
+    slug, pack, sky, controls, labels, landmarks, terrain, trees, roads, water, panel, sheet, day, ui, settings, scene, camera, toScene, renderer, THREE, shared,
     get time() { return sky.time; },
     info: () => ({
       calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, trees: trees.count, treeDraws: trees.draws, fps: fpsBox.fps, tier,
@@ -198,7 +223,7 @@ async function boot(slug, { base, time = null } = {}) {
     },
     dispose() {
       renderer.setAnimationLoop(null); ac.abort(); clearTimeout(reshadeT);
-      controls.dispose(); terrain.dispose(); disposeScene(scene, renderer);
+      controls.dispose(); day.dispose(); terrain.dispose(); disposeScene(scene, renderer);
       for (const el of [...root.children]) if (!keep.has(el)) el.remove();
       labelLayer.replaceChildren();
     },
