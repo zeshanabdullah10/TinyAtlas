@@ -17,12 +17,12 @@ content is summarised in §8 so you do not need it).
 |---|---|
 | Branch | `swat-illustrated-map` (local; not yet pushed). `main` on GitHub is still v1.0.0 (`72f8fb1`). |
 | Commits on the branch | `8a4c043` geo bundles + Blender posters · `58f410f` paint-over + TRELLIS · `bc6e06c` Atlas v1 · `78c84dd` Lower Swat + linked packs · `38eba22` Atlas in the app |
-| Tests | `python -m pytest -q` → 120 passed (last run before this document) |
+| Tests | `python -m pytest -q` → 53 passed after the v2.1 cleanup; `python backend/tools/smoke.py [http://localhost:8000]` end-to-end |
 | Live map | `cd backend && uvicorn tinyatlas.api:app --port 8000` → `http://localhost:8000/atlas.html?pack=swat` (and `?pack=swat-lower`). Owner confirmed it runs well in Chrome on real hardware. |
 | Data (gitignored, under `data/`) | bundles `swat`, `swat_far`, `swat_lower`, `swat_lower_far`; packs `data/packs/swat/atlas` (~104 MB), `data/packs/swat-lower/atlas` (~162 MB); research, photos, models, renders. |
 | RunPod | Old pod `t6t4cq301hjkuo` TERMINATED. TTS pod `s9p3rr2my88itr` (RTX A4000, $0.17/h) was RUNNING for the audio-guide job at the time of writing. **First action: check it with the RunPod `get-pod` tool; if the audio job is done or abandoned, stop + terminate it.** `.env` `POD_ID` / `POD_JUPYTER_TOKEN` point at it. |
 | In-flight work at handoff | Swat audio guide generation (narration + Kokoro/MMS TTS) by a subagent. Verify its outputs before relying on them (§10.3). |
-| Owner decisions not yet executed | (1) **Swat-only app**: remove the old Diorama interface and every non-Swat region, plus "Build any place". (2) **Release**: merge to `main`, push, tag `v2.0.0` with a GitHub release, publish the static site to `gh-pages`. Procedure in §15. |
+| Owner decisions | DONE: v2.0.0 released (main + tag + gh-pages). DONE (v2.1 cleanup): the app is Swat-only (Diorama, non-Swat regions, "Build any place" and dead modules removed; list in `docs/CLEANUP-v2.1.md`) and the main page is rebuilt in the Atlas style (`web/index.html`, `css/home.css`, `js/home.js`, data from `backend/tools/home_data.py` → `web/data/home.json`). Tests: 53 (removed tests covered deleted code). Model zoom bug fixed: fixed hero scale (`landmarks.js` HERO_M 110 m). Audio: English only, generated locally (Kokoro / Chatterbox bake-off in progress; MMS-TTS is CC-BY-NC and must not be used). |
 | Known defects | §14. (The Explore-area heading drift between `meta.json` and `atlas_pack.py` was found while writing this document and is RESOLVED: generator updated, rebuilt `meta.json` parses to exactly the same JSON as the hand-fixed one.) |
 
 ---
@@ -546,7 +546,7 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
 
 ## 15. Next: the owner's approved plan (execute in order)
 1. **Finish audio**, verify, terminate the pod (§10).
-2. **Swat-only cleanup** (owner chose this). Method:
+2. **Swat-only cleanup** — DONE in v2.1 (see `docs/CLEANUP-v2.1.md`). The method, for future cleanups:
    a. Build a reachability map from the entry points that remain: `web/index.html` → `main.js` → `home.js` (gallery,
       two Swat cards) and `web/atlas.html` → `js/atlas/*` (+ the planner/listen modules it imports), and the API
       endpoints those call (`/api/regions`, `/api/region`, `/api/plan`, `/api/audio`, facts, `/packs`).
@@ -558,7 +558,7 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
    c. Present the full deletion list to the owner (or in the release notes) — git history keeps everything recoverable.
    d. Update README (Swat-only, the new run/build flow), the service worker shell list, the manifest.
    e. `pytest`, `smoke.py` (update it for the new app), screenshots of gallery + both packs + phone.
-3. **Release** (owner chose: main + tag + site):
+3. **Release** — v2.0.0 DONE (procedure below worked; note: fetch `origin/gh-pages` first, the local ref can be stale):
    a. Commit on `swat-illustrated-map`; merge into `main` (fast-forward or merge commit; no force-push); `git push origin main`.
    b. `git tag -a v2.0.0 -m "..."`; `git push origin v2.0.0`; `gh release create v2.0.0 --notes-file <notes>` (notes:
       what's new, data sources + licences, known issues from §14).

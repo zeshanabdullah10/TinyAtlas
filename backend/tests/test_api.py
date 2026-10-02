@@ -2,70 +2,52 @@ import pytest
 from fastapi.testclient import TestClient
 from tinyatlas import api, llm
 
-LMS = [
-    {"slug": "baltit-fort", "name": "Baltit Fort", "kind": "fort", "u": 0.34, "v": 0.64,
-     "summary": "Baltit Fort is a palatial fort in the Hunza Valley.", "url": "https://w/Baltit"},
-    {"slug": "attabad-lake", "name": "Attabad Lake", "kind": "lake", "u": 0.73, "v": 0.6,
-     "summary": "Attabad Lake formed after a 2010 landslide.", "url": "https://w/Attabad"},
-]
-CHUNKS = [{"source": "Attabad Lake", "url": "https://w/Attabad", "text": "Attabad Lake formed after a landslide in 2010."}]
-
 
 @pytest.fixture
 def client(monkeypatch, tmp_path):
-    monkeypatch.setattr(api.sources, "landmarks", lambda region: LMS)
-    monkeypatch.setattr(api.sources, "chunks", lambda region: CHUNKS)
-    api._landmarks.cache_clear(); api._chunks.cache_clear()
     monkeypatch.setattr(llm, "ROOT", tmp_path); monkeypatch.setattr(llm, "CACHE", tmp_path / "llm")
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setattr(api, "AUDIO", tmp_path / "audio")
     return TestClient(api.app)
 
 
-def test_landmarks_and_unknown_region(client):
-    assert [l["slug"] for l in client.get("/api/landmarks/hunza").json()] == ["baltit-fort", "attabad-lake"]
-    assert client.get("/api/landmarks/atlantis").status_code == 404
+def test_only_the_two_swat_regions_exist(client):
+    r = client.get("/api/regions").json()
+    assert set(r) == {"swat", "swat-lower"} and r["swat"]["atlas"] == "swat"
+    assert client.get("/api/region/hunza").status_code == 404
+    assert client.get("/api/region/swat").json()["name"] == "Swat Valley"
 
 
-def test_story_extractive_and_404(client):
-    r = client.get("/api/story/hunza/baltit-fort").json()
-    assert r["name"] == "Baltit Fort" and "palatial fort" in r["story"] and r["mode"] == "extractive"
-    assert client.get("/api/story/hunza/nope").status_code == 404
-
-
-def test_guide_is_rate_limited_per_visitor(client, monkeypatch):
-    monkeypatch.setattr(api, "LIMITS", {**api.LIMITS, "guide": (2, 3600)})
-    monkeypatch.setattr(api, "_calls", {})
-    codes = [client.post("/api/guide/hunza", json={"question": "Attabad Lake?"}).status_code for _ in range(3)]
-    assert codes == [200, 200, 429]
+def test_removed_endpoints_are_gone(client):
+    for path in ("/api/geocode?q=x", "/api/views/swat", "/api/terrain/swat", "/api/guide/swat", "/api/story/swat/kalam"):
+        assert client.get(path).status_code in (404, 405)
+    assert client.post("/api/build", json={"query": "x"}).status_code in (404, 405)
 
 
 def test_planner_needs_a_model(client):
-    r = client.post("/api/plan/hunza", json={"request": "2 days"})
-    assert r.status_code == 503
+    assert client.post("/api/plan/swat", json={"request": "2 days"}).status_code == 503
+    assert client.post("/api/plan/atlantis", json={"request": "2 days"}).status_code == 404
 
 
-def test_guide_grounded_and_refuses_unsupported(client):
-    ok = client.post("/api/guide/hunza", json={"question": "how did Attabad Lake form?"}).json()
-    assert ok["sources"][0]["url"] == "https://w/Attabad" and "landslide" in ok["answer"]
-    no = client.post("/api/guide/hunza", json={"question": "best pizza restaurant?"}).json()
-    assert no["answer"] == "That isn't in my sources for this region." and no["sources"] == []
-    assert client.post("/api/guide/hunza", json={"question": "  "}).status_code == 400
+def test_planner_is_rate_limited_per_visitor(client, monkeypatch):
+    monkeypatch.setattr(api, "LIMITS", {"plan": (2, 3600)})
+    monkeypatch.setattr(api, "_calls", {})
+    monkeypatch.setattr(llm, "available", lambda: True)
+    monkeypatch.setattr(api.planner, "plan", lambda *a, **k: {"days": []})
+    monkeypatch.setattr(api, "region_landmarks", lambda r: [])
+    monkeypatch.setattr(api, "region_facts", lambda r: {"facts": []})
+    codes = [client.post("/api/plan/swat", json={"request": "a day"}).status_code for _ in range(3)]
+    assert codes == [200, 200, 429]
 
 
-def test_itinerary_and_status(client):
-    it = client.get("/api/itinerary/hunza").json()
-    assert [s["slug"] for s in it["stops"]] == ["baltit-fort", "attabad-lake"]
+def test_audio_is_empty_until_clips_exist_and_filenames_are_checked(client, tmp_path):
+    assert client.get("/api/audio/swat").json() == {}
+    assert client.get("/api/audio-file/swat/../../x.en.m4a").status_code in (400, 404)
+    assert client.get("/api/audio-file/swat/kalam.en.m4a").status_code == 404
+    (tmp_path / "audio" / "swat").mkdir(parents=True)
+    (tmp_path / "audio" / "swat" / "kalam.en.m4a").write_bytes(b"x")
+    assert client.get("/api/audio-file/swat/kalam.en.m4a").status_code == 200
+
+
+def test_status_reports_no_model(client):
     assert client.get("/api/status").json()["llm"] is False
-
-
-def test_texture_prefers_ai_then_falls_back_to_painted(client, monkeypatch, tmp_path):
-    from PIL import Image
-    monkeypatch.setattr(api.tiles, "OUT", tmp_path)
-    (tmp_path / "hunza").mkdir()
-    Image.new("RGB", (4, 4), (255, 0, 0)).save(tmp_path / "hunza" / "texture.png")
-    assert client.get("/api/texture/hunza?style=ai").status_code == 404
-    assert Image.open(__import__("io").BytesIO(client.get("/api/texture/hunza").content)).getpixel((0, 0)) == (255, 0, 0)
-    Image.new("RGB", (4, 4), (0, 0, 255)).save(tmp_path / "hunza" / "texture_ai.png")
-    assert Image.open(__import__("io").BytesIO(client.get("/api/texture/hunza").content)).getpixel((0, 0)) == (0, 0, 255)
-    assert Image.open(__import__("io").BytesIO(client.get("/api/texture/hunza?style=painted").content)).getpixel((0, 0)) == (255, 0, 0)
-    assert client.get("/api/texture/hunza?style=bogus").status_code == 400

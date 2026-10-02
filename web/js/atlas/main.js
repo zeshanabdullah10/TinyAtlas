@@ -91,7 +91,7 @@ async function boot(slug, { base, time = null } = {}) {
 
   const anchorOf = (pl) => [pl.anchor?.[0] ?? pl.x, pl.anchor?.[1] ?? pl.z];
   const listen = makeListen({ api, slug: pack.slug });
-  let clips = null;                                      // the place's audio guide; none has been recorded for Swat yet
+  let clips = null;                                      // the place's audio guide; English clips from data/audio/<pack>/
   api.audio(pack.slug).then((a) => { clips = a || {}; panel.paintAudio(); }).catch(() => { clips = {}; });
   const audio = { has: (p) => !!clips?.[p.slug], row: (p) => listen.row(p) };
   const panel = new Panel(root, pack, {

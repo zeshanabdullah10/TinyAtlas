@@ -1,4 +1,4 @@
-data/
+/data/
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -7,3 +7,4 @@ node_modules/
 smoke.png
 shot.png
 dist/
+.venv-tts/

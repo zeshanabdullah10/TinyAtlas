@@ -26,7 +26,7 @@ def _atlas_pack_module():
 @pytest.mark.parametrize("slug", ["swat", "swat-lower"])
 def test_swat_regions_are_atlas_places_with_landmarks_inside_the_bbox(slug):
     cfg = regions.REGIONS[slug]
-    assert cfg["atlas"] == slug and cfg["builtin"] is True and cfg["landmarks"]
+    assert cfg["atlas"] == slug and cfg["landmarks"]
     w, s, e, n = cfg["bbox"]
     assert w <= cfg["center"][1] <= e and s <= cfg["center"][0] <= n
     for lm in cfg["landmarks"]:
@@ -38,9 +38,9 @@ def test_swat_regions_are_atlas_places_with_landmarks_inside_the_bbox(slug):
         assert set(tour["stops"]) <= titles
 
 
-def test_swat_names_and_regular_regions_have_no_atlas_field():
+def test_the_app_knows_exactly_two_places():
     assert regions.REGIONS["swat"]["name"] == "Swat Valley" and regions.REGIONS["swat-lower"]["name"] == "Lower Swat"
-    assert "atlas" not in regions.REGIONS["hunza"]
+    assert set(regions.REGIONS) == {"swat", "swat-lower"}
 
 
 @pytest.mark.skipif(not (REAL / "swat" / "atlas" / "places.json").exists(), reason="Atlas packs are not built here")

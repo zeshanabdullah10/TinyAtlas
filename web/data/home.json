@@ -1,0 +1,138 @@
+{
+ "regions": [
+  {
+   "slug": "swat",
+   "title": "Swat Valley",
+   "subtitle": "Kalam · Utror · Ushu · Mahodand",
+   "cover": "packs/swat/atlas/cover.webp",
+   "size_km": [
+    74,
+    63
+   ],
+   "places": 65,
+   "heritage": 1,
+   "lakes": 18,
+   "peak": {
+    "name": "Thalo Zom",
+    "m": 6050,
+    "source": "OpenStreetMap"
+   }
+  },
+  {
+   "slug": "swat-lower",
+   "title": "Lower Swat",
+   "subtitle": "Mingora · Udegram · Malam Jabba",
+   "cover": "packs/swat-lower/atlas/cover.webp",
+   "size_km": [
+    66,
+    82
+   ],
+   "places": 43,
+   "heritage": 16,
+   "lakes": 3,
+   "peak": {
+    "name": "Elum Ghar (Mount Ilam)",
+    "m": 2800,
+    "source": "Wikipedia"
+   }
+  }
+ ],
+ "timeline": [
+  {
+   "era": "Ancient Swat",
+   "years": "c. 1400 BCE to 327 BCE",
+   "events": [
+    {
+     "date": "c. 1400-800 BCE",
+     "text": "Gandhara grave culture along the middle Swat River",
+     "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+    },
+    {
+     "date": "327 BCE",
+     "text": "Alexander the Great storms Odigram (Ora) and Barikot (Bazira)",
+     "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+    }
+   ]
+  },
+  {
+   "era": "Uddiyana",
+   "years": "1st to 7th century",
+   "events": [
+    {
+     "date": "1st-3rd c. CE",
+     "text": "Kushan rule: golden age of Gandhara art, many stupas built",
+     "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+    },
+    {
+     "date": "629-645 CE",
+     "text": "Xuanzang visits Udayana (Swat); records 1,400 monasteries, many desolate",
+     "source": "https://en.wikipedia.org/wiki/Xuanzang"
+    }
+   ]
+  },
+  {
+   "era": "Shahis to Sultanate",
+   "years": "8th to 16th century",
+   "events": [
+    {
+     "date": "From the 8th c.",
+     "text": "Hindu Shahi dynasty rules Swat from capital at Udigram",
+     "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+    },
+    {
+     "date": "12th-16th c.",
+     "text": "Sultanate of Swat, last Dardic state in the valley",
+     "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+    }
+   ]
+  },
+  {
+   "era": "Yusufzai & the Akhund",
+   "years": "1519 to 1849",
+   "events": [
+    {
+     "date": "1519",
+     "text": "Yusufzai Pashtuns conquer Swat; Babur marches toward Swat in January 1519",
+     "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+    },
+    {
+     "date": "1849",
+     "text": "Syed Akbar Shah elected king of Swat (start of the Akhund/Saidu Baba era)",
+     "source": "https://en.wikipedia.org/wiki/Swat_(princely_state)"
+    }
+   ]
+  },
+  {
+   "era": "State of Swat",
+   "years": "1926 to 1969",
+   "events": [
+    {
+     "date": "1926",
+     "text": "British recognise Abdul Wadud as Wali of Swat",
+     "source": "https://en.wikipedia.org/wiki/Wadud_of_Swat"
+    },
+    {
+     "date": "1969",
+     "text": "Swat, Chitral and Dir fully integrated into Pakistan; Swat State ends",
+     "source": "https://en.wikipedia.org/wiki/Swat_(princely_state)"
+    }
+   ]
+  },
+  {
+   "era": "Recent years",
+   "years": "2007 to 2025",
+   "events": [
+    {
+     "date": "2007-2009",
+     "text": "Armed conflict in Swat between Pakistani security forces and the militant Tehrik-i-Taliban; government control re-established mid-2009",
+     "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+    },
+    {
+     "date": "2025",
+     "text": "Heavy flooding again strikes Swat",
+     "source": "https://en.wikipedia.org/wiki/2025_Pakistan_floods"
+    }
+   ]
+  }
+ ]
+}

@@ -3,72 +3,124 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tiny Atlas</title>
-<meta name="description" content="Miniature 3D maps of real places, drawn from open elevation and map data, with a guide that only tells you what its sources say.">
-<meta name="theme-color" content="#cfd3cb">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/icon.svg">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f5c52'/%3E%3Cpath d='M5 24 13 9l5 8 3-4 6 11H5Z' fill='%23fbfaf6'/%3E%3C/svg%3E">
+<title>Swat Valley: a true illustrated 3D map | Tiny Atlas</title>
+<meta name="description" content="A true-to-the-ground illustrated 3D map of Swat, Pakistan. Every ridge, river, road and stupa sits where it really is, with sourced stories, a day planner and offline use.">
+<meta name="theme-color" content="#15120f">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Swat Valley: a true illustrated 3D map">
+<meta property="og:description" content="Every ridge, river, road and stupa of Swat where it really is. Kalam, Utror, Ushu, Mahodand, Mingora and the Gandhara heritage.">
+<meta property="og:image" content="img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preload" as="image" href="img/hero-1600.webp" media="(min-width: 701px)" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&family=Schibsted+Grotesk:wght@400;500;600&family=Noto+Nastaliq+Urdu&display=swap">
-<link rel="stylesheet" href="/css/tokens.css">
-<link rel="stylesheet" href="/css/app.css">
-<script type="importmap">
-{ "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-} }
-</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&family=Cormorant+SC:wght@600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/home.css">
 </head>
-<body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <symbol id="i-fly" viewBox="0 0 24 24"><path d="M3 11.5 21 4l-6.5 16-3-6.5L3 11.5ZM11.5 13.5 21 4"/></symbol>
-    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></symbol>
-    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3-9 5 9 5 9-5-9-5ZM3 12.5l9 5 9-5M3 16.5l9 5 9-5"/></symbol>
-    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></symbol>
-    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1ZM12 10.2a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6Z"/></symbol>
-    <symbol id="i-help" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5M12 16.6v.1"/></symbol>
-    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
-    <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5 7.5 12l7 7"/></symbol>
-    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-4 16-4.5-6.5L4 12Z"/></symbol>
-    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M7 5v14M17 5v14M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
-    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M5 19h14"/></symbol>
-    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s6-5.6 6-11a6 6 0 1 0-12 0c0 5.4 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></symbol>
-    <symbol id="i-go" viewBox="0 0 24 24"><path d="M12 2.5 19 20l-7-3.5L5 20l7-17.5Z"/></symbol>
-    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol>
-    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-    <symbol id="i-route" viewBox="0 0 24 24"><path d="M8 17h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="5" r="2"/></symbol>
-    <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-4-4"/></symbol>
-    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/></symbol>
-    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5-12-7.5Z"/></symbol>
-    <symbol id="i-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
-    <symbol id="k-fort" viewBox="0 0 24 24"><path d="M4 20V9h3V6h2v3h2V6h2v3h2V6h2v3h3v11M10 20v-5h4v5"/></symbol>
-    <symbol id="k-temple" viewBox="0 0 24 24"><path d="m12 3 8 5H4l8-5ZM6 8v9M10 8v9M14 8v9M18 8v9M4 20h16"/></symbol>
-    <symbol id="k-peak" viewBox="0 0 24 24"><path d="M3 19 10 6l3.5 6 2-3L21 19H3Z"/></symbol>
-    <symbol id="k-glacier" viewBox="0 0 24 24"><path d="m4 19 4-10 3 4 3-6 6 12H4ZM8 15l2 4M14 13l1 6"/></symbol>
-    <symbol id="k-lake" viewBox="0 0 24 24"><path d="M3 15c3-3 6 3 9 0s6 3 9 0M3 19c3-3 6 3 9 0s6 3 9 0M12 4c2 3 4 4 4 6.5a4 4 0 0 1-8 0C8 8 10 7 12 4Z"/></symbol>
-    <symbol id="k-waterfall" viewBox="0 0 24 24"><path d="M6 4h12M9 4v9M12 4v11M15 4v9M6 19c2-2 4 2 6 0s4 2 6 0"/></symbol>
-    <symbol id="k-bridge" viewBox="0 0 24 24"><path d="M2 16h20M4 16V8M20 16V8M4 8c4 6 12 6 16 0M8 16v-4M12 16v-4.5M16 16v-4"/></symbol>
-    <symbol id="k-museum" viewBox="0 0 24 24"><path d="m12 3-9 5v2h18V8l-9-5ZM6 10v8M10 10v8M14 10v8M18 10v8M3 21h18"/></symbol>
-    <symbol id="k-tower" viewBox="0 0 24 24"><path d="m9 21 1-13h4l1 13M8 8h8l-1.5-4h-5L8 8ZM12 4V2"/></symbol>
-    <symbol id="k-ruins" viewBox="0 0 24 24"><path d="M4 20V11h4v9M12 20v-6h4v6M3 20h18"/></symbol>
-    <symbol id="k-monument" viewBox="0 0 24 24"><path d="m12 3 3 17H9L12 3ZM7 20h10"/></symbol>
-    <symbol id="k-park" viewBox="0 0 24 24"><path d="M12 3c4 3 6 6 6 9a6 6 0 0 1-12 0c0-3 2-6 6-9ZM12 18v3"/></symbol>
-    <symbol id="k-town" viewBox="0 0 24 24"><path d="M4 20V11l4-3 4 3v9M12 20v-8l4-3 4 3v8M3 20h18"/></symbol>
-    <symbol id="k-rail" viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1ZM5 10h14M8 20l2-3M16 20l-2-3"/></symbol>
-    <symbol id="k-pin" viewBox="0 0 24 24"><path d="M12 21s6-5.6 6-11a6 6 0 1 0-12 0c0 5.4 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></symbol>
-  </defs>
-</svg>
-<a class="skip" href="#app">Skip to content</a>
-<div id="wall" aria-hidden="true"></div>
-<main id="app"></main>
-<div id="toasts" role="status" aria-live="polite"></div>
-<script type="module" src="/js/main.js"></script>
-<noscript><p style="padding:2rem;font-family:system-ui">Tiny Atlas draws 3D maps in the browser, so it needs JavaScript.</p></noscript>
+<body class="home">
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <a class="brand" href="./" aria-label="Tiny Atlas, home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#15120f" stroke="rgba(243,235,221,.32)"/><path d="M5 24 13 9l5 8 3-4 6 11H5Z" fill="#e9a23b"/></svg>
+    <span>Tiny Atlas</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="#valleys">The valleys</a>
+    <a href="#through-time">Through time</a>
+    <a href="#how">How it is made</a>
+    <a href="https://github.com/zeshanabdullah10/tinyatlas" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="h-title">
+    <picture class="hero-art">
+      <source media="(max-width: 700px)" srcset="img/hero-800.webp">
+      <img src="img/hero-1600.webp" alt="An illustrated oblique view over the snow peaks and forested valleys of upper Swat at golden hour" width="1600" height="1067" fetchpriority="high">
+    </picture>
+    <div class="hero-copy">
+      <h1 id="h-title">Swat Valley</h1>
+      <p class="sub"><span class="rule"></span><em>Kalam · Utror · Ushu · Mahodand · Mingora</em><span class="rule"></span></p>
+      <p class="lead">A true-to-the-ground illustrated map of Swat: every ridge, river, road and stupa where it really is.</p>
+      <p class="cta">
+        <a class="btn btn-primary" href="atlas.html?pack=swat">Open the map</a>
+        <a class="btn btn-ghost" href="atlas.html?pack=swat-lower">Lower Swat &amp; the Gandhara heritage</a>
+      </p>
+    </div>
+    <p class="hero-cap">Upper Swat seen from the south, heights exaggerated. Drawn from open elevation data.</p>
+  </section>
+
+  <section class="band" id="valleys" aria-labelledby="h-valleys">
+    <h2 id="h-valleys">Two valleys, one true map</h2>
+    <p class="band-sub">Each one opens as a map you can fly, tilt and read.</p>
+    <div class="cards" id="regions">
+      <noscript><p><a class="btn btn-primary" href="atlas.html?pack=swat">Open Swat Valley</a> <a class="btn btn-ghost" href="atlas.html?pack=swat-lower">Open Lower Swat</a></p></noscript>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="h-do">
+    <h2 id="h-do">What you can do</h2>
+    <ul class="features">
+      <li>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+        <h3>Explore in golden light</h3>
+        <p>Fly over the 3D map at golden hour, then slide the sun to any time of day and watch the ridges cast their shadows.</p>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.6 6-11a6 6 0 1 0-12 0c0 5.4 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>
+        <h3>Every place, with its sources</h3>
+        <p>Each place has its story, timeline and facts. Every fact is quoted from its source, with a link to read more.</p>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 17h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="5" r="2"/></svg>
+        <h3>Plan a day on the real roads</h3>
+        <p>Choose from the places on the map and see the day drawn along the roads. Times follow the road type, paved, jeep or track, and are labelled estimates.</p>
+      </li>
+      <li>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg>
+        <h3>Save a valley for offline</h3>
+        <p>Download a whole valley once and keep exploring in the mountains, where the signal drops out.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="band" id="through-time" aria-labelledby="h-time">
+    <h2 id="h-time">Swat through time</h2>
+    <p class="band-sub">Six eras, from the grave culture of the middle Swat River to the floods of 2025. Each event links to its source.</p>
+    <ol class="timeline" id="timeline" tabindex="0" aria-label="Timeline of six eras"></ol>
+  </section>
+
+  <section class="band how" id="how" aria-labelledby="h-how">
+    <div>
+      <h2 id="h-how">Real data sets the facts; AI only paints.</h2>
+      <p class="prose">Terrain, roads, rivers, lakes and places come from open data and sit at their true coordinates. Nothing is ever moved. Artificial intelligence paints the surface on top of that geometry and never decides where anything is. The day planner chooses only among options the app has measured.</p>
+      <p class="prose">Two exaggerations are allowed, and the map says so: heights are stretched to read as mountains, and landmarks are drawn larger than life. A handful of landmark shapes were generated from Commons photos with an open image-to-3D model (TRELLIS), and the map credits them.</p>
+      <p><a class="link" href="https://github.com/zeshanabdullah10/tinyatlas" rel="noopener">Read the code and the data contract on GitHub</a></p>
+    </div>
+    <dl class="sources">
+      <div><dt>Copernicus DEM GLO-30</dt><dd>Terrain heights at 30 m</dd></div>
+      <div><dt>ESA WorldCover 2021</dt><dd>Forest, meadow, snow, water and towns</dd></div>
+      <div><dt>Sentinel-2 cloudless 2016, by EOX</dt><dd>Ground colour from satellite imagery</dd></div>
+      <div><dt>OpenStreetMap</dt><dd>Roads, rivers, lakes, peaks and place names</dd></div>
+      <div><dt>Wikimedia Commons</dt><dd>Photographs, each credited and openly licensed</dd></div>
+    </dl>
+  </section>
+</main>
+
+<footer class="foot">
+  <p class="cta"><a class="btn btn-primary" href="atlas.html?pack=swat">Open the map</a></p>
+  <p>Contains modified Copernicus DEM GLO-30 data, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA · © ESA WorldCover project 2021 (CC BY 4.0) · Imagery: Sentinel-2 cloudless 2016 by EOX IT Services GmbH (CC BY 4.0) · © OpenStreetMap contributors (ODbL) · Photos via Wikimedia Commons, each credited · Sky: Poly Haven (CC0) · 3D shapes: TRELLIS (MIT), procedural stupas · Heights exaggerated, places drawn larger than life.</p>
+  <p><a class="link" href="https://github.com/zeshanabdullah10/tinyatlas" rel="noopener">Source code on GitHub</a> · Tiny Atlas is open source.</p>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+<noscript><p class="nojs">The valley cards and the timeline need JavaScript. The map itself does too.</p></noscript>
 </body>
 </html>

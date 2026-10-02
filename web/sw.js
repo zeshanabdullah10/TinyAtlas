@@ -2,17 +2,19 @@
 // in full when the visitor presses "Save for offline" (the page posts the list of URLs). Place data is served from
 // the cache first when saved; everything else goes to the network first and falls back to the cache.
 
-const SHELL = "tinyatlas-shell-v1";
+const SHELL = "tinyatlas-shell-v2";
 const DATA = "tinyatlas-data-v1";
 // The site may live under a subpath (GitHub Pages); the scope knows where it is ("/" at a domain root).
 const BASE = new URL(self.registration.scope).pathname;
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(SHELL).then((c) => c.addAll([BASE, `${BASE}index.html`, `${BASE}css/tokens.css`, `${BASE}css/app.css`, `${BASE}manifest.webmanifest`,
-    `${BASE}atlas.html`, `${BASE}css/atlas.css`]))   // the Atlas shell; js/atlas/*.js and the rest are cached as they are used, or by "Save for offline"
+  e.waitUntil(caches.open(SHELL).then((c) => c.addAll([BASE, `${BASE}index.html`, `${BASE}css/tokens.css`, `${BASE}css/home.css`, `${BASE}js/main.js`, `${BASE}js/home.js`,
+    `${BASE}js/api.js`, `${BASE}js/dom.js`, `${BASE}data/home.json`, `${BASE}img/hero-1600.webp`, `${BASE}img/hero-800.webp`, `${BASE}manifest.webmanifest`,
+    `${BASE}icon.svg`, `${BASE}atlas.html`, `${BASE}css/atlas.css`]))   // home + the Atlas shell; js/atlas/*.js and the rest are cached as they are used, or by "Save for offline"
     .then(() => self.skipWaiting()));
 });
-self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
+self.addEventListener("activate", (e) => e.waitUntil(
+  caches.keys().then((ks) => Promise.all(ks.filter((k) => k.startsWith("tinyatlas-shell-") && k !== SHELL).map((k) => caches.delete(k)))).then(() => self.clients.claim())));
 
 self.addEventListener("message", (e) => {
   if (e.data?.type !== "save") return;
@@ -39,7 +41,7 @@ self.addEventListener("fetch", (e) => {
   const isData = rel.startsWith("/packs/") || rel.startsWith("/api/");
   e.respondWith((async () => {
     const hit = await caches.match(req);
-    if (hit && (cdn || rel.startsWith("/packs/") || /\.(png|jpg|webp|m4a|bin)$|\/(terrain|horizon|near|texture|audio-file|view-image)\//.test(rel))) return hit;
+    if (hit && (cdn || rel.startsWith("/packs/") || /\.(png|jpg|webp|m4a|bin)$|\/audio-file\//.test(rel))) return hit;
     try {
       const r = await fetch(req);
       if (r.ok && (!isData || hit)) (await caches.open(isData ? DATA : SHELL)).put(req, r.clone());   // refresh what is saved

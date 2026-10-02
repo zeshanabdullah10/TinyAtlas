@@ -1,105 +1,93 @@
-# Tiny Atlas
+# Tiny Atlas: Swat
 
-A free travel companion for Northern Pakistan's valleys, built on 3D miniatures of the real terrain. See the view from
-the best spots at any season and time of day, work out which summits you're looking at, plan a trip on the real roads,
-and carry an audio guide that works with no signal.
+A true-to-the-ground, illustrated 3D map of Swat, Pakistan (Khyber Pakhtunkhwa). Upper Swat (Kalam, Utror, Ushu,
+Mahodand, Kumrat) and Lower Swat (Mingora, the Gandhara stupas, Udegram, Barikot, Malam Jabba) are drawn in a
+golden-hour poster style, while every ridge, river, road and place sits at its real coordinates.
 
-**The rule everything follows: real data sets the facts, AI only paints, speaks and plans on top of them.** Terrain,
-roads, water, summits, sunlight and travel times are computed from open data. Image models are pinned to that
-geometry, the planner may only choose among measured options, extracted facts must quote their source, and anything
-generated is labelled.
+**The rule everything follows: real data sets the facts, AI only paints.** Terrain, roads, water, places, heights,
+distances and travel times come from open data. Image models are pinned to that geometry, the day planner may only
+choose among measured options, every fact carries a verbatim quote from its source, and exaggeration (heights,
+landmarks drawn larger than life) is labelled on the map.
 
-## What a traveller can do
-- **See the view before you go** (Views tab). Every curated viewpoint has pictures for four seasons and three times
-  of day, painted by SDXL over a depth image ray-cast from the real skyline, with water seeded where OpenStreetMap
-  puts it. Summit names are laid over from the viewshed, never painted in.
-- **What can I see from here?** Tap anywhere (or "What can I see from here?" on a landmark) for a 360° drawing of the
-  skyline with every visible named summit, earth curvature and refraction included, the day's sun path drawn across
-  it, and "Match my photo" to lay the labels over your own picture.
-- **Real sun and seasons** (the sun button). Real shadows on the terrain for any date and time on the place's clock,
-  one tap for sunrise, golden hour and sunset, "Play the day", and season textures that follow the date.
-- **Plan by talking to the map** (Plan tab). Describe the trip; the planner picks stops into days, and every distance,
-  time and altitude is recomputed by the server, with warnings for long days and fast altitude gain. Each day draws
-  on the map.
-- **Know before you go** (Place tab). Practical facts from Wikivoyage and Wikipedia, each kept only if its quote is
-  really in the source.
-- **Listen** (Place tab). Every landmark's placard plays its story in English, Urdu or Mandarin, with the text to
-  read along; "Save for offline" (the download button) caches the whole place for the valley with no signal.
-- **My trip.** Drop in trip photos: they are pinned by GPS and turned into a short film, all in the browser.
-- **Ask the guide**, **fly the route**, share links, pictures, and "Build any place" for anywhere else.
+## What a visitor can do
+- **Open the landing page** (`/`): two valley cards with real figures read from the packs, a "Swat through time"
+  strip of six eras with sources, and a plain statement of how the map is made.
+- **Explore the map** (`/atlas.html?pack=swat` or `?pack=swat-lower`): fly, tilt and zoom a real-time 3D relief map,
+  switch between the areas in the Explore dock, search places, and slide the sun through any time of day (default
+  golden hour).
+- **Read a place**: tap a label for its story, timeline and facts, each quoted from its source with a link, plus
+  credited photos.
+- **Plan a day** on the real roads: describe the trip, and the planner picks from the map's places; every leg is
+  measured on the pack's roads with times by road type (paved 40, minor 25, jeep 14, track 9 km/h, slope-adjusted),
+  shown as estimates, and drawn on the map.
+- **Save a valley for offline** (download button): the whole pack goes into the service worker's cache.
+
+The audio guide (narration and voices) is in progress and ships in the next release.
 
 ## Run
 ```
 pip install -r backend/requirements.txt
-cd backend && uvicorn tinyatlas.api:app --port 8000         # open http://localhost:8000
-python -m pytest                                          # from the repo root, no network needed
-python backend/tools/smoke.py                             # end-to-end browser check against the running app
+cd backend && uvicorn tinyatlas.api:app --port 8000     # open http://localhost:8000
+python -m pytest -q                                      # from the repo root, no network needed
+python backend/tools/smoke.py                            # browser check of the running app (needs Playwright + Edge)
 ```
-Built-in places live in `backend/tinyatlas/regions.py`: Hunza, Skardu, Fairy Meadows, Naran and Kaghan, Deosai and
-Khunjerab, each with hand-checked landmarks, tours and viewpoints. Data is cached under `data/` (gitignored).
-Swat Valley and Lower Swat are Atlas places (`"atlas": "<pack>"` in `regions.py`): their cards open `/atlas.html?pack=<slug>`, the real-time illustrated map, with the same planner, audio guide and "save for offline" (`docs/atlas-pack-v1.md`).
+The server serves `web/` and the built packs under `/packs`. The two places are defined in
+`backend/tinyatlas/regions.py`; each points at an Atlas pack in `data/packs/<slug>/atlas/` (gitignored, see below).
 
-## Static site (what goes public)
+## Data and build pipeline
+Everything under `data/` is generated and gitignored. Full step-by-step, with parameters and lessons, is in
+`docs/HANDOFF.md`; the pack format is in `docs/atlas-pack-v1.md`.
+```
+python backend/tools/geo_bundle.py swat --bbox 72.10 35.30 72.90 35.85 --res 30     # DEM, land cover, satellite, OSM
+python backend/tools/blender/prep.py data/bundles/swat                                # de-lit albedo, trees, lakes
+blender -b -P backend/tools/blender/build_scene.py -- --bundle data/bundles/swat ...  # poster renders, albedo bake
+python backend/tools/atlas_pack.py swat                                               # bundle + research -> Atlas pack
+python backend/tools/home_data.py                                                     # landing-page stats, timeline, hero art
+```
+Other tools: `collect_photos.py` (licence-filtered Commons photos), `poster_labels.py`, `atlas_shot.py` (headless
+screenshots), `buildings3d.py` + `trellis_*` (landmark shapes on a RunPod GPU), `paintover.py` (parked), `pod_run.py`
+and `pod_files.py` (RunPod via Jupyter), `audio.py` and `tts_*` (audio guide, in progress).
+
+## Static site
 ```
 python backend/tools/pack.py --api https://api.example.org --base-url https://tinyatlas.example.org
 ```
-writes `dist/`: the app, one pack per place under `packs/<slug>/` (terrain, textures per season, panorama grids,
-previews, audio, facts, points of interest), an indexable page per place under `place/<slug>/`, `sitemap.xml` and
-`robots.txt`. Serve it from any CDN (Cloudflare Pages, GitHub Pages). Only the guide and the planner call the live
-server; run that anywhere with `TINYATLAS_CORS=https://tinyatlas.example.org` and an OpenRouter key. Both endpoints
-are rate limited per visitor (`LIMITS` in `api.py`).
+writes `dist/`: the landing page, `atlas.html`, `packs/swat/atlas/` and `packs/swat-lower/atlas/`, `sitemap.xml` and
+`robots.txt`. It works under a subpath (GitHub Pages: `--base-url https://user.github.io/tinyatlas`). Only the day
+planner needs the live server; run it with `TINYATLAS_CORS=<site origin>` and an OpenRouter key. The planner is rate
+limited per visitor (`LIMITS` in `api.py`).
 
 ## LLM
 ```
 # .env in the repo root (gitignored)
 OPENROUTER_API_KEY=sk-or-...
 TINYATLAS_MODEL=deepseek/deepseek-v4.1-flash          # default for every task
-TINYATLAS_MODEL_PLANNER=...                           # optional per task: _PLANNER, _EXTRACT, _NARRATION, _GUIDE
+TINYATLAS_MODEL_PLANNER=...                           # optional per task
 ```
-Answers are cached by prompt hash in `data/llm/`; empty replies are retried once and never cached; usage is logged to
-`data/llm/usage.jsonl` and shown at `/api/status`.
+Replies are cached by prompt hash in `data/llm/` and usage is shown at `/api/status`.
 
-## GPU batch jobs (RunPod)
-All GPU work is precomputed; nothing runs on a GPU per visitor. With a ComfyUI pod (official "ComfyUI" template) and
-`POD_ID` / `POD_JUPYTER_TOKEN` in `.env`:
-
-| Job | Command | Models |
-|---|---|---|
-| Season textures | `COMFY_URL=... python backend/tools/stylize.py <region> --season autumn` | SD1.5 + depth/lineart ControlNet |
-| View previews | `COMFY_URL=... python backend/tools/previews.py <region>` (`--dry` for depth only) | RealVisXL v5 + SDXL depth ControlNet |
-| Audio guide | `python backend/tools/audio.py <region>` (needs `tts_setup.sh` run on the pod once) | Kokoro-82M (en, zh), MMS-TTS Urdu |
-| Landmark models | `python backend/tools/models3d.py <region>` (needs `h3d_setup.sh` once) | Hunyuan3D-2 shape |
-
-`pod_run.py` runs a command on the pod and `pod_files.py` copies files, both through Jupyter. Everything is cached,
-so re-runs only pay for what is missing. Stop or terminate the pod when a batch is done.
-
-## Tools
-`panorama.py lat lon` lists the summits visible from a point; `try_planner.py region "request"` runs facts and the
-planner from the shell; `screenshot.py` takes app screenshots (`--sun`, `--eval`, `--open`); `export.py` writes a
-flyover video or print poster; `check_viewshed_port.mjs` checks the JS viewshed against Python.
+## Layout
+```
+backend/tinyatlas/  api (FastAPI)  regions  atlaspack  planner  routing  sun  llm  narration  stylize (used by paintover)
+backend/tools/      Atlas pipeline, pack.py (static site), smoke.py, home_data.py, RunPod and audio tools
+web/                index.html + js/home.js (landing), atlas.html + js/atlas/* (renderer and UI), planner.js, listen.js,
+                    api.js, dom.js, css/{tokens,home,atlas}.css, sw.js (offline), manifest, data/home.json, img/
+docs/               HANDOFF.md, atlas-pack-v1.md, CLEANUP-v2.1.md
+```
 
 ## Design
-A museum vitrine: a lichen-grey gallery wall, placard-white labels, a walnut plinth, plaster-white landmark
-maquettes. Schibsted Grotesk for interface, Literata for stories, Noto Nastaliq Urdu for Urdu. Tokens live in
-`web/css/tokens.css`; the only saturated colours are content (route, water, the sun).
-
-## Architecture
-```
-backend/tinyatlas/  regions  terrain  osm  paint  tiles  stylize  routing  guide  sources  discover  geocode
-                    sun  viewshed  views  planner  facts  narration  llm  builder+jobs  api (FastAPI)
-web/js/             main  home  place  scene  light  sun  viewshed  panorama  views  planner  listen  keepsake  models  api  dom
-web/                sw.js (offline)  manifest.webmanifest
-backend/tools/      pack  stylize  previews  audio  models3d  panorama  try_planner  pod_run  pod_files  screenshot  export  smoke
-```
-`sun.js` and `viewshed.js` are line-for-line ports of their Python modules; keep them in step.
+Warm near-black glass over the picture, cream type, one saffron accent (`#e9a23b`). Cormorant SC for titles,
+Cormorant Garamond italic for subtitles, Schibsted Grotesk for the interface, Literata for prose, Noto Nastaliq Urdu
+for Urdu names. Tokens live in `web/css/tokens.css`.
 
 ## Known limits
-- Seasonal colours and snow are typical conditions, not a forecast; the app says so.
-- Travel times are estimates from road steepness and walking pace, not traffic or road closures.
-- Summit names depend on OpenStreetMap; a peak missing there is missing from the panorama.
-- Place building has no login: run the full server locally or behind your own auth; the public site is static.
+- Heights are exaggerated and landmarks drawn larger than life; the map says so.
+- Travel times are estimates from road class and slope, not traffic or closures.
+- Some places have no verifiable coordinates yet and are left out rather than guessed (see `docs/HANDOFF.md` section 3.3).
 
 ## Attribution
-Elevation: Mapzen and AWS Terrain Tiles. Map data, summits and points of interest © OpenStreetMap contributors (ODbL).
-Place search by Nominatim. Landmark photos and text © Wikipedia and Wikivoyage contributors (CC BY-SA, each linked).
-View previews painted with RealVisXL; voices by Kokoro-82M and Meta MMS-TTS; landmark shapes by Tencent Hunyuan3D-2.
+Contains modified Copernicus DEM GLO-30 data, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018,
+provided under COPERNICUS by the European Union and ESA. © ESA WorldCover project 2021 (CC BY 4.0). Imagery:
+Sentinel-2 cloudless 2016 by EOX IT Services GmbH (CC BY 4.0). © OpenStreetMap contributors (ODbL). Photos via
+Wikimedia Commons, each credited (CC0, public domain, CC BY or CC BY-SA). Sky: Poly Haven (CC0). 3D shapes: TRELLIS
+(MIT) and procedural stupas. Facts and history from Wikipedia and Wikidata (CC BY-SA), each linked.

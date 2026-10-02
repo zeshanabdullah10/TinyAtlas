@@ -1,11 +1,11 @@
 {
-  "name": "Tiny Atlas",
+  "name": "Tiny Atlas: Swat Valley",
   "short_name": "Tiny Atlas",
-  "description": "3D miniatures of Northern Pakistan's valleys: see the view before you go, plan with the map, and an offline audio guide.",
+  "description": "A true-to-the-ground illustrated 3D map of Swat, Pakistan: Kalam, Ushu, Mahodand, Mingora and the Gandhara heritage, with sourced stories, a day planner and offline use.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#cfd3cb",
-  "theme_color": "#1f5c52",
+  "background_color": "#15120f",
+  "theme_color": "#15120f",
   "icons": [
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
