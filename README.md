@@ -1,8 +1,12 @@
+
 # Tiny Atlas: Swat
 
 A true-to-the-ground, illustrated 3D map of Swat, Pakistan (Khyber Pakhtunkhwa). Upper Swat (Kalam, Utror, Ushu,
 Mahodand, Kumrat) and Lower Swat (Mingora, the Gandhara stupas, Udegram, Barikot, Malam Jabba) are drawn in a
 golden-hour poster style, while every ridge, river, road and place sits at its real coordinates.
+
+<img width="1672" height="941" alt="Tiny Atlas_ Swat in 3D" src="https://github.com/user-attachments/assets/36c9f435-87bc-4137-acc9-141abe1dffbf" />
+
 
 **The rule everything follows: real data sets the facts, AI only paints.** Terrain, roads, water, places, heights,
 distances and travel times come from open data. Image models are pinned to that geometry, the day planner may only
