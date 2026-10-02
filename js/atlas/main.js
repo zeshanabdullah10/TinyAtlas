@@ -8,7 +8,7 @@ import { Sky } from "./sky.js";
 import { Trees } from "./trees.js";
 import { Water } from "./water.js";
 import { Roads } from "./roads.js";
-import { Landmarks } from "./landmarks.js";
+import { Landmarks, HERO_M, CAP_M } from "./landmarks.js";
 import { Labels } from "./labels.js";
 import { Panel } from "./panel.js";
 import { MapControls } from "./controls.js";
@@ -91,7 +91,7 @@ async function boot(slug, { base, time = null } = {}) {
 
   const anchorOf = (pl) => [pl.anchor?.[0] ?? pl.x, pl.anchor?.[1] ?? pl.z];
   const listen = makeListen({ api, slug: pack.slug });
-  let clips = null;                                      // the place's audio guide; none has been recorded for Swat yet
+  let clips = null;                                      // the place's audio guide; English clips from data/audio/<pack>/
   api.audio(pack.slug).then((a) => { clips = a || {}; panel.paintAudio(); }).catch(() => { clips = {}; });
   const audio = { has: (p) => !!clips?.[p.slug], row: (p) => listen.row(p) };
   const panel = new Panel(root, pack, {
@@ -140,7 +140,7 @@ async function boot(slug, { base, time = null } = {}) {
   let nDone = 0;
   await Promise.all(steps.map(([n, p]) => p.catch((e) => console.warn(n, e.message)).then(() => ui.setProgress(++nDone / steps.length, n))));
 
-  trees.clearings = landmarks.items.map((i) => ({ x: i.place.x, z: i.place.z, r: Math.max(40, Math.min(260, i.foot * 8)) * 0.65 }));   // displayed footprint + 30 %
+  trees.clearings = landmarks.items.map((i) => ({ x: i.place.x, z: i.place.z, r: Math.min(CAP_M, Math.max(i.foot, HERO_M)) * 0.65 }));   // displayed footprint + 30 %
 
   // ---- picking: tap a landmark, double-click the ground
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();

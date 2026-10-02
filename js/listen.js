@@ -36,6 +36,7 @@ export function makeListen({ api, slug }) {
     const paint = () => {
       const c = pick(lm);
       if (!c) { el.replaceChildren(); return; }
+      const langs = LANGS.filter(([k]) => clips?.[lm.slug]?.[k]);                 // only languages with a clip; one language: no switch
       const mine = current === c, playing = mine && !audio.paused;
       el.replaceChildren(
         h("div", { class: "listen-row" },
@@ -43,8 +44,8 @@ export function makeListen({ api, slug }) {
             icon(playing ? "i-stop" : "i-play")),
           h("div", {}, h("b", {}, "Listen to this place"),
             h("span", { class: "listen-sub" }, `Audio guide · ${Math.round(c.seconds)} s`)),
-          h("div", { class: "segs listen-langs", role: "group", "aria-label": "Audio language" },
-            ...LANGS.filter(([k]) => clips?.[lm.slug]?.[k]).map(([k, label]) =>
+          langs.length > 1 && h("div", { class: "segs listen-langs", role: "group", "aria-label": "Audio language" },
+            ...langs.map(([k, label]) =>
               h("button", { class: "seg", type: "button", lang: k, "aria-pressed": String(k === lang), onclick: () => { lang = k; stored("tinyatlas.lang", k); if (current) { audio.pause(); current = null; } sync(); } }, label)))),
         h("details", { class: "listen-text" }, h("summary", {}, "Read along"),
           h("p", { dir: c.file.endsWith(".ur.m4a") ? "rtl" : "auto", lang: c.file.match(/\.(\w+)\.m4a$/)?.[1] }, c.text)));

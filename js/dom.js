@@ -24,7 +24,7 @@ export function fill(el, ...kids) {
 
 const SVG = "http://www.w3.org/2000/svg";
 
-/** An icon from the sprite in index.html (`i-*` for interface, `k-*` for landmark kinds). */
+/** An icon from the sprite in the page (`i-*`). */
 export function icon(name, cls = "ic") {
   const svg = document.createElementNS(SVG, "svg");
   svg.setAttribute("class", cls);
@@ -34,10 +34,6 @@ export function icon(name, cls = "ic") {
   svg.append(use);
   return svg;
 }
-
-export const kindIcon = (kind) => icon(`k-${KINDS.has(kind) ? kind : "pin"}`);
-export const KINDS = new Set(["fort", "temple", "peak", "glacier", "lake", "waterfall", "bridge", "museum", "tower",
-  "ruins", "monument", "park", "town", "rail", "pin"]);
 
 export const KIND_LABEL = {
   fort: "Fort or palace", temple: "Place of worship", peak: "Peak", glacier: "Glacier", lake: "Lake",
@@ -50,9 +46,3 @@ export function toast(message, ms = 2600) {
   document.getElementById("toasts").append(t);
   setTimeout(() => t.remove(), ms);
 }
-
-export const $ = (sel, root = document) => root.querySelector(sel);
-export const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
-export const fmtKm = (m) => (m >= 10000 ? `${Math.round(m / 1000)} km` : `${(m / 1000).toFixed(1)} km`);
-export const fmtM = (m) => `${Math.round(m).toLocaleString("en")} m`;
-export const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
