@@ -7,7 +7,24 @@ const TIER_MAX_DIST = { 1: Infinity, 2: 75000, 3: 30000, 4: 15000 };   // camera
 const LEAD = 24;
 const DIRS = [[0, -1], [1, -1], [-1, -1], [1, 0], [-1, 0], [0, 1], [1, 1], [-1, 1]];
 const DISTS = [60, 100, 140];
-const tierOf = (p) => p.tier;
+const HERITAGE = new Set(["stupa", "monastery", "palace", "museum", "archaeological_site", "mosque", "fort_ruin", "rock_carving", "temple", "fort"]);
+const tierOf = (p) => (HERITAGE.has(p.kind) && p.tier > 1 ? Math.min(p.tier, 1.5) : p.tier);        // heritage ranks just after tier 1
+const TIER_KEY = (t) => (t === 1.5 ? 2 : t);
+const SVGNS = "http://www.w3.org/2000/svg";
+const ICONS = {          // 12 px outline icons: stupa (dome on a plinth), column, arch
+  stupa: "M2 11h8M3 11V9h6v2M3.5 9a2.5 2.5 0 0 1 5 0M6 6.5V3M5 3h2",
+  column: "M2 11h8M3 9.5h6M4 9.5V4M8 9.5V4M2.5 4h7M6 1.5l3.5 2.5h-7Z",
+  arch: "M2 11V6a4 4 0 0 1 8 0v5M4.5 11V6.5a1.5 1.5 0 0 1 3 0V11",
+};
+const ICON_OF = { stupa: "stupa", monastery: "stupa", palace: "column", museum: "column", archaeological_site: "column", fort_ruin: "column", fort: "column", temple: "column", rock_carving: "column", mosque: "arch" };
+function icon(kind) {
+  const d = ICONS[ICON_OF[kind]];
+  if (!d) return null;
+  const s = document.createElementNS(SVGNS, "svg");
+  s.setAttribute("viewBox", "0 0 12 12"); s.setAttribute("class", "kic"); s.setAttribute("aria-hidden", "true");
+  s.innerHTML = `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return s;
+}
 
 export class Labels {
   constructor(pack, layer, { onPick, anchorLift = () => 0 } = {}) {
@@ -22,7 +39,7 @@ export class Labels {
   make(p) {
     const e = p.label_elevation_m;
     const chip = h("button", { class: "chip", type: "button", "aria-label": p.name, onClick: (ev) => { ev.stopPropagation(); this.onPick?.(p); } },
-      h("span", { class: "nm" }, p.name), ELEV_KINDS.has(p.kind) && e != null ? h("span", { class: "el" }, `${Math.round(e).toLocaleString("en")} m`) : null);
+      h("span", { class: "nm" }, icon(p.kind), p.short_name || p.name), ELEV_KINDS.has(p.kind) && e != null ? h("span", { class: "el" }, `${Math.round(e).toLocaleString("en")} m`) : null);
     const el = h("div", { class: "lbl off", dataset: { tier: tierOf(p) } }, chip, h("i", { class: "lead" }), h("i", { class: "dot" }));
     this.layer.append(el);
     return { place: p, tier: tierOf(p), ox: 0, oy: -(LEAD + 5), el, chip, w: 80, h: 28, fs: 0, shown: false, want: false, sx: 0, sy: 0, vis: false, fade: 0 };
@@ -34,7 +51,8 @@ export class Labels {
       const p = it.place, kind = p.kind;
       const base = kind === "lake" ? this.pack.yOf(p.ground_m ?? this.pack.heightAt(p.x, p.z)) : this.pack.groundY(p.x, p.z);
       const ax = p.anchor?.[0] ?? p.x, az = p.anchor?.[1] ?? p.z;
-      it.pos = new THREE.Vector3(ax, (kind === "lake" ? base : this.pack.groundY(ax, az)) + 14 + this.anchorLift(p.slug), az);
+      it.base = kind === "lake" ? base : this.pack.groundY(ax, az);
+      it.pos = new THREE.Vector3(ax, it.base + 14 + this.anchorLift(p.slug), az);
     }
   }
 
@@ -52,11 +70,12 @@ export class Labels {
       it.onscreen = this.v.z < 1 && x > -40 && x < W + 40 && y > 20 && y < H + 40;
       if (it.onscreen) it.el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;
     }
+    if (slow) for (const it of this.items) if (it.place.model) it.pos.y = it.base + 14 + this.anchorLift(it.place.slug);
     if (!slow || !this.on) return;
     const blockers = [...(this.block ? [this.block] : []), ...(this.blockers?.() ?? [])];
     const taken = [];
     const pad = 5, clash = (r) => taken.some((o) => r[0] < o[2] + pad && r[2] > o[0] - pad && r[1] < o[3] + pad && r[3] > o[1] - pad);
-    const cand = this.items.filter((it) => it.onscreen && (it.place.slug === this.selected || camDist <= (TIER_MAX_DIST[it.tier] ?? 15000)));
+    const cand = this.items.filter((it) => it.onscreen && (it.place.slug === this.selected || camDist <= (TIER_MAX_DIST[TIER_KEY(it.tier)] ?? 15000)));
     cand.sort((a, b) => (a.place.slug === this.selected ? -1 : b.place.slug === this.selected ? 1 : a.tier - b.tier || cp.distanceToSquared(a.pos) - cp.distanceToSquared(b.pos)));
     const show = new Set();
     for (const it of cand) {
@@ -82,7 +101,7 @@ export class Labels {
         it.el.style.setProperty("--ll", len + "px"); it.el.style.setProperty("--la", Math.atan2(-pos[0], pos[1]) + "rad");
       }
       const occ = !isSel && this.pack.occluded(cp, it.pos, 40 + d * 0.004);
-      if (occ && it.tier > 2) continue;                                                  // tiers 1-2 stay as ghosts
+      if (occ && it.tier >= 3) continue;                                                  // tiers 1-2 stay as ghosts
       it.ghost = occ; taken.push(rect); show.add(it);
     }
     for (const it of this.items) {

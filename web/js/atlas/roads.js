@@ -3,11 +3,12 @@ import * as THREE from "three";
 import { buildRibbon, ribbonMaterial, PALETTE } from "./ribbon.js";
 
 const CLASSES = {   // real width (m), pixel floor, dash period (m, 0 = solid)
-  paved: { w: 9, px: 1.5, dash: 0 }, jeep: { w: 5, px: 1.0, dash: 0, opacity: 0.6 }, track: { w: 2.5, px: 0.8, dash: 22, opacity: 0.35, maxD: 3000 },
-  path: { w: 2, px: 1.2, dash: 18, opacity: 0.4, maxD: 3000 },
+  paved: { w: 9, px: 1.5, dash: 0 }, jeep: { w: 5, px: 1.0, dash: 0, opacity: 0.6, fade: [12000, 26000] }, track: { w: 2.5, px: 0.8, dash: 22, opacity: 0.35, maxD: 3000 },
+  minor: { w: 2.2, px: 0.7, dash: 0, opacity: 0.3, maxD: 4000 }, path: { w: 2, px: 1.2, dash: 18, opacity: 0.4, maxD: 3000 },
 };
 const HERO = 2;
 const lin = (hex) => new THREE.Color(hex);
+const GREYS = [lin(0x9a958c), lin(0xa7a297), lin(0xb7b1a6), lin(0xa09a90)];           // flat concrete roofs
 const ROOFS = [lin(0x8e3b2a), lin(0x3e7a78), lin(0x8c8c88), lin(0x5a4330)];       // rust, teal tin, grey tin, timber
 const rnd = (n) => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
 
@@ -41,7 +42,7 @@ export class Roads {
     this.roadGroup = new THREE.Group(); this.routeGroup = new THREE.Group(); this.houses = new THREE.Group();
     this.group.add(this.roadGroup, this.routeGroup, this.houses);
     this.mats = {};
-    for (const [k, c] of Object.entries(CLASSES)) this.mats[k] = ribbonMaterial({ kind: "road", minPx: c.px, color: k === "track" ? [0.58, 0.5, 0.38] : k === "jeep" ? [0.70, 0.58, 0.42] : PALETTE[k], maxK: 3, legibD: 4500, dash: c.dash, opacity: c.opacity ?? 1, maxD: c.maxD ?? 1e9 });
+    for (const [k, c] of Object.entries(CLASSES)) this.mats[k] = ribbonMaterial({ kind: "road", minPx: c.px, color: k === "track" ? [0.58, 0.5, 0.38] : k === "jeep" ? [0.70, 0.58, 0.42] : k === "minor" ? [0.62, 0.54, 0.42] : PALETTE[k], maxK: 3, legibD: 4500, dash: c.dash, fade: c.fade, opacity: c.opacity ?? 1, maxD: c.maxD ?? 1e9 });
     this.routeMat = ribbonMaterial({ kind: "road", minPx: 2.4, color: PALETTE.route, maxK: 3, legibD: 3000, dash: 40 });
     this.hmat = new THREE.MeshStandardMaterial({ roughness: 0.9, metalness: 0 });
     this.hmat.onBeforeCompile = (sh) => {            // instance colour = roof colour; walls are warm whitewash/tan with variation
@@ -73,16 +74,22 @@ export class Roads {
       const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), T = new THREE.Vector3();
       const col = new THREE.Color();
       list.forEach((b, i) => {
-        const ang = (b.angle_deg * Math.PI) / 180, ca = Math.cos(ang), sa = Math.sin(ang), w = b.w * HERO, d = (b.d ?? b.w * 0.7) * HERO;
+        const ang = (b.angle_deg * Math.PI) / 180, ca = Math.cos(ang), sa = Math.sin(ang);
+        const area = b.w * (b.d ?? b.w * 0.7), hero = area > 600 ? 1 : HERO;           // big buildings are not enlarged
+        const w = b.w * hero, d = (b.d ?? b.w * 0.7) * hero;
         Q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, -ang);          // angle runs from +x toward +z; rotation about +y runs the other way
         let lo = 1e9;                                                  // sit on the lowest ground under the footprint
         for (const [u, v] of [[0, 0], [-1, -1], [1, -1], [1, 1], [-1, 1]]) {
           const lx = (u * w) / 2, lz = (v * d) / 2;
           lo = Math.min(lo, p.groundY(b.x + lx * ca - lz * sa, b.z + lx * sa + lz * ca));
         }
-        M.compose(T.set(b.x, lo, b.z), Q, S.set(w, HERO, d));
+        M.compose(T.set(b.x, lo, b.z), Q, S.set(w, hero, d));
         im.setMatrixAt(i, M);
-        col.copy(ROOFS[Math.floor(rnd(i * 3 + b.x) * 4) % 4]).multiplyScalar(roof === "flat" ? 0.8 : 1).multiplyScalar(0.9 + rnd(i + 9) * 0.2);
+        const r = rnd(i * 3 + b.x);
+        if (roof === "flat") col.copy(GREYS[Math.floor(r * 4) % 4]);                       // concrete greys
+        else if (area < 150) col.copy(ROOFS[Math.floor(r * 4) % 4]);                       // rust / teal tin / grey tin / timber
+        else col.copy(ROOFS[1 + (Math.floor(r * 3) % 3)]);                                 // big gables: no solid red
+        col.multiplyScalar(0.92 + rnd(i + 9) * 0.16);
         im.setColorAt(i, col);
       });
       im.castShadow = true; im.receiveShadow = true;

@@ -6,8 +6,10 @@ Labels JSON: {"image":[w,h], "labels":[{name,kind,px:[x,y],visible,dem_elevation
 listed_elevation_m,distance_m}]} (a bare list also accepted). Optional top-level
 heading/yaw. Missing kind is looked up in the gazetteer by name/slug.
 """
-import argparse, json, math
+import argparse, json, math, sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from shortname import short_name
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -40,10 +42,15 @@ def elev(l):
 MAJOR_LAKES = ("mahodand", "mahundand", "kundol", "spin khwar", "izmis", "kharkhari")
 
 
+HERITAGE = {"stupa", "monastery", "rock_carving", "fort_ruin", "palace", "mosque", "museum", "archaeological_site", "ski_resort"}
+
+
 def prio(l):
     k, e = l["kind"], elev(l) or 0
     n = l["name"].casefold()
-    if k in ("town", "village") or (k == "lake" and any(m in n for m in MAJOR_LAKES)): return 1
+    if k == "town" or (k == "lake" and any(m in n for m in MAJOR_LAKES)): return 1
+    if k in HERITAGE: return 1.5      # after towns, before villages / peaks / minor lakes
+    if k == "village": return 1.7
     if k == "peak" and e >= 5500: return 2
     if k == "lake": return 3
     return 4
@@ -97,6 +104,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--heading", type=float, default=None)
     ap.add_argument("--max-labels", type=int, default=14)
+    ap.add_argument("--max-dist-km", type=float, default=0, help="drop labels farther than this from the camera")
     a = ap.parse_args()
 
     data = json.load(open(a.labels, encoding="utf-8"))
@@ -133,8 +141,9 @@ def main():
 
     items = []
     IMG_W[0] = iw
+    if a.max_dist_km: labels = [l for l in labels if l.get("distance_m", 0) <= a.max_dist_km * 1000]
     for l in select(labels, ih, a.max_labels):
-        lines = [l["name"]]
+        lines = [short_name(l["name"])]
         e = elev(l)
         if l["kind"] in ELEV_KINDS and e is not None:
             lines.append(f"{e:,} m")
@@ -163,7 +172,7 @@ def main():
                 continue
             it["box"] = box; placed.append(it); break
         else:
-            if it["l"]["tier"] == 1:   # never drop tier 1: wider offsets, relaxed dot clearance
+            if it["l"]["tier"] < 1.6:   # never drop towns / heritage: wider offsets, relaxed dot clearance
                 done = False
                 for dist in (100, 130, 165, 200):
                     D = dist * u

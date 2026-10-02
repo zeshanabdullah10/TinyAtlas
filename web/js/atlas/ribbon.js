@@ -61,14 +61,14 @@ export function buildRibbon(pack, items, maxSeg = 45) {
  * kind: "river" | "road". minPx: pixel floor for the full width.
  * color: display-space rgb (roads/routes).
  */
-export function ribbonMaterial({ kind, minPx = 1, color = [1, 1, 1], maxK = 3, legibD = 4000, dash = 0, opacity = 1, maxD = 1e9 }) {
+export function ribbonMaterial({ kind, minPx = 1, color = [1, 1, 1], maxK = 3, legibD = 4000, dash = 0, opacity = 1, maxD = 1e9, fade = null }) {
   const m = new THREE.ShaderMaterial({
-    fog: true, transparent: opacity < 1, toneMapped: false, depthWrite: kind === "river",
+    fog: true, transparent: opacity < 1 || !!fade, toneMapped: false, depthWrite: kind === "river",
     side: THREE.DoubleSide,
     polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
     uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
       uMinPx: { value: minPx }, uMaxK: { value: maxK }, uLegibD: { value: legibD },
-      uColor: { value: new THREE.Color().setRGB(...color, THREE.LinearSRGBColorSpace) }, uDash: { value: dash }, uOpacity: { value: opacity }, uMaxD: { value: maxD },
+      uColor: { value: new THREE.Color().setRGB(...color, THREE.LinearSRGBColorSpace) }, uDash: { value: dash }, uOpacity: { value: opacity }, uFade: { value: new THREE.Vector2(fade?.[0] ?? 1e9, fade?.[1] ?? 2e9) }, uMaxD: { value: maxD },
     }]),
     defines: { RIVER: kind === "river" ? 1 : 0 },
     vertexShader: /* glsl */ `
@@ -88,7 +88,7 @@ export function ribbonMaterial({ kind, minPx = 1, color = [1, 1, 1], maxK = 3, l
         #include <fog_vertex>
       }`,
     fragmentShader: /* glsl */ `
-      uniform vec3 uColor; uniform float uDash, uPx, uOpacity, uMaxD; uniform sampler2D uShadow; uniform vec4 uGridUV;
+      uniform vec3 uColor; uniform float uDash, uPx, uOpacity, uMaxD; uniform vec2 uFade; uniform sampler2D uShadow; uniform vec4 uGridUV;
       varying float vSide, vAlong, vD; varying vec3 vWP;
       #include <fog_pars_fragment>
       ${WATER_GLSL}
@@ -104,7 +104,7 @@ export function ribbonMaterial({ kind, minPx = 1, color = [1, 1, 1], maxK = 3, l
             float per = max(uDash, vD * uPx * 9.0);
             if (fract(vAlong / per) > 0.55) discard;
           }
-          gl_FragColor = vec4(uColor * (0.8 + 0.2 * texture2D(uShadow, (vWP.xz * uGridUV.x + uGridUV.y) / uGridUV.zw).r), uOpacity);
+          gl_FragColor = vec4(uColor * (0.8 + 0.2 * texture2D(uShadow, (vWP.xz * uGridUV.x + uGridUV.y) / uGridUV.zw).r), uOpacity * (1.0 - smoothstep(uFade.x, uFade.y, vD)));
         #endif
         #include <fog_fragment>
       }`,

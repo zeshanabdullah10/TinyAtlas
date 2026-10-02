@@ -21,6 +21,8 @@ export class MapControls {
     c.addEventListener("start", () => { this.tween = null; });
   }
 
+  dispose() { this.c.stopListenToKeyEvents?.(); this.c.dispose(); }
+
   get target() { return this.c.target; }
   get distance() { return this.camera.position.distanceTo(this.c.target); }
   /** Camera heading in degrees clockwise from north (the direction it looks along). */

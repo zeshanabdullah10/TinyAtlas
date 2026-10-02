@@ -43,6 +43,7 @@ export class Trees {
       s.vertexShader = s.vertexShader.replace("#include <common>", "#include <common>\nvarying float vH;").replace("#include <begin_vertex>", "#include <begin_vertex>\nvH = position.y;");
       s.fragmentShader = s.fragmentShader.replace("#include <common>", "#include <common>\nvarying float vH;").replace("#include <color_fragment>", "#include <color_fragment>\ndiffuseColor.rgb *= mix(vec3(1.0), vec3(2.2, 1.7, 0.8), smoothstep(0.55, 1.0, vH));");
     };
+    this.clearings = [];          // [{x, z, r}] around placed landmark models
     this.chunks = new Map();      // key -> {raw, meshes, rect, state}
     this.visible = true; this.shadowDist = tier === "high" ? 4000 : 2500;
     this.count = 0; this.draws = 0;
@@ -69,6 +70,7 @@ export class Trees {
         const id = perm[i], x = f[id * 3], z = f[id * 3 + 1];
         const gx = (p.heightAt(x + 30, z) - p.heightAt(x - 30, z)) / 60, gz = (p.heightAt(x, z + 30) - p.heightAt(x, z - 30)) / 60;
         if (Math.hypot(gx, gz) > 1.19) continue;
+        if (this.clearings.some((c) => (x - c.x) ** 2 + (z - c.z) ** 2 < c.r * c.r)) continue;      // keep landmark footprints clear
         lists[kk++ % 3].push(id);
       }
       e.raw = f; e.lists = lists; e.state = "ready";

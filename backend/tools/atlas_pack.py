@@ -1,6 +1,9 @@
 """Build an Atlas pack (docs/atlas-pack-v1.md) from a geo bundle + research data.
 
-    python backend/tools/atlas_pack.py swat [--no-bake] [--only albedo,vectors,places,models,sky,terrain,trees,check]
+    python backend/tools/atlas_pack.py <bundle> [--no-bake] [--only albedo,vectors,places,models,sky,terrain,trees,check]
+
+<bundle> is a name in data/bundles/ (its far backdrop is <bundle>_far); the pack slug is the bundle name with "_" -> "-".
+Per-pack settings (title, home camera, place filter, neighbours) live in PACKS below.
 
 Output: data/packs/<slug>/atlas/.  The near-terrain albedo is baked by Blender (build_scene.py --bake-albedo,
 one 384 px DIFFUSE-colour tile + one 96 px AO tile per 128-cell chunk); the rest is numpy / PIL / shapely / trimesh.
@@ -12,11 +15,31 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 from pyproj import Transformer
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from shortname import short_name
+
 ROOT = Path(__file__).resolve().parents[2]
 BLENDER = Path("D:/TinyAtlas/tools/blender-5.2.2-windows-x64/blender.exe")
 CC = 128                       # chunk cells
 PXC = 384                      # L0 tile px
 OV_SHOT = dict(lat=35.60, lon=72.60, heading=5.0, pitch=-31.0, dist=42000.0, sun_az=215.0, sun_el=15.0, sun_color=(1.0, 0.74, 0.46))
+PACKS = {
+    "swat": dict(title="Swat Valley", subtitle="Kalam \u00b7 Utror \u00b7 Ushu \u00b7 Mahodand", shot=OV_SHOT, exag=1.6, bake_shot="overview",
+                 areas=None, peak_tier2_min=5500, drop_empty_routes=False,
+                 neighbors=[{"slug": "swat-lower", "title": "Lower Swat", "edge": "south"}],
+                 explore=[("Kalam & Ushu", 35.54, 72.64, 305, -30, 15000), ("Utror & Gabral", 35.50, 72.445, 305, -30, 11000),
+                          ("Mahodand", 35.708, 72.654, 305, -30, 9000), ("Kumrat", 35.52, 72.22, 305, -30, 14000)]),
+    "swat_lower": dict(title="Lower Swat", subtitle="Mingora \u00b7 Udegram \u00b7 Malam Jabba \u00b7 Bahrain",
+                       shot=dict(lat=34.84, lon=72.40, heading=25.0, pitch=-28.0, dist=36000.0, sun_az=238.0, sun_el=14.0, sun_color=(1.0, 0.76, 0.5)),
+                       exag=1.8, bake_shot="lower", lowland=True, areas={"swat-lower", "swat-mid", "malam-jabba", "gateway"}, peak_tier2_min=2500,
+                       drop_empty_routes=True, neighbors=[{"slug": "swat", "title": "Swat Valley", "edge": "north"}],
+                       explore=[("Mingora & Saidu Sharif", 34.76, 72.36, 305, -30, 9000), ("Udegram & Barikot", 34.72, 72.26, 305, -30, 14000),
+                                ("Malam Jabba", 34.805, 72.53, 305, -30, 12000), ("Madyan & Bahrain", 35.17, 72.54, 305, -30, 12000)]),
+}
+HWY_CLASS = {"motorway": "paved", "trunk": "paved", "primary": "paved", "secondary": "paved", "tertiary": "jeep",
+             "unclassified": "minor", "residential": "minor", "service": "minor", "living_street": "minor",
+             "track": "track", "path": "path", "footway": "path", "steps": "path", "bridleway": "path", "cycleway": "path"}
+GAZETTEER = "data/research/swat_gazetteer.json"
 SCALE_GUESS = {"white-palace-marghazar": 40.0, "jamia-masjid-thal": 25.0, "swat-museum": 45.0}   # footprint widths, estimates
 TRELLIS = set(SCALE_GUESS)
 MAJOR_LAKES = ("mahodand", "kundol", "spin khwar", "izmis", "kharkhari")   # tier 1 regardless of area; others if >= 0.15 km2
@@ -76,44 +99,53 @@ def step_terrain(ctx):
     x0, y1 = near.x0, near.y1
     ncx, ncy = -(-near.W // CC), -(-near.H // CC)
     tr = Transformer.from_crs("EPSG:4326", "EPSG:32643", always_xy=True)
-    tx, ty = tr.transform(OV_SHOT["lon"], OV_SHOT["lat"])
+    cfg = ctx["cfg"]; sh = cfg["shot"]
+    tx, ty = tr.transform(sh["lon"], sh["lat"])
     tx_s, tz_s = tx - x0, y1 - ty
     ground = float(near.sample(tx_s, tz_s))
     attrib = [m["layers"][k]["attribution"] for k in ("height", "landcover", "satellite", "osm") if k in m["layers"]]
     attrib += ["Sky: Poly Haven 'belfast_sunset_puresky' HDRI, CC0", "Landmark shapes: TRELLIS (Microsoft, MIT licence)",
                "Photos: Wikimedia Commons contributors, licences as credited per photo"]
     meta = {
-        "version": 1, "slug": ctx["slug"], "title": "Swat Valley", "subtitle": "Kalam \u00b7 Utror \u00b7 Ushu \u00b7 Mahodand",
+        "version": 1, "slug": ctx["slug"], "title": cfg["title"], "subtitle": cfg["subtitle"],
         "crs": m["crs"], "origin_utm": [x0, y1], "res_m": int(near.res), "cols": near.W, "rows": near.H,
         "size_m": [near.W * near.res, near.H * near.res], "hmin": round(near.hmin, 2), "hmax": round(near.hmax, 2),
         "chunk_cells": CC, "chunks": [ncx, ncy], "albedo_levels": 4, "albedo_px_m": 10,
         "far": {"origin_m": [far.x0 - x0, y1 - far.y1], "size_m": [far.W * far.res, far.H * far.res], "cols": far.W, "rows": far.H,
                 "res_m": int(far.res), "hmin": round(far.hmin, 2), "hmax": round(far.hmax, 2)},
-        "exag_default": 1.6, "tree_scale_default": 2.5, "landmark_scale_default": 30,
-        "sun_default": {"azimuth_deg": OV_SHOT["sun_az"], "elevation_deg": OV_SHOT["sun_el"], "color": list(OV_SHOT["sun_color"])},
-        "home_camera": {"target": [round(tx_s, 1), round(ground, 1), round(tz_s, 1)], "heading_deg": OV_SHOT["heading"],
-                        "pitch_deg": OV_SHOT["pitch"], "distance_m": OV_SHOT["dist"]},
+        "exag_default": cfg["exag"], "tree_scale_default": 2.5, "landmark_scale_default": 30,
+        "sun_default": {"azimuth_deg": sh["sun_az"], "elevation_deg": sh["sun_el"], "color": list(sh["sun_color"])},
+        "home_camera": {"target": [round(tx_s, 1), round(ground, 1), round(tz_s, 1)], "heading_deg": sh["heading"],
+                        "pitch_deg": sh["pitch"], "distance_m": sh["dist"]},
         "attribution": attrib,
     }
+    if cfg.get("neighbors"): meta["neighbors"] = cfg["neighbors"]
+    areas = []
+    for nm, lat, lon, hd, pt, dist in cfg.get("explore", []):
+        ax, ay = tr.transform(lon, lat); xs, zs = ax - x0, y1 - ay
+        areas.append({"name": nm, "camera": {"target": [round(xs, 1), round(float(near.sample(xs, zs)), 1), round(zs, 1)],
+                                             "heading_deg": hd, "pitch_deg": pt, "distance_m": dist}})
+    if areas: meta["areas"] = areas
     jdump(out / "meta.json", meta)
     ctx["meta"] = meta
     log("terrain", (out / "height.bin").stat().st_size, (out / "far.bin").stat().st_size)
 
 
 # ---------------------------------------------------------------- albedo
-def run_bake(raw_dir, ncx, ncy):
+def run_bake(raw_dir, ncx, ncy, ctx):
     n = len(list(raw_dir.glob("col_*.npy"))) if raw_dir.exists() else 0
     if n >= ncx * ncy and len(list(raw_dir.glob("ao_*.npy"))) >= ncx * ncy:
         log("bake tiles present", n); return None
     log("running Blender bake ...")
     t = time.time()
-    subprocess.run([str(BLENDER), "-b", "-P", str(ROOT / "backend/tools/blender/build_scene.py"), "--", "--bundle", "data/bundles/swat",
-                    "--far", "data/bundles/swat_far", "--shot", "overview", "--bake-albedo", str(raw_dir.parent)], cwd=ROOT, check=True,
+    subprocess.run([str(BLENDER), "-b", "-P", str(ROOT / "backend/tools/blender/build_scene.py"), "--", "--bundle", f"data/bundles/{ctx['bundle']}",
+                    "--far", f"data/bundles/{ctx['bundle']}_far", "--gazetteer", GAZETTEER, "--shot", ctx["cfg"]["bake_shot"],
+                    "--bake-albedo", str(raw_dir.parent)], cwd=ROOT, check=True,
                    stdout=subprocess.DEVNULL)
     return time.time() - t
 
 
-def far_recolour(far_dir):
+def far_recolour(far_dir, lowland=False):
     """numpy version of the poster palette (build_scene.make_terrain_material) on the far albedo, no procedural noise."""
     alb = np.asarray(Image.open(far_dir / "albedo.png").convert("RGB"), np.float32) / 255
     lc = np.load(far_dir / "landcover_hi.npy")
@@ -133,15 +165,18 @@ def far_recolour(far_dir):
     snow = np.maximum(c(70), ss((h - 4250) / 400) * np.clip((40 - slope) / 10, 0, 1))
     snow = snow * np.clip(1 - (slope - 39) / 7, 0, 1)
     rock = np.maximum(np.clip((slope - 36) / 10, 0, 1), 0.8 * np.maximum(c(60), c(100))) * (1 - snow)
-    meadow = np.maximum(c(30), 0.6 * c(40)) * (1 - rock)
+    meadow = np.maximum(c(30), (0.95 if lowland else 0.6) * c(40)) * (1 - rock)
     forest = c(10) * (1 - rock)
-    forest_col = mix(0.35, base, (0.028, 0.065, 0.022))
+    forest_col = mix(0.30, base, (0.05, 0.10, 0.03)) if lowland else mix(0.35, base, (0.028, 0.065, 0.022))
     tint = np.array([0.165, 0.17, 0.03], np.float32) * 0.65 + np.array([0.15, 0.15, 0.04], np.float32) * 0.35
     meadow_col = mix(0.25, mix(0.62, base, tint), (0, 0, 0))
     rb = mix(0.08, mix(0.12, mix(0.8, base, (0.34, 0.21, 0.08)), (0.40, 0.34, 0.27)), (0, 0, 0)) * np.array([1.09, 0.95, 0.72], np.float32)
     rock_col = mix(0.2, rb, (0.06, 0.04, 0.03))
     col = mix(forest, base, forest_col)
     col = mix(meadow, col, meadow_col)
+    if lowland:
+        built = c(50) * (1 - rock)
+        col = mix(built, col, mix(0.6, base, (0.42, 0.33, 0.24)))
     col = mix(rock, col, rock_col)
     col = mix(snow, col, (0.92, 0.94, 0.98))
     out = (lin2srgb(col) * 255 + 0.5).astype(np.uint8)
@@ -153,7 +188,7 @@ def step_albedo(ctx, bake=True):
     near, out = ctx["near"], ctx["out"]
     ncx, ncy = -(-near.W // CC), -(-near.H // CC)
     raw = ROOT / "data" / "packs" / ctx["slug"] / "_bake" / "raw"
-    secs = run_bake(raw, ncx, ncy) if bake else None
+    secs = run_bake(raw, ncx, ncy, ctx) if bake else None
     done = raw.parent / "bake_done.json"
     ctx["bake_seconds"] = json.loads(done.read_text())["seconds"] if done.exists() else secs
     for lv in range(4):
@@ -193,7 +228,7 @@ def step_albedo(ctx, bake=True):
     ov = Image.fromarray(mos).resize((2048, round(2048 * near.H / near.W)), Image.LANCZOS)
     ov.save(out / "albedo" / "overview.webp", "WEBP", quality=85, method=4)
     del mos
-    far_recolour(ctx["far"].dir).save(out / "albedo" / "far.webp", "WEBP", quality=82, method=4)
+    far_recolour(ctx["far"].dir, ctx["cfg"].get("lowland", False)).save(out / "albedo" / "far.webp", "WEBP", quality=82, method=4)
     log("albedo done")
 
 
@@ -319,7 +354,7 @@ def step_vectors(ctx):
         elif c == "trail": k = "path"
         elif c in ("jeep_only", "likely_jeep"): k = "track" if r["highway"] == "track" else "jeep"
         elif c == "unknown": k = "track"
-        else: k = {"path": "path", "track": "track", "unclassified": "jeep"}.get(r["highway"], "paved")
+        else: k = HWY_CLASS.get(str(r["highway"]).replace("_link", ""), "minor")
         roads.append({"name": r.get("name"), "class": k, "pts": simp(line(r["pts"]), 5.0)})
     # buildings
     buildings = []
@@ -348,6 +383,7 @@ def step_vectors(ctx):
                 cur = []
             if inside(p): cur.append(p)
         if len(cur) > 1: pieces.append(cur)
+        if ctx["cfg"]["drop_empty_routes"] and not pieces: continue
         routes.append({"slug": rt["slug"], "name": rt["name"], "kind": rt["kind"], "confidence": rt["confidence"],
                        "length_km": rt["length_km"], "ascent_m": rt["ascent_m"], "pieces": [simp(p, 5.0) for p in pieces]})
     ctx["vectors"] = {"lakes": lakes, "rivers": rivers, "roads": roads, "buildings": buildings, "routes": routes}
@@ -388,8 +424,11 @@ def step_models(ctx):
     (out / "models").mkdir(exist_ok=True)
     readme = (ROOT / "data/models3d/README.md").read_text(encoding="utf-8").splitlines()
     ctx["models"] = {}
+    areas = ctx["cfg"]["areas"]
+    ok = None if areas is None else {g["slug"] for g in ctx["gaz"] if g.get("area") in areas}
     for f in sorted((ROOT / "data/models3d").glob("*.glb")):
         slug = f.stem
+        if ok is not None and slug not in ok: continue
         dst = out / "models" / f.name
         if slug in TRELLIS:
             info = normalise_glb(f, dst, SCALE_GUESS[slug]); info["estimated_scale"] = True
@@ -441,6 +480,7 @@ def step_places(ctx):
     for it in items:
         if it["src"] == "osm_peak":
             if float(it["ele"]) < 4500 or any(math.hypot(it["xy"][0] - x, it["xy"][1] - y) < 300 for x, y in gaz_xy): continue
+        if ctx["cfg"]["areas"] is not None and (it["g"] or {}).get("area") not in ctx["cfg"]["areas"]: continue
         x, z = it["xy"][0] - near.x0, near.y1 - it["xy"][1]
         in_near = 0 <= x <= Wm and 0 <= z <= Hm
         in_far = fx0 <= x <= fx0 + fW and fz0 <= z <= fz0 + fH
@@ -457,7 +497,7 @@ def step_places(ctx):
         kind = it["kind"]
         if kind in ("town", "village"): tier = 1
         elif kind == "lake": tier = 1 if (lake_area.get(it["slug"], 0) >= 0.15 or any(m in it["name"].lower() or m.replace(" ", "-") in str(it["slug"]) for m in MAJOR_LAKES)) else 3
-        elif kind == "peak" and lab >= 5500: tier = 2
+        elif kind == "peak" and lab >= ctx["cfg"]["peak_tier2_min"]: tier = 2
         elif kind in HERITAGE: tier = 2
         else: tier = 4
         slug = it["slug"] or re.sub(r"[^a-z0-9]+", "-", it["name"].lower()).strip("-")
@@ -476,7 +516,7 @@ def step_places(ctx):
                 im.save(out / "photos" / slug / fn, "JPEG", quality=85, optimize=True)
                 photos.append({"file": f"photos/{slug}/{fn}", "attribution": p.get("attribution"), "url": p.get("page")})
         model = f"models/{slug}.glb" if (out / "models" / f"{slug}.glb").exists() else None
-        pl = {"slug": slug, "name": it["name"], "name_ur": g.get("name_ur"), "kind": kind, "area": g.get("area", ""),
+        pl = {"slug": slug, "name": it["name"], "short_name": short_name(it["name"]), "name_ur": g.get("name_ur"), "kind": kind, "area": g.get("area", ""),
               "x": round(x, 1), "z": round(z, 1), "ground_m": round(ground, 1), "label_elevation_m": lab, "tier": tier,
               "summary": g.get("summary", ""), "timeline": g.get("timeline") or [], "facts": g.get("facts") or [],
               "access": g.get("access", ""), "hidden_gem": bool(g.get("hidden_gem", False)), "photos": photos, "model": model,
@@ -521,7 +561,7 @@ def step_check(ctx):
         d.polygon(P(lk["rings"][0]), outline=(0, 255, 255), fill=(0, 200, 255))
     for r in vec["rivers"]:
         d.line(P(r["pts"]), fill=(60, 120, 255), width=1)
-    col = {"paved": (255, 255, 255), "jeep": (255, 200, 0), "track": (255, 140, 0), "path": (255, 0, 255)}
+    col = {"paved": (255, 255, 255), "jeep": (255, 200, 0), "minor": (200, 200, 120), "track": (255, 140, 0), "path": (255, 0, 255)}
     for r in vec["roads"]:
         d.line(P(r["pts"]), fill=col[r["class"]], width=1)
     for b in vec["buildings"]:
@@ -543,13 +583,14 @@ def main():
     ap.add_argument("--no-bake", action="store_true", help="do not (re)run Blender; use tiles in data/packs/<slug>/_bake/raw")
     ap.add_argument("--only", default="")
     A = ap.parse_args()
-    slug = A.bundle
+    bundle = A.bundle
+    slug = bundle.replace("_", "-")
     out = ROOT / "data" / "packs" / slug / "atlas"
     out.mkdir(parents=True, exist_ok=True)
     (out / "photos").mkdir(exist_ok=True)
-    ctx = dict(slug=slug, out=out, near=Grid(slug), far=Grid(slug + "_far"), tr=Transformer.from_crs("EPSG:4326", "EPSG:32643", always_xy=True),
-               osm=json.loads((ROOT / f"data/bundles/{slug}/osm.json").read_text(encoding="utf-8")),
-               gaz=json.loads((ROOT / f"data/research/{slug}_gazetteer.json").read_text(encoding="utf-8")))
+    ctx = dict(slug=slug, bundle=bundle, cfg=PACKS[bundle], out=out, near=Grid(bundle), far=Grid(bundle + "_far"), tr=Transformer.from_crs("EPSG:4326", "EPSG:32643", always_xy=True),
+               osm=json.loads((ROOT / f"data/bundles/{bundle}/osm.json").read_text(encoding="utf-8")),
+               gaz=json.loads((ROOT / GAZETTEER).read_text(encoding="utf-8")))
     steps = A.only.split(",") if A.only else ["terrain", "albedo", "trees", "vectors", "models", "places", "sky", "check"]
     for s in steps:
         if s == "albedo": step_albedo(ctx, bake=not A.no_bake)

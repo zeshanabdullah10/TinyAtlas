@@ -46,6 +46,10 @@ positions, so a renderer that puts vertex `i` at `i * res_m` is half a cell (15 
 ```
 `home_camera.target[1]` is a real height in metres (unexaggerated).
 
+Optional `"neighbors": [{"slug": "swat-lower", "title": "Lower Swat", "edge": "south"}]` lists adjacent packs (`edge` = north|south|east|west, the side of *this* pack the neighbour touches). The renderer offers each neighbour in its Explore dock and at the matching map edge, and links to `?pack=<slug>`; the reverse link (`"edge": "north"`) lives in the neighbour's own meta. Packs need not share a grid; only the shared edge matters.
+
+Optional `"areas": [{"name": "Mingora & Saidu Sharif", "camera": {"target": [x, y, z], "heading_deg": 305, "pitch_deg": -30, "distance_m": 9000}}]` lists the Explore-dock areas; `camera` has the same shape as `home_camera` (target in scene metres, `y` a real height). Each frames its key places at 8-15 km, heading chosen so a ~215 deg sun rakes from the side.
+
 ## Chunks
 The near grid is split into chunks of `chunk_cells` cells (128 × 30 m = 3.84 km). Chunk `(cx, cy)` covers cells
 `[cx*128, cx*128+128] × [cy*128, cy*128+128]` (inclusive edge, clamped to the grid), x from west, y from north.
@@ -57,19 +61,20 @@ extent (edge chunks: the partial area is stretched to the full tile; the rendere
 {
   "lakes":    [{"name": "...", "slug": "...|null", "level_m": 2861.5, "rings": [[[x, z], ...]]}],
   "rivers":   [{"name": "...|null", "kind": "river|stream", "width_m": 30, "pts": [[x, z], ...]}],
-  "roads":    [{"name": "...|null", "class": "paved|jeep|track|path", "pts": [[x, z], ...]}],
+  "roads":    [{"name": "...|null", "class": "paved|jeep|minor|track|path", "pts": [[x, z], ...]}],
   "buildings":[{"x": 0, "z": 0, "w": 9, "d": 12, "angle_deg": 15, "roof": "gable|flat"}],
   "routes":   [{"slug": "...", "name": "...", "kind": "trek|jeep|road", "confidence": "high|medium|low",
                 "length_km": 0, "ascent_m": 0, "pieces": [[[x, z], ...]]}]
 }
 ```
+Road `class`: where `data/research/swat_road_classes.json` classifies a way (upper Swat only) it decides (`jeep` = classified jeep roads); otherwise the OSM `highway` tag does: motorway/trunk/primary/secondary -> `paved`, tertiary -> `jeep`, unclassified/residential/service/living_street -> `minor` (village and city streets), track -> `track`, path/footway/steps -> `path`. Renderers must draw `minor` thinner than `paved`.
 Buildings: `w` is the long side; `angle_deg` is the long axis measured from +x (east) toward +z (south).
 Lake `rings[0]` is the outer ring; holes follow. Route `pieces` are the OSM-backed segments; gaps are NOT bridged.
 
 ## places.json
 List of
 ```json
-{"slug": "...", "name": "...", "name_ur": "...|null", "kind": "town|lake|peak|stupa|...", "area": "...",
+{"slug": "...", "name": "...", "name_ur": "...|null", "short_name": "...", "kind": "town|lake|peak|stupa|...", "area": "...",
  "x": 0, "z": 0, "ground_m": 2002, "label_elevation_m": 5918, "tier": 1,
  "summary": "...", "timeline": [{"date": "...", "event": "...", "source": "url"}],
  "facts": [{"text": "...", "quote": "...", "source": "url"}], "access": "...", "hidden_gem": false,
@@ -78,5 +83,6 @@ List of
 ```
 `tier`: 1 towns, villages and major lakes; 2 peaks ≥ 5,500 m and heritage sites; 3 other lakes; 4 the rest.
 `label_elevation_m` follows the poster rule: the sourced value nearest the DEM summit within 250 m, else DEM.
+`short_name` is the label-chip text (name without parentheticals/qualifiers, <= 22 chars, `backend/tools/shortname.py`); `name` stays for the panel.
 Optional `anchor: [x, z]` + `anchor_source: "worldcover-built"` (towns/villages only): centre of the densest 300 m cell of WorldCover built-up pixels within 1.5 km of the node, present only when it has >= 40 built pixels and is > 250 m from `x, z` (which stay the OSM node); use it to place the label over the built-up area.
 Photos referenced here are copied into `photos/<slug>/` inside the pack (≤ 1600 px JPEG).

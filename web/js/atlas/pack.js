@@ -42,7 +42,7 @@ export class Pack {
       const f = meta.far;
       this.far = { ...f, hm: decode(fb, f.hmin, f.hmax) };
     }
-    this.chunkCells = meta.chunk_cells; this.ncx = meta.chunks[0]; this.ncy = meta.chunks[1];
+    this.slug = meta.slug; this.chunkCells = meta.chunk_cells; this.ncx = meta.chunks[0]; this.ncy = meta.chunks[1];
     this.sun = meta.sun_default;
   }
 

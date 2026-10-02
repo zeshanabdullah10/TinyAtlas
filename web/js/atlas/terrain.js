@@ -206,6 +206,7 @@ export class Terrain {
       this.inflight++;
       const [l, rest] = key.split("/"), [cx, cy] = rest.split("_").map(Number);
       loadBitmap(this.pack.tileUrl(l, cx, cy)).then((bm) => {
+        if (this.disposed) { bm.close?.(); return; }
         const tex = new THREE.Texture(bm); tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = this.aniso; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.needsUpdate = true;
         e.tex = tex; this.stats.tilesLoaded++;
@@ -220,6 +221,11 @@ export class Terrain {
     const inUse = new Set(this.chunks.map((c) => c.albKey));
     const old = [...this.cache.entries()].filter(([k, e]) => e.tex && !inUse.has(k)).sort((a, b) => a[1].used - b[1].used);
     for (const [k, e] of old) { if (this.cache.size <= this.cacheMax) break; e.tex.dispose(); e.tex.image?.close?.(); this.cache.delete(k); }
+  }
+
+  dispose() {
+    for (const e of this.cache.values()) { e.tex?.image?.close?.(); e.tex?.dispose(); }
+    this.cache.clear(); this.queue = []; this.disposed = true;
   }
 
   async loadOverview() {

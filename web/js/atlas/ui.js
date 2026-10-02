@@ -34,7 +34,7 @@ export function clockText(s, el) {
   return `${mood} · ${t}`;
 }
 
-export function buildUI(root, { pack, controls, settings, tier, showFps, sky, openPlace, areas }) {
+export function buildUI(root, { pack, controls, settings, tier, showFps, sky, openPlace, areas, neighbors = [], onNeighbor }) {
   const m = pack.meta;
   const loading = h("div", { class: "loading", role: "status" }, h("p", { class: "ld-t" }, m.title), h("div", { class: "ld-bar" }, h("i")), h("p", { class: "ld-l" }, "Opening the map"));
   const bar = loading.querySelector("i"), label = loading.querySelector(".ld-l");
@@ -96,6 +96,11 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
     const b = h("button", { type: "button", onClick: () => { sel?.classList.remove("sel"); sel = b; b.classList.add("sel"); a.go(); } }, a.name);
     dock.append(b);
   }
+  const ARROW = { north: "↑", south: "↓", east: "→", west: "←" };
+  for (const n of neighbors) dock.append(h("button", { type: "button", class: "nb", title: `Switch to ${n.title}`, onClick: () => onNeighbor(n.slug) }, `${n.title} ${ARROW[n.edge] || ""}`));
+  const edgeBtn = h("button", { class: "edge-prompt", type: "button", hidden: true }, "");
+  let edgeN = null;
+  edgeBtn.addEventListener("click", () => edgeN && onNeighbor(edgeN.slug));
   const deselect = () => { sel?.classList.remove("sel"); sel = null; };
   controls.c.addEventListener("start", deselect);
 
@@ -108,7 +113,7 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
 
   const foot = h("footer", { class: "attrib" }, (m.attribution || []).join(" · "), " · Heights exaggerated ×", h("span", { class: "exv" }, pack.exag.toFixed(1)));
   const stats = showFps ? h("pre", { class: "fps" }, "") : null;
-  root.append(cart, top, dock, tools, foot, loading, stats);
+  root.append(cart, top, dock, edgeBtn, tools, foot, loading, stats);
   return {
     setProgress(f, text) { bar.style.width = `${Math.round(f * 100)}%`; if (text) label.textContent = `Loading ${text}`; },
     done() { loading.classList.add("gone"); setTimeout(() => loading.remove(), 700); },
@@ -116,22 +121,34 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
     exag(v) { foot.querySelector(".exv").textContent = v.toFixed(1); },
     stats(t) { if (stats) stats.textContent = t; },
     tier(t) { pop.querySelector(".tier").textContent = `Quality: ${t}`; },
+    edge(n) { if (n === edgeN) return; edgeN = n; edgeBtn.hidden = !n; if (n) edgeBtn.textContent = `Continue to ${n.title} ${ARROW[n.edge] || ""}`; },
     routes(on) { routesBox.checked = on; settings.onRoutes(on); },
     refreshLight() { light.value = sky.time; upLight(); },
   };
 }
 
-/** Explore areas from place names; entries whose places are missing are dropped. */
+/** Explore areas: meta.areas when the pack has them (camera like home_camera), else guessed from place names. */
 export function makeAreas(pack, controls, onTreks) {
-  const by = (re) => pack.places.filter((p) => re.test(p.name) || re.test(p.slug));
-  const mid = (list) => list.reduce((a, p) => a.add(new THREE.Vector3(p.x, 0, p.z)), new THREE.Vector3()).multiplyScalar(1 / list.length);
-  const defs = [["Kalam & Ushu", /^(kalam|ushu)/i, 11000], ["Utror & Gabral", /^(utror|gabral)/i, 11000], ["Kumrat", /kumrat/i, 12000]];
   const out = [];
+  for (const a of pack.meta.areas || []) {
+    const cam = a.camera || a, t = cam.target || a.target;
+    if (!t) continue;
+    const [x, y, z] = t.length === 2 ? [t[0], null, t[1]] : t;
+    out.push({ name: a.name || a.title || a.slug, go: () => {
+      const v = new THREE.Vector3(x, y == null ? pack.groundY(x, z) : pack.yOf(y), z);
+      controls.flyTo(v, cam.distance_m ?? 12000, cam.heading_deg ?? controls.heading, cam.pitch_deg ?? -30, 1800);
+      if (/trek/i.test(a.name || a.slug || "")) onTreks?.();
+    } });
+  }
+  if (out.length) return out;
+  const by = (re) => pack.places.filter((p) => re.test(p.name) || re.test(p.slug));
+  const mid = (list) => list.reduce((acc, p) => acc.add(new THREE.Vector3(p.anchor?.[0] ?? p.x, 0, p.anchor?.[1] ?? p.z)), new THREE.Vector3()).multiplyScalar(1 / list.length);
+  const defs = pack.slug === "swat" ? [["Kalam & Ushu", /^(kalam|ushu)/i, 11000], ["Utror & Gabral", /^(utror|gabral)/i, 11000], ["Kumrat", /kumrat/i, 12000]] : [["Mingora", /^mingora/i, 12000], ["Saidu Sharif", /^saidu/i, 8000]];
   for (const [name, re, dist] of defs) {
-    const l = by(re).filter((p, i, a) => a.findIndex((q) => q.name === p.name) === i).slice(0, 3);
+    const l = by(re).filter((p, i, arr) => arr.findIndex((q) => q.name === p.name) === i).slice(0, 3);
     if (!l.length) continue;
     out.push({ name, go: () => { const t = mid(l); t.y = pack.groundY(t.x, t.z); controls.flyTo(t, dist, controls.heading, -30, 1600); } });
   }
-  out.push({ name: "Treks", go: () => { controls.goHome(); onTreks?.(); } });
+  if (pack.vectors.routes?.length) out.push({ name: "Treks", go: () => { controls.goHome(); onTreks?.(); } });
   return out;
 }

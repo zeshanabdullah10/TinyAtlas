@@ -5,18 +5,18 @@ const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : n
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return "source"; } };
 
 export class Panel {
-  constructor(root, pack, { onClose, onFly } = {}) {
+  constructor(root, pack, { onClose, onFly, signal } = {}) {
     this.pack = pack; this.onClose = onClose; this.onFly = onFly; this.current = null; this.opener = null;
     this.body = h("div", { class: "pn-body" });
     this.closeBtn = h("button", { class: "pn-close", type: "button", "aria-label": "Close", onClick: () => this.close() }, "×");
     this.el = h("aside", { class: "panel", role: "dialog", "aria-modal": "false", "aria-label": "Place details", tabindex: "-1", hidden: true }, this.closeBtn, this.body);
     root.append(this.el);
-    addEventListener("keydown", (e) => { if (e.key === "Escape" && this.current) this.close(); });
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && this.current) this.close(); }, { signal });
     addEventListener("pointerdown", (e) => {
       if (!this.current || this.el.contains(e.target)) return;
       if (e.target.closest?.(".chip, .search, .dock, .light")) return;       // those switch place or camera instead
       this.close();
-    }, true);
+    }, { capture: true, signal });
   }
 
   /** Screen rectangle taken by the sheet, so labels underneath can hide: [x0, y0, x1, y1] or null. */

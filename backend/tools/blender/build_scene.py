@@ -27,13 +27,20 @@ SHOTS = {
                      focus=(35.486, 72.585), fstop=0.9, clouds=False, exag=1.8, sun_az=OV_AZ, sun_el=OV_EL, horizon_y=0.89,
                      haze_col=(0.93, 0.74, 0.62), sky_fade_col=(1.0, 0.78, 0.60), sky_fade_band=0.06,
                      sun_strength=11.0, sun_color=(1.0, 0.74, 0.46), auto_horizon=True, haze_km=140.0, haze_max=0.85),
+    # Lower & Middle Swat (bundle swat_lower): Mingora basin + the river, looking NNE up the valley
+    "lower": dict(lat=34.87, lon=72.40, heading=25.0, pitch=-26.5, dist=44000.0, lens=24.0, shift_y=0.037,
+                  focus=(34.77, 72.36), fstop=0.9, clouds=False, exag=1.8, sun_az=238.0, sun_el=14.0, horizon_y=0.89,
+                  lowland=True, haze_col=(0.93, 0.76, 0.64), sky_fade_col=(1.0, 0.78, 0.60), sky_fade_band=0.06, proc_frac=0.06,
+                  sun_strength=11.0, sun_color=(1.0, 0.76, 0.5), auto_horizon=True, haze_km=140.0, haze_max=0.85),
 }
 
 # ------------------------------------------------------------------ args
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 ap = argparse.ArgumentParser()
 ap.add_argument("--bundle", default="data/bundles/swat")
-ap.add_argument("--far", default="data/bundles/swat_far")
+ap.add_argument("--far", default=None, help="default: <bundle>_far")
+ap.add_argument("--gazetteer", default="data/research/swat_gazetteer.json")
+ap.add_argument("--max-buildings", type=int, default=12000)
 ap.add_argument("--shot", default="kalam")
 ap.add_argument("--preview", action="store_true")
 ap.add_argument("--samples", type=int, default=0)
@@ -69,11 +76,14 @@ ap.add_argument("--tlat", type=float, default=None)
 ap.add_argument("--tlon", type=float, default=None)
 ap.add_argument("--res-scale", type=float, default=1.0)
 ap.add_argument("--paint-base", action="store_true", help="no directional rock strata, softer micro-bump: a cleaner base for the AI paint-over")
-ap.add_argument("--passes", action="store_true", help="also write depth/normal/segmentation EXRs to data/renders/swat/passes_<shot>/ "
+ap.add_argument("--passes", action="store_true", help="also write depth/normal/segmentation EXRs to data/renders/<slug>/passes_<shot>/ "
                 "(use with --samples 16 --out <scratch.png>; then run backend/tools/passes_convert.py <shot>)")
 ap.add_argument("--bake-albedo", default="", help="atlas pack: bake per-chunk unlit albedo (384 px) + AO (96 px) of the near terrain to this dir, then exit")
 ap.add_argument("--bake-only", default="", help="with --bake-albedo: only these chunks, e.g. 5,8;6,8")
 A = ap.parse_args(argv)
+A.bundle = A.bundle.rstrip("/\\")
+if A.far is None: A.far = A.bundle + "_far"
+SLUG = Path(A.bundle).name.replace("_", "-")          # render folder: data/renders/<slug>/
 shot = dict(SHOTS[A.shot])
 EXAG = A.exag if A.exag is not None else shot.get("exag", 1.6)
 if A.pitch is not None: shot["pitch"] = A.pitch
@@ -84,6 +94,7 @@ if A.heading is not None: shot["heading"] = A.heading
 SUN_EL = A.sun_el if A.sun_el is not None else shot.get("sun_el", 15.0)
 SUN_AZ = A.sun_az if A.sun_az is not None else shot.get("sun_az", 195.0)
 SUN_STR = A.sun_strength if A.sun_strength is not None else shot.get("sun_strength", 11.0)
+LOWLAND = bool(shot.get("lowland", False))      # terraced, cultivated lowland palette (crop = fields, built-up = warm town)
 SUN_COL = shot.get("sun_color", (1.0, 0.77, 0.54))
 T0 = time.time()
 
@@ -344,14 +355,14 @@ def make_terrain_material(name, albedo_path, lc_path):
     rock = mth(nt, "MAXIMUM", rock, mth(nt, "MULTIPLY", mth(nt, "MAXIMUM", cls(60), cls(100)), 0.8))
     rock = mth(nt, "MULTIPLY", rock, mth(nt, "SUBTRACT", 1.0, snow))
     # ---- masks
-    meadow = mth(nt, "MAXIMUM", cls(30), mth(nt, "MULTIPLY", cls(40), 0.6))
+    meadow = mth(nt, "MAXIMUM", cls(30), mth(nt, "MULTIPLY", cls(40), 0.95 if LOWLAND else 0.6))   # lowland: crops read as cultivated fields
     meadow = mth(nt, "MULTIPLY", meadow, mth(nt, "SUBTRACT", 1.0, rock))
     forest = mth(nt, "MULTIPLY", cls(10), mth(nt, "SUBTRACT", 1.0, rock))
     # ---- colours
     hs = N(nt, "ShaderNodeHueSaturation"); hs.inputs["Saturation"].default_value = 1.12; hs.inputs["Value"].default_value = 1.0
     L(nt, alb.outputs["Color"], hs.inputs["Color"])
     base = hs.outputs["Color"]
-    forest_col = mixc(nt, 0.35, base, (0.028, 0.065, 0.022, 1))
+    forest_col = mixc(nt, 0.35, base, (0.028, 0.065, 0.022, 1)) if not LOWLAND else mixc(nt, 0.30, base, (0.05, 0.10, 0.03, 1))
     meadow_tint = mixc(nt, maprange(nt, nb, 0.35, 0.65), (0.26, 0.19, 0.035, 1), (0.07, 0.15, 0.025, 1))
     meadow_tint = mixc(nt, maprange(nt, nm, 0.4, 0.62, 0.0, 0.7), meadow_tint, (0.15, 0.15, 0.04, 1))
     meadow_col = mixc(nt, 0.62, base, meadow_tint)
@@ -383,6 +394,9 @@ def make_terrain_material(name, albedo_path, lc_path):
     snow_col = (0.92, 0.94, 0.98, 1)
     col = mixc(nt, forest, base, forest_col)
     col = mixc(nt, meadow, col, meadow_col)
+    if LOWLAND:   # built-up (50): warm town tone instead of the grey satellite roofs
+        built = mth(nt, "MULTIPLY", cls(50), mth(nt, "SUBTRACT", 1.0, rock))
+        col = mixc(nt, built, col, mixc(nt, 0.6, base, (0.42, 0.33, 0.24, 1)))
     col = mixc(nt, rock, col, rock_col)
     # fine colour speckle
     col = mixc(nt, mth(nt, "MULTIPLY", mth(nt, "SUBTRACT", nf, 0.5), 0.35), col, (0.02, 0.02, 0.02, 1))
@@ -733,7 +747,7 @@ if lakeV:
 log("lakes", nl)
 
 # ------------------------------------------------------------------ buildings + trucks
-gaz = json.loads((ROOT / "data" / "research" / "swat_gazetteer.json").read_text(encoding="utf-8"))
+gaz = json.loads((ROOT / A.gazetteer).read_text(encoding="utf-8"))
 gaz = [g_ for g_ in gaz if g_.get("coord_confidence") != "low"]
 
 
@@ -800,7 +814,7 @@ if not A.no_buildings:
     rr0, cc0 = np.nonzero((lc_hi == 50) | (lc_hi == 40))
     px_ = near.x0 + (cc0 + 0.5) * near.res / 2; py_ = near.y1 - (rr0 + 0.5) * near.res / 2
     dmin = np.min(np.hypot(px_[:, None] - towns[:, 0][None], py_[:, None] - towns[:, 1][None]), 1) if len(towns) else np.full(len(px_), 1e9)
-    sel = (dmin < 3000) & (rng.random(len(px_)) < 0.25)
+    sel = (dmin < 3000) & (rng.random(len(px_)) < shot.get("proc_frac", 0.25))
     gyh, gxh = np.gradient(hn, near.res)
     for x, y in zip(px_[sel] + rng.uniform(-6, 6, sel.sum()), py_[sel] + rng.uniform(-6, 6, sel.sum())):
         cc_, rr_ = int((x - near.x0) / near.res), int((near.y1 - y) / near.res)
@@ -809,7 +823,7 @@ if not A.no_buildings:
         u = np.array([-gy_, gx_]) / n_ if n_ > 0.05 else np.array([math.cos(rng.uniform(0, 3.14)), math.sin(rng.uniform(0, 3.14))])
         if rng.random() < 0.3: u = np.array([math.cos(rng.uniform(0, 3.14)), math.sin(rng.uniform(0, 3.14))])
         specs.append((np.array([x, y]), u, rng.uniform(8, 14) * 3 / 2, rng.uniform(6, 9) * 3 / 2))
-    for c, u, Lh, Wh in specs[:12000]:
+    for c, u, Lh, Wh in specs[:A.max_buildings]:
         cr = corners(c, u, Lh, Wh)
         z0 = float(ground(cr[:, 0], cr[:, 1]).min()) * EXAG - 2.0
         wh = 12.0 + 6.0 * rng.random(); gable = rng.random() < 0.65
@@ -1298,7 +1312,7 @@ cc.inputs["Saturation"].default_value = 1.25; cc.inputs["Contrast"].default_valu
 L(g, cur, cc.inputs["Image"]); cur = cc.outputs["Image"]
 L(g, cur, out.inputs[0])
 if A.passes and not A.raw:
-    pdir = ROOT / "data" / "renders" / "swat" / f"passes_{A.shot}"
+    pdir = ROOT / "data" / "renders" / SLUG / f"passes_{A.shot}"
     pdir.mkdir(parents=True, exist_ok=True)
     fo = N(g, "CompositorNodeOutputFile")
     fo.directory = str(pdir) + os.sep; fo.file_name = "p_"
@@ -1310,7 +1324,7 @@ if A.passes and not A.raw:
     (pdir / "camera.json").write_text(json.dumps({"R": [list(r) for r in mw], "res": [RX, RY]}), encoding="utf-8")
 
 # ------------------------------------------------------------------ save + render
-outdir = ROOT / "data" / "renders" / "swat"
+outdir = ROOT / "data" / "renders" / SLUG
 outdir.mkdir(parents=True, exist_ok=True)
 if not A.no_render or True:
     bpy.ops.wm.save_as_mainfile(filepath=str(outdir / "scene.blend"))
@@ -1322,7 +1336,7 @@ log("labels")
 from mathutils.bvhtree import BVHTree
 dg = bpy.context.evaluated_depsgraph_get()
 bvhs = [BVHTree.FromObject(o_, dg) for o_ in (obj_near, obj_far)]
-gaz = json.loads((ROOT / "data" / "research" / "swat_gazetteer.json").read_text(encoding="utf-8"))
+gaz = json.loads((ROOT / A.gazetteer).read_text(encoding="utf-8"))
 DROP = {"swat-river-source-kalam", "ushu-forest"}
 PRIO = {"peak": 0, "mountain": 0, "volcano": 0, "saddle": 0, "lake": 1, "town": 2, "village": 3}
 items = []
