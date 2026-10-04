@@ -18,14 +18,14 @@ content is summarised in §8 so you do not need it).
 >
 > **Latest (2026-10-04):** v2.3.0 released, adding the English audio guide (52 clips, Chatterbox by Resemble AI, MIT, generated
 > locally by `backend/tools/audio_local.py` in `.venv-tts`; numbers are spoken as words, and a Whisper gate checks every sentence;
-> clips live in `data/audio/<region>/` and are packed into the site). The checkout is on `main` (`swat-illustrated-map` is level with it).
+> clips live in `data/audio/<region>/` and are packed into the site). The checkout is on `main`; the only other branch is `gh-pages`.
 > The remote is `https://github.com/zeshanabdullah10/TinyAtlas.git`. No RunPod pods exist. Start new work in a fresh session.
 
 ## 0. Status snapshot (read first)
 
 | Item | State |
 |---|---|
-| Branch | `main` at `ae5d59a`, pushed; `swat-illustrated-map` is level with it. Releases v2.0.0–v2.3.0 are tagged on GitHub (v2.3.0 tag → `e56d398`; `ae5d59a` adds only the method skill and docs). `gh-pages` = `dce7bec` (static site v2.3.0). |
+| Branch | `main`, pushed. Only `main` and `gh-pages` remain: the merged branches `swat-illustrated-map`, `travel-companion` (tip `dd58bf0`) and `claude/exciting-edison-k01oo3` (tip `1ba2160`) were deleted 2026-10-04. Releases v2.0.0–v2.3.0 are tagged on GitHub (v2.3.0 tag → `e56d398`; `ae5d59a` adds only the method skill and docs). `gh-pages` = `dce7bec` (static site v2.3.0). |
 | Commits since v2.2.0 | `25c8cb2` numbers spoken as words + strict number check in the gate · `e56d398` "Saidu Sharif I" read as "One" · `ae5d59a` delegate-and-judge skill + HANDOFF status |
 | Tests | `python -m pytest -q` → 53 passed (re-run 2026-10-04 on v2.3.0); `python backend/tools/smoke.py [http://localhost:8000]` end-to-end |
 | Live map | `cd backend && uvicorn tinyatlas.api:app --port 8000` → `http://localhost:8000/atlas.html?pack=swat` (and `?pack=swat-lower`). Owner confirmed it runs well in Chrome on real hardware. |
@@ -599,7 +599,7 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
    d. Update README (Swat-only, the new run/build flow), the service worker shell list, the manifest.
    e. `pytest`, `smoke.py` (update it for the new app), screenshots of gallery + both packs + phone.
 3. **Release** — v2.0.0 DONE (procedure below worked; note: fetch `origin/gh-pages` first, the local ref can be stale):
-   a. Commit on `swat-illustrated-map`; merge into `main` (fast-forward or merge commit; no force-push); `git push origin main`.
+   a. Commit on a feature branch; merge into `main` (fast-forward or merge commit; no force-push); `git push origin main`.
    b. `git tag -a v2.0.0 -m "..."`; `git push origin v2.0.0`; `gh release create v2.0.0 --notes-file <notes>` (notes:
       what's new, data sources + licences, known issues from §14).
    c. Static site: find how v1.0.0 was published to `gh-pages` (inspect that branch's last commit and README "Static
