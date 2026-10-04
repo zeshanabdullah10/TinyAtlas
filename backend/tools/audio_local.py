@@ -42,11 +42,58 @@ def sentences(text: str) -> list[list[str]]:
             for para in re.split(r"\n\s*\n", text.strip()) if para.strip()]
 
 
-def norm(t: str) -> list[str]:
+NUM = re.compile(r"\d[\d,]*")
+UNIT_AFTER = re.compile(r"\s*(?:m|km|metres|meters|kilometres|kilometers|feet|ft|people|years)\b", re.I)
+
+
+def _year(n: int) -> str:
+    """1957 -> nineteen fifty-seven, 1900 -> nineteen hundred, 1905 -> nineteen oh five, 2007 -> two thousand and seven."""
+    from num2words import num2words as w
+    if 2000 <= n <= 2009:
+        return "two thousand" + (f" and {w(n - 2000)}" if n > 2000 else "")
+    hi, lo = divmod(n, 100)
+    return f"{w(hi)} hundred" if lo == 0 else f"{w(hi)} oh {w(lo)}" if lo < 10 else f"{w(hi)} {w(lo)}"
+
+
+def _say_number(m: re.Match, text: str) -> str:
+    """A number as it should be spoken: 1957 -> nineteen fifty-seven (a year), 5,918 -> five thousand nine hundred and
+    eighteen. A plain four-digit 1000-2099 is a year unless a unit follows it."""
     from num2words import num2words
+    raw = m.group(0).rstrip(","); n = int(raw.replace(",", ""))
+    year = "," not in raw and len(raw) == 4 and 1000 <= n <= 2099 and not UNIT_AFTER.match(text, m.end())
+    return (_year(n) if year else num2words(n)).replace(",", "") + ("," if m.group(0).endswith(",") else "")
+
+
+ROMAN = {"I": "One", "II": "Two", "III": "Three", "IV": "Four"}
+
+
+def speakable(t: str) -> str:
+    """Text for the voice: numbers spelled out so the model cannot misread digits (2nd -> second, 5,918 -> five
+    thousand ...), and site numerals read as words (Butkara I -> Butkara One). The display text stays as written."""
+    from num2words import num2words
+    t = re.sub(r"\b(Butkara|Shahi|Swat) (IV|III|II|I)\b", lambda m: f"{m.group(1)} {ROMAN[m.group(2)]}", t)
+    t = re.sub(r"\b(\d+)(st|nd|rd|th)\b", lambda m: num2words(int(m.group(1)), to="ordinal"), t)
+    return NUM.sub(lambda m: _say_number(m, t), t)
+
+
+def numbers(t: str) -> list[int]:
+    return [int(x.replace(",", "")) for x in NUM.findall(t) if x.strip(",")]
+
+
+def numbers_heard(sentence: str, heard: str) -> bool:
+    """Every number in the sentence must come back: as digits in the transcript, or spelled out in it."""
+    want = numbers(sentence)
+    if not want:
+        return True
+    got = set(numbers(heard)); words = " ".join(norm(heard))
+    return all(n in got or " ".join(norm(_say_number(re.match(r".*", str(n)), str(n)))) in words
+               or " ".join(norm(str(n))) in words for n in want)
+
+
+def norm(t: str) -> list[str]:
     t = t.lower().replace("-", " ").replace("metres", "meters").replace("kilometres", "kilometers")
-    t = re.sub(r"\d[\d,]*", lambda m: num2words(int(m.group(0).replace(",", ""))), t)
-    return re.sub(r"[^a-z' ]", " ", t).split()
+    t = speakable(t)
+    return re.sub(r"[^a-z' ]", " ", t.replace("-", " ")).split()
 
 
 def missing(ref: list[str], hyp: list[str]) -> float:
@@ -83,7 +130,7 @@ class Voice:
     def say(self, sentence: str, seed: int):
         import numpy as np
         self.torch.manual_seed(seed)
-        return self.tts.generate(sentence).squeeze().cpu().numpy().astype(np.float32)
+        return self.tts.generate(speakable(sentence)).squeeze().cpu().numpy().astype(np.float32)
 
     def hear(self, wav) -> str:
         import librosa
@@ -104,6 +151,8 @@ def voice_clip(v: Voice, text: str) -> tuple:
         wav = v.say(flat[i][1], seed)
         heard = v.hear(wav)
         bad = missing(norm(flat[i][1]), norm(heard))
+        if not numbers_heard(flat[i][1], heard):
+            bad = max(bad, 1.0)                 # a wrong number is never acceptable in a guide
         if longest_silence(wav) > SILENCE_MAX:
             bad = max(bad, 1.0)
         return [bad, wav, heard]
