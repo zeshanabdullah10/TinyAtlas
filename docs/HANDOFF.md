@@ -11,6 +11,16 @@ content is summarised in §8 so you do not need it).
 
 ---
 
+> **Method skill:** `.claude/skills/delegate-and-judge/SKILL.md` (invoke as `/delegate-and-judge`). It covers how this
+> project is run: the subagent prompt template, steering in rounds, the judging protocol, quality-gate lessons, release
+> hygiene and token economy. Load it at the start of any session that delegates or reviews work. §11–§12 below are the
+> project-specific detail behind it.
+>
+> **Latest (2026-10-04):** v2.3.0 released, adding the English audio guide (52 clips, Chatterbox by Resemble AI, MIT, generated
+> locally by `backend/tools/audio_local.py` in `.venv-tts`; numbers are spoken as words, and a Whisper gate checks every sentence;
+> clips live in `data/audio/<region>/` and are packed into the site). The checkout is on `main` (`swat-illustrated-map` is level with it).
+> The remote is `https://github.com/zeshanabdullah10/TinyAtlas.git`. No RunPod pods exist. Start new work in a fresh session.
+
 ## 0. Status snapshot (read first)
 
 | Item | State |
