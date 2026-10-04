@@ -32,6 +32,11 @@ SHOTS = {
                   focus=(34.77, 72.36), fstop=0.9, clouds=False, exag=1.8, sun_az=238.0, sun_el=14.0, horizon_y=0.89,
                   lowland=True, haze_col=(0.93, 0.76, 0.64), sky_fade_col=(1.0, 0.78, 0.60), sky_fade_band=0.06, proc_frac=0.06,
                   sun_strength=11.0, sun_color=(1.0, 0.76, 0.5), auto_horizon=True, haze_km=140.0, haze_max=0.85),
+    # poster-only reframe of Lower Swat (the bake keeps using "lower"); town_warm is read only when NOT baking
+    "lower2": dict(lat=34.78, lon=72.34, heading=25.0, pitch=-26.5, dist=44000.0, lens=24.0, shift_y=0.037,
+                   focus=(34.77, 72.36), fstop=0.9, clouds=False, exag=1.8, sun_az=208.0, sun_el=15.0, horizon_y=0.89,
+                   lowland=True, town_warm=True, tree_lift=1.25, haze_col=(0.93, 0.76, 0.64), sky_fade_col=(1.0, 0.78, 0.60), sky_fade_band=0.06, proc_frac=0.06,
+                   sun_strength=15.0, sun_color=(1.0, 0.76, 0.5), auto_horizon=True, haze_km=140.0, haze_max=0.85),
 }
 
 # ------------------------------------------------------------------ args
@@ -363,6 +368,8 @@ def make_terrain_material(name, albedo_path, lc_path):
     L(nt, alb.outputs["Color"], hs.inputs["Color"])
     base = hs.outputs["Color"]
     forest_col = mixc(nt, 0.35, base, (0.028, 0.065, 0.022, 1)) if not LOWLAND else mixc(nt, 0.30, base, (0.05, 0.10, 0.03, 1))
+    if LOWLAND and shot.get("town_warm") and not A.bake_albedo:   # poster render only: lighter forest floor
+        forest_col = mixc(nt, 0.30, base, (0.06, 0.115, 0.035, 1))
     meadow_tint = mixc(nt, maprange(nt, nb, 0.35, 0.65), (0.26, 0.19, 0.035, 1), (0.07, 0.15, 0.025, 1))
     meadow_tint = mixc(nt, maprange(nt, nm, 0.4, 0.62, 0.0, 0.7), meadow_tint, (0.15, 0.15, 0.04, 1))
     meadow_col = mixc(nt, 0.62, base, meadow_tint)
@@ -396,7 +403,12 @@ def make_terrain_material(name, albedo_path, lc_path):
     col = mixc(nt, meadow, col, meadow_col)
     if LOWLAND:   # built-up (50): warm town tone instead of the grey satellite roofs
         built = mth(nt, "MULTIPLY", cls(50), mth(nt, "SUBTRACT", 1.0, rock))
-        col = mixc(nt, built, col, mixc(nt, 0.6, base, (0.42, 0.33, 0.24, 1)))
+        if shot.get("town_warm") and not A.bake_albedo:   # POSTER RENDER ONLY (never the atlas albedo bake): cream/terracotta town with roof variety
+            _t1 = mixc(nt, maprange(nt, nm, 0.35, 0.65), (0.62, 0.23, 0.03, 1), (0.42, 0.13, 0.025, 1))
+            _t2 = mixc(nt, 0.04, _t1, base)
+            col = mixc(nt, built, col, _t2)
+        else:
+            col = mixc(nt, built, col, mixc(nt, 0.6, base, (0.42, 0.33, 0.24, 1)))
     col = mixc(nt, rock, col, rock_col)
     # fine colour speckle
     col = mixc(nt, mth(nt, "MULTIPLY", mth(nt, "SUBTRACT", nf, 0.5), 0.35), col, (0.02, 0.02, 0.02, 1))
@@ -795,6 +807,9 @@ if not A.no_buildings:
     rng = np.random.default_rng(3)
     wallc = [(0.40, 0.31, 0.22), (0.36, 0.32, 0.27), (0.46, 0.38, 0.28), (0.30, 0.26, 0.22), (0.52, 0.48, 0.40)]
     roofc = [(0.50, 0.12, 0.06), (0.06, 0.36, 0.30), (0.42, 0.43, 0.45), (0.30, 0.17, 0.08), (0.60, 0.20, 0.08)]
+    if shot.get("town_warm"):   # poster look only (buildings are never part of the atlas albedo bake): warm cream walls, terracotta roofs
+        wallc = [(0.46, 0.34, 0.22), (0.50, 0.40, 0.28), (0.40, 0.28, 0.18), (0.36, 0.30, 0.22), (0.52, 0.44, 0.32)]
+        roofc = [(0.50, 0.12, 0.06), (0.06, 0.36, 0.30), (0.45, 0.25, 0.14), (0.30, 0.17, 0.08), (0.60, 0.20, 0.08)]
     wacc, racc = Acc(), Acc()
     specs = []
     bp = near.path / "buildings.json"
@@ -1026,6 +1041,9 @@ if not A.no_trees and (near.path / "trees.npy").exists():
     ramp.color_ramp.elements[0].position = 0.0; ramp.color_ramp.elements[0].color = (0.008, 0.030, 0.028, 1)
     ramp.color_ramp.elements[1].position = 1.0; ramp.color_ramp.elements[1].color = (0.045, 0.085, 0.040, 1)
     e = ramp.color_ramp.elements.new(0.5); e.color = (0.016, 0.050, 0.040, 1)
+    _tl = float(shot.get("tree_lift", 1.0))   # poster-only brightening of the (very dark) tree ramp; trees are never part of the atlas bake
+    if _tl != 1.0:
+        for _el in ramp.color_ramp.elements: _el.color = (_el.color[0] * _tl, _el.color[1] * _tl, _el.color[2] * _tl, 1)
     L(ntr, oi.outputs["Random"], ramp.inputs[0])
     _tco = N(ntr, "ShaderNodeTexCoord"); _sz = N(ntr, "ShaderNodeSeparateXYZ"); L(ntr, _tco.outputs["Object"], _sz.inputs[0])
     _top = maprange(ntr, _sz.outputs[2], 0.45, 1.0)

@@ -68,7 +68,7 @@ def load_kinds():
     return m
 
 
-def select(labels, H, maxn):
+def select(labels, H, maxn, must=()):
     kinds = load_kinds()
     for l in labels:
         if not l.get("kind"):
@@ -80,8 +80,11 @@ def select(labels, H, maxn):
         return 0.04 * W_ <= x <= 0.96 * W_ and 0.0 <= y <= 0.96 * H
     for l in labels:
         l["tier"] = prio(l)
-    cand = [l for l in labels if edge_ok(l) and (l.get("visible") or l["tier"] == 1)]
-    cand.sort(key=lambda l: (l["tier"], l.get("distance_m", 0)))
+    mset = {m.strip().casefold() for m in must if m.strip()}
+    for l in labels:
+        l["must"] = short_name(l["name"]).casefold() in mset
+    cand = [l for l in labels if l["must"] or (edge_ok(l) and (l.get("visible") or l["tier"] == 1))]
+    cand.sort(key=lambda l: (not l["must"], l["tier"], l.get("distance_m", 0)))   # --must labels are guaranteed first
     out = []
     for l in cand:
         if any(abs(o["px"][0] - l["px"][0]) < 8 and abs(o["px"][1] - l["px"][1]) < 8 for o in out):
@@ -104,6 +107,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--heading", type=float, default=None)
     ap.add_argument("--max-labels", type=int, default=14)
+    ap.add_argument("--must", default="", help='comma-separated short names that are always labelled, e.g. "Mingora,Elum Ghar"')
     ap.add_argument("--max-dist-km", type=float, default=0, help="drop labels farther than this from the camera")
     a = ap.parse_args()
 
@@ -142,7 +146,7 @@ def main():
     items = []
     IMG_W[0] = iw
     if a.max_dist_km: labels = [l for l in labels if l.get("distance_m", 0) <= a.max_dist_km * 1000]
-    for l in select(labels, ih, a.max_labels):
+    for l in select(labels, ih, a.max_labels, a.must.split(",")):
         lines = [short_name(l["name"])]
         e = elev(l)
         if l["kind"] in ELEV_KINDS and e is not None:
@@ -172,7 +176,7 @@ def main():
                 continue
             it["box"] = box; placed.append(it); break
         else:
-            if it["l"]["tier"] < 1.6:   # never drop towns / heritage: wider offsets, relaxed dot clearance
+            if it["l"]["tier"] < 1.6 or it["l"].get("must"):   # never drop towns / heritage / --must: wider offsets, relaxed dot clearance
                 done = False
                 for dist in (100, 130, 165, 200):
                     D = dist * u
@@ -188,23 +192,41 @@ def main():
     print("placed:", [it["l"]["name"] for it in placed])
     print("dropped:", [it["l"]["name"] for it in items if "box" not in it])
     r = 4 * u
+    def dashed(draw, p0, p1, fill, width, dash, gap):
+        L_ = math.hypot(p1[0] - p0[0], p1[1] - p0[1]) or 1.0
+        ux, uy = (p1[0] - p0[0]) / L_, (p1[1] - p0[1]) / L_
+        t = 0.0
+        while t < L_:
+            t2 = min(t + dash, L_)
+            draw.line([(p0[0] + ux * t, p0[1] + uy * t), (p0[0] + ux * t2, p0[1] + uy * t2)], fill=fill, width=width)
+            t += dash + gap
+
     for it in placed:
         b = it["box"]; x, y = it["x"], it["y"]
+        hidden = it["l"].get("visible") is False      # behind a ridge from this camera: drawn honestly as hidden
         ex = min(max(x, b[0] + r), b[2] - r)
         ey = b[3] if y > b[3] else (b[1] if y < b[1] else (b[1] + b[3]) / 2)
         if b[1] <= y <= b[3]:
             ex = b[0] if x < b[0] else b[2]
-        sd.line([(ex, ey), (x, y)], fill=(0, 0, 0, 150), width=int(3 * u))
-        d.line([(ex, ey), (x, y)], fill=(240, 235, 225, 235), width=max(1, int(1.2 * u)))
-        sd.rounded_rectangle([b[0], b[1] + 2 * u, b[2], b[3] + 2 * u], r, fill=(0, 0, 0, 150))
-        d.rounded_rectangle(b, r, fill=(21, 18, 15, 224), outline=(233, 226, 211, 90), width=max(1, int(u)))
+        if hidden:
+            dashed(d, (ex, ey), (x, y), (240, 235, 225, 200), max(1, int(1.2 * u)), 5 * u, 4 * u)
+            sd.rounded_rectangle([b[0], b[1] + 2 * u, b[2], b[3] + 2 * u], r, fill=(0, 0, 0, 100))
+            d.rounded_rectangle(b, r, fill=(21, 18, 15, 157), outline=(233, 226, 211, 70), width=max(1, int(u)))
+        else:
+            sd.line([(ex, ey), (x, y)], fill=(0, 0, 0, 150), width=int(3 * u))
+            d.line([(ex, ey), (x, y)], fill=(240, 235, 225, 235), width=max(1, int(1.2 * u)))
+            sd.rounded_rectangle([b[0], b[1] + 2 * u, b[2], b[3] + 2 * u], r, fill=(0, 0, 0, 150))
+            d.rounded_rectangle(b, r, fill=(21, 18, 15, 224), outline=(233, 226, 211, 90), width=max(1, int(u)))
         cx = (b[0] + b[2]) / 2
-        d.text((cx, b[1] + 4 * u), it["lines"][0], font=F1, fill=(255, 255, 255, 255), anchor="ma")
+        d.text((cx, b[1] + 4 * u), it["lines"][0], font=F1, fill=(255, 255, 255, 215 if hidden else 255), anchor="ma")
         if len(it["lines"]) > 1:
             d.text((cx, b[1] + 21 * u), it["lines"][1], font=F2, fill=(217, 210, 196, 255), anchor="ma")
         dr = 3.6 * u
-        d.ellipse([x - dr - u, y - dr - u, x + dr + u, y + dr + u], fill=(20, 17, 14, 230))
-        d.ellipse([x - dr + .6 * u, y - dr + .6 * u, x + dr - .6 * u, y + dr - .6 * u], fill=(255, 255, 255, 255))
+        if hidden:
+            d.ellipse([x - dr, y - dr, x + dr, y + dr], outline=(255, 255, 255, 235), width=max(1, int(1.4 * u)))
+        else:
+            d.ellipse([x - dr - u, y - dr - u, x + dr + u, y + dr + u], fill=(20, 17, 14, 230))
+            d.ellipse([x - dr + .6 * u, y - dr + .6 * u, x + dr - .6 * u, y + dr - .6 * u], fill=(255, 255, 255, 255))
 
     # ---- title cartouche
     tx, ty = 38 * u, 28 * u

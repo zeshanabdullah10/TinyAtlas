@@ -24,14 +24,15 @@ CC = 128                       # chunk cells
 PXC = 384                      # L0 tile px
 OV_SHOT = dict(lat=35.60, lon=72.60, heading=5.0, pitch=-31.0, dist=42000.0, sun_az=215.0, sun_el=15.0, sun_color=(1.0, 0.74, 0.46))
 PACKS = {
-    "swat": dict(title="Swat Valley", subtitle="Kalam \u00b7 Utror \u00b7 Ushu \u00b7 Mahodand", shot=OV_SHOT, exag=1.6, bake_shot="overview",
+    "swat": dict(road_classes=["swat_road_classes.json"], title="Swat Valley", subtitle="Kalam \u00b7 Utror \u00b7 Ushu \u00b7 Mahodand", shot=OV_SHOT, exag=1.6, bake_shot="overview",
                  areas=None, peak_tier2_min=5500, drop_empty_routes=False,
                  neighbors=[{"slug": "swat-lower", "title": "Lower Swat", "edge": "south"}],
                  # Explore-dock cameras: (name, lat, lon, heading°, pitch°, distance m). Headings chosen by viewing each
                  # framing: no ridge in front of the key places, sun (~215°) raking from the side, not into the camera.
                  explore=[("Kalam & Ushu", 35.54, 72.64, 10, -30, 15000), ("Utror & Gabral", 35.50, 72.445, 15, -30, 11000),
                           ("Mahodand", 35.708, 72.654, 345, -30, 9000), ("Kumrat", 35.52, 72.22, 20, -30, 14000)]),
-    "swat_lower": dict(title="Lower Swat", subtitle="Mingora \u00b7 Udegram \u00b7 Malam Jabba \u00b7 Bahrain",
+    # lower pack: the upper file (judgement classes) wins where both list a way, the tag-evidence file fills in the rest
+    "swat_lower": dict(road_classes=["swat_road_classes.json", "swat_lower_road_classes.json"], title="Lower Swat", subtitle="Mingora \u00b7 Udegram \u00b7 Malam Jabba \u00b7 Bahrain",
                        shot=dict(lat=34.84, lon=72.40, heading=25.0, pitch=-28.0, dist=36000.0, sun_az=238.0, sun_el=14.0, sun_color=(1.0, 0.76, 0.5)),
                        exag=1.8, bake_shot="lower", lowland=True, areas={"swat-lower", "swat-mid", "malam-jabba", "gateway"}, peak_tier2_min=2500,
                        drop_empty_routes=True, neighbors=[{"slug": "swat", "title": "Swat Valley", "edge": "north"}],
@@ -42,7 +43,7 @@ HWY_CLASS = {"motorway": "paved", "trunk": "paved", "primary": "paved", "seconda
              "unclassified": "minor", "residential": "minor", "service": "minor", "living_street": "minor",
              "track": "track", "path": "path", "footway": "path", "steps": "path", "bridleway": "path", "cycleway": "path"}
 GAZETTEER = "data/research/swat_gazetteer.json"
-SCALE_GUESS = {"white-palace-marghazar": 40.0, "jamia-masjid-thal": 25.0, "swat-museum": 45.0}   # footprint widths, estimates
+SCALE_GUESS = {"white-palace-marghazar": 40.0, "jamia-masjid-thal": 25.0, "swat-museum": 45.0}   # footprint widths, estimates (white palace 40 m: UNVERIFIED, no OSM footprint or published size as of 2026-10-04)
 TRELLIS = set(SCALE_GUESS)
 MAJOR_LAKES = ("mahodand", "kundol", "spin khwar", "izmis", "kharkhari")   # tier 1 regardless of area; others if >= 0.15 km2
 HERITAGE = {"stupa", "fort_ruin", "archaeological_site", "museum", "palace", "mosque", "rock_carving"}
@@ -355,12 +356,16 @@ def step_vectors(ctx):
         k = "river" if w["waterway"] == "river" else "stream"
         rivers.append({"name": w.get("name"), "kind": k, "width_m": 30 if k == "river" else 10, "pts": simp(line(w["pts"]), 5.0)})
     # roads
-    cls = {w["way_id"]: w for w in json.loads((ROOT / "data/research/swat_road_classes.json").read_text(encoding="utf-8"))["ways"]}
+    cls = {}
+    for fn in reversed(ctx["cfg"]["road_classes"]):                       # earlier files win
+        cls.update({w["way_id"]: w for w in json.loads((ROOT / "data/research" / fn).read_text(encoding="utf-8"))["ways"]})
     roads = []
     for r in osm["roads"]:
         if len(r["pts"]) < 2: continue
         c = cls.get(r["id"], {}).get("jeep_class")
-        if c == "paved_or_regular": k = "paved"
+        direct = cls.get(r["id"], {}).get("class")                         # tag-evidence file: renderer class as is
+        if direct in ("paved", "minor", "jeep", "track", "path"): k = direct
+        elif c == "paved_or_regular": k = "paved"
         elif c == "trail": k = "path"
         elif c in ("jeep_only", "likely_jeep"): k = "track" if r["highway"] == "track" else "jeep"
         elif c == "unknown": k = "track"
