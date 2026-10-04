@@ -71,7 +71,7 @@ def speakable(t: str) -> str:
     """Text for the voice: numbers spelled out so the model cannot misread digits (2nd -> second, 5,918 -> five
     thousand ...), and site numerals read as words (Butkara I -> Butkara One). The display text stays as written."""
     from num2words import num2words
-    t = re.sub(r"\b(Butkara|Shahi|Swat) (IV|III|II|I)\b", lambda m: f"{m.group(1)} {ROMAN[m.group(2)]}", t)
+    t = re.sub(r"\b(Butkara|Shahi|Swat|Sharif) (IV|III|II|I)\b", lambda m: f"{m.group(1)} {ROMAN[m.group(2)]}", t)
     t = re.sub(r"\b(\d+)(st|nd|rd|th)\b", lambda m: num2words(int(m.group(1)), to="ordinal"), t)
     return NUM.sub(lambda m: _say_number(m, t), t)
 
