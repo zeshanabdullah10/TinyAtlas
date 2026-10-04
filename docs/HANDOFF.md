@@ -25,14 +25,14 @@ content is summarised in §8 so you do not need it).
 
 | Item | State |
 |---|---|
-| Branch | `swat-illustrated-map` (local; not yet pushed). `main` on GitHub is still v1.0.0 (`72f8fb1`). |
-| Commits on the branch | `8a4c043` geo bundles + Blender posters · `58f410f` paint-over + TRELLIS · `bc6e06c` Atlas v1 · `78c84dd` Lower Swat + linked packs · `38eba22` Atlas in the app |
-| Tests | `python -m pytest -q` → 53 passed after the v2.1 cleanup; `python backend/tools/smoke.py [http://localhost:8000]` end-to-end |
+| Branch | `main` at `ae5d59a`, pushed; `swat-illustrated-map` is level with it. Releases v2.0.0–v2.3.0 are tagged on GitHub (v2.3.0 tag → `e56d398`; `ae5d59a` adds only the method skill and docs). `gh-pages` = `dce7bec` (static site v2.3.0). |
+| Commits since v2.2.0 | `25c8cb2` numbers spoken as words + strict number check in the gate · `e56d398` "Saidu Sharif I" read as "One" · `ae5d59a` delegate-and-judge skill + HANDOFF status |
+| Tests | `python -m pytest -q` → 53 passed (re-run 2026-10-04 on v2.3.0); `python backend/tools/smoke.py [http://localhost:8000]` end-to-end |
 | Live map | `cd backend && uvicorn tinyatlas.api:app --port 8000` → `http://localhost:8000/atlas.html?pack=swat` (and `?pack=swat-lower`). Owner confirmed it runs well in Chrome on real hardware. |
-| Data (gitignored, under `data/`) | bundles `swat`, `swat_far`, `swat_lower`, `swat_lower_far`; packs `data/packs/swat/atlas` (~104 MB), `data/packs/swat-lower/atlas` (~162 MB); research, photos, models, renders. |
-| RunPod | Old pod `t6t4cq301hjkuo` TERMINATED. TTS pod `s9p3rr2my88itr` (RTX A4000, $0.17/h) was RUNNING for the audio-guide job at the time of writing. **First action: check it with the RunPod `get-pod` tool; if the audio job is done or abandoned, stop + terminate it.** `.env` `POD_ID` / `POD_JUPYTER_TOKEN` point at it. |
-| In-flight work at handoff | Swat audio guide generation (narration + Kokoro/MMS TTS) by a subagent. Verify its outputs before relying on them (§10.3). |
-| Owner decisions | DONE: v2.0.0 released (main + tag + gh-pages). DONE (v2.1 cleanup): the app is Swat-only (Diorama, non-Swat regions, "Build any place" and dead modules removed; list in `docs/CLEANUP-v2.1.md`) and the main page is rebuilt in the Atlas style (`web/index.html`, `css/home.css`, `js/home.js`, data from `backend/tools/home_data.py` → `web/data/home.json`). Tests: 53 (removed tests covered deleted code). Model zoom bug fixed: fixed scale (`landmarks.js`: real size × user multiplier, minimum ×20 so landmarks read when zoomed out, displayed footprint capped 1 km). Audio: English only, generated locally (Kokoro / Chatterbox bake-off in progress; MMS-TTS is CC-BY-NC and must not be used). |
+| Data (gitignored, under `data/`) | bundles `swat`, `swat_far`, `swat_lower`, `swat_lower_far`; packs `data/packs/swat/atlas` (~98 MB), `data/packs/swat-lower/atlas` (~162 MB); audio `data/audio/swat` (23 clips) and `data/audio/swat-lower` (29 clips), `.m4a` + `.txt` script each; research, photos, models, renders. `data/audio/{deosai,hunza,...}` and `_bakeoff` are leftovers from removed regions / the TTS bake-off. |
+| RunPod | No pods exist (RunPod API checked 2026-10-04). The `.env` `POD_ID=s9p3rr2my88itr` is stale; ignore it. All TTS now runs locally. |
+| In-flight work at handoff | None. Untracked in the working tree: `docs/launch/` (launch video, cover, script), `gui-test-screenshots/`, `style-examples/`; the owner decides whether to commit them. |
+| Owner decisions | DONE: v2.0.0 released (main + tag + gh-pages). DONE (v2.1 cleanup): the app is Swat-only (Diorama, non-Swat regions, "Build any place" and dead modules removed; list in `docs/CLEANUP-v2.1.md`) and the main page is rebuilt in the Atlas style (`web/index.html`, `css/home.css`, `js/home.js`, data from `backend/tools/home_data.py` → `web/data/home.json`). DONE (v2.2): honest landmark scale, label accuracy pass, mobile navigation. DONE (v2.3): English audio guide, Chatterbox (MIT) chosen over Kokoro, generated locally by `backend/tools/audio_local.py` in `.venv-tts`, every sentence checked by a Whisper gate with strict number matching. MMS-TTS is CC-BY-NC and must not be used. |
 | Known defects | §14. (The Explore-area heading drift between `meta.json` and `atlas_pack.py` was found while writing this document and is RESOLVED: generator updated, rebuilt `meta.json` parses to exactly the same JSON as the hand-fixed one.) |
 
 ---
@@ -544,10 +544,8 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
 
 ## 14. Known defects and open items (fix in this order)
 1. ~~Area camera headings not in the generator~~ — RESOLVED 2026-10-02 (see §4.5 and §11.3).
-2. **Audio guide**: local bake-off (Kokoro/Chatterbox) was in flight in the working tree (`audio_local.py`,
-   `tts_bakeoff.py`, `narration.py`, `listen.js`, `atlaspack.py` audio chunk slug) — uncommitted, not reviewed here.
-   The old RunPod TTS pod `s9p3rr2my88itr` no longer serves (proxy 404 on every endpoint; no RunPod API key in `.env`
-   to stop/terminate it) — if it still shows in the RunPod console, terminate it there.
+2. ~~Audio guide~~ — RESOLVED in v2.3.0 (2026-10-04): 52 English clips, Chatterbox, Whisper-gated; the old TTS pod is
+   gone.
 3. **Offline save** never exercised with a real service worker: test by hand in Chrome.
 4. **White Palace** — PARTLY RESOLVED 2026-10-02: the listed 2,175 m (Wikidata) was wrong; the DEM at the OSM pin is
    1,308 m and the label now uses it (gazetteer note added). TRELLIS silhouette verified against the photo (colonnaded
