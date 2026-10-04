@@ -15,6 +15,7 @@ export const shared = {
   uSunCol: { value: new THREE.Color(1, 0.8, 0.6) },
   uSkyCol: { value: new THREE.Color(0.8, 0.85, 0.95) },
   uTime: { value: 0 },
+  uClose: { value: 0 },              // 1 in close views (orbit distance <= ~9 km), 0 from ~20 km: gates the shade lift
   uPx: { value: 1 },                 // world metres per pixel at distance 1 (2 tan(fov/2) / height)
 };
 
@@ -59,8 +60,8 @@ export function makeTerrainMaterial() {
     s.fragmentShader = s.fragmentShader
       .replace("#include <common>", `#include <common>
 varying vec3 vWPos;
-uniform sampler2D uGrad, uShadow, uOv, uAlb; uniform vec4 uGridUV, uTile; uniform vec2 uGridSize;
-uniform float uExag, uDetail, uHasTile, uTexPx, uHmin;
+uniform sampler2D uGrad, uShadow, uOv, uAlb; uniform vec4 uGridUV, uTile; uniform vec3 uSunDir; uniform vec2 uGridSize;
+uniform float uExag, uDetail, uHasTile, uTexPx, uHmin, uClose;
 ${NOISE}
 
 vec3 gradeAlbedo(vec3 a, float alt) {          // poster grade: ochre rock, deep blue-green forest, cool bright snow
@@ -106,8 +107,13 @@ vec3 gradeAlbedo(vec3 a, float alt) {          // poster grade: ochre rock, deep
   {
     vec3 lit0 = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse;
     reflectedLight.directDiffuse *= hLit; reflectedLight.directSpecular *= hLit;
-    float def = max(0.0, 0.45 * dot(lit0, vec3(0.299, 0.587, 0.114)) - dot(reflectedLight.directDiffuse + reflectedLight.indirectDiffuse, vec3(0.299, 0.587, 0.114)));
-    reflectedLight.indirectDiffuse += def * vec3(0.92, 1.03, 1.1);   // shadows keep >= 45 % of their lit luminance, sky-tinted
+    float flo = mix(0.45, 0.66, uClose);                              // close views: shade keeps more of its lit luminance
+    float def = max(0.0, flo * dot(lit0, vec3(0.299, 0.587, 0.114)) - dot(reflectedLight.directDiffuse + reflectedLight.indirectDiffuse, vec3(0.299, 0.587, 0.114)));
+    vec3 chroma = diffuseColor.rgb / max(dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114)), 0.01);   // keep the ground's own saturation in the lift
+    vec3 tealC = mix(chroma * vec3(0.70, 1.0, 1.45), vec3(0.45, 1.0, 1.45), 0.25); tealC /= dot(tealC, vec3(0.299, 0.587, 0.114));
+    reflectedLight.indirectDiffuse += def * mix(vec3(0.92, 1.03, 1.1), tealC, uClose);   // sky-tinted; close: albedo chroma shifted toward teal-blue
+    float ndl = dot(tN, uSunDir), away = 1.0 - smoothstep(0.0, 0.3, ndl);
+    reflectedLight.indirectDiffuse += uClose * 0.12 * max(1.0 - hLit, away) * diffuseColor.rgb * vec3(0.7, 1.0, 1.25);   // albedo-keyed teal fill in cast shadow and on sun-averted slopes
   }`);
   };
   return m;

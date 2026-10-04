@@ -89,6 +89,7 @@ export class Sky {
   updateHaze(camDist) {
     const f = this.scene.fog;
     f.near = Math.max(10000, camDist * 0.75); f.far = f.near + 55000;
+    shared.uClose.value = 1 - smooth(9000, 20000, camDist);
   }
 
   setTier(tier) {
