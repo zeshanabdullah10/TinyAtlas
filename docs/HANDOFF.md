@@ -16,7 +16,11 @@ content is summarised in §8 so you do not need it).
 > hygiene and token economy. Load it at the start of any session that delegates or reviews work. §11–§12 below are the
 > project-specific detail behind it.
 >
-> **Latest (2026-10-04):** v2.3.0 released, adding the English audio guide (52 clips, Chatterbox by Resemble AI, MIT, generated
+> **Latest (2026-10-04, later):** v2.4.0 released: Lower Swat poster reframed and relit (poster-only shot `lower2`, new
+> cover), live-map close views lighter in shade with near-detail conifers, Lower Swat road classes from OSM
+> surface/smoothness/tracktype (`backend/tools/road_classes.py`). See §14.2 for what was verified and what is still open.
+>
+> **Earlier (2026-10-04):** v2.3.0 released, adding the English audio guide (52 clips, Chatterbox by Resemble AI, MIT, generated
 > locally by `backend/tools/audio_local.py` in `.venv-tts`; numbers are spoken as words, and a Whisper gate checks every sentence;
 > clips live in `data/audio/<region>/` and are packed into the site). The checkout is on `main`; the only other branch is `gh-pages`.
 > The remote is `https://github.com/zeshanabdullah10/TinyAtlas.git`. No RunPod pods exist. Start new work in a fresh session.
@@ -25,14 +29,14 @@ content is summarised in §8 so you do not need it).
 
 | Item | State |
 |---|---|
-| Branch | `main`, pushed. Only `main` and `gh-pages` remain: the merged branches `swat-illustrated-map`, `travel-companion` (tip `dd58bf0`) and `claude/exciting-edison-k01oo3` (tip `1ba2160`) were deleted 2026-10-04. Releases v2.0.0–v2.3.0 are tagged on GitHub (v2.3.0 tag → `e56d398`; `ae5d59a` adds only the method skill and docs). `gh-pages` = `dce7bec` (static site v2.3.0). |
-| Commits since v2.2.0 | `25c8cb2` numbers spoken as words + strict number check in the gate · `e56d398` "Saidu Sharif I" read as "One" · `ae5d59a` delegate-and-judge skill + HANDOFF status |
-| Tests | `python -m pytest -q` → 53 passed (re-run 2026-10-04 on v2.3.0); `python backend/tools/smoke.py [http://localhost:8000]` end-to-end |
+| Branch | `main`, pushed. Only `main` and `gh-pages` remain: the merged branches `swat-illustrated-map`, `travel-companion` (tip `dd58bf0`) and `claude/exciting-edison-k01oo3` (tip `1ba2160`) were deleted 2026-10-04. Releases v2.0.0–v2.4.0 are tagged on GitHub (v2.4.0 tag → `563439c`; v2.3.0 → `e56d398`). `gh-pages` = `2388802` (static site v2.4.0, live-checked: both packs load). The v2.4 feature branch `v2.4-visual-data` was fast-forwarded into `main` and deleted. |
+| Commits since v2.3.0 | `ae5d59a` delegate-and-judge skill · `563439c` v2.4.0 (poster `lower2`, hidden-label style + `--must` in poster_labels, close-view shade + near trees, road classes) · this HANDOFF update |
+| Tests | `python -m pytest -q` → 58 passed (2026-10-04 on v2.4.0; 5 new in `test_road_classes.py`); `python backend/tools/smoke.py [http://localhost:8000]` end-to-end |
 | Live map | `cd backend && uvicorn tinyatlas.api:app --port 8000` → `http://localhost:8000/atlas.html?pack=swat` (and `?pack=swat-lower`). Owner confirmed it runs well in Chrome on real hardware. |
-| Data (gitignored, under `data/`) | bundles `swat`, `swat_far`, `swat_lower`, `swat_lower_far`; packs `data/packs/swat/atlas` (~98 MB), `data/packs/swat-lower/atlas` (~162 MB); audio `data/audio/swat` (23 clips) and `data/audio/swat-lower` (29 clips), `.m4a` + `.txt` script each; research, photos, models, renders. `data/audio/{deosai,hunza,...}` and `_bakeoff` are leftovers from removed regions / the TTS bake-off. |
+| Data (gitignored, under `data/`) | bundles `swat`, `swat_far`, `swat_lower`, `swat_lower_far`; packs `data/packs/swat/atlas` (~98 MB), `data/packs/swat-lower/atlas` (~159 MB; cover.webp = 4:3 crop (254,194,2046,1536) of `data/renders/swat-lower/lower_v24_poster.png`, resized to 1280×960 — no tool generates covers); audio `data/audio/swat` (23 clips) and `data/audio/swat-lower` (29 clips), `.m4a` + `.txt` script each; research, photos, models, renders. `data/audio/{deosai,hunza,...}` and `_bakeoff` are leftovers from removed regions / the TTS bake-off. |
 | RunPod | No pods exist (RunPod API checked 2026-10-04). The `.env` `POD_ID=s9p3rr2my88itr` is stale; ignore it. All TTS now runs locally. |
-| In-flight work at handoff | None. Untracked in the working tree: `docs/launch/` (launch video, cover, script), `gui-test-screenshots/`, `style-examples/`; the owner decides whether to commit them. |
-| Owner decisions | DONE: v2.0.0 released (main + tag + gh-pages). DONE (v2.1 cleanup): the app is Swat-only (Diorama, non-Swat regions, "Build any place" and dead modules removed; list in `docs/CLEANUP-v2.1.md`) and the main page is rebuilt in the Atlas style (`web/index.html`, `css/home.css`, `js/home.js`, data from `backend/tools/home_data.py` → `web/data/home.json`). DONE (v2.2): honest landmark scale, label accuracy pass, mobile navigation. DONE (v2.3): English audio guide, Chatterbox (MIT) chosen over Kokoro, generated locally by `backend/tools/audio_local.py` in `.venv-tts`, every sentence checked by a Whisper gate with strict number matching. MMS-TTS is CC-BY-NC and must not be used. |
+| In-flight work at handoff | None. **The C: drive was 100 % full (63 MB free) on 2026-10-04** — the system/temp drive; builds and screenshots must go to D:.  Untracked in the working tree: `docs/launch/` (launch video, cover, script), `gui-test-screenshots/`, `style-examples/`; the owner decides whether to commit them. |
+| Owner decisions | DONE (v2.4): visuals approved 2026-10-04; untagged lowland tertiary roads keep the strict "jeep" fallback (owner did not choose the 25 km/h default — still OPEN, §14 item 8). DONE: v2.0.0 released (main + tag + gh-pages). DONE (v2.1 cleanup): the app is Swat-only (Diorama, non-Swat regions, "Build any place" and dead modules removed; list in `docs/CLEANUP-v2.1.md`) and the main page is rebuilt in the Atlas style (`web/index.html`, `css/home.css`, `js/home.js`, data from `backend/tools/home_data.py` → `web/data/home.json`). DONE (v2.2): honest landmark scale, label accuracy pass, mobile navigation. DONE (v2.3): English audio guide, Chatterbox (MIT) chosen over Kokoro, generated locally by `backend/tools/audio_local.py` in `.venv-tts`, every sentence checked by a Whisper gate with strict number matching. MMS-TTS is CC-BY-NC and must not be used. |
 | Known defects | §14. (The Explore-area heading drift between `meta.json` and `atlas_pack.py` was found while writing this document and is RESOLVED: generator updated, rebuilt `meta.json` parses to exactly the same JSON as the hand-fixed one.) |
 
 ---
@@ -550,17 +554,22 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
 4. **White Palace** — PARTLY RESOLVED 2026-10-02: the listed 2,175 m (Wikidata) was wrong; the DEM at the OSM pin is
    1,308 m and the label now uses it (gazetteer note added). TRELLIS silhouette verified against the photo (colonnaded
    veranda, central pediment, ~3:1 massing match); mesh artifacts at both flanks (floating fragments > the 2 % drop
-   threshold) don't read at map scale. Absolute size stays a flagged estimate (no published dimensions). The pin sits
+   threshold) don't read at map scale. Absolute size stays a flagged estimate (no published dimensions). Re-checked 2026-10-04: no OSM building outline
+   (only node 6684687172, historic=castle), Wikipedia gives only ceiling height and 24 rooms; dated gazetteer note. The pin sits
    33 m from an OSM stream — coordinate is sourced (OSM + Wikidata agree), so it stands; slope is 15°.
 5. ~~Phone labels: chip shows while its anchor is off-screen~~ — RESOLVED 2026-10-02 (`labels.js`: candidates require
    the anchor dot inside the viewport).
-6. **Lower Swat poster**: lower third too dark, Mingora pale, Elum/Malam Jabba not prominent, Barikot at the edge;
-   White Palace and Shingardar below the frame.
-7. **Close views** still darker than the posters in shade; trees read as simple cones up close.
-8. **Lower Swat roads** were classified from highway tags only (no surface/tracktype review).
-9. **Missing places/routes** (§3.3): need GPX or a checkable source. One Overpass tile (72.9–73.2 E, 35.55–35.85 N)
-   never completed.
-10. Shingardar grass cap smaller/raggeder than the photo (cosmetic at map scale).
+6. ~~Lower Swat poster~~ — RESOLVED in v2.4.0 (§14.2). Remaining: Mingora reads as a small beige patch at 44 km.
+7. **Close views** — PARTLY RESOLVED in v2.4.0 (§14.2): shade lifted and near trees detailed. Remaining: shaded brown
+   slopes are olive, not the poster's teal (B < R there); Kalam close has 14 % fewer far trees (paid for the near LOD).
+8. **Lower Swat roads** — PARTLY RESOLVED in v2.4.0: 596 ways classed from tags. OPEN owner decision: 763.7 km (394 ways)
+   of untagged tertiary still fall back to jeep 14 km/h (Saidu Sharif Stupa → White Palace 14.2 km = 61 min). Options:
+   keep (strict), or a lowland-only fallback tertiary → minor (25 km/h), stated as a default in the UI.
+9. **Missing places/routes** (§3.3): need GPX or a checkable source. The last Overpass tile (72.9–73.2 E, 35.55–35.85 N)
+   was searched 2026-10-04: 0 hits (thinly mapped, 19 highway ways; weak evidence). Raw response cached as
+   `data/cache/osm/q_b2_tile_alt_names_overpass-api.de.json`.
+10. Shingardar grass cap smaller/raggeder than the photo (cosmetic at map scale). Skipped again in v2.4 (not cheap).
+12. Swat Museum looks huge in Mingora close views at the default ×20 landmark size (pre-existing; seen in v2.4 review).
 11. Photos are ~43 MB of the upper pack: consider ≤ 1200 px and ≤ 4 per place for offline.
 
 ### 14.1 Accuracy pass 2026-10-02 (label elevations + pack hygiene; packs rebuilt, diffs reviewed)
@@ -582,10 +591,59 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
   emissive lift 0.45→0.18, texture anisotropy 8 — the baked 1024 textures now read up close without losing the
   lift that makes maquettes visible against pale ground.
 
+### 14.2 v2.4.0 visual + data pass 2026-10-04 (delegated A1/A2/B, lead-verified)
+- **Poster** (`build_scene.py` SHOTS `lower2`: target 34.78 N 72.34 E, heading 25, pitch −26.5, 44 km, sun 208°/15°,
+  strength 15, `town_warm`, `tree_lift` 1.25). `town_warm`/forest/building/tree tweaks are guarded `not A.bake_albedo`
+  (or live in code the bake never reaches), so the pack bake still uses `lower` unchanged. Outputs
+  `data/renders/swat-lower/lower_v24.png`, `lower_v24_poster.png`, `lower2_labels.json`. Lead-measured beauty render:
+  P5 10→22 (overview 19), bottom/mid luminance 0.48→0.58 (overview 0.58), mid-third std 0.153→0.157. Labels:
+  `--must "Mingora,Saidu Sharif,Udegram,Barikot,Shingardar Stupa,White Palace,Malam Jabba,Elum Ghar"`; `visible=false`
+  is now drawn hidden on posters (hollow dot, dashed leader, ~70 % chip). Round 1 failed (milky: a 42° fill sun) —
+  never add a high fill light to fix a dark foreground; move the sun instead (lesson §5.4.2).
+- **Live map** (`material.js` `uClose` = 1 − smooth(9 km, 20 km, orbit distance), set in `sky.js`): shadow floor 0.45→0.66
+  of lit luminance, teal-shifted albedo-chroma fill; home views pixel-identical. `trees.js`: high-tier near-detail
+  conifers (68/64/38 tris) within 1.5 km (8 % hysteresis, cap 8 000), far trees thinned to stay triangle-neutral.
+  Measured (high tier): Kalam close 112→115 calls, 3.14→2.97 M tris; forest close 143→149, 3.86→3.91 M — close views
+  sit near the 4 M budget, so any further tree/terrain detail must be paid for.
+- **Roads**: `backend/tools/road_classes.py` (pure `classify()`, reads the cached Overpass response) →
+  `data/research/swat_lower_road_classes.json` (direct renderer `class`); `PACKS[...]["road_classes"]` lists class files
+  (earlier wins). Lower pack paved 778.6→835.3 km, jeep 837.5→909.8 km; 13 of 29 planner legs 1–3 min faster. Upper
+  pack places/vectors/meta byte-identical (regression rule held). Bundle `osm.json` keeps only `highway`; tags live in
+  `data/cache/osm/*_roads.json`.
+- Comparison views for future visual work: fixed cameras (UTM e/n) used for v2.4 before/after are Kalam close
+  (280917, 3929622, hdg 15, pitch −28, 3.5 km), Mingora close (258491, 3850933, 25, −30, 3.5 km), Shingardar close
+  (247829, 3842271, 25, −28, 2.5 km), forest close (252573, 3838656, 25, −22, 2.5 km), near trees = Kalam at 700 m pitch −18.
+
 ---
 
 ## 15. Next: the owner's approved plan (execute in order)
-1. **Finish audio**, verify, terminate the pod (§10).
+**Next session (v2.5.0 — offline that works, smaller packs):** start fresh with "Read docs/HANDOFF.md, then load
+/delegate-and-judge; execute §15 step 0." Steps 1–3 below are DONE history; keep them for their method.
+
+0. **v2.5.0 plan** (§14 items 3, 11, 8; then polish):
+   a. **Offline save, for real** (§14.3, lead-owned verification). Serve the app (`uvicorn` on :8000) and drive real
+      Chrome with the claude-in-chrome tools (headless Playwright has no service worker): open
+      `/atlas.html?pack=swat-lower`, use the download dialog, then read back `caches.keys()` and the
+      `tinyatlas-data-v1` entry count vs `files.json` with `javascript_tool`, go offline (DevTools or stop the server),
+      reload, fly to two places, open a panel with a photo and play one audio clip. Same on the live gh-pages site
+      (subpath `/TinyAtlas/`). Any bug → a Sonnet agent owning `web/sw.js` + `web/js/atlas/offline.js` with the exact
+      failing step. Also confirm audio clips are in the offline list (§9).
+   b. **Pack size** (§14.11, Sonnet agent owning `atlas_pack.py` photo step + `collect_photos` outputs only): photos
+      ≤ 1200 px long edge, ≤ 4 per place (keep `role` order: structure → landscape → artefact), WebP or JPEG q≈80,
+      attribution unchanged. Report MB per pack before → after (photos are ~43 MB of the upper pack), and the offline
+      dialog sizes. Judge: the place panel photo (440 px wide, 2× = 880 px) still crisp; every photo still credited;
+      places/meta identical except photo entries (regression rule).
+   c. **Owner decision first:** untagged lowland tertiary roads (§14.8). If the owner picks the 25 km/h default,
+      implement it as a per-pack fallback in `PACKS` (not in the class file), label it in the planner as a default,
+      and show the leg diff table again.
+   d. Optional polish, only if a–b land cleanly: shaded brown slopes toward teal in close views (§14.7; distance-gated,
+      `material.js`), Swat Museum close-view scale (§14.12; `landmarks.js` cap), Shingardar grass cap (§14.10).
+   e. Housekeeping for the owner: C: is full (§0); untracked `docs/launch/`, `gui-test-screenshots/`, `style-examples/`.
+   f. Release via step 3 (worked again for v2.4: build `dist/` on D:, gh-pages worktree on D:, compare file lists
+      with `git ls-tree -r origin/gh-pages` before committing, keep `.nojekyll`, no force-push; wait for
+      `gh api repos/zeshanabdullah10/TinyAtlas/pages/builds/latest`, then `atlas_shot.py --host <pages url>` both packs).
+
+1. **Finish audio**, verify, terminate the pod (§10). DONE (v2.3).
 2. **Swat-only cleanup** — DONE in v2.1 (see `docs/CLEANUP-v2.1.md`). The method, for future cleanups:
    a. Build a reachability map from the entry points that remain: `web/index.html` → `main.js` → `home.js` (gallery,
       two Swat cards) and `web/atlas.html` → `js/atlas/*` (+ the planner/listen modules it imports), and the API
