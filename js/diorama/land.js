@@ -159,7 +159,7 @@ export function tabletop(site) {
   cx.fillStyle = "#3a2410"; cx.textAlign = "center";
   cx.font = "700 74px 'Cormorant SC', Georgia, serif"; cx.fillText(site.meta.title.toUpperCase(), 512, 98);
   cx.font = "italic 500 38px 'Cormorant Garamond', Georgia, serif";
-  cx.fillText(`${site.meta.subtitle} · ${site.meta.facts.lake_level_m.toLocaleString("en")} m`, 512, 152);
+  cx.fillText(`${site.meta.subtitle} · ${(site.meta.facts.lake_level_m ?? site.meta.facts.arrival_m).toLocaleString("en")} m`, 512, 152);
   const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   const plate = new THREE.Mesh(new THREE.PlaneGeometry(1400, 262),
     new THREE.MeshStandardMaterial({ map: tex, metalness: 0.55, roughness: 0.35 }));

@@ -13,8 +13,9 @@ import { Dust } from "./dust.js";
 import { Sky } from "./sky.js";
 import { Sound } from "./audio.js";
 import { Hud } from "./hud.js";
-import { shoreLoop, footpath, viewpoints, viewpointPosts, Walker, nearestOnLoop } from "./shore.js";
-import { Life } from "./life.js";
+import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, waterRoute } from "./shore.js";
+import { Life, boat as boatModel, horse as horseModel } from "./life.js";
+import { Weather } from "./weather.js";
 import { SEASONS, seasonU, mist } from "./season.js";
 
 const qs = new URLSearchParams(location.search);
@@ -40,6 +41,7 @@ hud.loading("Opening the model");
 const site = await loadSite(base, (f) => hud.loading(`Loading ${f}`)).catch((e) => { hud.loading(`Could not load this diorama (${e.message}).`); throw e; });
 const meta = site.meta, F = meta.facts, Y0 = site.Y0;
 document.title = `${meta.title} diorama · Tiny Atlas`;
+document.querySelectorAll(".arrive h2, #title").forEach((el) => (el.textContent = meta.title));
 const latC = (meta.grid.bbox[0] + meta.grid.bbox[2]) / 2;
 
 // ---- world
@@ -49,7 +51,7 @@ document.getElementById("sun").value = sky.hour; document.getElementById("sun").
 const near = nearTerrain(site); scene.add(near);
 const far = farTerrain(site); scene.add(far);
 const table = tabletop(site); scene.add(table);
-const water = lake(site); scene.add(water);
+const water = meta.lake ? lake(site) : null; if (water) scene.add(water);
 scene.add(streams(site));
 const path = new Path(meta.drive, Y0);
 scene.add(driveRibbon(path), ...trackRibbons(site, path), roadStones(path));
@@ -60,8 +62,10 @@ const dust = new Dust(scene, tier === "high" ? 800 : 400);
 const sound = new Sound();
 ride.update(0.016, { throttle: 0, brake: 0, steer: 0 });
 
-const lb = water.userData.box;
-const lakeC = new THREE.Vector3((lb.x0 + lb.x1) / 2, 0, (lb.z0 + lb.z1) / 2);
+// the place the visit is about: the lake, or (on a site without one) the arrival viewpoint
+const A = meta.arrival;
+const lb = water ? water.userData.box : { x0: A.x - 200, x1: A.x + 200, z0: A.z - 120, z1: A.z + 120 };
+const lakeC = water ? new THREE.Vector3((lb.x0 + lb.x1) / 2, 0, (lb.z0 + lb.z1) / 2) : new THREE.Vector3(A.x, A.y - Y0, A.z);
 const tableTarget = new THREE.Vector3(0, 380, 300);
 hud.facts(meta);
 hud.profile(path);
@@ -69,12 +73,32 @@ hud.profile(path);
 fetch(base + "practical.json").then((r) => (r.ok ? r.json() : null)).then((p) => hud.practical(p)).catch(() => {});
 
 // ---- the shore: footpath, viewpoints, walker, life, mist
-const loop = shoreLoop(site);
+const loop = meta.lake ? shoreLoop(site) : ringLoop(site, A.x, A.z, 150);
 scene.add(footpath(site, loop));
 const vps = viewpoints(site, loop, path);
 scene.add(viewpointPosts(vps));
 const walker = new Walker(site, loop, canvas);
-const life = new Life(scene, site, loop, path, lakeC);
+const rowRoute = meta.lake ? waterRoute(site, loop) : null;
+if (!rowRoute) { document.getElementById("m-boat").hidden = true; document.querySelector('[data-act="walk"]').textContent = "Walk around"; }
+walker.mounts.horse = horseModel(0x9a6a3e);
+walker.mounts.boat = boatModel(0xe2b347, { rower: false });
+{
+  const h = walker.mounts.horse, neck = h.userData.neck;
+  h.userData.animate = (t, moving, phase) => { neck.rotation.x = 0.62 + Math.sin(phase * 0.9) * 0.08 * moving; };
+  const b = walker.mounts.boat, oar = b.userData.oar;
+  b.userData.animate = (t, moving) => { oar.rotation.y = Math.sin(t * 2.2) * 0.45 * Math.max(moving, 0.15); };
+  for (const m of [h, b]) { m.visible = false; scene.add(m); }
+}
+const holdKeys = new Set();
+// photos taken near here (Wikimedia Commons, geotagged, credited)
+let photos = [];
+fetch(base + "photos.json").then((r) => (r.ok ? r.json() : [])).then((list) => {
+  photos = list.map((p) => { const [x, z] = site.toLocal(p.lat, p.lon); return { ...p, x, z }; });
+  hud.addLabels(photos.map((p) => ({ text: "📷", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 260 })));
+}).catch(() => {});
+const weather = new Weather(latC, (meta.grid.bbox[1] + meta.grid.bbox[3]) / 2, F.arrival_m);
+weather.load().then((t) => hud.weather(t)).catch(() => {});
+const life = meta.lake ? new Life(scene, site, loop, path, lakeC) : { labels: [], horses: [], update() {} };
 const mistG = mist(lakeC); scene.add(mistG);
 let season = 0;
 function lakeView() {           // high above the track you came up, looking up the valley over the lake
@@ -85,7 +109,7 @@ function lakeView() {           // high above the track you came up, looking up 
 // ---- labels (names only as the sources give them)
 const river = meta.streams.find((s) => s.name);
 const labels = [
-  { text: meta.title, p: lakeC.clone().setY(40), cls: "lake" },
+  { text: meta.title, p: lakeC.clone().setY(lakeC.y + 40), cls: meta.lake ? "lake" : "start" },
   { text: "Start of the drive", p: new THREE.Vector3(path.X[0], path.Y[0] + 30, path.Z[0]), cls: "start", table: true },
   { text: "Mahodand Lake Road", p: (() => { const q = path.at(path.length * 0.45); return new THREE.Vector3(q.x, q.y + 25, q.z); })(), cls: "road" },
 ];
@@ -109,6 +133,19 @@ setEnv("table");
 // ---- controls
 const orbit = new OrbitControls(camera, canvas);
 orbit.enableDamping = true; orbit.dampingFactor = 0.07;
+// the Atlas gesture model: one finger moves, pinch zooms, two-finger twist turns; mouse drag turns, right-drag moves
+Object.assign(orbit, { screenSpacePanning: false, zoomToCursor: true, zoomSpeed: 0.9, rotateSpeed: 0.6, panSpeed: 0.9 });
+orbit.touches.ONE = THREE.TOUCH.PAN;
+orbit.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
+orbit.addEventListener("start", () => { orbit.autoRotate = false; });
+canvas.addEventListener("dblclick", (e) => {     // double-click flies to that spot, as on the map
+  if (!orbit.enabled) return;
+  const ndc = new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  const ray = new THREE.Raycaster(); ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObject(near, false)[0];
+  if (hit) orbitFly = { t: 0, from: orbit.target.clone(), to: hit.point.clone(), cam: camera.position.clone() };
+});
+let orbitFly = null;
 function tableView(animate = false) {
   orbit.target.copy(tableTarget);
   orbit.minDistance = 1800; orbit.maxDistance = 22000; orbit.maxPolarAngle = 1.38;
@@ -161,12 +198,19 @@ hud.on("pace", () => { pace = PACES[(PACES.indexOf(pace) + 1) % PACES.length]; h
 hud.on("sound", () => { sound.start(); sound.mute(!sound.muted); hud.sound(!sound.muted); });
 hud.on("sun", (h) => { sky.set(h); if (scene.fog) scene.fog.color.copy(sky.horizon); });
 hud.on("walk", startWalk);
-hud.on("auto", () => { if (state !== "walk") return; walker.auto = !walker.auto; walker.glide = null; hud.auto(walker.auto); });
+hud.on("auto", () => { if (state !== "walk") return; walker.auto = !walker.auto; walker.glide = null; hud.auto(walker.auto, walker.mode); });
+for (const m of ["foot", "horse", "boat"]) hud.on(`mode-${m}`, () => {
+  if (state !== "walk" || walker.mode === m) return;
+  walker.setMode(m, m === "boat" ? rowRoute : loop);
+  hud.auto(false, m);
+});
+hud.bindHold("#p-walk", () => holdKeys.add("w"), () => holdKeys.delete("w"));
 hud.on("nextvp", () => {
   if (state !== "walk") return;
   const rel = (v) => ((((v.s - walker.s) % loop.length) + loop.length) % loop.length);
   const next = vps.filter((v) => rel(v) > 15).sort((a, b) => rel(a) - rel(b))[0] || vps[0];
-  walker.glideTo(next, lakeC); hud.auto(false);
+  if (walker.mode === "boat") walker.setMode("foot", loop);
+  walker.glideTo(next, lakeC); hud.auto(false, walker.mode);
 });
 hud.on("lakeview", () => leaveWalk());
 hud.on("season", () => {
@@ -188,7 +232,8 @@ function startWalk() {
     done: () => { walker.place(v.x, v.z, lakeC.x, lakeC.z); walker.pitch = -0.04; walker.on = true; state = "walk"; hud.walking(true); hud.vp(v.name); } });
 }
 function leaveWalk() {
-  walker.on = false; walker.auto = false; hud.auto(false); hud.walking(false);
+  if (walker.mode !== "foot") { walker.setMode("foot", loop); walker.glide = null; }
+  walker.on = false; walker.auto = false; hud.auto(false); hud.walking(false); hud.photo(null);
   state = "back";
   flyTo({ dur: 3.2, to: () => lakeView(), lift: 0,
     done: () => { state = "explore"; orbit.enabled = true; orbit.target.copy(lakeC); setExploreOrbit(); hud.arrive(F, { arrived }); } });
@@ -290,7 +335,10 @@ function driveCamera(dt) {
 // ---- loop
 function frameView() {             // keep the model clear of the side card on wide screens
   const w = innerWidth, h = innerHeight, side = w > 900 && (state === "table" || state === "explore");
-  if (side) camera.setViewOffset(w, h, -Math.min(w * 0.17, 300), 0, w, h); else camera.clearViewOffset();
+  const phone = w <= 640 && (state === "table" || state === "explore");     // phones: lift the model above the bottom card
+  if (side) camera.setViewOffset(w, h, -Math.min(w * 0.17, 300), 0, w, h);
+  else if (phone) camera.setViewOffset(w, h, 0, h * 0.2, w, h);
+  else camera.clearViewOffset();
   camera.updateProjectionMatrix();
 }
 function resize() {
@@ -347,10 +395,15 @@ function tick(dt) {
   mistG.userData.uni.uT.value = elapsed;
   mistG.userData.uni.uMist.value = Math.min(1, Math.max(0, (7.4 - sky.hour) / 1.8)) * 0.95 + seasonU.uWinter.value * 0.12;
   if (state === "walk") {
-    walker.update(dt, keys, pace, lakeC, camera);
-    for (let i = 0; i < walker.steps; i++) sound.step(keys.has("shift") ? 1.2 : 0.8);
+    const k2 = holdKeys.size ? new Set([...keys, ...holdKeys]) : keys;
+    walker.update(dt, k2, pace, lakeC, camera);
+    let ph = null, pd = 120;
+    for (const p of photos) { const d = Math.hypot(p.x - walker.pos.x, p.z - walker.pos.z); if (d < pd) { pd = d; ph = p; } }
+    hud.photo(ph, pd);
+    if (walker.mode === "foot") for (let i = 0; i < walker.steps; i++) sound.step(keys.has("shift") ? 1.2 : 0.8);
+    if (walker.mode === "horse" && walker.steps && Math.random() < 0.12) sound.hooves(0.3);
     const near = vps.find((v) => Math.hypot(v.x - walker.pos.x, v.z - walker.pos.z) < 30);
-    hud.vp(near ? near.name : "Mahodand Lake shore");
+    hud.vp(near ? near.name : meta.lake ? `${meta.title} shore` : meta.arrival.name);
   }
   if (env === "real" && state !== "drive") {
     let dl = Infinity;
@@ -370,6 +423,7 @@ function tick(dt) {
     const t = Math.min(fly.t, 1), e = ease(t);
     if (fly.curve) {
       camera.position.copy(fly.curve.getPoint(e));
+      camera.position.y = Math.max(camera.position.y, site.heightAt(camera.position.x, camera.position.z) + 3);
       camera.lookAt(fly.looks.getPoint(Math.min(e * 1.05, 1)));
     } else {
       const goal = fly.to();
@@ -382,6 +436,17 @@ function tick(dt) {
     if (fly.mid >= 0 && t >= fly.mid && !fly.midDone) { fly.midDone = true; fly.onMid?.(); }
     if (t >= 1) { const f = fly; fly = null; f.done?.(); }
   } else if (orbit.enabled) {
+    if (orbitFly) {                                  // glide target and camera together, closing in by half
+      orbitFly.t = Math.min(1, orbitFly.t + dt / 1.1);
+      const e = 1 - (1 - orbitFly.t) ** 3;
+      const off = orbitFly.cam.clone().sub(orbitFly.from).multiplyScalar(1 - 0.5 * e);
+      orbit.target.lerpVectors(orbitFly.from, orbitFly.to, e);
+      camera.position.copy(orbit.target).add(off);
+      if (orbitFly.t >= 1) orbitFly = null;
+    }
+    const gw = meta.grid.width / 2, gh = meta.grid.height / 2;     // keep the target on the model, riding the ground
+    orbit.target.x = Math.min(gw, Math.max(-gw, orbit.target.x)); orbit.target.z = Math.min(gh, Math.max(-gh, orbit.target.z));
+    if (env === "real") { const dy = (site.heightAt(orbit.target.x, orbit.target.z) - orbit.target.y) * 0.1; orbit.target.y += dy; camera.position.y += dy; }
     orbit.update();
     if (env === "real") {
       const g = site.heightAt(camera.position.x, camera.position.z) + 8;
@@ -421,7 +486,7 @@ addEventListener("pointerdown", () => sound.ctx?.resume?.(), { once: true });
 addEventListener("keydown", () => sound.ctx?.resume?.(), { once: true });
 requestAnimationFrame(frame);
 // test hook: advance the simulation by fixed steps without drawing (software GL runs at under 1 fps)
-window.__diorama = { site, path, ride, camera, scene, keys, input, renderer, walker, loop, vps, state: () => state, start: startDrive, emit: (k, a) => hud.emit(k, a),
+window.__diorama = { site, path, ride, camera, scene, keys, input, renderer, walker, loop, vps, rowRoute, state: () => state, start: startDrive, emit: (k, a) => hud.emit(k, a),
   advance(seconds, hold = []) { paused = true; hold.forEach((k) => keys.add(k)); for (let t = 0; t < seconds; t += 1 / 30) tick(1 / 30);
     hold.forEach((k) => keys.delete(k)); renderer.render(scene, camera); clock.getDelta(); return { s: ride.s, v: ride.v, state, lat: ride.lat }; },
   resume() { paused = false; clock.getDelta(); } };

@@ -8,16 +8,17 @@ import { Dust } from "./dust.js";
 const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85, ...o });
 const shadowed = (g) => { g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); return g; };
 
-function boat(colour) {
+export function boat(colour, { rower = true } = {}) {
   const g = new THREE.Group();
   const hull = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.45, 3.6, 10, 1, true, 0, Math.PI).rotateZ(Math.PI / 2).rotateY(Math.PI / 2),
     mat(colour, { side: THREE.DoubleSide }));
   hull.scale.set(1, 0.55, 1); hull.position.y = 0.32;
   const seat = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.06, 0.3), mat(0x8a6a44)); seat.position.set(0, 0.3, 0.2);
-  const rower = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.45, 3, 6), mat(0x2f4f7a)); rower.position.set(0, 0.75, 0.25);
+  const rowerM = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.45, 3, 6), mat(0x2f4f7a)); rowerM.position.set(0, 0.75, 0.25);
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 6), mat(0xc79a76)); head.position.set(0, 1.18, 0.25);
   const oar = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.04, 0.08), mat(0x9b7b55)); oar.position.set(0, 0.5, 0.35);
-  g.add(hull, seat, rower, head, oar);
+  g.add(hull, seat, oar);
+  if (rower) g.add(rowerM, head);
   g.userData.oar = oar;
   return shadowed(g);
 }
@@ -47,7 +48,7 @@ function stall() {
   return shadowed(g);
 }
 
-function horse(colour) {
+export function horse(colour) {
   const g = new THREE.Group(), m = mat(colour);
   const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.42, 1.2, 4, 8).rotateX(Math.PI / 2), m); body.position.y = 1.25;
   const neck = new THREE.Group(); neck.position.set(0, 1.45, -0.75);
@@ -90,22 +91,22 @@ export class Life {
   constructor(scene, site, loop, path, lakeC) {
     this.site = site; this.group = new THREE.Group(); this.labels = [];
     const end = path.at(path.length);
-    // boats: lake cells at least 3 cells from the shore
+    // boats: lake cells with water all around
     const g = site.meta.grid, deep = [];
     for (let r = 3; r < g.rows - 3; r++) for (let c = 3; c < g.cols - 3; c++) {
       let ok = true;
-      for (let dr = -3; dr <= 3 && ok; dr++) for (let dc = -3; dc <= 3 && ok; dc++) if (site.C[(r + dr) * g.cols + c + dc] !== 5) ok = false;
+      for (let dr = -1; dr <= 1 && ok; dr++) for (let dc = -1; dc <= 1 && ok; dc++) if (site.C[(r + dr) * g.cols + c + dc] !== 5) ok = false;
       if (ok) deep.push([site.x0 + c * g.cell, site.z0 + r * g.cell]);
     }
     this.boats = [];
-    const colours = [0xd9573b, 0x2f7f8a, 0xe2b347];
+    const colours = [0xe2b347, 0xd9573b, 0x3f8f5a];   // painted wooden boats, as in the Commons photo "Mahodand Lake 3044 (2)"
     for (let k = 0; k < Math.min(3, deep.length); k++) {
       const p = deep[Math.floor(hash(k, 501) * deep.length)], b = boat(colours[k]);
       b.position.set(p[0], 0, p[1]); b.rotation.y = hash(k, 502) * 6.28;
       this.group.add(b);
       this.boats.push({ m: b, home: new THREE.Vector2(p[0], p[1]), ph: hash(k, 503) * 10 });
     }
-    if (this.boats.length) this.labels.push({ text: "Boats · illustrative", p: () => this.boats[0].m.position.clone().setY(8), cls: "illus", modes: ["explore", "walk"] });
+    if (this.boats.length) this.labels.push({ text: "Boats for hire · positions illustrative", p: () => this.boats[0].m.position.clone().setY(8), cls: "illus", modes: ["explore", "walk"] });
 
     // tea stalls beside the end of the track
     this.smoke = new Dust(scene, 240);
@@ -132,7 +133,7 @@ export class Life {
       t.rotation.y = hash(k, 603) * 6.28;
       this.group.add(t);
     });
-    if (tc.length) this.labels.push({ text: "Camping · illustrative", p: new THREE.Vector3(tc[0].x, site.heightAt(tc[0].x, tc[0].z) + 7, tc[0].z), cls: "illus", modes: ["explore", "walk"] });
+    if (tc.length) this.labels.push({ text: "Camping · positions illustrative", p: new THREE.Vector3(tc[0].x, site.heightAt(tc[0].x, tc[0].z) + 7, tc[0].z), cls: "illus", modes: ["explore", "walk"] });
 
     // horses grazing by the shore
     this.horses = [];
@@ -150,7 +151,7 @@ export class Life {
   update(dt, t, wind) {
     for (const b of this.boats) {
       // drift in a slow loop around home, turning back before the shore
-      const a = t * 0.03 + b.ph, R = 22;
+      const a = t * 0.03 + b.ph, R = 12;
       const x = b.home.x + Math.cos(a) * R, z = b.home.y + Math.sin(a * 0.8) * R;
       if (this.site.coverAt(x, z) === 5) {
         const dx = x - b.m.position.x, dz = z - b.m.position.z;
