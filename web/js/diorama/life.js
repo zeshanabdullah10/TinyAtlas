@@ -61,7 +61,7 @@ export function horse(colour) {
   const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.02, 0.8, 5), mat(0x2a1d14)); tail.position.set(0, 1.0, 1.05); tail.rotation.x = 0.4;
   const saddle = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.12, 0.6), mat(0x8a2f2a)); saddle.position.set(0, 1.7, -0.05);
   g.add(body, neck, tail, saddle);
-  g.userData.neck = neck;
+  g.userData.neck = neck; g.userData.saddle = saddle;
   return shadowed(g);
 }
 

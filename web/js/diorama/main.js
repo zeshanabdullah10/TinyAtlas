@@ -83,8 +83,10 @@ if (!rowRoute) { document.getElementById("m-boat").hidden = true; document.query
 walker.mounts.horse = horseModel(0x9a6a3e);
 walker.mounts.boat = boatModel(0xe2b347, { rower: false });
 {
+  // from the saddle: the neck reaches forward and down so the head sits low in the view, never across it
   const h = walker.mounts.horse, neck = h.userData.neck;
-  h.userData.animate = (t, moving, phase) => { neck.rotation.x = 0.62 + Math.sin(phase * 0.9) * 0.08 * moving; };
+  h.userData.saddle.visible = false;
+  h.userData.animate = (t, moving, phase) => { neck.rotation.x = -0.5 + Math.sin(phase * 0.9) * 0.05 * moving; };
   const b = walker.mounts.boat, oar = b.userData.oar;
   b.userData.animate = (t, moving) => { oar.rotation.y = Math.sin(t * 2.2) * 0.45 * Math.max(moving, 0.15); };
   for (const m of [h, b]) { m.visible = false; scene.add(m); }
