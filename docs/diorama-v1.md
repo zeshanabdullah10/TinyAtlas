@@ -18,13 +18,15 @@ under "How this model is made".
    altitude, the distance left and the grade, with the elevation profile of the drive.
 3. **Arrive.** At the end of the track the jeep stops, the camera glides low over the lake and then rises to an
    overview. From there the visitor can orbit the lake, drive again, or go back to the whole model.
-4. **Walk the shore.** From the lake card, "Walk the shore" sets the visitor down at eye height where the track ends.
+4. **Tour the shore.** The lake card's main button runs a guided tour: it glides along the shore path to each
+   viewpoint in turn, stops, turns to the water and holds the view for six seconds, then moves on. Any step (W A S D,
+   or "Stop") takes over. **Walk it yourself** sets the visitor down at eye height where the track ends.
    W A S D walk (Shift runs), drag to look, Space or "Walk for me" follows the shore path, N or "Next viewpoint"
    glides to the next viewpoint and turns to the water. The path is traced 20 m outside the lake outline and the
    walker cannot step into the water. Viewpoints are named only by where they are: where the track ends, where a
    stream comes in (the OSM waterway end nearest the shore), the far end, and two along the shore.
-   **Ride a horse** follows the shore path at a trot from the saddle; **Row a boat** follows a route down the middle
-   of the water (each shore point pushed across to the middle of the water in front of it), seen from the stern of a
+   **Ride a horse** follows the shore path at a trot from the saddle; **Boat ride** is one short ride: it rows about 220 m along a route down the middle of the water (each shore point
+   pushed across to the middle of the water in front of it), stops, and turns to look up the lake, seen from the stern of a
    painted wooden boat like the one in the Commons photo "Mahodand Lake 3044 (2)". On a phone, hold "Hold to go".
    **Photos from here:** near any of the geotagged Wikimedia Commons photos in `photos.json` (16, each credited with
    author, year and licence), a card shows the photo and how far from here it was taken; 📷 marks where they were taken.

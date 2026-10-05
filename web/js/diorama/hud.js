@@ -72,7 +72,7 @@ export class Hud {
   }
 
   intro(show) { $("#intro").hidden = !show; document.body.classList.toggle("is-intro", show); }
-  modeBtns(mode) { for (const m of ["foot", "horse", "boat"]) $(`#m-${m}`).setAttribute("aria-pressed", m === mode); $("#btn-auto").textContent = $("#btn-auto").getAttribute("aria-pressed") === "true" ? "Stop" : mode === "boat" ? "Row for me" : mode === "horse" ? "Ride for me" : "Walk for me"; }
+  modeBtns(mode) { for (const m of ["foot", "horse", "boat"]) $(`#m-${m}`).setAttribute("aria-pressed", m === mode); $("#btn-auto").textContent = $("#btn-auto").getAttribute("aria-pressed") === "true" ? "Stop" : mode === "boat" ? "Keep rowing" : mode === "horse" ? "Ride for me" : "Walk for me"; }
   weather(text) { const el = $("#wx"); el.hidden = !text; el.innerHTML = text || ""; }
   photo(p, dist) {
     const el = $("#photo");
