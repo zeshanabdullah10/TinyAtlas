@@ -1,5 +1,6 @@
 // The lake (outline from ESA WorldCover, level from the DEM) and the OSM streams as flowing ribbons.
 import * as THREE from "three";
+import { seasonU } from "./season.js";
 
 export const waterUniforms = { uTime: { value: 0 }, uSky: { value: new THREE.Color(0.75, 0.8, 0.9) }, uSun: { value: new THREE.Vector3(0, 1, 0) } };
 
@@ -18,13 +19,13 @@ vec2 waveGrad(vec2 p, float t) {
 function lakeMaterial(maskTex, grid) {
   const m = new THREE.MeshStandardMaterial({ color: 0x1d6f74, roughness: 0.08, metalness: 0, transparent: true });
   m.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, waterUniforms, { uMask: { value: maskTex } });
+    Object.assign(sh.uniforms, waterUniforms, seasonU, { uMask: { value: maskTex } });
     sh.vertexShader = sh.vertexShader
       .replace("#include <common>", "#include <common>\nvarying vec3 vW;")
       .replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
     sh.fragmentShader = sh.fragmentShader
       .replace("#include <common>", `#include <common>
-varying vec3 vW; uniform sampler2D uMask; uniform float uTime; uniform vec3 uSky, uSun;
+varying vec3 vW; uniform sampler2D uMask; uniform float uTime, uWinter; uniform vec3 uSky, uSun;
 ${WAVES}
 float lakeMask(vec2 xz) { return texture2D(uMask, vec2((xz.x + ${(grid.width / 2).toFixed(1)}) / ${grid.cell.toFixed(1)} + 0.5, (xz.y + ${(grid.height / 2).toFixed(1)}) / ${grid.cell.toFixed(1)} + 0.5) / vec2(${grid.cols}.0, ${grid.rows}.0)).r; }`)
       .replace("#include <color_fragment>", `#include <color_fragment>
@@ -32,9 +33,12 @@ float lakeMask(vec2 xz) { return texture2D(uMask, vec2((xz.x + ${(grid.width / 2
   if (mk < 0.5) discard;
   float shore = 1.0 - smoothstep(0.5, 0.8, mk);
   diffuseColor.rgb = mix(vec3(0.03, 0.26, 0.27), vec3(0.2, 0.55, 0.47), shore * 0.9);
-  diffuseColor.a = 0.9 + 0.1 * (1.0 - shore);`)
+  diffuseColor.a = 0.9 + 0.1 * (1.0 - shore);
+  vec3 ice = mix(vec3(0.78, 0.86, 0.9), vec3(0.93, 0.95, 0.97), wn(vW.xz / 14.0).x);
+  diffuseColor.rgb = mix(diffuseColor.rgb, ice, uWinter);
+  diffuseColor.a = mix(diffuseColor.a, 1.0, uWinter);`)
       .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
-  vec2 wg = waveGrad(vW.xz, uTime);
+  vec2 wg = waveGrad(vW.xz, uTime) * (1.0 - uWinter * 0.97);
   vec3 nW = normalize(vec3(-wg.x, 1.0, -wg.y));
   normal = normalize((viewMatrix * vec4(nW, 0.0)).xyz);`)
       .replace("#include <opaque_fragment>", `
@@ -42,9 +46,9 @@ float lakeMask(vec2 xz) { return texture2D(uMask, vec2((xz.x + ${(grid.width / 2
   float fres = 0.04 + 0.96 * pow(1.0 - max(dot(V, nW), 0.0), 5.0);
   vec3 R = reflect(-V, nW);
   vec3 sky = mix(uSky, uSky * vec3(0.55, 0.7, 1.0), clamp(R.y * 1.6, 0.0, 1.0)) * vec3(0.85, 0.95, 0.95);
-  outgoingLight = mix(outgoingLight, sky, fres * 0.55);
+  outgoingLight = mix(outgoingLight, sky, fres * 0.55 * (1.0 - uWinter * 0.6));
   float foam = smoothstep(0.62, 0.5, mk) * (0.55 + 0.45 * sin(uTime * 1.3 + wn(vW.xz / 3.0).x * 9.0));
-  outgoingLight = mix(outgoingLight, vec3(0.92, 0.9, 0.84), foam * 0.6);
+  outgoingLight = mix(outgoingLight, vec3(0.92, 0.9, 0.84), foam * 0.6 * (1.0 - uWinter));
   #include <opaque_fragment>`);
   };
   return m;
@@ -84,18 +88,19 @@ function streamMaterial() {
   const m = new THREE.MeshStandardMaterial({ color: 0x5fa8a4, roughness: 0.2, transparent: true, depthWrite: false,
     polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
   m.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, waterUniforms);
+    Object.assign(sh.uniforms, waterUniforms, seasonU);
     sh.vertexShader = sh.vertexShader
       .replace("#include <common>", "#include <common>\nattribute vec2 aFlow; varying vec2 vFlow;")
       .replace("#include <begin_vertex>", "#include <begin_vertex>\nvFlow = aFlow;");
     sh.fragmentShader = sh.fragmentShader
-      .replace("#include <common>", `#include <common>\nvarying vec2 vFlow; uniform float uTime;\n${WAVES}`)
+      .replace("#include <common>", `#include <common>\nvarying vec2 vFlow; uniform float uTime, uWinter;\n${WAVES}`)
       .replace("#include <color_fragment>", `#include <color_fragment>
   float a = abs(vFlow.x);
   float streak = wn(vec2(vFlow.x * 1.7, vFlow.y * 0.11 - uTime * 0.9)).x * 0.6 + wn(vec2(vFlow.x * 4.0, vFlow.y * 0.5 - uTime * 2.2)).x * 0.4;
   float white = smoothstep(0.58, 0.85, streak) * 0.55;
   diffuseColor.rgb = mix(vec3(0.24, 0.5, 0.5), vec3(0.88, 0.94, 0.92), white);
-  diffuseColor.a = 1.0 - smoothstep(0.55, 1.0, a);`);
+  diffuseColor.a = 1.0 - smoothstep(0.55, 1.0, a);
+  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.85, 0.9, 0.93), uWinter * 0.8);`);
   };
   return m;
 }

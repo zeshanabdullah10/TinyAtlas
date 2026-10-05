@@ -76,10 +76,12 @@ export class Panel {
         h("dl", { class: "pn-stats" }, stats.map(([k, v]) => h("div", null, h("dt", null, k), h("dd", null, v)))),
         p.summary ? h("p", { class: "pn-sum" }, p.summary) : null,
         h("div", { class: "pn-actions" },
-          h("button", { class: "primary", type: "button", onClick: () => this.onFly?.(p) }, "Fly there"),
+          DIORAMA[p.slug]
+            ? h("button", { class: "primary", type: "button", onClick: () => location.assign(`diorama.html?site=${DIORAMA[p.slug]}&drive=1`) }, "Drive there")
+            : h("button", { class: "primary", type: "button", onClick: () => this.onFly?.(p) }, "Fly there"),
           h("button", { type: "button", onClick: () => { dispatchEvent(new CustomEvent("atlas:plan", { detail: p })); this.onPlan?.(p); } }, "Plan a day"),
           this.listenBtn = h("button", { type: "button", class: "listen-btn", onClick: () => this.toggleListen(p) }, "Listen"),
-          DIORAMA[p.slug] ? h("button", { type: "button", onClick: () => location.assign(`diorama.html?site=${DIORAMA[p.slug]}`) }, "View diorama") : null),
+          DIORAMA[p.slug] ? h("button", { type: "button", onClick: () => location.assign(`diorama.html?site=${DIORAMA[p.slug]}&view=lake`) }, "See the lake") : null),
         this.listenSlot = h("div", { class: "pn-listen" })),
       p.access ? h("section", null, h("h3", null, "Getting there"), h("p", null, p.access)) : null,
       this.timeline(p), this.sources(p),

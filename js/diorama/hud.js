@@ -66,15 +66,29 @@ export class Hud {
   }
 
   intro(show) { $("#intro").hidden = !show; document.body.classList.toggle("is-intro", show); }
+  walking(on) { document.body.classList.toggle("is-walking", on); $("#walkbar").hidden = !on; }
+  vp(name) { $("#vp-name").textContent = name; }
+  auto(on) { $("#btn-auto").setAttribute("aria-pressed", on); $("#btn-auto").textContent = on ? "Stop walking" : "Walk for me"; }
+  season(name, note) { $("#season-name").textContent = name; $("#season-note").hidden = !note; $("#season-note").textContent = note || ""; }
+  practical(items) {
+    if (!items?.length) return;
+    const row = (it) => `<dt>${it.label}</dt><dd>${it.value} <a href="${it.url}" target="_blank" rel="noopener">${it.source}</a></dd>`;
+    $("#before-list").innerHTML = items.map(row).join("");
+    $("#before").hidden = false;
+    $("#about-practical").innerHTML = `<dl>${items.map(row).join("")}</dl>`;
+  }
   driving(on) { document.body.classList.toggle("is-driving", on); $("#hud").hidden = !on; }
   camName(n) { $("#cam-name").textContent = n; }
+  pace(n) { $("#pace-x").textContent = `${n}×`; $("#btn-pace").setAttribute("aria-pressed", n > 1); }
   cruise(on) { $("#btn-cruise").setAttribute("aria-pressed", on); }
   sound(on) { $("#btn-sound").setAttribute("aria-pressed", on); }
   flash() { const f = $("#flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); }
 
-  arrive(F) {
+  arrive(F, { arrived = true } = {}) {
     $("#arrive").hidden = !F;
     if (!F) return;
+    $("#arrive-eyebrow").textContent = arrived ? "You have arrived" : "Tiny Atlas · Diorama";
+    $("#btn-again").textContent = arrived ? "Drive it again" : "Drive up the track";
     $("#arrive-facts").innerHTML = `You climbed <b>${fmt(F.drive_climb_m)} m</b> over <b>${fmt(F.drive_km, 1)} km</b> of jeep track. The lake lies at <b>${fmt(F.lake_level_m)} m</b>, about <b>${fmt(F.lake_length_km, 1)} km</b> long.`;
   }
 
@@ -100,10 +114,23 @@ export class Hud {
       return { ...l, el };
     });
   }
-  placeLabels(camera, w, h, show) {
+  addLabels(list) {
+    const layer = $("#labels");
+    for (const l of list) {
+      const el = document.createElement("div");
+      el.className = `lbl lbl-${l.cls}`; el.textContent = l.text;
+      layer.append(el);
+      this.labels.push({ ...l, el });
+    }
+  }
+  placeLabels(camera, w, h, state) {
+    const base = state === "table" || state === "explore" || state === "back";
     for (const l of this.labels) {
-      const v = this.v.copy(l.p).project(camera);
-      const ok = show && v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1 && (l.table ? document.body.dataset.env === "table" : true);
+      const p = typeof l.p === "function" ? l.p() : l.p;
+      const v = this.v.copy(p).project(camera);
+      const mode = l.modes ? l.modes.includes(state) : base && (l.table ? document.body.dataset.env === "table" : true);
+      const far = state === "walk" && camera.position.distanceTo(p) > (l.range || 650);
+      const ok = mode && !far && v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
       l.el.style.opacity = ok ? 1 : 0;
       if (ok) l.el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -100%)`;
     }
