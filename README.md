@@ -25,6 +25,8 @@ landmarks drawn larger than life) is labelled on the map.
   measured on the pack's roads with times by road type (paved 40, minor 25, jeep 14, track 9 km/h, slope-adjusted),
   shown as estimates, and drawn on the map.
 - **Save a valley for offline** (download button): the whole pack goes into the service worker's cache.
+- **Drive into a diorama** (`/diorama.html?site=mahodand`): a tabletop model of Mahodand Lake from open data. Drive a
+  jeep up the real last 3.5 km of the track, over ruts you can feel, and arrive at the lake. See `docs/diorama-v1.md`.
 
 The audio guide (narration and voices) is in progress and ships in the next release.
 
