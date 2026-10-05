@@ -13,7 +13,7 @@ import { Dust } from "./dust.js";
 import { Sky } from "./sky.js";
 import { Sound } from "./audio.js";
 import { Hud } from "./hud.js";
-import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, waterRoute } from "./shore.js";
+import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, waterRoute, loopAt, nearestOnLoop } from "./shore.js";
 import { Life, boat as boatModel, horse as horseModel } from "./life.js";
 import { Weather } from "./weather.js";
 import { SEASONS, seasonU, mist } from "./season.js";
@@ -94,7 +94,8 @@ const holdKeys = new Set();
 let photos = [];
 fetch(base + "photos.json").then((r) => (r.ok ? r.json() : [])).then((list) => {
   photos = list.map((p) => { const [x, z] = site.toLocal(p.lat, p.lon); return { ...p, x, z }; });
-  hud.addLabels(photos.map((p) => ({ text: "📷", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 260 })));
+  hud.addLabels(photos.map((p) => ({ text: `📷 ${p.caption}`, name: p.caption, sub: `${p.author}, ${p.date.slice(0, 4)}`, photo: p, group: "Photos",
+    hint: "Open the photo and walk to where it was taken", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 300 })));
 }).catch(() => {});
 const weather = new Weather(latC, (meta.grid.bbox[1] + meta.grid.bbox[3]) / 2, F.arrival_m);
 weather.load().then((t) => hud.weather(t)).catch(() => {});
@@ -109,14 +110,33 @@ function lakeView() {           // high above the track you came up, looking up 
 // ---- labels (names only as the sources give them)
 const river = meta.streams.find((s) => s.name);
 const labels = [
-  { text: meta.title, p: lakeC.clone().setY(lakeC.y + 40), cls: meta.lake ? "lake" : "start" },
-  { text: "Start of the drive", p: new THREE.Vector3(path.X[0], path.Y[0] + 30, path.Z[0]), cls: "start", table: true },
-  { text: "Mahodand Lake Road", p: (() => { const q = path.at(path.length * 0.45); return new THREE.Vector3(q.x, q.y + 25, q.z); })(), cls: "road" },
+  { text: meta.title, p: lakeC.clone().setY(lakeC.y + 40), cls: meta.lake ? "lake" : "start", group: "On the map" },
+  { text: "Start of the drive", p: new THREE.Vector3(path.X[0], path.Y[0] + 30, path.Z[0]), cls: "start", table: true, group: "On the map", drive: true },
+  { text: "Mahodand Lake Road", group: "On the map", p: (() => { const q = path.at(path.length * 0.45); return new THREE.Vector3(q.x, q.y + 25, q.z); })(), cls: "road" },
 ];
-if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
+if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, group: "On the map", p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
 hud.makeLabels(labels);
-hud.addLabels(vps.map((v) => ({ text: v.name, p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
-hud.addLabels(life.labels);
+hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: "On the shore path", p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
+hud.addLabels(life.labels.map((l) => ({ ...l, name: l.text.split(" · ")[0], sub: l.text.split(" · ")[1], group: `At the ${meta.lake ? "lake" : "site"}` })));
+
+// ---- tags and the Places list: go to what was chosen
+hud.on("goto", (l) => {
+  const p = typeof l.p === "function" ? l.p() : l.p;
+  if (l.photo) hud.lightbox(l.photo);
+  if (l.drive) { startDrive(); return; }
+  if (state === "walk") {
+    if (walker.mode !== "foot") { walker.setMode("foot", loop); walker.glide = null; }
+    let x = p.x, z = p.z;
+    if (site.coverAt(x, z) === 5) { const q = loopAt(loop, nearestOnLoop(loop, x, z)); x = q.x; z = q.z; }
+    walker.glideTo({ x, z, s: nearestOnLoop(loop, x, z) }, l.photo || l.vp ? lakeC : new THREE.Vector3(p.x, 0, p.z));
+    hud.auto(false, "foot");
+  } else if (state === "explore" || state === "table") {
+    if (l.vp || l.photo) { startWalk(l.vp || nearestVp(p)); return; }
+    hud.intro(false); orbit.autoRotate = false;
+    orbitFly = { t: 0, from: orbit.target.clone(), to: new THREE.Vector3(p.x, site.heightAt(p.x, p.z), p.z), cam: camera.position.clone() };
+  }
+});
+function nearestVp(p) { return vps.reduce((a, v) => (Math.hypot(v.x - p.x, v.z - p.z) < Math.hypot(a.x - p.x, a.z - p.z) ? v : a), vps[0]); }
 
 // ---- environment modes
 let env = "";
@@ -220,10 +240,10 @@ hud.on("season", () => {
 hud.on("skip", () => { if (state === "drive") ride.s = path.length - 40; });
 
 let arrived = false;
-function startWalk() {
+function startWalk(target) {
   sound.start(); hud.sound(!sound.muted);
   hud.arrive(null); hud.intro(false);
-  const v = vps[0];
+  const v = target && target.x != null ? target : vps[0];
   orbit.enabled = false; orbit.autoRotate = false;
   state = "walkin";
   const eye = new THREE.Vector3(v.x, v.y + 1.65, v.z);

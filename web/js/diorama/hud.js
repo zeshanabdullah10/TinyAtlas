@@ -16,6 +16,10 @@ export class Hud {
     $("#sun-out").textContent = clock(Number(sun.value));
     $("#about-open").addEventListener("click", () => $("#about").showModal());
     $("#about-close").addEventListener("click", () => $("#about").close());
+    $("#lb-close").addEventListener("click", () => $("#lightbox").close());
+    $("#lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox") $("#lightbox").close(); });
+    $("#btn-places").addEventListener("click", () => { $("#places").hidden = !$("#places").hidden; });
+    $("#places-close").addEventListener("click", () => { $("#places").hidden = true; });
     this.v = new THREE.Vector3();
   }
   on(k, f) { this.ev[k] = f; }
@@ -78,6 +82,7 @@ export class Hud {
       this.shownPhoto = p;
       const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
       $("#photo-img").src = p.thumb; $("#photo-img").alt = p.caption; $("#photo-link").href = p.page;
+      $("#photo-link").onclick = (e) => { e.preventDefault(); this.lightbox(p); };
       $("#photo-cap").textContent = p.caption;
       $("#photo-credit").innerHTML = `Photo ${esc(p.author)}, ${esc(p.date.slice(0, 4))}, <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}</a> · Wikimedia Commons · <span id="photo-d"></span>`;
     }
@@ -131,36 +136,71 @@ export class Hud {
     hold("#p-right", () => (input.steer = 1), () => (input.steer = 0));
   }
 
-  makeLabels(list) {
-    const layer = $("#labels");
-    this.labels = list.map((l) => {
-      const el = document.createElement("div");
-      el.className = `lbl lbl-${l.cls}`; el.textContent = l.text;
-      layer.append(el);
-      return { ...l, el };
-    });
-  }
+  makeLabels(list) { this.labels = []; this.addLabels(list); }
+  /** Every tag is a button: clicking it goes there (and opens the photo for a photo tag). */
   addLabels(list) {
     const layer = $("#labels");
     for (const l of list) {
-      const el = document.createElement("div");
-      el.className = `lbl lbl-${l.cls}`; el.textContent = l.text;
+      const el = document.createElement("button");
+      el.type = "button"; el.className = `lbl lbl-${l.cls}`; el.textContent = l.text;
+      el.title = l.hint || `Go to ${l.name || l.text}`;
+      const item = { ...l, el };
+      el.addEventListener("click", (e) => { e.stopPropagation(); this.emit("goto", item); });
       layer.append(el);
-      this.labels.push({ ...l, el });
+      this.labels.push(item);
     }
+    this.renderPlaces();
+  }
+  /** The Places list: every tag, grouped, so nothing has to be found by looking around. */
+  renderPlaces() {
+    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    const groups = new Map();
+    for (const l of this.labels) if (l.group) (groups.get(l.group) || groups.set(l.group, []).get(l.group)).push(l);
+    const box = $("#places-list");
+    box.replaceChildren();
+    for (const [g, items] of groups) {
+      const sec = document.createElement("section");
+      sec.innerHTML = `<h3>${esc(g)} <small>${items.length}</small></h3>`;
+      const ul = document.createElement("ul");
+      for (const l of items) {
+        const li = document.createElement("li"), b = document.createElement("button");
+        b.type = "button"; b.className = "place";
+        b.innerHTML = (l.photo ? `<img src="${esc(l.photo.thumb.replace(/\/\d+px-/, "/240px-"))}" alt="" loading="lazy">` : `<span class="dot dot-${esc(l.cls)}"></span>`) +
+          `<span><b>${esc(l.name || l.text)}</b>${l.sub ? `<small>${esc(l.sub)}</small>` : ""}</span>`;
+        b.addEventListener("click", () => { $("#places").hidden = true; this.emit("goto", l); });
+        li.append(b); ul.append(li);
+      }
+      sec.append(ul); box.append(sec);
+    }
+  }
+  lightbox(p) {
+    const d = $("#lightbox"), esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    $("#lb-img").src = p.thumb; $("#lb-img").alt = p.caption;
+    $("#lb-cap").textContent = p.caption;
+    $("#lb-credit").innerHTML = `Photo ${esc(p.author)}, ${esc(p.date.slice(0, 10))} · <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}, Wikimedia Commons</a>`;
+    if (!d.open) d.showModal();
   }
   placeLabels(camera, w, h, state) {
     const base = state === "table" || state === "explore" || state === "back";
+    const taken = [];                                   // simple declutter: first come (list order = priority), first placed
     for (const l of this.labels) {
       const p = typeof l.p === "function" ? l.p() : l.p;
       const v = this.v.copy(p).project(camera);
       const mode = l.modes ? l.modes.includes(state) : base && (l.table ? document.body.dataset.env === "table" : true);
       const far = state === "walk" && camera.position.distanceTo(p) > (l.range || 650);
-      const ok = mode && !far && v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
+      let ok = mode && !far && v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
+      const x = ((v.x + 1) / 2) * w, y = ((1 - v.y) / 2) * h;
+      if (ok) {
+        const bw = l.el.offsetWidth || 80, bh = l.el.offsetHeight || 24, r = [x - bw / 2, y - bh, x + bw / 2, y];
+        if (taken.some((t) => r[0] < t[2] + 4 && r[2] > t[0] - 4 && r[1] < t[3] + 2 && r[3] > t[1] - 2)) ok = false;
+        else taken.push(r);
+      }
       l.el.style.opacity = ok ? 1 : 0;
-      if (ok) l.el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -100%)`;
+      l.el.style.visibility = ok ? "visible" : "hidden";
+      if (ok) l.el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
     }
   }
+
 }
 
 function clock(h) { const hh = Math.floor(h), mm = Math.round((h - hh) * 60); return `${hh}:${String(mm).padStart(2, "0")}`; }
