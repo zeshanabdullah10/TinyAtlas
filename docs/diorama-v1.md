@@ -13,7 +13,8 @@ under "How this model is made".
    scroll to zoom. The card gives the measured facts (lake level, track length, climb, time by jeep).
 2. **Drive.** "Drive the last 3.5 km" dives the camera into the model and onto a Willys-type jeep at the start of the
    OSM track. W or ↑ is gas, S or ↓ is brake, A and D steer within the track, C changes the camera (chase, driver,
-   trackside), Space toggles cruise. On a touch screen there are on-screen pedals. The gauges show speed, real
+   trackside), Space toggles cruise, T (or the Pace chip) runs time 1×, 2×, 4× or 8× faster while the jeep keeps its
+   real speed. On a touch screen there are on-screen pedals. The gauges show speed, real
    altitude, the distance left and the grade, with the elevation profile of the drive.
 3. **Arrive.** At the end of the track the jeep stops, the camera glides low over the lake and then rises to an
    overview. From there the visitor can orbit the lake, drive again, or go back to the whole model.

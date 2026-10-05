@@ -102,6 +102,7 @@ addEventListener("keydown", (e) => {
   keys.add(e.key.toLowerCase());
   if (state === "drive") {
     if (e.key === "c" || e.key === "C") cycleCam();
+    if (e.key === "t" || e.key === "T") hud.emit("pace");
     if (e.key === " ") { input.cruise = !input.cruise; hud.cruise(input.cruise); e.preventDefault(); }
     if (e.key.startsWith("Arrow")) e.preventDefault();
   }
@@ -126,6 +127,9 @@ hud.on("again", () => { hud.arrive(null); startDrive(); });
 hud.on("model", backToModel);
 hud.on("cam", cycleCam);
 hud.on("cruise", () => { input.cruise = !input.cruise; hud.cruise(input.cruise); });
+const PACES = [1, 2, 4, 8];
+let pace = 1;
+hud.on("pace", () => { pace = PACES[(PACES.indexOf(pace) + 1) % PACES.length]; hud.pace(pace); });
 hud.on("sound", () => { sound.start(); sound.mute(!sound.muted); hud.sound(!sound.muted); });
 hud.on("sun", (h) => { sky.set(h); if (scene.fog) scene.fog.color.copy(sky.horizon); });
 hud.on("skip", () => { if (state === "drive") ride.s = path.length - 40; });
@@ -254,7 +258,8 @@ function tick(dt) {
     const steer = driving ? (kb("d") || kb("arrowright") ? 1 : 0) - (kb("a") || kb("arrowleft") ? 1 : 0) || input.steer : 0;
     if (driving && input.cruise && !throttle && !brake) { throttle = Math.min(Math.max((6.2 - ride.v) * 0.7, 0), 1); brake = ride.v > 7.5 ? 0.3 : 0; }
     if (state === "dive") { throttle = 0; brake = 0; }
-    ride.update(dt, { throttle, brake, steer });
+    const reps = driving ? pace : 1;                // time-lapse: the same physics, stepped more often
+    for (let i = 0; i < reps; i++) ride.update(dt, { throttle, brake, steer });
     const dHV = Math.abs(ride.heaveV - lastHV); lastHV = ride.heaveV;
     if (dHV > 0.35) sound.knock(dHV * 0.8);
     if (ride.v > 0.6) for (const c of ride.rearContacts(contacts)) dust.emit(c, ride.v, Math.random() < ride.v * dt * 7 ? 1 : 0);
@@ -313,7 +318,10 @@ function frame() {
   requestAnimationFrame(frame);
 }
 hud.loading(null);
-hud.intro(true);
+// ?drive=1 (from the Atlas "Drive there" button) starts the drive straight away; sound waits for the first gesture
+if (qs.get("drive") === "1") startDrive(); else hud.intro(true);
+addEventListener("pointerdown", () => sound.ctx?.resume?.(), { once: true });
+addEventListener("keydown", () => sound.ctx?.resume?.(), { once: true });
 requestAnimationFrame(frame);
 // test hook: advance the simulation by fixed steps without drawing (software GL runs at under 1 fps)
 window.__diorama = { site, path, ride, camera, scene, keys, input, renderer, state: () => state, start: startDrive,

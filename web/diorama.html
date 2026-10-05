@@ -49,6 +49,7 @@
 
   <nav class="dock" aria-label="Diorama controls">
     <button class="chip drive-only" data-act="cam" title="Camera (C)">Camera: <span id="cam-name">Chase</span></button>
+    <button class="chip drive-only" id="btn-pace" data-act="pace" aria-pressed="false" title="Time-lapse (T): the jeep's speed stays real, time runs faster">Pace <span id="pace-x">1×</span></button>
     <button class="chip drive-only" id="btn-cruise" data-act="cruise" aria-pressed="false" title="Cruise (Space)">Cruise</button>
     <button class="chip drive-only" data-act="skip" title="Skip to the lake">Skip ahead</button>
     <button class="chip" id="btn-sound" data-act="sound" aria-pressed="false">Sound</button>
@@ -56,7 +57,7 @@
     <button class="chip not-intro" data-act="model">Whole model</button>
   </nav>
 
-  <p class="hint drive-only">W / ↑ gas · S / ↓ brake · A D steer · C camera · Space cruise</p>
+  <p class="hint drive-only">W / ↑ gas · S / ↓ brake · A D steer · C camera · Space cruise · T pace</p>
   <div class="pedals drive-only" aria-hidden="true">
     <div class="steer"><button id="p-left" type="button">◀</button><button id="p-right" type="button">▶</button></div>
     <div class="feet"><button id="p-brake" type="button">Brake</button><button id="p-gas" type="button">Gas</button></div>

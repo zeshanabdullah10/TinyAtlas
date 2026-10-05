@@ -68,6 +68,7 @@ export class Hud {
   intro(show) { $("#intro").hidden = !show; document.body.classList.toggle("is-intro", show); }
   driving(on) { document.body.classList.toggle("is-driving", on); $("#hud").hidden = !on; }
   camName(n) { $("#cam-name").textContent = n; }
+  pace(n) { $("#pace-x").textContent = `${n}×`; $("#btn-pace").setAttribute("aria-pressed", n > 1); }
   cruise(on) { $("#btn-cruise").setAttribute("aria-pressed", on); }
   sound(on) { $("#btn-sound").setAttribute("aria-pressed", on); }
   flash() { const f = $("#flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); }
