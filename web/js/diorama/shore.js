@@ -203,7 +203,7 @@ export class Walker {
   }
   /** foot | horse (on the shore path) | boat (on the water route). `mounts` maps mode → Object3D shown under the camera. */
   setMode(mode, route) {
-    this.mode = mode; this.route = route; this.auto = false; this.glide = null;
+    this.mode = mode; this.route = route; this.auto = false; this.glide = null; this.afterGlide = null; this.stopAt = null; this.onStop = null; this.speed = 1;
     for (const [k, m] of Object.entries(this.mounts)) m.visible = k === mode;
     const s = nearestOnLoop(route, this.pos.x, this.pos.z), q = loopAt(route, s);
     this.glide = { t: 0, from: this.pos.clone(), fromYaw: this.yaw, to: new THREE.Vector3(q.x, 0, q.z), toYaw: Math.atan2(-q.tx, -q.tz), s };
@@ -225,7 +225,7 @@ export class Walker {
       let dy = G.toYaw - G.fromYaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
       this.yaw = G.fromYaw + dy * e;
       moved = prev.distanceTo(this.pos);
-      if (G.t >= 1) { this.s = G.s; this.glide = null; }
+      if (G.t >= 1) { this.s = G.s; this.glide = null; const f = this.afterGlide; this.afterGlide = null; f?.(); }
     } else if (this.auto || (this.mode === "boat" && (keys.has("w") || keys.has("s") || keys.has("arrowup") || keys.has("arrowdown")))) {
       const sp = { foot: 1.35, horse: 2.4, boat: 1.3 }[this.mode];
       const dir = this.auto ? 1 : (keys.has("w") || keys.has("arrowup") ? 1 : -1);

@@ -229,7 +229,7 @@ function tourLeg() {
   if (tour.left-- <= 0) { endTour(); return; }
   const next = vps.filter((v) => relS(v) > 15).sort((a, b) => relS(a) - relS(b))[0];
   if (!next) { endTour(); return; }
-  walker.speed = 7; walker.stopAt = walker.s + relS(next); walker.auto = true;
+  walker.speed = 15; walker.stopAt = walker.s + relS(next); walker.auto = true;
   walker.onStop = () => { walker.glideTo({ x: walker.pos.x, z: walker.pos.z, s: walker.s }, lakeC); tour.pause = 6; tour.at = next; };
   hud.auto(true, walker.mode);
 }
@@ -244,9 +244,8 @@ for (const m of ["foot", "horse", "boat"]) hud.on(`mode-${m}`, () => {
 });
 // One short ride: row ~220 m out along the middle of the water, stop, and turn to look up the lake.
 function boatRide() {
-  const wait = () => {
+  walker.afterGlide = () => {
     if (walker.mode !== "boat") return;
-    if (walker.glide) { requestAnimationFrame(wait); return; }
     walker.speed = 1.6; walker.stopAt = walker.s + Math.min(220, rowRoute.length * 0.25); walker.auto = true;
     walker.onStop = () => {
       const far = vps.reduce((a, v) => (Math.hypot(v.x - walker.pos.x, v.z - walker.pos.z) > Math.hypot(a.x - walker.pos.x, a.z - walker.pos.z) ? v : a), vps[0]);
@@ -254,7 +253,6 @@ function boatRide() {
     };
     hud.auto(true, "boat");
   };
-  wait();
 }
 hud.bindHold("#p-walk", () => holdKeys.add("w"), () => holdKeys.delete("w"));
 hud.on("nextvp", () => {
