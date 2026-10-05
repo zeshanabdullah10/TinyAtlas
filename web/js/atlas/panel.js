@@ -1,6 +1,8 @@
 // Place side sheet (440 px on the right, bottom sheet on mobile): photo with credit, kind, name (+Urdu), stats, story, sources.
 import { h, fill, KIND_LABEL } from "../dom.js";
 
+const DIORAMA = { "mahodand-lake": "mahodand" };   // place slug → web/data/diorama/<site>/
+
 const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : null);
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return "source"; } };
 
@@ -76,7 +78,8 @@ export class Panel {
         h("div", { class: "pn-actions" },
           h("button", { class: "primary", type: "button", onClick: () => this.onFly?.(p) }, "Fly there"),
           h("button", { type: "button", onClick: () => { dispatchEvent(new CustomEvent("atlas:plan", { detail: p })); this.onPlan?.(p); } }, "Plan a day"),
-          this.listenBtn = h("button", { type: "button", class: "listen-btn", onClick: () => this.toggleListen(p) }, "Listen")),
+          this.listenBtn = h("button", { type: "button", class: "listen-btn", onClick: () => this.toggleListen(p) }, "Listen"),
+          DIORAMA[p.slug] ? h("button", { type: "button", onClick: () => location.assign(`diorama.html?site=${DIORAMA[p.slug]}`) }, "View diorama") : null),
         this.listenSlot = h("div", { class: "pn-listen" })),
       p.access ? h("section", null, h("h3", null, "Getting there"), h("p", null, p.access)) : null,
       this.timeline(p), this.sources(p),
