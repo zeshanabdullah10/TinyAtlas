@@ -13,7 +13,7 @@ import { Dust } from "./dust.js";
 import { Sky } from "./sky.js";
 import { Sound } from "./audio.js";
 import { Hud } from "./hud.js";
-import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, waterRoute } from "./shore.js";
+import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, waterRoute, loopAt, nearestOnLoop } from "./shore.js";
 import { Life, boat as boatModel, horse as horseModel } from "./life.js";
 import { Weather } from "./weather.js";
 import { SEASONS, seasonU, mist } from "./season.js";
@@ -79,12 +79,14 @@ const vps = viewpoints(site, loop, path);
 scene.add(viewpointPosts(vps));
 const walker = new Walker(site, loop, canvas);
 const rowRoute = meta.lake ? waterRoute(site, loop) : null;
-if (!rowRoute) { document.getElementById("m-boat").hidden = true; document.querySelector('[data-act="walk"]').textContent = "Walk around"; }
+if (!rowRoute) { document.getElementById("m-boat").hidden = true; document.querySelector('[data-act="tour"]').textContent = "Tour around"; }
 walker.mounts.horse = horseModel(0x9a6a3e);
 walker.mounts.boat = boatModel(0xe2b347, { rower: false });
 {
+  // from the saddle: the neck reaches forward and down so the head sits low in the view, never across it
   const h = walker.mounts.horse, neck = h.userData.neck;
-  h.userData.animate = (t, moving, phase) => { neck.rotation.x = 0.62 + Math.sin(phase * 0.9) * 0.08 * moving; };
+  h.userData.saddle.visible = false;
+  h.userData.animate = (t, moving, phase) => { neck.rotation.x = -0.5 + Math.sin(phase * 0.9) * 0.05 * moving; };
   const b = walker.mounts.boat, oar = b.userData.oar;
   b.userData.animate = (t, moving) => { oar.rotation.y = Math.sin(t * 2.2) * 0.45 * Math.max(moving, 0.15); };
   for (const m of [h, b]) { m.visible = false; scene.add(m); }
@@ -94,7 +96,8 @@ const holdKeys = new Set();
 let photos = [];
 fetch(base + "photos.json").then((r) => (r.ok ? r.json() : [])).then((list) => {
   photos = list.map((p) => { const [x, z] = site.toLocal(p.lat, p.lon); return { ...p, x, z }; });
-  hud.addLabels(photos.map((p) => ({ text: "📷", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 260 })));
+  hud.addLabels(photos.map((p) => ({ text: `📷 ${p.caption}`, name: p.caption, sub: `${p.author}, ${p.date.slice(0, 4)}`, photo: p, group: "Photos",
+    hint: "Open the photo and walk to where it was taken", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 300 })));
 }).catch(() => {});
 const weather = new Weather(latC, (meta.grid.bbox[1] + meta.grid.bbox[3]) / 2, F.arrival_m);
 weather.load().then((t) => hud.weather(t)).catch(() => {});
@@ -109,14 +112,33 @@ function lakeView() {           // high above the track you came up, looking up 
 // ---- labels (names only as the sources give them)
 const river = meta.streams.find((s) => s.name);
 const labels = [
-  { text: meta.title, p: lakeC.clone().setY(lakeC.y + 40), cls: meta.lake ? "lake" : "start" },
-  { text: "Start of the drive", p: new THREE.Vector3(path.X[0], path.Y[0] + 30, path.Z[0]), cls: "start", table: true },
-  { text: "Mahodand Lake Road", p: (() => { const q = path.at(path.length * 0.45); return new THREE.Vector3(q.x, q.y + 25, q.z); })(), cls: "road" },
+  { text: meta.title, p: lakeC.clone().setY(lakeC.y + 40), cls: meta.lake ? "lake" : "start", group: "On the map" },
+  { text: "Start of the drive", p: new THREE.Vector3(path.X[0], path.Y[0] + 30, path.Z[0]), cls: "start", table: true, group: "On the map", drive: true },
+  { text: "Mahodand Lake Road", group: "On the map", p: (() => { const q = path.at(path.length * 0.45); return new THREE.Vector3(q.x, q.y + 25, q.z); })(), cls: "road" },
 ];
-if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
+if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, group: "On the map", p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
 hud.makeLabels(labels);
-hud.addLabels(vps.map((v) => ({ text: v.name, p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
-hud.addLabels(life.labels);
+hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: "On the shore path", p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
+hud.addLabels(life.labels.map((l) => ({ ...l, name: l.text.split(" · ")[0], sub: l.text.split(" · ")[1], group: `At the ${meta.lake ? "lake" : "site"}` })));
+
+// ---- tags and the Places list: go to what was chosen
+hud.on("goto", (l) => {
+  const p = typeof l.p === "function" ? l.p() : l.p;
+  if (l.photo) hud.lightbox(l.photo);
+  if (l.drive) { startDrive(); return; }
+  if (state === "walk") {
+    if (walker.mode !== "foot") { walker.setMode("foot", loop); walker.glide = null; }
+    let x = p.x, z = p.z;
+    if (site.coverAt(x, z) === 5) { const q = loopAt(loop, nearestOnLoop(loop, x, z)); x = q.x; z = q.z; }
+    walker.glideTo({ x, z, s: nearestOnLoop(loop, x, z) }, l.photo || l.vp ? lakeC : new THREE.Vector3(p.x, 0, p.z));
+    hud.auto(false, "foot");
+  } else if (state === "explore" || state === "table") {
+    if (l.vp || l.photo) { startWalk(l.vp || nearestVp(p)); return; }
+    hud.intro(false); orbit.autoRotate = false;
+    orbitFly = { t: 0, from: orbit.target.clone(), to: new THREE.Vector3(p.x, site.heightAt(p.x, p.z), p.z), cam: camera.position.clone() };
+  }
+});
+function nearestVp(p) { return vps.reduce((a, v) => (Math.hypot(v.x - p.x, v.z - p.z) < Math.hypot(a.x - p.x, a.z - p.z) ? v : a), vps[0]); }
 
 // ---- environment modes
 let env = "";
@@ -198,17 +220,46 @@ hud.on("pace", () => { pace = PACES[(PACES.indexOf(pace) + 1) % PACES.length]; h
 hud.on("sound", () => { sound.start(); sound.mute(!sound.muted); hud.sound(!sound.muted); });
 hud.on("sun", (h) => { sky.set(h); if (scene.fog) scene.fog.color.copy(sky.horizon); });
 hud.on("walk", startWalk);
-hud.on("auto", () => { if (state !== "walk") return; walker.auto = !walker.auto; walker.glide = null; hud.auto(walker.auto, walker.mode); });
+hud.on("tour", () => startWalk(vps[0], { tour: true }));
+// The shore tour: glide along the path to each viewpoint in turn, stop, turn to the water, look for a few seconds.
+let tour = null;
+const relS = (v) => ((((v.s - walker.s) % loop.length) + loop.length) % loop.length);
+function tourLeg() {
+  if (!tour) return;
+  if (tour.left-- <= 0) { endTour(); return; }
+  const next = vps.filter((v) => relS(v) > 15).sort((a, b) => relS(a) - relS(b))[0];
+  if (!next) { endTour(); return; }
+  walker.speed = 15; walker.stopAt = walker.s + relS(next); walker.auto = true;
+  walker.onStop = () => { walker.glideTo({ x: walker.pos.x, z: walker.pos.z, s: walker.s }, lakeC); tour.pause = 6; tour.at = next; };
+  hud.auto(true, walker.mode);
+}
+function endTour() { tour = null; walker.auto = false; walker.stopAt = null; walker.onStop = null; walker.speed = 1; hud.auto(false, walker.mode); }
+hud.on("auto", () => { if (state !== "walk") return; if (tour) { endTour(); return; } walker.auto = !walker.auto; walker.glide = null; hud.auto(walker.auto, walker.mode); });
 for (const m of ["foot", "horse", "boat"]) hud.on(`mode-${m}`, () => {
   if (state !== "walk" || walker.mode === m) return;
+  if (tour) endTour();
   walker.setMode(m, m === "boat" ? rowRoute : loop);
   hud.auto(false, m);
+  if (m === "boat") boatRide();
 });
+// One short ride: row ~220 m out along the middle of the water, stop, and turn to look up the lake.
+function boatRide() {
+  walker.afterGlide = () => {
+    if (walker.mode !== "boat") return;
+    walker.speed = 1.6; walker.stopAt = walker.s + Math.min(220, rowRoute.length * 0.25); walker.auto = true;
+    walker.onStop = () => {
+      const far = vps.reduce((a, v) => (Math.hypot(v.x - walker.pos.x, v.z - walker.pos.z) > Math.hypot(a.x - walker.pos.x, a.z - walker.pos.z) ? v : a), vps[0]);
+      walker.glideTo({ x: walker.pos.x, z: walker.pos.z, s: walker.s }, far); hud.auto(false, "boat");
+    };
+    hud.auto(true, "boat");
+  };
+}
 hud.bindHold("#p-walk", () => holdKeys.add("w"), () => holdKeys.delete("w"));
 hud.on("nextvp", () => {
   if (state !== "walk") return;
   const rel = (v) => ((((v.s - walker.s) % loop.length) + loop.length) % loop.length);
   const next = vps.filter((v) => rel(v) > 15).sort((a, b) => rel(a) - rel(b))[0] || vps[0];
+  if (tour) endTour();
   if (walker.mode === "boat") walker.setMode("foot", loop);
   walker.glideTo(next, lakeC); hud.auto(false, walker.mode);
 });
@@ -220,18 +271,20 @@ hud.on("season", () => {
 hud.on("skip", () => { if (state === "drive") ride.s = path.length - 40; });
 
 let arrived = false;
-function startWalk() {
+function startWalk(target, opts = {}) {
   sound.start(); hud.sound(!sound.muted);
   hud.arrive(null); hud.intro(false);
-  const v = vps[0];
+  const v = target && target.x != null ? target : vps[0];
   orbit.enabled = false; orbit.autoRotate = false;
   state = "walkin";
   const eye = new THREE.Vector3(v.x, v.y + 1.65, v.z);
   flyTo({ dur: env === "table" ? 4 : 3.2, lift: env === "table" ? 1800 : 60, to: () => ({ p: eye, look: lakeC.clone().setY(2) }),
     mid: env === "table" ? 0.6 : -1, onMid: () => { hud.flash(); setEnv("real"); },
-    done: () => { walker.place(v.x, v.z, lakeC.x, lakeC.z); walker.pitch = -0.04; walker.on = true; state = "walk"; hud.walking(true); hud.vp(v.name); } });
+    done: () => { walker.place(v.x, v.z, lakeC.x, lakeC.z); walker.pitch = -0.04; walker.on = true; state = "walk"; hud.walking(true); hud.vp(v.name);
+      if (opts.tour) { tour = { left: vps.length, pause: 4, at: v }; } } });
 }
 function leaveWalk() {
+  if (tour) endTour();
   if (walker.mode !== "foot") { walker.setMode("foot", loop); walker.glide = null; }
   walker.on = false; walker.auto = false; hud.auto(false); hud.walking(false); hud.photo(null);
   state = "back";
@@ -396,11 +449,13 @@ function tick(dt) {
   mistG.userData.uni.uMist.value = Math.min(1, Math.max(0, (7.4 - sky.hour) / 1.8)) * 0.95 + seasonU.uWinter.value * 0.12;
   if (state === "walk") {
     const k2 = holdKeys.size ? new Set([...keys, ...holdKeys]) : keys;
+    if (tour && ["w", "a", "s", "d", "arrowup", "arrowdown"].some((x) => k2.has(x))) endTour();   // any step takes over
+    if (tour && tour.pause > 0 && !walker.glide && (tour.pause -= dt) <= 0) tourLeg();
     walker.update(dt, k2, pace, lakeC, camera);
     let ph = null, pd = 120;
     for (const p of photos) { const d = Math.hypot(p.x - walker.pos.x, p.z - walker.pos.z); if (d < pd) { pd = d; ph = p; } }
     hud.photo(ph, pd);
-    if (walker.mode === "foot") for (let i = 0; i < walker.steps; i++) sound.step(keys.has("shift") ? 1.2 : 0.8);
+    if (walker.mode === "foot" && walker.speed === 1) for (let i = 0; i < walker.steps; i++) sound.step(keys.has("shift") ? 1.2 : 0.8);
     if (walker.mode === "horse" && walker.steps && Math.random() < 0.12) sound.hooves(0.3);
     const near = vps.find((v) => Math.hypot(v.x - walker.pos.x, v.z - walker.pos.z) < 30);
     hud.vp(near ? near.name : meta.lake ? `${meta.title} shore` : meta.arrival.name);

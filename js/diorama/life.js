@@ -61,7 +61,7 @@ export function horse(colour) {
   const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.02, 0.8, 5), mat(0x2a1d14)); tail.position.set(0, 1.0, 1.05); tail.rotation.x = 0.4;
   const saddle = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.12, 0.6), mat(0x8a2f2a)); saddle.position.set(0, 1.7, -0.05);
   g.add(body, neck, tail, saddle);
-  g.userData.neck = neck;
+  g.userData.neck = neck; g.userData.saddle = saddle;
   return shadowed(g);
 }
 
@@ -98,21 +98,37 @@ export class Life {
       for (let dr = -1; dr <= 1 && ok; dr++) for (let dc = -1; dc <= 1 && ok; dc++) if (site.C[(r + dr) * g.cols + c + dc] !== 5) ok = false;
       if (ok) deep.push([site.x0 + c * g.cell, site.z0 + r * g.cell]);
     }
+    // Layout follows satellite views of the lake (not traced): boats pulled up in a row along the meadow shore near
+    // the end of the track, a cluster of stalls where the track meets the water, and camps spread over the meadow.
     this.boats = [];
-    const colours = [0xe2b347, 0xd9573b, 0x3f8f5a];   // painted wooden boats, as in the Commons photo "Mahodand Lake 3044 (2)"
-    for (let k = 0; k < Math.min(3, deep.length); k++) {
+    const colours = [0xe2b347, 0xd9573b, 0x3f8f5a, 0x3d7fb8, 0xf0ebe0];   // painted wooden boats, as in the Commons photo "Mahodand Lake 3044 (2)"
+    let last = null, nb = 0;
+    for (const [px, pz] of loop.pts) {
+      if (nb >= 22 || Math.hypot(px - end.x, pz - end.z) > 380) continue;
+      if (last && Math.hypot(px - last[0], pz - last[1]) < 7) continue;
+      // walk toward the lake centre until the water starts; the boat sits on the bank, bow to the water
+      const dx = lakeC.x - px, dz = lakeC.z - pz, L = Math.hypot(dx, dz) || 1;
+      let edge = null;
+      for (let t = 0; t < 80; t += 1) if (site.coverAt(px + dx / L * t, pz + dz / L * t) === 5) { edge = t; break; }
+      if (edge == null) continue;
+      const x = px + dx / L * (edge - 1.5), z = pz + dz / L * (edge - 1.5);
+      const bt = boat(colours[nb % colours.length], { rower: false });
+      bt.position.set(x, Math.max(site.heightAt(x, z), 0) + 0.05, z); bt.rotation.y = Math.atan2(-dx, -dz);
+      this.group.add(bt); last = [px, pz]; nb++;
+      if (nb === 1) this.labels.push({ text: "Boats for hire · illustrative, as in satellite views", p: bt.position.clone().setY(bt.position.y + 7), cls: "illus", modes: ["explore", "walk"] });
+    }
+    for (let k = 0; k < Math.min(2, deep.length); k++) {   // two out on the water
       const p = deep[Math.floor(hash(k, 501) * deep.length)], b = boat(colours[k]);
       b.position.set(p[0], 0, p[1]); b.rotation.y = hash(k, 502) * 6.28;
       this.group.add(b);
       this.boats.push({ m: b, home: new THREE.Vector2(p[0], p[1]), ph: hash(k, 503) * 10 });
     }
-    if (this.boats.length) this.labels.push({ text: "Boats for hire · positions illustrative", p: () => this.boats[0].m.position.clone().setY(8), cls: "illus", modes: ["explore", "walk"] });
 
-    // tea stalls beside the end of the track
-    this.smoke = new Dust(scene, 240);
+    // stalls and huts where the track meets the water
+    this.smoke = new Dust(scene, 400);
     this.smoke.uni.uCol.value.setRGB(0.78, 0.78, 0.8);
     this.chimneys = [];
-    const sc = spread(candidates(site, loop, 8, 400, end, 140), 3, 9);
+    const sc = spread(candidates(site, loop, 6, 400, end, 160), 8, 10);
     sc.forEach((p, k) => {
       const s = stall();
       s.position.set(p.x, site.heightAt(p.x, p.z) + 0.2, p.z);
@@ -120,20 +136,25 @@ export class Life {
       this.group.add(s);
       s.updateMatrixWorld(true);
       this.chimneys.push(s.localToWorld(s.userData.chimney.clone()));
-      if (!k) this.labels.push({ text: "Tea stalls · illustrative", p: s.position.clone().setY(s.position.y + 7), cls: "illus", modes: ["explore", "walk"] });
+      if (!k) this.labels.push({ text: "Tea stalls and hotels · illustrative", p: s.position.clone().setY(s.position.y + 7), cls: "illus", modes: ["explore", "walk"] });
     });
 
-    // a camp on the flattest meadow close to the water
-    const tc = spread(candidates(site, loop, 15, 160), 7, 12);
-    const tcol = [0xe46b2f, 0x3d7fb8, 0xe6c34a, 0x5b9a4a, 0xd94a5a, 0xf0ebe0, 0x7f5ab0];
-    tc.forEach((p, k) => {
-      const t = tent(tcol[k % tcol.length]);
-      t.position.set(p.x + (hash(k, 601) - 0.5) * 6, 0, p.z + (hash(k, 602) - 0.5) * 6);
-      t.position.y = site.heightAt(t.position.x, t.position.z) + 0.25;
-      t.rotation.y = hash(k, 603) * 6.28;
-      this.group.add(t);
+    // camps spread over the meadow by the track, in small clusters
+    const tc = spread(candidates(site, loop, 15, 350, end, 550).filter((p) => !sc.some((q) => Math.hypot(q.x - p.x, q.z - p.z) < 14)), 9, 35);
+    const tcol = [0xe46b2f, 0x3d7fb8, 0xe6c34a, 0xf0ebe0, 0xd94a5a, 0xf0ebe0, 0x5b9a4a];
+    let ti = 0;
+    tc.forEach((p) => {
+      const n = 3 + Math.floor(hash(ti, 600) * 4);
+      for (let j = 0; j < n; j++, ti++) {
+        const t = tent(tcol[ti % tcol.length]);
+        t.position.set(p.x + (hash(ti, 601) - 0.5) * 16, 0, p.z + (hash(ti, 602) - 0.5) * 16);
+        if (site.coverAt(t.position.x, t.position.z) === 5) continue;
+        t.position.y = site.heightAt(t.position.x, t.position.z) + 0.25;
+        t.rotation.y = hash(ti, 603) * 6.28;
+        this.group.add(t);
+      }
     });
-    if (tc.length) this.labels.push({ text: "Camping · positions illustrative", p: new THREE.Vector3(tc[0].x, site.heightAt(tc[0].x, tc[0].z) + 7, tc[0].z), cls: "illus", modes: ["explore", "walk"] });
+    if (tc.length) this.labels.push({ text: "Camps · illustrative, as in satellite views", p: new THREE.Vector3(tc[0].x, site.heightAt(tc[0].x, tc[0].z) + 7, tc[0].z), cls: "illus", modes: ["explore", "walk"] });
 
     // horses grazing by the shore
     this.horses = [];

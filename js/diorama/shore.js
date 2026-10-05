@@ -185,6 +185,7 @@ export class Walker {
     this.pos = new THREE.Vector3(); this.yaw = 0; this.pitch = -0.05; this.auto = false; this.s = 0;
     this.phase = 0; this.moving = 0; this.glide = null; this.steps = 0;
     this.mode = "foot"; this.route = loop; this.mounts = {}; this.t = 0;
+    this.speed = 1; this.stopAt = null; this.onStop = null;   // automated legs: run along the route to `stopAt`, then call onStop
     let drag = null;
     canvas.addEventListener("pointerdown", (e) => { if (this.on) { drag = [e.clientX, e.clientY]; canvas.setPointerCapture?.(e.pointerId); } });
     canvas.addEventListener("pointermove", (e) => {
@@ -202,7 +203,7 @@ export class Walker {
   }
   /** foot | horse (on the shore path) | boat (on the water route). `mounts` maps mode → Object3D shown under the camera. */
   setMode(mode, route) {
-    this.mode = mode; this.route = route; this.auto = false; this.glide = null;
+    this.mode = mode; this.route = route; this.auto = false; this.glide = null; this.afterGlide = null; this.stopAt = null; this.onStop = null; this.speed = 1;
     for (const [k, m] of Object.entries(this.mounts)) m.visible = k === mode;
     const s = nearestOnLoop(route, this.pos.x, this.pos.z), q = loopAt(route, s);
     this.glide = { t: 0, from: this.pos.clone(), fromYaw: this.yaw, to: new THREE.Vector3(q.x, 0, q.z), toYaw: Math.atan2(-q.tx, -q.tz), s };
@@ -224,11 +225,13 @@ export class Walker {
       let dy = G.toYaw - G.fromYaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
       this.yaw = G.fromYaw + dy * e;
       moved = prev.distanceTo(this.pos);
-      if (G.t >= 1) { this.s = G.s; this.glide = null; }
+      if (G.t >= 1) { this.s = G.s; this.glide = null; const f = this.afterGlide; this.afterGlide = null; f?.(); }
     } else if (this.auto || (this.mode === "boat" && (keys.has("w") || keys.has("s") || keys.has("arrowup") || keys.has("arrowdown")))) {
       const sp = { foot: 1.35, horse: 2.4, boat: 1.3 }[this.mode];
       const dir = this.auto ? 1 : (keys.has("w") || keys.has("arrowup") ? 1 : -1);
-      this.s += sp * dt * pace * dir;
+      this.s += sp * this.speed * dt * pace * dir;
+      let stopped = false;
+      if (this.auto && this.stopAt != null && this.s >= this.stopAt) { this.s = this.stopAt; this.auto = false; this.stopAt = null; stopped = true; }
       const q = loopAt(this.route, this.s);
       const prev = this.pos.clone();
       this.pos.set(q.x, 0, q.z);
@@ -238,6 +241,7 @@ export class Walker {
       let d = toLake - along; d = Math.atan2(Math.sin(d), Math.cos(d));
       let want = along + d * 0.35 - this.yaw; want = Math.atan2(Math.sin(want), Math.cos(want));
       this.yaw += want * Math.min(1, dt * 1.5);
+      if (stopped) { const f = this.onStop; this.onStop = null; this.speed = 1; f?.(); }
     } else {
       const f = (keys.has("w") || keys.has("arrowup") ? 1 : 0) - (keys.has("s") || keys.has("arrowdown") ? 1 : 0);
       const r = (keys.has("d") ? 1 : 0) - (keys.has("a") ? 1 : 0);
@@ -253,7 +257,7 @@ export class Walker {
     }
     this.moving += ((moved > 0.0005 ? 1 : 0) - this.moving) * Math.min(1, dt * 6);
     const before = Math.floor(this.phase / Math.PI);
-    this.phase += moved * 3.1;
+    this.phase += (moved / this.speed) * 3.1;
     this.steps = Math.floor(this.phase / Math.PI) - before;
     this.t += dt;
     const ground = this.mode === "boat" ? 0 : this.site.heightAt(this.pos.x, this.pos.z);
