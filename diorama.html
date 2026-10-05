@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tiny Atlas diorama</title>
+<meta name="description" content="A tabletop model of Mahodand Lake built from open elevation, land-cover and map data. Drive the last stretch of the jeep track to the lake.">
+<meta name="theme-color" content="#15120f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2315120f'/%3E%3Cpath d='M5 24 13 9l5 8 3-4 6 11H5Z' fill='%23e9a23b'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&family=Cormorant+SC:wght@600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/diorama.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body class="diorama is-intro">
+<main id="app">
+  <canvas id="gl" tabindex="0" aria-label="Diorama. Drag to turn the model, scroll to zoom. While driving: W or up arrow to accelerate, S or down arrow to brake, A and D to steer, C to change camera, space for cruise."></canvas>
+  <div id="labels" aria-hidden="true"></div>
+  <div id="flash" aria-hidden="true"></div>
+  <div id="loading" class="loading" role="status">Opening the model</div>
+
+  <section id="intro" class="card intro" hidden>
+    <p class="eyebrow">Tiny Atlas · Diorama</p>
+    <h1 id="title">Mahodand Lake</h1>
+    <p id="sub" class="sub"></p>
+    <ul id="facts" class="facts"></ul>
+    <p class="lede">Built from real elevation, land cover and the mapped jeep track. Take the wheel for the last stretch up the Ushu valley, feel every rut, and roll out at the lake.</p>
+    <div class="row">
+      <button class="btn primary" data-act="drive">Drive the last <span id="cta-km">3.5</span> km</button>
+      <button class="btn" data-act="explore">Look around the model</button>
+    </div>
+    <p class="fine">Sound on for the engine. <button class="link" id="about-open" type="button">How this model is made</button></p>
+  </section>
+
+  <section id="hud" class="hud" hidden aria-live="off">
+    <div class="gauge big"><b id="g-speed">0</b><small>km/h</small></div>
+    <div class="gauge"><b id="g-alt">0</b><small>m altitude</small></div>
+    <div class="gauge"><b id="g-left">0</b><small>km to the lake</small></div>
+    <div class="gauge"><b id="g-grade">0</b><small>% grade</small></div>
+    <svg id="prof" class="prof" aria-hidden="true"><polygon id="prof-fill"/><polyline id="prof-line"/><circle id="prof-dot" r="4"/></svg>
+  </section>
+
+  <nav class="dock" aria-label="Diorama controls">
+    <button class="chip drive-only" data-act="cam" title="Camera (C)">Camera: <span id="cam-name">Chase</span></button>
+    <button class="chip drive-only" id="btn-cruise" data-act="cruise" aria-pressed="false" title="Cruise (Space)">Cruise</button>
+    <button class="chip drive-only" data-act="skip" title="Skip to the lake">Skip ahead</button>
+    <button class="chip" id="btn-sound" data-act="sound" aria-pressed="false">Sound</button>
+    <label class="chip sun"><span>Sun</span><input id="sun" type="range" min="5.2" max="19.6" step="0.05" value="16.9" aria-label="Time of day"><output id="sun-out"></output></label>
+    <button class="chip not-intro" data-act="model">Whole model</button>
+  </nav>
+
+  <p class="hint drive-only">W / ↑ gas · S / ↓ brake · A D steer · C camera · Space cruise</p>
+  <div class="pedals drive-only" aria-hidden="true">
+    <div class="steer"><button id="p-left" type="button">◀</button><button id="p-right" type="button">▶</button></div>
+    <div class="feet"><button id="p-brake" type="button">Brake</button><button id="p-gas" type="button">Gas</button></div>
+  </div>
+
+  <section id="arrive" class="card arrive" hidden>
+    <p class="eyebrow">You have arrived</p>
+    <h2>Mahodand Lake</h2>
+    <p id="arrive-facts" class="lede"></p>
+    <div class="row">
+      <button class="btn primary" data-act="again">Drive it again</button>
+      <button class="btn" data-act="model">See the whole model</button>
+    </div>
+    <p class="fine">Drag to look around the lake. Slide the sun to see it at dawn or dusk.</p>
+  </section>
+
+  <dialog id="about" class="about">
+    <h2>How this model is made</h2>
+    <p>Every height, the lake outline, the trees' places and the line of the track come from open data. Nothing is moved to look better.</p>
+    <h3>Measured from the data</h3>
+    <dl id="about-facts"></dl>
+    <h3>Sources</h3>
+    <ul id="about-sources"></ul>
+    <h3>What is illustrative</h3>
+    <ul id="about-edits"></ul>
+    <button class="btn" id="about-close" type="button">Close</button>
+  </dialog>
+</main>
+<script type="module" src="js/diorama/main.js"></script>
+<noscript><p style="padding:2rem;font-family:system-ui">This diorama is drawn in the browser, so it needs JavaScript.</p></noscript>
+</body>
+</html>
