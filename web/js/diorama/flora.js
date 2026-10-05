@@ -3,6 +3,7 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { hash } from "./site.js";
+import { seasonize } from "./season.js";
 
 function painted(geo, rgb) {
   const g = geo.index ? geo.toNonIndexed() : geo, n = g.attributes.position.count, c = new Float32Array(n * 3);
@@ -52,7 +53,7 @@ export function flora(site, path, tier) {
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), s = new THREE.Vector3(), col = new THREE.Color();
   const up = new THREE.Vector3(0, 1, 0);
 
-  const pineMesh = new THREE.InstancedMesh(pineGeometry(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }), pines.length);
+  const pineMesh = new THREE.InstancedMesh(pineGeometry(), seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }), "pine"), pines.length);
   pines.forEach(([c, r, k], i) => {
     const x = site.x0 + c * g.cell, z = site.z0 + r * g.cell;
     const sz = 1.05 + 0.85 * hash(i, 3);
@@ -67,7 +68,7 @@ export function flora(site, path, tier) {
   group.add(pineMesh);
 
   const shrubGeo = painted(new THREE.IcosahedronGeometry(1, 0).scale(1, 0.7, 1), L(104, 124, 56));
-  const shrubMesh = new THREE.InstancedMesh(shrubGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true }), shrubs.length);
+  const shrubMesh = new THREE.InstancedMesh(shrubGeo, seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true }), "shrub"), shrubs.length);
   shrubs.forEach(([c, r], i) => {
     const x = site.x0 + c * g.cell, z = site.z0 + r * g.cell, sz = 0.8 + 1.4 * hash(i, 8);
     v.set(x, site.heightAt(x, z) + 0.2 * sz, z);
@@ -79,7 +80,7 @@ export function flora(site, path, tier) {
   group.add(shrubMesh);
 
   const rockMesh = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1, 0),
-    new THREE.MeshStandardMaterial({ color: 0xa69582, roughness: 0.95, flatShading: true }), rocks.length);
+    seasonize(new THREE.MeshStandardMaterial({ color: 0xa69582, roughness: 0.95, flatShading: true }), "rock"), rocks.length);
   rocks.forEach(([c, r], i) => {
     const x = site.x0 + c * g.cell, z = site.z0 + r * g.cell, sz = 0.7 + 2.6 * hash(i, 12) ** 2;
     v.set(x, site.heightAt(x, z) + 0.15 * sz, z);
@@ -107,7 +108,7 @@ export function flora(site, path, tier) {
     const cov = site.coverAt(x, z);
     if (cov === 2 || cov === 6 || cov === 7 || cov === 1) tufts.push([x, z]);
   }
-  const tuftMesh = new THREE.InstancedMesh(tuftGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, side: THREE.DoubleSide, alphaTest: 0.5 }), tufts.length);
+  const tuftMesh = new THREE.InstancedMesh(tuftGeo, seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, side: THREE.DoubleSide, alphaTest: 0.5 }), "shrub"), tufts.length);
   tufts.forEach(([x, z], i) => {
     const sz = 0.7 + 1.1 * hash(i, 80);
     v.set(x, site.heightAt(x, z) - 0.05, z);
@@ -116,6 +117,7 @@ export function flora(site, path, tier) {
     tuftMesh.setColorAt(i, col.setRGB(0.85 + 0.3 * hash(i, 83), 0.85 + 0.25 * hash(i, 84), 0.75));
   });
   group.add(tuftMesh);
+  group.userData.tufts = tuftMesh;
   group.userData.counts = { pines: pines.length, shrubs: shrubs.length, rocks: rocks.length };
   return group;
 }

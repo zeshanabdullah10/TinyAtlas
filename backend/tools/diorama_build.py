@@ -267,6 +267,8 @@ def build(name, dem_path, wc_path, osm_path):
             "A bench up to 24 m wide is cut along the jeep track to the smoothed track profile (the 30 m DSM includes tree canopy).",
             "Road bumps and ruts in the drive are illustrative; the grade and the line of the track are real.",
             "Trees, shrubs, grass tufts and boulders are placed where WorldCover maps that cover; their size and number are illustrative.",
+            "At the lake, the boats, tents, tea stalls, horses, season colours, snow, ice and dawn mist are illustrative; no source places them yet.",
+            "The shore path is traced 20 m outside the WorldCover lake outline; it is not a mapped trail.",
         ],
         "sources": [
             {"name": "Copernicus DEM GLO-30", "use": "terrain heights", "licence": "© DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA",

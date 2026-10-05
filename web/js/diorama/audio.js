@@ -43,6 +43,37 @@ export class Sound {
     g.gain.setValueAtTime(Math.min(strength, 1) * 0.55, C.currentTime); g.gain.exponentialRampToValueAtTime(0.001, C.currentTime + 0.22);
     s.connect(f).connect(g).connect(this.out); s.start(C.currentTime, Math.random()); s.stop(C.currentTime + 0.25);
   }
+  /** one footstep on grass and gravel */
+  step(loud = 1) {
+    if (!this.on) return;
+    const C = this.ctx, s = C.createBufferSource(), f = C.createBiquadFilter(), g = C.createGain(), t = C.currentTime;
+    s.buffer = this.noise; f.type = "bandpass"; f.frequency.value = 900 + Math.random() * 700; f.Q.value = 0.8;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.09 * loud, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0005, t + 0.16);
+    s.connect(f).connect(g).connect(this.out); s.start(t, Math.random()); s.stop(t + 0.2);
+  }
+  /** a short bird phrase: two to four rising and falling whistles */
+  bird(near = 1) {
+    if (!this.on) return;
+    const C = this.ctx, t0 = C.currentTime, base = 2400 + Math.random() * 1800, n = 2 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < n; i++) {
+      const o = C.createOscillator(), g = C.createGain(), t = t0 + i * (0.11 + Math.random() * 0.06);
+      o.type = "sine"; o.frequency.setValueAtTime(base, t); o.frequency.exponentialRampToValueAtTime(base * (1.25 + Math.random() * 0.4), t + 0.05);
+      o.frequency.exponentialRampToValueAtTime(base * 0.9, t + 0.09);
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.025 * near, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+      o.connect(g).connect(this.out); o.start(t); o.stop(t + 0.12);
+    }
+  }
+  /** a few distant hoof beats */
+  hooves(near = 1) {
+    if (!this.on) return;
+    const C = this.ctx, t0 = C.currentTime;
+    for (let i = 0; i < 8; i++) {
+      const s = C.createBufferSource(), f = C.createBiquadFilter(), g = C.createGain(), t = t0 + i * 0.28 + (i % 2) * 0.09;
+      s.buffer = this.noise; f.type = "bandpass"; f.frequency.value = 520; f.Q.value = 4;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.05 * near, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+      s.connect(f).connect(g).connect(this.out); s.start(t, Math.random()); s.stop(t + 0.09);
+    }
+  }
   /** engine: 0..1 (idle off), speed m/s, throttle 0..1, rough 0..1, wind 0..1, water 0..1 */
   update(dt, { engine, speed, throttle, rough, wind, water }) {
     if (!this.on) return;

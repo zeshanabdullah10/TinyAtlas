@@ -18,10 +18,30 @@ under "How this model is made".
    altitude, the distance left and the grade, with the elevation profile of the drive.
 3. **Arrive.** At the end of the track the jeep stops, the camera glides low over the lake and then rises to an
    overview. From there the visitor can orbit the lake, drive again, or go back to the whole model.
-4. **Sun.** A slider moves the sun along its July path for the site's latitude. At dusk the headlights come on.
+4. **Walk the shore.** From the lake card, "Walk the shore" sets the visitor down at eye height where the track ends.
+   W A S D walk (Shift runs), drag to look, Space or "Walk for me" follows the shore path, N or "Next viewpoint"
+   glides to the next viewpoint and turns to the water. The path is traced 20 m outside the lake outline and the
+   walker cannot step into the water. Viewpoints are named only by where they are: where the track ends, where a
+   stream comes in (the OSM waterway end nearest the shore), the far end, and two along the shore.
+5. **Life at the lake (illustrative).** Rowing boats, a camp on the flattest meadow near the water, tea stalls with
+   smoke beside the end of the track, grazing horses. No source places these yet, so each carries an "illustrative"
+   label. When a source turns up (OSM, research notes, credited geotagged photos), they move to the sourced places.
+6. **Seasons.** Summer, autumn (golden meadows, red shrubs) and winter (snow on gentle ground and trees, an iced
+   lake). Dawn mist forms over the basin before about 7:30. All of it is illustrative and the page says so.
+7. **Opening on the lake.** `?view=lake` opens on the view from the end of the drive (the Atlas "See the lake"
+   button); `?drive=1` starts the drive (the Atlas "Drive there" button).
+8. **Sun.** A slider moves the sun along its July path for the site's latitude. At dusk the headlights come on.
 
 Sound is synthesised in the browser: an engine note that follows speed and gear, gravel crunch, knocks over big
-bumps, wind, and water near the lake.
+bumps, wind, water lapping that grows near the shore, footsteps, birdsong (not in winter) and distant hooves.
+
+## Before you go (practical facts)
+`web/data/diorama/<site>/practical.json` is optional and kept by hand. Each entry needs a source:
+```json
+[{ "label": "Best months", "value": "June to September", "source": "Source name", "url": "https://..." }]
+```
+When it exists, the lake card shows a "Before you go" list and the About dialog repeats it. Nothing is shown
+without it.
 
 ## Files (`web/data/diorama/<site>/`, committed, ~1.5 MB per site)
 | File | Contents |

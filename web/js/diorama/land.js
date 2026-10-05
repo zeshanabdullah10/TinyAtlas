@@ -1,6 +1,7 @@
 // Ground: the near terrain (10 m cells), the coarse horizon ring (60 m), and the tabletop pieces (cut walls, plinth,
 // name plate). Colours follow the Atlas poster grade: ochre rock, golden-green meadow, deep blue-green forest, cream snow.
 import * as THREE from "three";
+import { seasonize } from "./season.js";
 
 const PAL = {            // sRGB
   1: [52, 86, 64], 2: [158, 172, 74], 3: [180, 142, 96], 4: [242, 240, 232], 5: [64, 102, 96], 6: [138, 146, 92], 7: [116, 134, 62], 0: [158, 172, 74],
@@ -82,7 +83,7 @@ function gridGeometry(cols, rows, cell, x0, z0, heights, covers, yOff = 0) {
 
 export function nearTerrain(site) {
   const g = site.meta.grid;
-  const mesh = new THREE.Mesh(gridGeometry(g.cols, g.rows, g.cell, site.x0, site.z0, site.H, site.C), terrainMaterial());
+  const mesh = new THREE.Mesh(gridGeometry(g.cols, g.rows, g.cell, site.x0, site.z0, site.H, site.C), seasonize(terrainMaterial(), "ground"));
   mesh.receiveShadow = true; mesh.castShadow = true;
   return mesh;
 }
@@ -90,7 +91,7 @@ export function nearTerrain(site) {
 export function farTerrain(site) {
   const f = site.meta.far, g = site.meta.grid;
   const mesh = new THREE.Mesh(gridGeometry(f.cols, f.rows, f.cell, f.x0, f.z0, site.FH, site.FC, -2),
-    terrainMaterial({ hole: [g.width / 2 - 4, g.height / 2 - 4] }));
+    seasonize(terrainMaterial({ hole: [g.width / 2 - 4, g.height / 2 - 4] }), "ground"));
   mesh.receiveShadow = false;
   return mesh;
 }

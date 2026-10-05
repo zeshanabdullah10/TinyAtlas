@@ -3,6 +3,7 @@
 // you see is one you feel.
 import * as THREE from "three";
 import { hash } from "./site.js";
+import { seasonize } from "./season.js";
 
 export const HALF_W = 2.3;        // half width of the drawn track, metres
 const LIFT = 0.3;                 // the track surface sits this far above the 10 m terrain mesh, which cannot hold its ruts
@@ -123,7 +124,7 @@ export function driveRibbon(path, step = 0.5, across = 13) {
       road.set([l, s], k * 2);
     }
   }
-  return ribbonMesh(pos, road, ns, across, roadMaterial(true));
+  return ribbonMesh(pos, road, ns, across, seasonize(roadMaterial(true), "ground"));
 }
 
 /** The rest of the OSM track (before and beyond the drive), draped on the terrain. */
@@ -152,7 +153,7 @@ export function trackRibbons(site, path) {
         road.set([l, s], k * 2);
       }
     }
-    meshes.push(ribbonMesh(pos, road, n, across, roadMaterial(false)));
+    meshes.push(ribbonMesh(pos, road, n, across, seasonize(roadMaterial(false), "ground")));
   }
   return meshes;
 }

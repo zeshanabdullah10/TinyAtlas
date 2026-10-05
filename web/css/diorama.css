@@ -102,3 +102,22 @@ body.is-intro .not-intro { display: none; }
   .gauge b { font-size: 18px; }
   .prof { height: 40px; }
 }
+
+/* lake: shore walk, seasons, before you go */
+.walkbar { position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px;
+  width: min(560px, calc(100vw - 32px)); }
+.walkbar .row { margin: 0; justify-content: center; }
+.vp-name { margin: 0; padding: 6px 14px; border-radius: 999px; background: var(--glass-soft); font: 700 18px var(--f-title); letter-spacing: .03em; }
+.hint-walk { margin: 0; font-size: 12.5px; color: var(--muted); text-shadow: 0 1px 4px #000; }
+@media (pointer: coarse) { .hint-walk { display: none; } }
+body.is-walking .dock .drive-only { display: none !important; }
+body.is-walking #btn-pace { display: inline-flex !important; }
+.lbl-illus { font: italic 500 13px var(--font-text); color: var(--cream); background: rgba(21, 18, 15, .6); }
+.lbl-vp { color: var(--saffron); }
+.before { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.before h3 { margin: 0 0 8px; font: 600 12px var(--font-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--saffron); }
+.before dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0; font-size: 13.5px; }
+.before dt { color: var(--faint); } .before dd { margin: 0; color: var(--cream); }
+.before a { color: var(--muted); font-size: 12px; }
+.season-note { position: absolute; left: 50%; top: 70px; transform: translateX(-50%); margin: 0; padding: 6px 14px; border-radius: 999px; background: var(--glass-soft);
+  font-size: 13px; color: var(--muted); white-space: nowrap; }

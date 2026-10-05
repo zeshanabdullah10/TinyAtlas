@@ -53,6 +53,7 @@
     <button class="chip drive-only" id="btn-cruise" data-act="cruise" aria-pressed="false" title="Cruise (Space)">Cruise</button>
     <button class="chip drive-only" data-act="skip" title="Skip to the lake">Skip ahead</button>
     <button class="chip" id="btn-sound" data-act="sound" aria-pressed="false">Sound</button>
+    <button class="chip" id="btn-season" data-act="season" title="Season (illustrative)">Season: <span id="season-name">Summer</span></button>
     <label class="chip sun"><span>Sun</span><input id="sun" type="range" min="5.2" max="19.6" step="0.05" value="16.9" aria-label="Time of day"><output id="sun-out"></output></label>
     <button class="chip not-intro" data-act="model">Whole model</button>
   </nav>
@@ -64,14 +65,27 @@
   </div>
 
   <section id="arrive" class="card arrive" hidden>
-    <p class="eyebrow">You have arrived</p>
+    <p class="eyebrow" id="arrive-eyebrow">You have arrived</p>
     <h2>Mahodand Lake</h2>
     <p id="arrive-facts" class="lede"></p>
+    <div id="before" class="before" hidden><h3>Before you go</h3><dl id="before-list"></dl></div>
     <div class="row">
-      <button class="btn primary" data-act="again">Drive it again</button>
-      <button class="btn" data-act="model">See the whole model</button>
+      <button class="btn primary" data-act="walk">Walk the shore</button>
+      <button class="btn" data-act="again" id="btn-again">Drive it again</button>
+      <button class="btn" data-act="model">Whole model</button>
     </div>
-    <p class="fine">Drag to look around the lake. Slide the sun to see it at dawn or dusk.</p>
+    <p class="fine">Drag to look around. Try the seasons and slide the sun to see the lake at dawn or dusk.</p>
+  </section>
+
+  <p id="season-note" class="season-note" hidden></p>
+  <section id="walkbar" class="walkbar" hidden>
+    <p id="vp-name" class="vp-name">Where the track ends</p>
+    <div class="row">
+      <button class="chip" id="btn-auto" data-act="auto" aria-pressed="false">Walk for me</button>
+      <button class="chip" data-act="nextvp">Next viewpoint</button>
+      <button class="chip" data-act="lakeview">Lake view</button>
+    </div>
+    <p class="hint-walk">W A S D walk · Shift run · drag to look · T pace</p>
   </section>
 
   <dialog id="about" class="about">
@@ -83,6 +97,8 @@
     <ul id="about-sources"></ul>
     <h3>What is illustrative</h3>
     <ul id="about-edits"></ul>
+    <h3>Before you go</h3>
+    <p id="about-practical">Practical details (best months, road from Kalam, jeep fares, where to stay, phone signal, temperature) will appear here once each has a source.</p>
     <button class="btn" id="about-close" type="button">Close</button>
   </dialog>
 </main>
