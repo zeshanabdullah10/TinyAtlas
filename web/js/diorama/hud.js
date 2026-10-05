@@ -28,14 +28,16 @@ export class Hud {
     $("#sub").textContent = meta.subtitle;
     $("#cta-km").textContent = fmt(F.drive_km, 1);
     $("#facts").innerHTML = [
-      [fmt(F.lake_level_m), "m", "lake level"],
+      F.lake_level_m != null ? [fmt(F.lake_level_m), "m", "lake level"] : [fmt(F.arrival_m), "m", "at the end of the drive"],
       [fmt(F.drive_km, 1), "km", "of jeep track"],
       [fmt(F.drive_climb_m), "m", "climb on the way"],
       [`~${F.drive_minutes_at_9kmh}`, "min", "by jeep at 9 km/h"],
     ].map(([n, u, l]) => `<li><b>${n}<small>${u}</small></b><span>${l}</span></li>`).join("");
     $("#about-facts").innerHTML = [
-      ["Lake surface", `${fmt(F.lake_level_m)} m above sea level (median of the DEM over the lake)`],
-      ["Lake extent", `${fmt(F.lake_area_km2, 2)} km², ${fmt(F.lake_length_km, 2)} km long (WorldCover 2021 water)`],
+      ...(F.lake_level_m != null ? [
+        ["Lake surface", `${fmt(F.lake_level_m)} m above sea level (median of the DEM over the lake)`],
+        ["Lake extent", `${fmt(F.lake_area_km2, 2)} km², ${fmt(F.lake_length_km, 2)} km end to end (${meta.lake?.outline || "mapped water"})`]]
+        : [["Arrival", `${meta.arrival.name}, ${fmt(F.arrival_m)} m above sea level`]]),
       ["The drive", `${fmt(F.drive_km, 2)} km on the OSM track, from ${fmt(F.drive_start_m)} m to ${fmt(F.drive_end_m)} m, ${fmt(F.drive_climb_m)} m of climbing, steepest ~${F.drive_max_grade_pct}% over 60 m`],
       ["Model", `${F.box_km[0]} × ${F.box_km[1]} km at true scale, no height exaggeration`],
     ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
@@ -66,13 +68,35 @@ export class Hud {
   }
 
   intro(show) { $("#intro").hidden = !show; document.body.classList.toggle("is-intro", show); }
+  modeBtns(mode) { for (const m of ["foot", "horse", "boat"]) $(`#m-${m}`).setAttribute("aria-pressed", m === mode); $("#btn-auto").textContent = $("#btn-auto").getAttribute("aria-pressed") === "true" ? "Stop" : mode === "boat" ? "Row for me" : mode === "horse" ? "Ride for me" : "Walk for me"; }
+  weather(text) { const el = $("#wx"); el.hidden = !text; el.innerHTML = text || ""; }
+  photo(p, dist) {
+    const el = $("#photo");
+    if (!p) { el.hidden = true; this.shownPhoto = null; return; }
+    el.hidden = false;
+    if (this.shownPhoto !== p) {
+      this.shownPhoto = p;
+      const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      $("#photo-img").src = p.thumb; $("#photo-img").alt = p.caption; $("#photo-link").href = p.page;
+      $("#photo-cap").textContent = p.caption;
+      $("#photo-credit").innerHTML = `Photo ${esc(p.author)}, ${esc(p.date.slice(0, 4))}, <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}</a> · Wikimedia Commons · <span id="photo-d"></span>`;
+    }
+    const d = document.getElementById("photo-d"); if (d) d.textContent = `taken about ${Math.round(dist / 10) * 10} m from here`;
+  }
+  bindHold(sel, on, off) {
+    const el = $(sel);
+    const down = (e) => { e.preventDefault(); el.setPointerCapture?.(e.pointerId); el.classList.add("on"); on(); };
+    const up = () => { el.classList.remove("on"); off(); };
+    el.addEventListener("pointerdown", down); el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up); el.addEventListener("lostpointercapture", up);
+  }
   walking(on) { document.body.classList.toggle("is-walking", on); $("#walkbar").hidden = !on; }
   vp(name) { $("#vp-name").textContent = name; }
-  auto(on) { $("#btn-auto").setAttribute("aria-pressed", on); $("#btn-auto").textContent = on ? "Stop walking" : "Walk for me"; }
+  auto(on, mode = "foot") { $("#btn-auto").setAttribute("aria-pressed", on); this.modeBtns(mode); }
   season(name, note) { $("#season-name").textContent = name; $("#season-note").hidden = !note; $("#season-note").textContent = note || ""; }
   practical(items) {
     if (!items?.length) return;
-    const row = (it) => `<dt>${it.label}</dt><dd>${it.value} <a href="${it.url}" target="_blank" rel="noopener">${it.source}</a></dd>`;
+    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" })[c]);
+    const row = (it) => `<dt>${esc(it.label)}</dt><dd>${esc(it.value)} <a href="${esc(it.url)}" target="_blank" rel="noopener" title="${esc(it.quote || "")}">${esc(it.source)}</a></dd>`;
     $("#before-list").innerHTML = items.map(row).join("");
     $("#before").hidden = false;
     $("#about-practical").innerHTML = `<dl>${items.map(row).join("")}</dl>`;
@@ -89,7 +113,9 @@ export class Hud {
     if (!F) return;
     $("#arrive-eyebrow").textContent = arrived ? "You have arrived" : "Tiny Atlas · Diorama";
     $("#btn-again").textContent = arrived ? "Drive it again" : "Drive up the track";
-    $("#arrive-facts").innerHTML = `You climbed <b>${fmt(F.drive_climb_m)} m</b> over <b>${fmt(F.drive_km, 1)} km</b> of jeep track. The lake lies at <b>${fmt(F.lake_level_m)} m</b>, about <b>${fmt(F.lake_length_km, 1)} km</b> long.`;
+    $("#arrive-facts").innerHTML = `You climbed <b>${fmt(F.drive_climb_m)} m</b> over <b>${fmt(F.drive_km, 1)} km</b> of jeep track. ` + (F.lake_level_m != null
+      ? `The lake lies at <b>${fmt(F.lake_level_m)} m</b>, about <b>${fmt(F.lake_length_km, 1)} km</b> end to end.`
+      : `You are at <b>${fmt(F.arrival_m)} m</b>.`);
   }
 
   bindPedals(input) {

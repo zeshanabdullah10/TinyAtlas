@@ -68,19 +68,31 @@
     <p class="eyebrow" id="arrive-eyebrow">You have arrived</p>
     <h2>Mahodand Lake</h2>
     <p id="arrive-facts" class="lede"></p>
-    <div id="before" class="before" hidden><h3>Before you go</h3><dl id="before-list"></dl></div>
+    <p id="wx" class="wx" hidden></p>
+    <details id="before" class="before" hidden><summary>Before you go</summary><dl id="before-list"></dl></details>
     <div class="row">
       <button class="btn primary" data-act="walk">Walk the shore</button>
       <button class="btn" data-act="again" id="btn-again">Drive it again</button>
       <button class="btn" data-act="model">Whole model</button>
     </div>
-    <p class="fine">Drag to look around. Try the seasons and slide the sun to see the lake at dawn or dusk.</p>
+    <p class="fine">Drag to look around. Try the seasons and slide the sun to see it at dawn or dusk.</p>
   </section>
 
   <p id="season-note" class="season-note" hidden></p>
+  <aside id="photo" class="photo" hidden>
+    <a id="photo-link" target="_blank" rel="noopener"><img id="photo-img" alt=""></a>
+    <p id="photo-cap" class="photo-cap"></p>
+    <p id="photo-credit" class="photo-credit"></p>
+  </aside>
   <section id="walkbar" class="walkbar" hidden>
     <p id="vp-name" class="vp-name">Where the track ends</p>
+    <div class="row" role="group" aria-label="How to get around">
+      <button class="chip" data-act="mode-foot" id="m-foot" aria-pressed="true">On foot</button>
+      <button class="chip" data-act="mode-horse" id="m-horse" aria-pressed="false">Ride a horse</button>
+      <button class="chip" data-act="mode-boat" id="m-boat" aria-pressed="false">Row a boat</button>
+    </div>
     <div class="row">
+      <button class="chip walk-hold" id="p-walk" type="button">Hold to go</button>
       <button class="chip" id="btn-auto" data-act="auto" aria-pressed="false">Walk for me</button>
       <button class="chip" data-act="nextvp">Next viewpoint</button>
       <button class="chip" data-act="lakeview">Lake view</button>

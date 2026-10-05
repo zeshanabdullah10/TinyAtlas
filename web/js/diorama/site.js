@@ -10,7 +10,7 @@ export async function loadSite(base, onProgress = () => {}) {
   };
   const [meta, hb, cb, fb, fcb] = await Promise.all([
     get("meta.json", "json"), get("height.bin"), get("cover.bin"), get("far.bin"), get("farcover.bin")]);
-  const g = meta.grid, f = meta.far, Y0 = meta.lake.level;
+  const g = meta.grid, f = meta.far, Y0 = meta.lake?.level ?? meta.arrival.y;   // y = 0 at the lake, or at the arrival point
   const H = new Float32Array(g.cols * g.rows), raw = new Uint16Array(hb);
   for (let i = 0; i < H.length; i++) H[i] = g.hmin + raw[i] / 10 - Y0;
   const FH = new Float32Array(f.cols * f.rows), fraw = new Uint16Array(fb);
@@ -35,7 +35,11 @@ export async function loadSite(base, onProgress = () => {}) {
     const c = Math.round((x - x0) / g.cell), r = Math.round((z - z0) / g.cell);
     return C[r * g.cols + c];
   };
-  return { meta, Y0, H, C, FH, FC, heightAt, coverAt, inside, x0, z0 };
+  // geographic → local metres, the same WGS84 approximation the build uses
+  const [s, w, n, e] = g.bbox, lat0 = (s + n) / 2, r = Math.PI / 180;
+  const my = 111132.95 - 559.82 * Math.cos(2 * lat0 * r), mx = 111412.84 * Math.cos(lat0 * r) - 93.5 * Math.cos(3 * lat0 * r);
+  const toLocal = (lat, lon) => [(lon - w) * mx - g.width / 2, (n - lat) * my - g.height / 2];
+  return { meta, Y0, H, C, FH, FC, heightAt, coverAt, inside, x0, z0, toLocal };
 }
 
 /** Deterministic random in [0, 1) from integers (placement must not change between visits). */

@@ -56,6 +56,14 @@ export function shoreLoop(site, grow = 2) {
   return { pts: out, S, length: S[S.length - 1] + Math.hypot(out[0][0] - out.at(-1)[0], out[0][1] - out.at(-1)[1]) };
 }
 
+/** A walking circle around a viewpoint (sites without a lake), every ~3 m. */
+export function ringLoop(site, x, z, r) {
+  const n = Math.round((2 * Math.PI * r) / 3), pts = [];
+  for (let i = 0; i < n; i++) { const a = (i / n) * 2 * Math.PI; pts.push([x + Math.cos(a) * r, z + Math.sin(a) * r]); }
+  const S = pts.map((_, i) => i * ((2 * Math.PI * r) / n));
+  return { pts, S, length: 2 * Math.PI * r };
+}
+
 export function loopAt(loop, s) {
   const L = loop.length, n = loop.pts.length;
   s = ((s % L) + L) % L;
@@ -64,6 +72,38 @@ export function loopAt(loop, s) {
   while (i < n - 1 && loop.S[i + 1] <= s) i++;
   const a = loop.pts[i], b = loop.pts[(i + 1) % n], seg = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, t = (s - loop.S[i]) / seg;
   return { x: a[0] + (b[0] - a[0]) * t, z: a[1] + (b[1] - a[1]) * t, tx: (b[0] - a[0]) / seg, tz: (b[1] - a[1]) / seg, i };
+}
+
+/** A rowing route on the water: each shore point pushed across to the middle of the water in front of it. */
+export function waterRoute(site, shore) {
+  const pts = [];
+  for (let i = 0; i < shore.pts.length; i += 2) {
+    const [px, pz] = shore.pts[i];
+    let best = null, bd = Infinity;               // nearest water within 60 m
+    for (let a = 0; a < 24; a++) for (const r of [8, 16, 24, 32, 44, 60]) {
+      const x = px + Math.cos((a / 24) * 6.283) * r, z = pz + Math.sin((a / 24) * 6.283) * r;
+      if (site.coverAt(x, z) === 5 && r < bd) { bd = r; best = [Math.cos((a / 24) * 6.283), Math.sin((a / 24) * 6.283)]; }
+    }
+    if (!best) continue;
+    let enter = null, exit = null;
+    for (let t = 0; t < 260; t += 2) {
+      const w = site.coverAt(px + best[0] * t, pz + best[1] * t) === 5;
+      if (w && enter == null) enter = t;
+      if (!w && enter != null) { exit = t; break; }
+    }
+    if (enter == null) continue;
+    const mid = (enter + (exit ?? enter + 10)) / 2;
+    pts.push([px + best[0] * mid, pz + best[1] * mid]);
+  }
+  let p = pts;
+  for (let pass = 0; pass < 4; pass++) {
+    const n = p.length;
+    p = p.map((_, i) => { let x = 0, z = 0; for (let k = -3; k <= 3; k++) { const q = p[(i + k + n) % n]; x += q[0]; z += q[1]; } return [x / 7, z / 7]; });
+  }
+  p = p.filter(([x, z]) => site.coverAt(x, z) === 5);
+  const S = [0];
+  for (let i = 1; i < p.length; i++) S.push(S[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+  return { pts: p, S, length: S.at(-1) + Math.hypot(p[0][0] - p.at(-1)[0], p[0][1] - p.at(-1)[1]) };
 }
 
 export function nearestOnLoop(loop, x, z) {
@@ -144,6 +184,7 @@ export class Walker {
     this.site = site; this.loop = loop;
     this.pos = new THREE.Vector3(); this.yaw = 0; this.pitch = -0.05; this.auto = false; this.s = 0;
     this.phase = 0; this.moving = 0; this.glide = null; this.steps = 0;
+    this.mode = "foot"; this.route = loop; this.mounts = {}; this.t = 0;
     let drag = null;
     canvas.addEventListener("pointerdown", (e) => { if (this.on) { drag = [e.clientX, e.clientY]; canvas.setPointerCapture?.(e.pointerId); } });
     canvas.addEventListener("pointermove", (e) => {
@@ -157,7 +198,14 @@ export class Walker {
   place(x, z, lookX, lookZ) {
     this.pos.set(x, 0, z);
     this.yaw = Math.atan2(-(lookX - x), -(lookZ - z));
-    this.s = nearestOnLoop(this.loop, x, z);
+    this.s = nearestOnLoop(this.route, x, z);
+  }
+  /** foot | horse (on the shore path) | boat (on the water route). `mounts` maps mode → Object3D shown under the camera. */
+  setMode(mode, route) {
+    this.mode = mode; this.route = route; this.auto = false; this.glide = null;
+    for (const [k, m] of Object.entries(this.mounts)) m.visible = k === mode;
+    const s = nearestOnLoop(route, this.pos.x, this.pos.z), q = loopAt(route, s);
+    this.glide = { t: 0, from: this.pos.clone(), fromYaw: this.yaw, to: new THREE.Vector3(q.x, 0, q.z), toYaw: Math.atan2(-q.tx, -q.tz), s };
   }
   glideTo(v, look) {
     this.auto = false;
@@ -177,9 +225,11 @@ export class Walker {
       this.yaw = G.fromYaw + dy * e;
       moved = prev.distanceTo(this.pos);
       if (G.t >= 1) { this.s = G.s; this.glide = null; }
-    } else if (this.auto) {
-      this.s += 1.35 * dt * pace;
-      const q = loopAt(this.loop, this.s);
+    } else if (this.auto || (this.mode === "boat" && (keys.has("w") || keys.has("s") || keys.has("arrowup") || keys.has("arrowdown")))) {
+      const sp = { foot: 1.35, horse: 2.4, boat: 1.3 }[this.mode];
+      const dir = this.auto ? 1 : (keys.has("w") || keys.has("arrowup") ? 1 : -1);
+      this.s += sp * dt * pace * dir;
+      const q = loopAt(this.route, this.s);
       const prev = this.pos.clone();
       this.pos.set(q.x, 0, q.z);
       moved = prev.distanceTo(this.pos);
@@ -193,21 +243,31 @@ export class Walker {
       const r = (keys.has("d") ? 1 : 0) - (keys.has("a") ? 1 : 0);
       this.yaw += ((keys.has("arrowleft") ? 1 : 0) - (keys.has("arrowright") ? 1 : 0)) * dt * 1.6;
       if (f || r) {
-        const sp = (keys.has("shift") ? 3.4 : 1.4) * dt * pace;
+        const sp = (this.mode === "horse" ? (keys.has("shift") ? 5.5 : 2.6) : keys.has("shift") ? 3.4 : 1.4) * dt * pace;
         const fx = -Math.sin(this.yaw), fz = -Math.cos(this.yaw);
         let nx = this.pos.x + (fx * f - fz * r) * sp, nz = this.pos.z + (fz * f + fx * r) * sp;
         const half = [this.site.meta.grid.width / 2 - 20, this.site.meta.grid.height / 2 - 20];
         nx = Math.min(Math.max(nx, -half[0]), half[0]); nz = Math.min(Math.max(nz, -half[1]), half[1]);
-        if (this.site.coverAt(nx, nz) !== 5) { moved = Math.hypot(nx - this.pos.x, nz - this.pos.z); this.pos.x = nx; this.pos.z = nz; }
+        if (this.mode !== "boat" && this.site.coverAt(nx, nz) !== 5) { moved = Math.hypot(nx - this.pos.x, nz - this.pos.z); this.pos.x = nx; this.pos.z = nz; }
       }
     }
     this.moving += ((moved > 0.0005 ? 1 : 0) - this.moving) * Math.min(1, dt * 6);
     const before = Math.floor(this.phase / Math.PI);
     this.phase += moved * 3.1;
     this.steps = Math.floor(this.phase / Math.PI) - before;
-    const ground = this.site.heightAt(this.pos.x, this.pos.z);
-    camera.position.set(this.pos.x, ground + 1.65 + Math.abs(Math.sin(this.phase)) * 0.045 * this.moving, this.pos.z);
-    camera.rotation.set(this.pitch, this.yaw, Math.sin(this.phase * 0.5) * 0.004 * this.moving, "YXZ");
+    this.t += dt;
+    const ground = this.mode === "boat" ? 0 : this.site.heightAt(this.pos.x, this.pos.z);
+    let eye = 1.65, bob = Math.abs(Math.sin(this.phase)) * 0.045 * this.moving, roll = Math.sin(this.phase * 0.5) * 0.004 * this.moving;
+    if (this.mode === "horse") { eye = 2.35; bob = Math.sin(this.phase * 0.9) * 0.07 * this.moving; roll = Math.sin(this.phase * 0.45) * 0.012 * this.moving; }
+    if (this.mode === "boat") { eye = 1.05; bob = Math.sin(this.t * 1.3) * 0.04 + Math.sin(this.phase * 0.6) * 0.03 * this.moving; roll = Math.sin(this.t * 1.1) * 0.015; }
+    camera.position.set(this.pos.x, ground + eye + bob, this.pos.z);
+    camera.rotation.set(this.pitch, this.yaw, roll, "YXZ");
+    const m = this.mounts[this.mode];
+    if (m) {
+      m.position.set(this.pos.x, ground + (this.mode === "boat" ? bob * 0.6 : this.mode === "horse" ? bob * 0.5 : 0), this.pos.z);
+      m.rotation.set(0, this.yaw, this.mode === "boat" ? roll * 0.8 : 0);
+      m.userData.animate?.(this.t, this.moving, this.phase);
+    }
     return moved;
   }
 }

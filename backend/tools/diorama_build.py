@@ -140,7 +140,29 @@ def bilerp(h, g, x, z):
             + h[r0 + 1, c0] * (1 - tx) * tz + h[r0 + 1, c0 + 1] * tx * tz)
 
 
-def build(name, dem_path, wc_path, osm_path):
+def s2_water(base, g):
+    """NDWI (green - nir) / (green + nir) from a Sentinel-2 L2A COG item on the local grid (nearest sample)."""
+    import rasterio
+    from rasterio.warp import transform, transform_bounds
+    from rasterio.windows import from_bounds
+    lon = g["w"] + np.arange(g["cols"]) * g["cell"] / g["mx"]
+    lat = g["n"] - np.arange(g["rows"]) * g["cell"] / g["my"]
+    LON, LAT = np.meshgrid(lon, lat)
+    bands = {}
+    with rasterio.Env(AWS_NO_SIGN_REQUEST="YES", GDAL_HTTP_MULTIRANGE="YES", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif"):
+        for b in ("B03", "B08"):
+            with rasterio.open(f"/vsicurl/{base.rstrip('/')}/{b}.tif") as ds:
+                win = from_bounds(*transform_bounds("EPSG:4326", ds.crs, g["w"], g["s"], g["e"], g["n"], densify_pts=21), ds.transform)
+                a = ds.read(1, window=win, boundless=True).astype(float)
+                tr = ds.window_transform(win)
+                X, Y = transform("EPSG:4326", ds.crs, LON.ravel().tolist(), LAT.ravel().tolist())
+                col = np.clip(((np.array(X) - tr.c) / tr.a).astype(int), 0, a.shape[1] - 1)
+                row = np.clip(((np.array(Y) - tr.f) / tr.e).astype(int), 0, a.shape[0] - 1)
+                bands[b] = a[row, col].reshape(LON.shape)
+    return (bands["B03"] - bands["B08"]) / (bands["B03"] + bands["B08"] + 1e-6)
+
+
+def build(name, dem_path, wc_path, osm_path, s2=None):
     import tifffile
     site = SITES[name]
     g = geo(site)
@@ -154,37 +176,59 @@ def build(name, dem_path, wc_path, osm_path):
     cls = sample_tile(wc, 36.0, 72.0, 1 / 12000, g, 0)
     cover = np.vectorize(lambda v: COVER.get(int(v), 2))(cls).astype(np.uint8)
 
-    # Lake: the WorldCover water patch that holds the place point, cleaned by the DEM's flat surface.
-    sx, sz = to_local(g, *site["lake_seed"])
-    seed = (int(round((sz + g["H"] / 2) / CELL)), int(round((sx + g["W"] / 2) / CELL)))
-    lake = flood(cover == 5, seed)                      # also follows the inflowing river upstream
-    level = float(np.percentile(h[lake], 25))
-    wet = (cover == 5) & (h < level + 4.0)
-    wet = (blur((blur(wet.astype(float), 2) > 0.9).astype(float), 2) > 0.05) & wet   # opening drops the thin river channels
-    near_seed = np.hypot(*np.mgrid[-seed[0]:g["rows"] - seed[0], -seed[1]:g["cols"] - seed[1]]) < 3
-    lake = flood(wet | near_seed, seed)
-    level = float(np.median(h[lake]))
-    cover[(cover == 5) & ~lake] = 2                     # stray water pixels elsewhere read as wet meadow
-    cover[lake] = 5
-    # Lake bed: deeper away from the shore (depth is illustrative; no bathymetry is published).
-    inside = lake.astype(float)
-    for _ in range(4):
-        inside = blur(inside, 3) * lake
-    h = np.where(lake, np.minimum(h, level - 0.6 - 9.0 * inside), h)
+    has_lake = "lake_seed" in site
+    lake = np.zeros(h.shape, bool)
+    level, lake_source, sx, sz = None, None, 0.0, 0.0
+    if has_lake:
+        sx, sz = to_local(g, *site["lake_seed"])
+        seed = (int(round((sz + g["H"] / 2) / CELL)), int(round((sx + g["W"] / 2) / CELL)))
+        lake_source = "ESA WorldCover 2021"
+        if s2:
+            # Lake from a recent cloud-free Sentinel-2 scene: NDWI > 0.05, thin channels opened away, the patch nearest the seed.
+            nd = s2_water(s2, g)
+            wet = nd > 0.05
+            wet = (blur((blur(wet.astype(float), 1) > 0.55).astype(float), 1) > 0.05) & wet
+            rr, cc = np.nonzero(wet)
+            k = np.argmin((rr - seed[0]) ** 2 + (cc - seed[1]) ** 2)
+            seed = (int(rr[k]), int(cc[k]))
+            cover[cover == 5] = 2
+            cover[wet] = 5
+            lake_source = "Sentinel-2 L2A " + s2.rstrip("/").split("/")[-1]
+        # Lake: the water patch that holds the place point, cleaned by the DEM's flat surface.
+        lake = flood(cover == 5, seed)                      # also follows the inflowing river upstream
+        level = float(np.percentile(h[lake], 25))
+        wet = (cover == 5) if s2 else (cover == 5) & (h < level + 4.0)   # Sentinel-2 water is trusted as mapped
+        if not s2:
+            wet = (blur((blur(wet.astype(float), 2) > 0.9).astype(float), 2) > 0.05) & wet   # opening drops the thin river channels
+        near_seed = np.hypot(*np.mgrid[-seed[0]:g["rows"] - seed[0], -seed[1]:g["cols"] - seed[1]]) < 3
+        lake = flood(wet | near_seed, seed)
+        level = float(np.median(h[lake]))
+        cover[(cover == 5) & ~lake] = 2                     # stray water pixels elsewhere read as wet meadow
+        cover[lake] = 5
+        # Lake bed: deeper away from the shore (depth is illustrative; no bathymetry is published).
+        inside = lake.astype(float)
+        for _ in range(4):
+            inside = blur(inside, 3) * lake
+        h = np.where(lake, np.minimum(h, level - 0.6 - 9.0 * inside), h)
+    if not has_lake:
+        cover[cover == 5] = 2                           # no lake on this site: WorldCover water reads as wet meadow
 
     ways = {e["id"]: e for e in json.load(open(osm_path, encoding="utf-8"))["elements"] if e["type"] == "way"}
 
     # The drive: OSM jeep track to the first point within 40 m of the lake, resampled every 4 m.
     line = chain(ways, site["drive_ways"], site["drive_start"])
     pts = resample([to_local(g, la, lo) for la, lo in line], 4.0)
-    dist = np.full(lake.shape, 1e9)
     lr, lc = np.nonzero(lake)
     lake_xz = np.stack([lc * CELL - g["W"] / 2, lr * CELL - g["H"] / 2], 1)
     end = len(pts) - 1
-    for i, p in enumerate(pts):
-        if np.min(np.hypot(*(lake_xz - p).T)) < 40:
-            end = i
-            break
+    if has_lake:                                   # stop at the water
+        for i, p in enumerate(pts):
+            if np.min(np.hypot(*(lake_xz - p).T)) < 40:
+                end = i
+                break
+    else:                                          # stop at the track point nearest the arrival point
+        ax, az = to_local(g, *site["arrival"]["point"])
+        end = int(np.argmin([math.hypot(x - ax, z - az) for x, z in pts]))
     drive = pts[: end + 1]
     # Round the OSM corners into drivable curves (moving average over ~28 m); the page drives exactly this line.
     arr = np.array(drive)
@@ -239,10 +283,18 @@ def build(name, dem_path, wc_path, osm_path):
     climb = float(np.sum(np.clip(np.diff(prof), 0, None)))
     grades = np.diff(prof) / np.maximum(seglen, 0.1)
     gsm = np.convolve(grades, np.ones(15) / 15, "same")
+    # Where the visit happens: the lake (its centre, at its level) or a named viewpoint at the end of the drive.
+    if has_lake:
+        cx, cz = lake_xz.mean(0)
+        arrival = {"kind": "lake", "name": site["title"], "x": round(float(cx), 1), "z": round(float(cz), 1), "y": round(level, 1)}
+    else:
+        ax, az = to_local(g, *site["arrival"]["point"])
+        arrival = {"kind": "viewpoint", "name": site["arrival"]["name"], "x": round(ax, 1), "z": round(az, 1),
+                   "y": round(float(bilerp(h, g, ax, az)), 1)}
     facts = {
-        "lake_level_m": round(level),
-        "lake_area_km2": round(float(lake.sum()) * CELL * CELL / 1e6, 2),
-        "lake_length_km": round(float(np.ptp(lake_xz @ np.array(pca(lake_xz)))) / 1000, 2),
+        **({"lake_level_m": round(level),
+            "lake_area_km2": round(float(lake.sum()) * CELL * CELL / 1e6, 2),
+            "lake_length_km": round(float(np.ptp(lake_xz @ np.array(pca(lake_xz)))) / 1000, 2)} if has_lake else {}),
         "drive_km": round(sum(seglen) / 1000, 2),
         "drive_start_m": round(float(prof[0])),
         "drive_end_m": round(float(prof[-1])),
@@ -250,6 +302,7 @@ def build(name, dem_path, wc_path, osm_path):
         "drive_max_grade_pct": round(float(np.max(np.abs(gsm))) * 100),
         "drive_minutes_at_9kmh": round(sum(seglen) / 1000 / 9 * 60),
         "box_km": [round(g["W"] / 1000, 2), round(g["H"] / 1000, 2)],
+        "arrival_m": round(arrival["y"]),
     }
     meta = {
         "version": 1, "site": name, "title": site["title"], "subtitle": site["subtitle"],
@@ -257,23 +310,27 @@ def build(name, dem_path, wc_path, osm_path):
                  "hmin": hmin, "hmax": float(h.max()), "bbox": site["bbox"]},
         "far": {"cols": fg["cols"], "rows": fg["rows"], "cell": FAR_CELL, "x0": round(fx0, 1), "z0": round(fz0, 1),
                 "hmin": fmin, "scale": 0.5},
-        "lake": {"level": round(level, 1), "seed": [round(sx, 1), round(sz, 1)]},
+        "lake": {"level": round(level, 1), "seed": [round(sx, 1), round(sz, 1)], "outline": lake_source} if has_lake else None,
+        "arrival": arrival,
         "drive": [[round(x, 1), round(z, 1), round(float(y), 2)] for (x, z), y in zip(drive, prof)],
         "track": track,
         "streams": streams,
         "facts": facts,
         "edits": [
-            "Lake bed lowered under the measured water level; the depth shown is illustrative (no published bathymetry).",
+            *(["Lake bed lowered under the measured water level; the depth shown is illustrative (no published bathymetry)."] if has_lake else []),
             "A bench up to 24 m wide is cut along the jeep track to the smoothed track profile (the 30 m DSM includes tree canopy).",
             "Road bumps and ruts in the drive are illustrative; the grade and the line of the track are real.",
             "Trees, shrubs, grass tufts and boulders are placed where WorldCover maps that cover; their size and number are illustrative.",
-            "At the lake, the boats, tents, tea stalls, horses, season colours, snow, ice and dawn mist are illustrative; no source places them yet.",
-            "The shore path is traced 20 m outside the WorldCover lake outline; it is not a mapped trail.",
+            *(["At the lake, the positions of the boats, tents, tea stalls and horses are illustrative (boating is described by the sources and seen in Commons photos).",
+               "The shore path is traced 20 m outside the lake outline; it is not a mapped trail."] if has_lake else
+              ["The walking loop is a 150 m circle around the arrival point; it is not a mapped trail."]),
+            "Season colours, snow, ice and dawn mist are illustrative.",
         ],
-        "sources": [
+        "sources": ([{"name": "Copernicus Sentinel-2 L2A", "use": f"the lake outline (NDWI, scene {lake_source.split()[-1]})",
+                      "licence": "Contains modified Copernicus Sentinel data 2025", "url": "https://registry.opendata.aws/sentinel-2-l2a-cogs/"}] if s2 else []) + [
             {"name": "Copernicus DEM GLO-30", "use": "terrain heights", "licence": "© DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA",
              "url": "https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model"},
-            {"name": "ESA WorldCover 10 m 2021 v200", "use": "trees, meadow, rock, snow, the lake outline", "licence": "CC BY 4.0, © ESA WorldCover project 2021",
+            {"name": "ESA WorldCover 10 m 2021 v200", "use": "trees, meadow, rock, snow" + ("" if s2 else ", the lake outline"), "licence": "CC BY 4.0, © ESA WorldCover project 2021",
              "url": "https://esa-worldcover.org"},
             {"name": "OpenStreetMap", "use": "the jeep track (Mahodand Lake Road) and streams", "licence": "ODbL, © OpenStreetMap contributors",
              "url": "https://www.openstreetmap.org/copyright"},
@@ -295,5 +352,6 @@ if __name__ == "__main__":
     ap.add_argument("--dem", required=True)
     ap.add_argument("--worldcover", required=True)
     ap.add_argument("--osm", required=True)
+    ap.add_argument("--s2", help="Sentinel-2 L2A COG item base URL (sentinel-cogs bucket) for the lake outline")
     a = ap.parse_args()
-    build(a.site, a.dem, a.worldcover, a.osm)
+    build(a.site, a.dem, a.worldcover, a.osm, a.s2)

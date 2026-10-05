@@ -23,6 +23,11 @@ under "How this model is made".
    glides to the next viewpoint and turns to the water. The path is traced 20 m outside the lake outline and the
    walker cannot step into the water. Viewpoints are named only by where they are: where the track ends, where a
    stream comes in (the OSM waterway end nearest the shore), the far end, and two along the shore.
+   **Ride a horse** follows the shore path at a trot from the saddle; **Row a boat** follows a route down the middle
+   of the water (each shore point pushed across to the middle of the water in front of it), seen from the stern of a
+   painted wooden boat like the one in the Commons photo "Mahodand Lake 3044 (2)". On a phone, hold "Hold to go".
+   **Photos from here:** near any of the geotagged Wikimedia Commons photos in `photos.json` (16, each credited with
+   author, year and licence), a card shows the photo and how far from here it was taken; 📷 marks where they were taken.
 5. **Life at the lake (illustrative).** Rowing boats, a camp on the flattest meadow near the water, tea stalls with
    smoke beside the end of the track, grazing horses. No source places these yet, so each carries an "illustrative"
    label. When a source turns up (OSM, research notes, credited geotagged photos), they move to the sourced places.
@@ -34,6 +39,15 @@ under "How this model is made".
 
 Sound is synthesised in the browser: an engine note that follows speed and gear, gravel crunch, knocks over big
 bumps, wind, water lapping that grows near the shore, footsteps, birdsong (not in winter) and distant hooves.
+
+## Live conditions
+`weather.js` asks Open-Meteo (free, no key) for the current temperature, sky, wind and three-day range, downscaled to
+the arrival height (`elevation` parameter). The lake card shows it, labelled as a forecast, not a measurement.
+
+## Navigation
+Table and lake views use the Atlas gesture model: on touch one finger moves, pinch zooms and a two-finger twist
+turns; with a mouse, drag turns, right-drag moves, the wheel zooms toward the cursor, and a double-click glides to
+that spot. The view target stays on the model and rides the ground.
 
 ## Before you go (practical facts)
 `web/data/diorama/<site>/practical.json` is optional and kept by hand. Each entry needs a source:
@@ -90,11 +104,14 @@ The terrain is shown at true scale with no height exaggeration.
 3. `python -m pytest -q backend/tests/test_diorama.py` checks the files against `meta.json`, that the drive lies on
    the model, follows the cut terrain and ends at the water, and that the sources and edits are declared.
 
-Sites that are not lakes need a different arrival target (a viewpoint, a stupa). `arrive()` in `main.js` assumes
-the lake mesh. Generalising that is the first job for the second site.
+A site does not need a lake. Leave out `lake_seed` and give `"arrival": {"name": ..., "point": (lat, lon)}`: the
+drive stops at the track point nearest it, `meta.lake` is `null`, `meta.arrival` is the viewpoint, the page skips the
+water, boats and life, and the walk is a 150 m circle around the point. For a lake, `--s2 <Sentinel-2 L2A COG item
+URL>` traces the outline from a recent cloud-free scene (NDWI > 0.05, thin channels opened away) instead of
+WorldCover 2021. Mahodand uses scene S2C_43SBV_20250921_0_L2A: the lake is a 1.4 km ribbon, 0.08 km².
 
 ## Known limits (v1)
-- The lake outline is WorldCover 2021 at 10 m, softened. OSM had no lake polygon in the extract used.
+- The lake outline is one Sentinel-2 scene (21 Sep 2025) at 10 m; the level changes through the season.
 - Shadows cover the area around the jeep while driving and around the view in the overview, not the whole valley.
 - The test hook `window.__diorama.advance(seconds, keys)` steps the simulation without drawing, because headless
   software GL runs at under 1 fps.
