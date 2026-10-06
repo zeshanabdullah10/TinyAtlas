@@ -42,7 +42,7 @@
   <section id="hud" class="hud" hidden aria-live="off">
     <div class="gauge big"><b id="g-speed">0</b><small>km/h</small></div>
     <div class="gauge"><b id="g-alt">0</b><small>m altitude</small></div>
-    <div class="gauge"><b id="g-left">0</b><small>km to the lake</small></div>
+    <div class="gauge"><b id="g-left">0</b><small id="g-left-l">km to the lake</small></div>
     <div class="gauge"><b id="g-grade">0</b><small>% grade</small></div>
     <svg id="prof" class="prof" aria-hidden="true"><polygon id="prof-fill"/><polyline id="prof-line"/><circle id="prof-dot" r="4"/></svg>
   </section>
@@ -51,7 +51,7 @@
     <button class="chip drive-only" data-act="cam" title="Camera (C)">Camera: <span id="cam-name">Chase</span></button>
     <button class="chip drive-only" id="btn-pace" data-act="pace" aria-pressed="false" title="Time-lapse (T): the jeep's speed stays real, time runs faster">Pace <span id="pace-x">1×</span></button>
     <button class="chip drive-only" id="btn-cruise" data-act="cruise" aria-pressed="false" title="Cruise (Space)">Cruise</button>
-    <button class="chip drive-only" data-act="skip" title="Skip to the lake">Skip ahead</button>
+    <button class="chip drive-only" data-act="skip" title="Skip to the end of the drive">Skip ahead</button>
     <button class="chip" id="btn-sound" data-act="sound" aria-pressed="false">Sound</button>
     <button class="chip" id="btn-places" type="button" aria-controls="places">Places</button>
     <button class="chip" id="btn-season" data-act="season" title="Season (illustrative)">Season: <span id="season-name">Summer</span></button>

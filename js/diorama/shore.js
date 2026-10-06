@@ -158,9 +158,17 @@ export function viewpoints(site, loop, path) {
     const s = nearestOnLoop(loop, p[0], p[1]), q = loopAt(loop, s), d = Math.hypot(q.x - p[0], q.z - p[1]);
     if (d < md && Math.abs(s - sPark) > 120) { md = d; mouth = s; }
   }
+  if (!site.meta.lake) {                 // around a building: its front, its sides and the back, by where they are
+    const A = site.meta.arrival, n = A.name;
+    const front = nearestOnLoop(loop, end.x, end.z);
+    list[0] = { name: `On the lawn before the ${n}`, s: front };
+    list.push({ name: `Beside the ${n}`, s: front + loop.length / 4 }, { name: `Behind the ${n}`, s: front + loop.length / 2 },
+      { name: `Beside the ${n}`, s: front + (3 * loop.length) / 4 });
+  } else {
   if (mouth != null && md < 60) list.push({ name: "Where a stream comes in", s: mouth });
   list.push({ name: "Far end of the lake", s: sPark + loop.length / 2 });
   list.push({ name: "Along the shore", s: sPark + loop.length / 4 }, { name: "Along the shore", s: sPark + (3 * loop.length) / 4 });
+  }
   list.sort((a, b) => (((a.s - sPark) % loop.length) + loop.length) % loop.length - ((((b.s - sPark) % loop.length) + loop.length) % loop.length));
   return list.map((v) => { const q = loopAt(loop, v.s); return { ...v, x: q.x, z: q.z, y: site.heightAt(q.x, q.z) }; });
 }

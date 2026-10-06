@@ -1,7 +1,7 @@
 // Place side sheet (440 px on the right, bottom sheet on mobile): photo with credit, kind, name (+Urdu), stats, story, sources.
 import { h, fill, KIND_LABEL } from "../dom.js";
 
-const DIORAMA = { "mahodand-lake": "mahodand" };   // place slug → web/data/diorama/<site>/
+const DIORAMA = { "mahodand-lake": "mahodand", "white-palace-marghazar": "white-palace" };   // place slug → web/data/diorama/<site>/
 
 const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : null);
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return "source"; } };

@@ -16,6 +16,7 @@ import { Hud } from "./hud.js";
 import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, waterRoute, loopAt, nearestOnLoop } from "./shore.js";
 import { Life, boat as boatModel, horse as horseModel } from "./life.js";
 import { Weather } from "./weather.js";
+import { palace } from "./palace.js";
 import { SEASONS, seasonU, mist } from "./season.js";
 
 const qs = new URLSearchParams(location.search);
@@ -56,6 +57,7 @@ scene.add(streams(site));
 const path = new Path(meta.drive, Y0);
 scene.add(driveRibbon(path), ...trackRibbons(site, path), roadStones(path));
 const plants = flora(site, path, tier); scene.add(plants);
+const lm = meta.landmark ? palace(site, meta.landmark, path.at(path.length)) : null; if (lm) scene.add(lm);
 const jeep = jeepModel(); scene.add(jeep.root);
 const ride = new Ride(path, jeep);
 const dust = new Dust(scene, tier === "high" ? 800 : 400);
@@ -68,18 +70,23 @@ const lb = water ? water.userData.box : { x0: A.x - 200, x1: A.x + 200, z0: A.z 
 const lakeC = water ? new THREE.Vector3((lb.x0 + lb.x1) / 2, 0, (lb.z0 + lb.z1) / 2) : new THREE.Vector3(A.x, A.y - Y0, A.z);
 const tableTarget = new THREE.Vector3(0, 380, 300);
 hud.facts(meta);
+if (!meta.lake) {
+  document.getElementById("g-left-l").textContent = `km to the ${meta.arrival.name}`;
+  document.querySelector('[data-act="lakeview"]').textContent = "Overview";
+  document.querySelector("#intro .lede").textContent = `Built from real elevation, land cover and the mapped road. Take the wheel for the last stretch of the ${meta.road || "road"}, feel every bump, and roll out at the ${meta.arrival.name}.`;
+}
 hud.profile(path);
 // optional, hand-kept: web/data/diorama/<site>/practical.json, [{label, value, source, url}], each with a source
 fetch(base + "practical.json").then((r) => (r.ok ? r.json() : null)).then((p) => hud.practical(p)).catch(() => {});
 
 // ---- the shore: footpath, viewpoints, walker, life, mist
-const loop = meta.lake ? shoreLoop(site) : ringLoop(site, A.x, A.z, 150);
-scene.add(footpath(site, loop));
+const loop = meta.lake ? shoreLoop(site) : ringLoop(site, A.x, A.z, meta.landmark ? 52 : 150);
+if (!meta.landmark) scene.add(footpath(site, loop));   // around a building you walk the lawn, no traced path
 const vps = viewpoints(site, loop, path);
 scene.add(viewpointPosts(vps));
 const walker = new Walker(site, loop, canvas);
 const rowRoute = meta.lake ? waterRoute(site, loop) : null;
-if (!rowRoute) { document.getElementById("m-boat").hidden = true; document.querySelector('[data-act="tour"]').textContent = "Tour around"; }
+if (!rowRoute) { document.getElementById("m-boat").hidden = true; document.getElementById("m-horse").hidden = true; document.querySelector('[data-act="tour"]').textContent = "Tour around"; }
 walker.mounts.horse = horseModel(0x9a6a3e);
 walker.mounts.boat = boatModel(0xe2b347, { rower: false });
 {
@@ -112,9 +119,9 @@ function lakeView() {           // high above the track you came up, looking up 
 // ---- labels (names only as the sources give them)
 const river = meta.streams.find((s) => s.name);
 const labels = [
-  { text: meta.title, p: lakeC.clone().setY(lakeC.y + 40), cls: meta.lake ? "lake" : "start", group: "On the map" },
+  { text: meta.title, p: lakeC.clone().setY(lakeC.y + (lm ? 30 : 40)), cls: meta.lake ? "lake" : "start", group: "On the map" },
   { text: "Start of the drive", p: new THREE.Vector3(path.X[0], path.Y[0] + 30, path.Z[0]), cls: "start", table: true, group: "On the map", drive: true },
-  { text: "Mahodand Lake Road", group: "On the map", p: (() => { const q = path.at(path.length * 0.45); return new THREE.Vector3(q.x, q.y + 25, q.z); })(), cls: "road" },
+  { text: meta.road || "Mahodand Lake Road", group: "On the map", p: (() => { const q = path.at(path.length * 0.45); return new THREE.Vector3(q.x, q.y + 25, q.z); })(), cls: "road" },
 ];
 if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, group: "On the map", p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
 hud.makeLabels(labels);
