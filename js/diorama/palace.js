@@ -4,6 +4,7 @@
 // table-and-bench sets on brick pads and a metal arch; tall pines and broadleaf trees around; the flag on the ridge.
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 
 const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...o });
 const white = M(0xf4f1ea, { roughness: 0.45 }), cream = M(0xeee4c8), dark = M(0x2e2a26, { roughness: 0.9 }),
@@ -126,6 +127,28 @@ function model(g, url) {
   }, undefined, (e) => { house(g); });
 }
 
+/** Merge every static mesh of the grounds into one mesh per material (about 190 draw calls down to about 20). */
+function batch(g) {
+  g.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(g.matrixWorld).invert(), byMat = new Map(), drop = [];
+  g.traverse((o) => {
+    if (!o.isMesh) return;
+    const geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone());
+    for (const k of Object.keys(geo.attributes)) if (k !== "position" && k !== "normal") geo.deleteAttribute(k);
+    geo.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld));
+    (byMat.get(o.material) || byMat.set(o.material, []).get(o.material)).push(geo);
+    drop.push(o);
+  });
+  for (const o of drop) o.removeFromParent();
+  for (const c of [...g.children]) if (!c.isMesh && c.children.length === 0) g.remove(c);
+  for (const [mat, list] of byMat) {
+    const mesh = new THREE.Mesh(mergeGeometries(list), mat);
+    mesh.castShadow = mesh.receiveShadow = true;
+    g.add(mesh);
+  }
+  return g;
+}
+
 export function palace(site, lm, face, url) {
   const y = site.heightAt(lm.x, lm.z);
   const g = new THREE.Group();
@@ -158,5 +181,5 @@ export function palace(site, lm, face, url) {
     [-12, 40, 9, "pine"], [30, 6, 13, "leaf"], [-28, 12, 12, "leaf"], [20, -30, 22, "leaf"], [-2, -32, 26, "pine"]];
   spots.forEach(([x, z, h, k], i) => tree(g, x, z, h, k, i));
   g.userData.top = y + 17;
-  return g;
+  return batch(g);
 }
