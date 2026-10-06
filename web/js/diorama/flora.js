@@ -35,6 +35,12 @@ export function flora(site, path, tier) {
     const c = Math.round((path.X[i] - site.x0) / g.cell), r = Math.round((path.Z[i] - site.z0) / g.cell);
     for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) clear[(r + dr) * g.cols + c + dc] = 1;
   }
+  // A tree budget: dense-forest sites (the White Palace valley is half forest) would otherwise draw 6x Mahodand's trees.
+  // Past the budget the forest is thinned evenly and its trees drawn a little larger, so the canopy still reads full.
+  let forest = 0;
+  for (let i = 0; i < site.C.length; i++) forest += site.C[i] === 1;
+  const budget = tier === "low" ? 14000 : 36000, thin = Math.min(1, budget / (forest * 1.4 * dens * 0.95 + 1));
+  const grow = Math.min(1.5, 1 / Math.sqrt(thin));
   const pines = [], shrubs = [], rocks = [];
   for (let r = 0; r < g.rows; r++) for (let c = 0; c < g.cols; c++) {
     const i = r * g.cols + c, cov = site.C[i];
@@ -42,7 +48,7 @@ export function flora(site, path, tier) {
     const h0 = hash(c, r, 11);
     if (cov === 1) {
       const n = h0 < 0.4 ? 2 : 1;
-      for (let k = 0; k < n; k++) if (hash(c, r, 20 + k) < dens * 0.95) pines.push([c + hash(c, r, 30 + k) - 0.5, r + hash(c, r, 40 + k) - 0.5, k]);
+      for (let k = 0; k < n; k++) if (hash(c, r, 20 + k) < dens * 0.95 * thin) pines.push([c + hash(c, r, 30 + k) - 0.5, r + hash(c, r, 40 + k) - 0.5, k]);
     } else if ((cov === 7 && h0 < 0.5 * dens) || (cov === 6 && h0 < 0.08 * dens) || (cov === 2 && h0 < 0.015 * dens)) {
       shrubs.push([c + hash(c, r, 50) - 0.5, r + hash(c, r, 51) - 0.5]);
     } else if ((cov === 3 && h0 < 0.07 * dens) || (cov === 2 && h0 > 1 - 0.006 * dens)) {
@@ -53,19 +59,28 @@ export function flora(site, path, tier) {
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), s = new THREE.Vector3(), col = new THREE.Color();
   const up = new THREE.Vector3(0, 1, 0);
 
-  const pineMesh = new THREE.InstancedMesh(pineGeometry(), seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }), "pine"), pines.length);
-  pines.forEach(([c, r, k], i) => {
-    const x = site.x0 + c * g.cell, z = site.z0 + r * g.cell;
-    const sz = 1.05 + 0.85 * hash(i, 3);
-    // the DSM is the canopy top in forest, so the trees are set down into it by part of their height
-    v.set(x, site.heightAt(x, z) - 7.5 * sz * 0.55, z);
-    q.setFromAxisAngle(up, hash(i, 4) * 6.28);
-    s.set(sz * (0.85 + 0.3 * hash(i, 5)), sz, sz * (0.85 + 0.3 * hash(i, 5)));
-    pineMesh.setMatrixAt(i, m.compose(v, q, s));
-    pineMesh.setColorAt(i, col.setScalar(0.82 + 0.36 * hash(i, 6)));
-  });
-  pineMesh.castShadow = true; pineMesh.receiveShadow = true;
-  group.add(pineMesh);
+  // pines in 800 m tiles, so the main and shadow passes skip what is off screen
+  const pineGeo = pineGeometry(), pineMat = seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }), "pine");
+  const TILE = 800 / g.cell, tiles = new Map();
+  pines.forEach((p, i) => { const key = Math.floor(p[0] / TILE) + "," + Math.floor(p[1] / TILE); (tiles.get(key) || tiles.set(key, []).get(key)).push(i); });
+  const pineMeshes = [];
+  for (const ids of tiles.values()) {
+    const mesh = new THREE.InstancedMesh(pineGeo, pineMat, ids.length);
+    ids.forEach((i, j) => {
+      const [c, r] = pines[i];
+      const x = site.x0 + c * g.cell, z = site.z0 + r * g.cell;
+      const sz = (1.05 + 0.85 * hash(i, 3)) * grow;
+      // the DSM is the canopy top in forest, so the trees are set down into it by part of their height
+      v.set(x, site.heightAt(x, z) - 7.5 * sz * 0.55, z);
+      q.setFromAxisAngle(up, hash(i, 4) * 6.28);
+      s.set(sz * (0.85 + 0.3 * hash(i, 5)), sz, sz * (0.85 + 0.3 * hash(i, 5)));
+      mesh.setMatrixAt(j, m.compose(v, q, s));
+      mesh.setColorAt(j, col.setScalar(0.82 + 0.36 * hash(i, 6)));
+    });
+    mesh.computeBoundingSphere();
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    group.add(mesh); pineMeshes.push(mesh);
+  }
 
   const shrubGeo = painted(new THREE.IcosahedronGeometry(1, 0).scale(1, 0.7, 1), L(104, 124, 56));
   const shrubMesh = new THREE.InstancedMesh(shrubGeo, seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true }), "shrub"), shrubs.length);
