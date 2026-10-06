@@ -117,7 +117,8 @@ The second site has no lake. The drive is the last 3 km of the OSM road up the M
 (the build starts it where the road enters the model). OSM maps no footprint for the palace, so `meta.landmark` places
 an illustrative model (`web/js/diorama/palace.js`) laid out after visitors' photos: a white house with a gabled upper
 floor over a columned veranda, cream one-storey wings, a lawn with marble table sets, hedges, a metal arch, trees and
-the flag. The grounds are levelled to a terrace 58 m around the place point (listed in `meta.edits`), and the walk is
+the flag. The palace itself is the Atlas TRELLIS model (`palace.glb`, from three CC BY-SA Commons photos, credited in
+`palace.attribution.txt` and the sources), scaled to a 28 m front; the drawn house is the fallback. The grounds are levelled to a terrace 58 m around the place point (listed in `meta.edits`), and the walk is
 a 52 m circle around the house with four viewpoints. `practical.json` quotes Wikipedia and The News. No Commons photos
 yet (the API was rate-limited when it was built).
 

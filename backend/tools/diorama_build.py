@@ -47,7 +47,7 @@ SITES = {
         "subtitle": "Marghazar, Swat",
         "bbox": (34.641, 72.318, 34.687, 72.372),
         "arrival": {"name": "White Palace", "point": (34.66328, 72.34486)},   # the place point in regions.py
-        "landmark": {"kind": "palace", "name": "White Palace", "point": (34.66328, 72.34486)},
+        "landmark": {"kind": "palace", "name": "White Palace", "point": (34.66328, 72.34486), "model": "palace.glb"},
         "drive_ways": [445432654, 1467739884],          # OSM road up the Marghazar valley from Saidu Sharif, past the palace gate
         "drive_start": (34.687, 72.3456),
         "track_ways": [445432654, 1467739884],
@@ -304,6 +304,9 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         if t.get("waterway") in ("river", "stream"):
             p = [to_local(g, q_["lat"], q_["lon"]) for q_ in w["geometry"]]
             p = [(x, z) for x, z in p if abs(x) < g["W"] / 2 and abs(z) < g["H"] / 2]
+            if "landmark" in site:                 # streams across the levelled grounds are dropped there (they would float)
+                lx, lz = to_local(g, *site["landmark"]["point"])
+                p = [(x, z) for x, z in p if math.hypot(x - lx, z - lz) > 90]
             if len(p) > 2:
                 streams.append({"kind": t["waterway"], "name": t.get("name"),
                                 "pts": [[round(x, 1), round(z, 1)] for x, z in resample(p, 10.0)]})
@@ -356,7 +359,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
                "The shore path is traced 20 m outside the lake outline; it is not a mapped trail."] if has_lake else
               ["The walking loop is a 150 m circle around the arrival point; it is not a mapped trail."]),
             *(["The palace grounds are levelled to a terrace 58 m around the place point and kept as lawn."] if "landmark" in site else []),
-            *(["The palace model is illustrative: a white marble block, its shape taken from photos, not a survey (OSM maps no footprint)."] if "landmark" in site else []),
+            *(["The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 24 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."] if "landmark" in site else []),
             "Season colours, snow, ice and dawn mist are illustrative.",
         ],
         "sources": ([{"name": "Copernicus Sentinel-2 L2A", "use": f"the lake outline (NDWI, scene {lake_source.split()[-1]})",
@@ -365,6 +368,9 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
              "url": "https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model"},
             {"name": "ESA WorldCover 10 m 2021 v200", "use": "trees, meadow, rock, snow" + ("" if s2 else ", the lake outline"), "licence": "CC BY 4.0, © ESA WorldCover project 2021",
              "url": "https://esa-worldcover.org"},
+            *([{"name": "White Palace model (TRELLIS, MIT)", "use": "the palace, generated from Commons photos by Adilswati, Arszul123 and Ihsan Farid",
+                 "licence": "CC BY-SA 3.0 / 4.0 (texture derived from the photos)", "url": "https://commons.wikimedia.org/wiki/File:White_Palace_Maraghzar,_Swat.jpg"}]
+              if site.get("landmark", {}).get("model") else []),
             {"name": "OpenStreetMap", "use": site.get("osm_use", "the jeep track (Mahodand Lake Road) and streams"), "licence": "ODbL, © OpenStreetMap contributors",
              "url": "https://www.openstreetmap.org/copyright"},
         ],
