@@ -74,7 +74,7 @@ export function jeepModel() {
 export class Ride {
   constructor(path, model) {
     this.path = path; this.m = model;
-    this.s = 6; this.v = 0; this.lat = 0.2; this.latV = 0; this.steer = 0;
+    this.s = 6; this.v = 0; this.lat = -0.45; this.latV = 0; this.steer = 0;
     this.heave = 0; this.heaveV = 0; this.pitch = 0; this.pitchV = 0; this.roll = 0; this.rollV = 0;
     this.jolt = 0; this.grade = 0; this.alt = 0; this.done = false; this.spin = 0;
     this._p = {}; this._init = false;
@@ -83,16 +83,19 @@ export class Ride {
     const P = this.path, p = P.at(this.s, this._p);
     this.grade = p.grade;
     // longitudinal: engine, brakes, gravity on the grade, rolling drag
-    const vmax = 9.5;
-    let a = input.throttle * (2.6 - 1.1 * Math.max(this.v / vmax, 0) ** 2) - input.brake * 6 - 9.81 * Math.sin(Math.atan(p.grade)) * 0.55;
+    // 4x4 low: more pull, less speed. In high range the jeep struggles on pitches steeper than 12%.
+    const vmax = this.low ? 4.4 : 9.5, steep = Math.max(0, p.grade - 0.12);
+    const pull = this.low ? 4.4 : 2.6 * Math.max(0.3, 1 - steep * 6);
+    this.lugging = !this.low && steep > 0.02 && input.throttle > 0;
+    let a = input.throttle * (pull - 1.1 * Math.max(this.v / vmax, 0) ** 2) - input.brake * 6 - 9.81 * Math.sin(Math.atan(p.grade)) * 0.55;
     a -= 0.35 * Math.sign(this.v) + 0.04 * this.v * Math.abs(this.v);
     if (!input.throttle && Math.abs(this.v) < 0.25) { a = 0; this.v *= 0.8; }
-    this.v = Math.min(Math.max(this.v + a * dt, -2), vmax);
+    this.v = Math.min(Math.max(this.v + a * dt, -2), Math.max(vmax, this.v - dt * 3));   // shifting down slows, never snaps
     this.s = Math.min(Math.max(this.s + this.v * dt, 2.5), P.length - 2.5);
     if (this.s >= P.length - 2.6 && !this.done) this.done = true;
     // lateral: steer within the track, drifts back to the ruts when let go
     this.steer += (input.steer - this.steer) * Math.min(1, dt * 5);
-    const target = input.steer ? this.lat + input.steer * 2 : 0.15;
+    const target = input.steer ? this.lat + input.steer * 2 : -0.45;   // let go, it settles in the left-hand ruts (Pakistan drives on the left)
     this.latV += ((target - this.lat) * (input.steer ? 1.2 : 0.6) - this.latV * 1.6) * dt * Math.min(Math.abs(this.v) / 3, 1.5);
     this.lat = Math.min(Math.max(this.lat + this.latV * dt, -1.45), 1.45);
 

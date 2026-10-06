@@ -42,6 +42,14 @@ function terrainMaterial({ hole = null } = {}) {
       .replace("#include <common>", `#include <common>\n${DETAIL}`)
       .replace("#include <color_fragment>", `#include <color_fragment>
   ${hole ? `if (abs(vW.x) < ${hole[0].toFixed(1)} && abs(vW.z) < ${hole[1].toFixed(1)}) discard;` : ""}
+  // bare ground (ochre) gets the meadow's life: grass breaking through in patches, scree and stones, not flat sand
+  float bare = smoothstep(1.05, 1.35, diffuseColor.r / max(diffuseColor.g, 0.01)) * (1.0 - smoothstep(0.5, 0.7, diffuseColor.b));
+  if (bare > 0.0) {
+    float turf = smoothstep(0.36, 0.6, fbm(vW.xz / 16.0 + 7.3));
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.20, 0.27, 0.07), bare * turf * 0.85);
+    float stones = smoothstep(0.78, 0.9, tn(vW.xz * 1.7)) * (1.0 - turf);
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.26, 0.24, 0.22), bare * stones * 0.6);
+  }
   float patchy = fbm(vW.xz / 55.0);
   float grain = tn(vW.xz * 0.9) * 0.6 + tn(vW.xz * 3.7) * 0.4;
   diffuseColor.rgb *= 0.82 + 0.3 * patchy + 0.14 * (grain - 0.5);
