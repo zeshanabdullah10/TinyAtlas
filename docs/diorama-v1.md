@@ -127,7 +127,7 @@ N33E072, and an OSM extract from the main API (`/api/0.6/map?bbox=72.30,34.63,72
 `out geom` JSON).
 
 ### Driving (both sites)
-The drive is the last kilometre of the track (`drive_km` in `SITES`; `--shorten-only` trims a built site). Traffic is
+The drive is the last 600 m of the track, about a minute (`drive_km` in `SITES`; `--shorten-only` trims a built site). Traffic is
 illustrative (`web/js/diorama/traffic.js`): Willys jeeps, a Hilux and motorbikes on the Mahodand track; painted
 Bedford trucks, Suzuki vans, Mehran cars, CD70 motorbikes, a Qingqi rickshaw and a jeep on the Marghazar road. Road
 rules: keep left; oncoming vehicles slow and squeeze past, and stop with the horn if you are on their side (wait and

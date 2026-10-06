@@ -81,7 +81,7 @@ export class Panel {
             : h("button", { class: "primary", type: "button", onClick: () => this.onFly?.(p) }, "Fly there"),
           h("button", { type: "button", onClick: () => { dispatchEvent(new CustomEvent("atlas:plan", { detail: p })); this.onPlan?.(p); } }, "Plan a day"),
           this.listenBtn = h("button", { type: "button", class: "listen-btn", onClick: () => this.toggleListen(p) }, "Listen"),
-          DIORAMA[p.slug] ? h("button", { type: "button", onClick: () => location.assign(`diorama.html?site=${DIORAMA[p.slug]}&view=lake`) }, "See the lake") : null),
+          DIORAMA[p.slug] ? h("button", { type: "button", onClick: () => location.assign(`diorama.html?site=${DIORAMA[p.slug]}&view=lake`) }, DIORAMA[p.slug] === "mahodand" ? "See the lake" : "See it up close") : null),
         this.listenSlot = h("div", { class: "pn-listen" })),
       p.access ? h("section", null, h("h3", null, "Getting there"), h("p", null, p.access)) : null,
       this.timeline(p), this.sources(p),

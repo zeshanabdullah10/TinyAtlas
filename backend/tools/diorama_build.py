@@ -41,7 +41,8 @@ SITES = {
         "drive_start": (35.6773, 72.6784),
         "track_ways": [345805207, 491297270, 1156049685, 1156049686, 1156052434, 1156052435],
         "far_bbox": (35.600, 72.545, 35.796, 72.779),     # the horizon seen from the drive, coarse
-        "drive_km": 1.0,                                # the page drives the last kilometre of the track
+        "drive_km": 0.6,                                # the page drives the last 600 m of the track (about a minute)
+        "pack": "swat",
     },
     "white-palace": {
         "title": "White Palace",
@@ -55,7 +56,8 @@ SITES = {
         "far_bbox": (34.575, 72.230, 34.755, 72.460),
         "osm_use": "the Marghazar road and streams",
         "road": "Marghazar road",
-        "drive_km": 1.0,
+        "drive_km": 0.6,
+        "pack": "swat-lower",
     },
 }
 COVER = {10: 1, 20: 7, 30: 2, 40: 2, 50: 3, 60: 3, 70: 4, 80: 5, 90: 2, 95: 1, 100: 6}
@@ -346,7 +348,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         "arrival_m": round(arrival["y"]),
     }
     meta = {
-        "version": 1, "site": name, "title": site["title"], "subtitle": site["subtitle"], "road": site.get("road", "Mahodand Lake Road"),
+        "version": 1, "site": name, "title": site["title"], "subtitle": site["subtitle"], "road": site.get("road", "Mahodand Lake Road"), "pack": site.get("pack", "swat"),
         "grid": {"cols": g["cols"], "rows": g["rows"], "cell": CELL, "width": g["W"], "height": g["H"],
                  "hmin": hmin, "hmax": float(h.max()), "bbox": site["bbox"]},
         "far": {"cols": fg["cols"], "rows": fg["rows"], "cell": FAR_CELL, "x0": round(fx0, 1), "z0": round(fz0, 1),

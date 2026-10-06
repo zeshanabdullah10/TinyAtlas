@@ -212,3 +212,30 @@ body.is-driving:not(.more) .dock .extra { display: none !important; }
   .toast { top: auto; bottom: 200px; }
 }
 body.is-driving .roadtip[hidden] { display: none !important; }
+
+/* ---- back to the map, close buttons, the More sheet */
+.back { position: absolute; left: 14px; top: max(14px, env(safe-area-inset-top)); z-index: 5; min-height: 36px; display: inline-flex; align-items: center;
+  padding: 0 12px; border-radius: 999px; background: var(--glass-soft); border: 1px solid var(--line); color: var(--cream); text-decoration: none;
+  font: 600 13px var(--font-ui); backdrop-filter: blur(8px); }
+body.is-driving .back { display: none; }
+.x { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: rgba(20,18,15,.7);
+  color: var(--cream); font: 600 20px/1 var(--font-ui); cursor: pointer; z-index: 2; }
+.photo { position: absolute; }
+.lightbox { position: fixed; }
+/* More: a sheet with every option, never clipped */
+body.is-driving.more .dock { position: fixed; left: 50%; right: auto; top: 50%; bottom: auto; transform: translate(-50%, -50%); flex-wrap: wrap; justify-content: center;
+  overflow: auto; max-width: min(520px, calc(100vw - 24px)); max-height: calc(100vh - 140px); padding: 16px; gap: 10px; background: var(--glass);
+  border: 1px solid var(--line); border-radius: 18px; z-index: 9; backdrop-filter: blur(12px); }
+body.is-driving.more .dock .chip { min-height: 44px; }
+body.is-driving.more .pedals, body.is-driving.more .roadtip { visibility: hidden; }
+@media (max-width: 640px) {
+  body.is-driving.more .dock { top: 50%; left: 50%; max-width: calc(100vw - 24px); }
+  .back { left: 10px; top: max(10px, env(safe-area-inset-top)); }
+}
+
+@media (max-width: 640px) {
+  body:not(.is-driving) .dock { left: 84px; right: 10px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; justify-content: flex-start; }
+  body:not(.is-driving) .dock::-webkit-scrollbar { display: none; }
+  body:not(.is-driving) .dock .chip { flex: none; }
+}
+@media (min-width: 641px) { body:not(.is-driving) .dock { left: 100px; } }

@@ -39,6 +39,8 @@
     <p class="fine">Sound on for the engine. <button class="link" id="about-open" type="button">How this model is made</button></p>
   </section>
 
+  <a id="back-atlas" class="back" href="atlas.html" title="Back to the map">‹ Map</a>
+
   <section id="hud" class="hud" hidden aria-live="off">
     <div class="gauge big"><b id="g-speed">0</b><small>km/h</small></div>
     <div class="gauge alt"><b id="g-alt">0</b><small>m altitude</small></div>
@@ -88,6 +90,7 @@
 
   <p id="season-note" class="season-note" hidden></p>
   <aside id="photo" class="photo" hidden>
+    <button class="x" id="photo-close" type="button" aria-label="Close the photo">×</button>
     <a id="photo-link" target="_blank" rel="noopener"><img id="photo-img" alt=""></a>
     <p id="photo-cap" class="photo-cap"></p>
     <p id="photo-credit" class="photo-credit"></p>
@@ -118,6 +121,7 @@
     <img id="lb-img" alt="">
     <div class="lb-text"><p id="lb-cap" class="lb-cap"></p><p id="lb-credit" class="lb-credit"></p></div>
     <button class="btn" id="lb-close" type="button">Close</button>
+    <button class="x" id="lb-x" type="button" aria-label="Close">×</button>
   </dialog>
 
   <dialog id="about" class="about">
