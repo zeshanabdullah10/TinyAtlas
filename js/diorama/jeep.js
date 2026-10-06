@@ -85,7 +85,8 @@ export class Ride {
     // longitudinal: engine, brakes, gravity on the grade, rolling drag
     // 4x4 low: more pull, less speed. In high range the jeep struggles on pitches steeper than 12%.
     const vmax = this.low ? 4.4 : 9.5, steep = Math.max(0, p.grade - 0.12);
-    const pull = this.low ? 4.4 : 2.6 * Math.max(0.3, 1 - steep * 6);
+    const hold = 9.81 * Math.sin(Math.atan(Math.max(p.grade, 0))) * 0.55 + 0.75;    // high range always crawls up, just slowly
+    const pull = this.low ? Math.max(4.4, hold + 1.6) : Math.max(2.6 * Math.max(0.3, 1 - steep * 6), hold);
     this.lugging = !this.low && steep > 0.02 && input.throttle > 0;
     let a = input.throttle * (pull - 1.1 * Math.max(this.v / vmax, 0) ** 2) - input.brake * 6 - 9.81 * Math.sin(Math.atan(p.grade)) * 0.55;
     a -= 0.35 * Math.sign(this.v) + 0.04 * this.v * Math.abs(this.v);

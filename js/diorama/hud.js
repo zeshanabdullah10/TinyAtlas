@@ -17,6 +17,9 @@ export class Hud {
     $("#about-open").addEventListener("click", () => $("#about").showModal());
     $("#about-close").addEventListener("click", () => $("#about").close());
     $("#lb-close").addEventListener("click", () => $("#lightbox").close());
+    $("#lb-x").addEventListener("click", () => $("#lightbox").close());
+    $("#photo-close").addEventListener("click", () => { $("#photo").hidden = true; this.photoShut = this.photoKey; });
+    addEventListener("keydown", (e) => { if (e.key === "Escape") { if (!$("#photo").hidden) { $("#photo").hidden = true; this.photoShut = this.photoKey; } $("#places").hidden = true; document.body.classList.remove("more"); } });
     $("#lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox") $("#lightbox").close(); });
     $("#btn-places").addEventListener("click", () => { $("#places").hidden = !$("#places").hidden; });
     $("#places-close").addEventListener("click", () => { $("#places").hidden = true; });
@@ -35,7 +38,7 @@ export class Hud {
       F.lake_level_m != null ? [fmt(F.lake_level_m), "m", "lake level"] : [fmt(F.arrival_m), "m", "at the end of the drive"],
       [fmt(F.drive_km, 1), "km", "of jeep track"],
       [fmt(F.drive_climb_m), "m", "climb on the way"],
-      [`~${F.drive_minutes_at_9kmh}`, "min", "by jeep at 9 km/h"],
+      [`~${Math.max(1, Math.round(F.drive_km * 1000 / 7 / 60))}`, "min", "to drive here"],
     ].map(([n, u, l]) => `<li><b>${n}<small>${u}</small></b><span>${l}</span></li>`).join("");
     $("#about-facts").innerHTML = [
       ...(F.lake_level_m != null ? [
@@ -76,7 +79,9 @@ export class Hud {
   weather(text) { const el = $("#wx"); el.hidden = !text; el.innerHTML = text || ""; }
   photo(p, dist) {
     const el = $("#photo");
-    if (!p) { el.hidden = true; this.shownPhoto = null; return; }
+    if (!p) { el.hidden = true; this.shownPhoto = null; this.photoShut = null; return; }
+    this.photoKey = p;
+    if (this.photoShut === p) { el.hidden = true; return; }     // closed by hand: stays shut until you walk to another photo
     el.hidden = false;
     if (this.shownPhoto !== p) {
       this.shownPhoto = p;
@@ -106,7 +111,7 @@ export class Hud {
     $("#before").hidden = false;
     $("#about-practical").innerHTML = `<dl>${items.map(row).join("")}</dl>`;
   }
-  driving(on) { document.body.classList.toggle("is-driving", on); $("#hud").hidden = !on; }
+  driving(on) { document.body.classList.toggle("is-driving", on); $("#hud").hidden = !on; if (!on) { document.body.classList.remove("more"); const b = $('[data-act="more"]'); if (b) b.textContent = "More"; } }
   camName(n) { $("#cam-name").textContent = n; }
   pace(n) { $("#pace-x").textContent = `${n}×`; $("#btn-pace").setAttribute("aria-pressed", n > 1); }
   cruise(on) { $("#btn-cruise").setAttribute("aria-pressed", on); }

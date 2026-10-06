@@ -44,6 +44,11 @@ const site = await loadSite(base, (f) => hud.loading(`Loading ${f}`)).catch((e) 
 const meta = site.meta, F = meta.facts, Y0 = site.Y0;
 document.title = `${meta.title} diorama · Tiny Atlas`;
 document.querySelectorAll(".arrive h2, #title").forEach((el) => (el.textContent = meta.title));
+{
+  const back = document.getElementById("back-atlas");
+  back.href = `atlas.html?pack=${meta.pack || "swat"}`;
+  back.addEventListener("click", (e) => { if (document.referrer.includes("atlas.html") && history.length > 1) { e.preventDefault(); history.back(); } });
+}
 const latC = (meta.grid.bbox[0] + meta.grid.bbox[2]) / 2;
 
 // ---- world
@@ -130,9 +135,22 @@ weather.load().then((t) => hud.weather(t)).catch(() => {});
 const life = meta.lake ? new Life(scene, site, loop, path, lakeC) : { labels: [], horses: [], update() {} };
 const mistG = mist(lakeC); scene.add(mistG);
 let season = 0;
-function lakeView() {           // high above the track you came up, looking up the valley over the lake
-  const back = path.at(Math.max(path.length - 750, 0));
-  return { p: new THREE.Vector3(back.x, back.y + 340, back.z), look: lakeC.clone() };
+let _overview = null;
+function lakeView() {           // the overview: high behind the track you came up, the whole site in view, never inside a ridge
+  if (_overview) return { p: _overview.p.clone(), look: _overview.look.clone() };
+  const look = lakeC.clone(), from = path.at(0), dir = new THREE.Vector3(from.x - look.x, 0, from.z - look.z).normalize();
+  const D = meta.lake ? 1100 : 520;
+  const p = look.clone().addScaledVector(dir, D); p.y = look.y + D * 0.62;
+  const clear = () => { for (let i = 1; i <= 24; i++) { const q = p.clone().lerp(look, i / 25); if (q.y < site.heightAt(q.x, q.z) + 25) return false; } return true; };
+  for (let k = 0; k < 40 && !clear(); k++) p.y += 40;
+  p.y = Math.max(p.y, site.heightAt(p.x, p.z) + 80);
+  _overview = { p, look };
+  return { p: p.clone(), look: look.clone() };
+}
+/** Any free camera stays above the ground. */
+function keepAbove(min = 18) {
+  const g = site.heightAt(camera.position.x, camera.position.z) + min;
+  if (camera.position.y < g) camera.position.y = g;
 }
 
 // ---- labels (names only as the sources give them)
@@ -144,7 +162,7 @@ const labels = [
 ];
 if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, group: "On the map", p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
 hud.makeLabels(labels);
-hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: "On the shore path", p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
+hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: meta.lake ? "On the shore path" : "On the walk round the grounds", p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
 hud.addLabels(life.labels.map((l) => ({ ...l, name: l.text.split(" · ")[0], sub: l.text.split(" · ")[1], group: `At the ${meta.lake ? "lake" : "site"}` })));
 
 // ---- tags and the Places list: go to what was chosen
@@ -299,14 +317,14 @@ hud.on("season", () => {
 });
 hud.on("low", () => setLow(!ride.low));
 hud.on("photo", photo);
-hud.on("more", () => { const on = document.body.classList.toggle("more"); document.querySelector('[data-act="more"]').setAttribute("aria-pressed", on); });
+hud.on("more", () => { const on = document.body.classList.toggle("more"), b = document.querySelector('[data-act="more"]'); b.setAttribute("aria-pressed", on); b.textContent = on ? "Close" : "More"; });
 hud.on("horn", () => { sound.start(); traffic.horn(ride); });
 document.getElementById("p-horn")?.addEventListener("pointerdown", (e) => { e.preventDefault(); sound.start(); traffic.horn(ride); });
 hud.on("skip", () => { if (state === "drive") ride.s = path.length - 40; });
 
 let arrived = false;
 function startWalk(target, opts = {}) {
-  sound.start(); hud.sound(!sound.muted);
+  sound.start(); hud.sound(!sound.muted); hud.driving(false);
   hud.arrive(null); hud.intro(false);
   const v = target && target.x != null ? target : vps[0];
   orbit.enabled = false; orbit.autoRotate = false;
@@ -326,14 +344,14 @@ function leaveWalk() {
     done: () => { state = "explore"; orbit.enabled = true; orbit.target.copy(lakeC); setExploreOrbit(); hud.arrive(F, { arrived }); } });
 }
 function setExploreOrbit() {
-  orbit.minDistance = 40; orbit.maxDistance = 9000; orbit.maxPolarAngle = 1.52; orbit.autoRotate = true; orbit.autoRotateSpeed = 0.25;
+  orbit.minDistance = 120; orbit.maxDistance = 6000; orbit.maxPolarAngle = 1.15; orbit.autoRotate = true; orbit.autoRotateSpeed = 0.18;
 }
 
 function startDrive() {
   sound.start(); hud.sound(!sound.muted);
   walker.on = false; hud.walking(false);
   hud.intro(false); hud.arrive(null);
-  ride.s = 6; ride.v = 0; ride.lat = 0.2; ride.done = false; ride._init = false;
+  ride.s = 6; ride.v = 0; ride.lat = -0.45; ride.done = false; ride._init = false;
   ride.update(0.016, { throttle: 0, brake: 0, steer: 0 });
   orbit.enabled = false; orbit.autoRotate = false;
   state = "dive";
@@ -356,30 +374,10 @@ function backToModel() {
   });
 }
 
-function arrive() {
+function arrive() {               // a short rise from the jeep to the overview; nothing flies low through the hills
   if (riders.aboard) toast(`You brought ${riders.aboard} ${riders.aboard > 1 ? "people" : "person"} up. Shukriya!`, 5);
-  state = "arrive"; hud.driving(false);
-  const fwd = new THREE.Vector3(-Math.sin(jeep.root.rotation.y), 0, -Math.cos(jeep.root.rotation.y));
-  const j = jeep.root.position.clone();
-  const axis = new THREE.Vector3(lb.x1 - lb.x0, 0, lb.z1 - lb.z0).normalize();
-  const overlook = lakeView().p;
-  arrived = true;
-  if (axis.dot(fwd) < 0) axis.negate();
-  const pts = [
-    camera.position.clone(),
-    j.clone().addScaledVector(fwd, 6).add(new THREE.Vector3(0, 7, 0)),
-    lakeC.clone().addScaledVector(axis, -260).setY(9),
-    lakeC.clone().addScaledVector(axis, 40).setY(6),
-    lakeC.clone().addScaledVector(axis, 320).add(new THREE.Vector3(-axis.z * 260, 140, axis.x * 260)),
-    lakeC.clone().addScaledVector(axis, -150).add(new THREE.Vector3(-axis.z * 420, 300, axis.x * 420)),
-    overlook,
-  ];
-  const curve = new THREE.CatmullRomCurve3(pts, false, "centripetal");
-  const looks = new THREE.CatmullRomCurve3([j.clone().setY(j.y + 1), lakeC.clone().addScaledVector(axis, -120), lakeC.clone().addScaledVector(axis, 200),
-    lakeC.clone().addScaledVector(axis, 420), lakeC.clone().addScaledVector(axis, 200), lakeC.clone(), lakeC.clone()], false, "centripetal");
-  fly = { t: 0, dur: 15, curve, looks, done: () => {
-    state = "explore"; orbit.enabled = true; orbit.target.copy(lakeC); setExploreOrbit();
-  } };
+  state = "arrive"; hud.driving(false); arrived = true;
+  flyTo({ dur: 5, to: () => lakeView(), lift: 0, done: () => { state = "explore"; orbit.enabled = true; orbit.target.copy(lakeC); setExploreOrbit(); } });
   setTimeout(() => { if (state === "arrive" || state === "explore") hud.arrive(F, { arrived: true }); }, 1800);
 }
 
@@ -455,7 +453,7 @@ function tick(dt) {
     let throttle = driving ? (kb("w") || kb("arrowup") ? 1 : input.throttle) : 0;
     let brake = driving ? (kb("s") || kb("arrowdown") ? 1 : input.brake) : 1;
     const steer = driving ? (kb("d") || kb("arrowright") ? 1 : 0) - (kb("a") || kb("arrowleft") ? 1 : 0) || input.steer : 0;
-    if (driving && input.cruise && !throttle && !brake) { throttle = Math.min(Math.max((6.2 - ride.v) * 0.7, 0), 1); brake = ride.v > 7.5 ? 0.3 : 0; }
+    if (driving && input.cruise && !throttle && !brake) { throttle = Math.min(Math.max((7.6 - ride.v) * 0.7, 0), 1); brake = ride.v > 8.8 ? 0.3 : 0; }
     if (state === "dive") { throttle = 0; brake = 0; }
     const reps = driving ? pace : 1;                // time-lapse: the same physics, stepped more often
     for (let i = 0; i < reps; i++) ride.update(dt, { throttle, brake, steer });
@@ -529,6 +527,7 @@ function tick(dt) {
       const p = fly.p0.clone().lerp(goal.p, e);
       p.y += Math.sin(Math.PI * e) * (fly.lift || 0) * (1 - e);
       camera.position.copy(p);
+      if (state !== "walkin" || t < 0.85) keepAbove(state === "walkin" || state === "dive" ? 2 + 40 * (1 - t) : 12);
       camera.lookAt(fly.l0.clone().lerp(goal.look, ease(Math.min(t * 1.3, 1))));
       camP.copy(p); camL.copy(goal.look);
     }
@@ -548,7 +547,7 @@ function tick(dt) {
     if (env === "real") { const dy = (site.heightAt(orbit.target.x, orbit.target.z) - orbit.target.y) * 0.1; orbit.target.y += dy; camera.position.y += dy; }
     orbit.update();
     if (env === "real") {
-      const g = site.heightAt(camera.position.x, camera.position.z) + 8;
+      const g = site.heightAt(camera.position.x, camera.position.z) + 25;
       if (camera.position.y < g) camera.position.y = g;
     }
   }
@@ -585,7 +584,7 @@ addEventListener("pointerdown", () => sound.ctx?.resume?.(), { once: true });
 addEventListener("keydown", () => sound.ctx?.resume?.(), { once: true });
 requestAnimationFrame(frame);
 // test hook: advance the simulation by fixed steps without drawing (software GL runs at under 1 fps)
-window.__diorama = { site, path, ride, camera, scene, keys, input, renderer, walker, loop, vps, rowRoute, state: () => state, start: startDrive, emit: (k, a) => hud.emit(k, a),
+window.__diorama = { site, path, ride, traffic, riders, camera, scene, keys, input, renderer, walker, loop, vps, rowRoute, state: () => state, start: startDrive, emit: (k, a) => hud.emit(k, a),
   advance(seconds, hold = []) { paused = true; hold.forEach((k) => keys.add(k)); for (let t = 0; t < seconds; t += 1 / 30) tick(1 / 30);
     hold.forEach((k) => keys.delete(k)); renderer.render(scene, camera); clock.getDelta(); return { s: ride.s, v: ride.v, state, lat: ride.lat }; },
   resume() { paused = false; clock.getDelta(); } };

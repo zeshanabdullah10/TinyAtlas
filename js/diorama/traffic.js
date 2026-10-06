@@ -115,8 +115,8 @@ const MODELS = {
 };
 
 const MIX = {
-  track: ["jeep", "jeep", "jeep", "pickup", "bike", "bike"],                          // a jeep track (Mahodand)
-  road: ["truck", "van", "van", "car", "car", "bike", "bike", "rickshaw", "jeep"],     // a valley road (Marghazar)
+  track: ["jeep", "bike", "pickup", "jeep"],                          // a jeep track (Mahodand)
+  road: ["truck", "bike", "van", "car", "rickshaw", "jeep"],     // a valley road (Marghazar)
 };
 
 const LANE = 1.15;          // a vehicle's distance left of the centre line, on its own side
@@ -142,6 +142,10 @@ export class Traffic {
     let hint = "", block = Infinity, crash = false;
     this.hornT -= dt;
     for (const c of this.cars) {
+      if (c.parked) {                                              // at the end of the road: waits on the verge until you are well away
+        if (Math.abs(me.s - c.s) > 120) { c.parked = false; c.dir = -c.dir; c.s = c.dir > 0 ? 4 : P.length - 4; c.lat = -c.dir * LANE; }
+        else { c.lat += (-c.dir * 3.6 - c.lat) * Math.min(1, dt * 1.5); this.pose(c); continue; }
+      }
       const ahead = (c.s - me.s) * c.dir;                          // > 0: the car is ahead of the player along its own travel
       const gapAlong = (c.s - me.s);                               // > 0: the car is further up the road than the player
       let want = c.vmax, lane = -c.dir * LANE;
@@ -158,11 +162,12 @@ export class Traffic {
       }
       // going your way, in front of you: you are held behind it until you sound the horn, then it pulls over
       if (driving && c.dir > 0 && gapAlong > 0 && gapAlong < 40) {
-        if (c.yield > 0) { lane = -1.55; want = Math.min(want, 2.5); hint = hint || "It is letting you pass: keep right (D)"; }
+        if (c.yield > 0) { lane = -(2.0 + c.width / 2); want = Math.abs(c.lat - lane) > 0.4 ? 1.5 : 0; hint = hint || "It is pulling over: drive past"; }
         else if (gapAlong < 18) hint = hint || "Slow traffic ahead: sound the horn (H) to pass";
         const clear = Math.abs(me.lat - c.lat) > (c.width + 1.55) / 2 - 0.1;     // side by side, by the vehicles' real widths
         if (!clear || c.yield <= 0) block = Math.min(block, c.s - (c.len + 3.5) / 2 - 0.8);
       }
+      if (c.yield > 0 && c.dir > 0) { lane = -(2.0 + c.width / 2); if (me.s - c.s < 15) want = Math.min(want, Math.abs(c.lat - lane) > 0.4 ? 1.5 : 0); }
       // the car ahead of this one in the same direction sets its pace (no ghosting through each other)
       for (const o of this.cars) if (o !== c && o.dir === c.dir) {
         const d = (o.s - c.s) * c.dir;
@@ -173,7 +178,8 @@ export class Traffic {
       c.v += Math.max(-4, Math.min(1.5, (want - c.v) * 1.5)) * dt;
       c.s += c.v * c.dir * dt;
       c.lat += (lane - c.lat) * Math.min(1, dt * 1.2);
-      c.yield = Math.max(0, c.yield - dt);
+      const rel = me.s - c.s;                                       // a car that pulled over waits until you are well past
+      if (c.yield > 0 && (rel > 15 || rel < -45)) c.yield = Math.max(0, c.yield - dt * (rel > 15 ? 6 : 1));
       // blind bends: a horn going in
       const q1 = P.at(c.s, this._p), tx = q1.tx, tz = q1.tz, q2 = P.at(c.s + 25 * c.dir, this._p);
       if (Math.abs(tx * q2.tz - tz * q2.tx) > 0.5 && Math.random() < dt * 0.6) this.honk(c, 1);
@@ -181,7 +187,7 @@ export class Traffic {
       if (c.s > P.length - 3 || c.s < 3) {
         const far = Math.abs(me.s - (c.dir > 0 ? 3 : P.length - 3)) > 120;
         if (far) { c.dir = -c.dir; c.s = c.dir > 0 ? 4 : P.length - 4; c.lat = -c.dir * LANE; }
-        else { c.s = Math.min(Math.max(c.s, 3), P.length - 3); c.v = 0; }
+        else { c.s = Math.min(Math.max(c.s, 3), P.length - 3); c.v = 0; c.parked = true; }   // pulls onto the verge, out of the way
       }
       this.pose(c);
     }
@@ -194,7 +200,7 @@ export class Traffic {
   /** The player sounds the horn: a slower car ahead pulls over. */
   horn(ride) {
     this.sound?.horn?.("car");
-    for (const c of this.cars) if (c.dir > 0 && c.s > ride.s && c.s - ride.s < 40) c.yield = 6;
+    for (const c of this.cars) if (c.dir > 0 && c.s > ride.s && c.s - ride.s < 40) c.yield = 12;   // pulls onto the verge and waits
   }
   honk(c, dt) {
     if (c.honk > 0) { c.honk -= dt; return; }
@@ -213,7 +219,7 @@ export class Riders {
   constructor(scene, path, jeep) {
     this.path = path; this.jeep = jeep; this.waiting = []; this.aboard = 0; this.t = 0;
     const shirts = [mats.shalwar, mats.cloth, M(0x6b4f2a), M(0x2f5d50)];
-    [0.3, 0.55, 0.8].forEach((f, i) => {
+    [0.4, 0.75].forEach((f, i) => {
       const s = path.length * f, g = new THREE.Group(), body = [];
       person(body, 0, 0, 0, shirts[i % 4]);
       g.add(build(body));
