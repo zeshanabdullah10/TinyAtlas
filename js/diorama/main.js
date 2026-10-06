@@ -57,7 +57,7 @@ scene.add(streams(site));
 const path = new Path(meta.drive, Y0);
 scene.add(driveRibbon(path), ...trackRibbons(site, path), roadStones(path));
 const plants = flora(site, path, tier); scene.add(plants);
-const lm = meta.landmark ? palace(site, meta.landmark, path.at(path.length)) : null; if (lm) scene.add(lm);
+const lm = meta.landmark ? palace(site, meta.landmark, path.at(path.length), meta.landmark.model ? base + meta.landmark.model : null) : null; if (lm) scene.add(lm);
 const jeep = jeepModel(); scene.add(jeep.root);
 const ride = new Ride(path, jeep);
 const dust = new Dust(scene, tier === "high" ? 800 : 400);

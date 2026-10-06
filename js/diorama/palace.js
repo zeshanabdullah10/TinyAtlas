@@ -3,6 +3,7 @@
 // steps; long one-storey cream wings with verandas at the sides; a lawn in front with hedges, flower beds, marble
 // table-and-bench sets on brick pads and a metal arch; tall pines and broadleaf trees around; the flag on the ridge.
 import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...o });
 const white = M(0xf4f1ea, { roughness: 0.45 }), cream = M(0xeee4c8), dark = M(0x2e2a26, { roughness: 0.9 }),
@@ -90,14 +91,49 @@ function tree(g, x, z, h, kind, k) {
   }
 }
 
-export function palace(site, lm, face) {
+/** Drop the dark ground scraps TRELLIS bakes in from the photos' backgrounds: triangles in the bottom 4% of the height
+ *  whose texture is dark. */
+function trimBase(geo) {
+  const pos = geo.attributes.position, idx = geo.index;
+  if (!idx) return;
+  geo.computeBoundingBox();
+  const y0 = geo.boundingBox.min.y, cut = y0 + (geo.boundingBox.max.y - y0) * 0.04, keep = [];
+  for (let i = 0; i < idx.count; i += 3) {
+    const a = idx.getX(i), b = idx.getX(i + 1), c = idx.getX(i + 2);
+    if (pos.getY(a) < cut && pos.getY(b) < cut && pos.getY(c) < cut) continue;
+    keep.push(a, b, c);
+  }
+  geo.setIndex(keep);
+}
+
+/** The textured TRELLIS model from the Atlas (made from three CC BY-SA Commons photos), scaled to a 24 m front.
+ *  Falls back to the drawn house if it does not load. */
+function model(g, url) {
+  new GLTFLoader().load(url, (gltf) => {
+    const m = gltf.scene;
+    m.traverse((o) => { if (o.isMesh) trimBase(o.geometry); });
+    const b = new THREE.Box3().setFromObject(m), sz = b.getSize(new THREE.Vector3());
+    const k = 28 / Math.max(sz.x, sz.z);
+    m.scale.setScalar(k);
+    m.position.set(-(b.min.x + sz.x / 2) * k, -b.min.y * k + 0.6, -(b.min.z + sz.z / 2) * k - 1);
+    m.traverse((o) => {
+      if (!o.isMesh) return;
+      o.castShadow = o.receiveShadow = true;
+      if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals();   // the TRELLIS export carries no normals
+      for (const mt of [].concat(o.material)) { mt.metalness = 0; mt.side = THREE.DoubleSide; if (mt.map) { mt.emissive.set(0xffffff); mt.emissiveMap = mt.map; mt.emissiveIntensity = 0.28; } mt.roughness = Math.min(0.95, Math.max(mt.roughness ?? 0.85, 0.55)); }
+    });
+    g.add(m); 
+  }, undefined, (e) => { house(g); });
+}
+
+export function palace(site, lm, face, url) {
   const y = site.heightAt(lm.x, lm.z);
   const g = new THREE.Group();
   g.position.set(lm.x, y - 0.05, lm.z);
   g.rotation.y = Math.atan2(face.x - lm.x, face.z - lm.z);        // the lawn and the front (+z) face the road
   const lawn = new THREE.Mesh(new THREE.BoxGeometry(76, 1.2, 74), lawnM);
   lawn.position.set(0, -0.6, 14); lawn.receiveShadow = true; g.add(lawn);
-  house(g);
+  if (url) model(g, url); else house(g);
   wing(g, 34, 20, 22, Math.PI);                                    // the long wing on the right of the lawn
   wing(g, 18, -19, 10, 0);                                         // and a shorter one on the left
   // hedges, beds, the path from the steps
