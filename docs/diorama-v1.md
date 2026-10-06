@@ -126,6 +126,16 @@ Inputs: `Copernicus_DSM_COG_10_N34_00_E072_00_DEM.tif` (the build reads the tile
 N33E072, and an OSM extract from the main API (`/api/0.6/map?bbox=72.30,34.63,72.38,34.69`, converted to Overpass
 `out geom` JSON).
 
+### Driving (both sites)
+The drive is the last kilometre of the track (`drive_km` in `SITES`; `--shorten-only` trims a built site). Traffic is
+illustrative (`web/js/diorama/traffic.js`): Willys jeeps, a Hilux and motorbikes on the Mahodand track; painted
+Bedford trucks, Suzuki vans, Mehran cars, CD70 motorbikes, a Qingqi rickshaw and a jeep on the Marghazar road. Road
+rules: keep left; oncoming vehicles slow and squeeze past, and stop with the horn if you are on their side (wait and
+they creep by); a slower vehicle ahead holds you until you sound the horn (H), then pulls left so you can pass on the
+right; horns at blind bends. 4×4 low (G) is needed on pitches over 12%. Three people wait on the left verge; stop
+beside them and they ride in the back. Photo (P) saves a postcard of the view. On phones the dash is a small pill,
+options sit in one row (More opens the rest), and the chase camera sits further back with a wider view.
+
 ## Known limits (v1)
 - The lake outline is one Sentinel-2 scene (21 Sep 2025) at 10 m; the level changes through the season.
 - Shadows cover the area around the jeep while driving and around the view in the overview, not the whole valley.

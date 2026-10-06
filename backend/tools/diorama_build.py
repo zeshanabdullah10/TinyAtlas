@@ -41,6 +41,7 @@ SITES = {
         "drive_start": (35.6773, 72.6784),
         "track_ways": [345805207, 491297270, 1156049685, 1156049686, 1156052434, 1156052435],
         "far_bbox": (35.600, 72.545, 35.796, 72.779),     # the horizon seen from the drive, coarse
+        "drive_km": 1.0,                                # the page drives the last kilometre of the track
     },
     "white-palace": {
         "title": "White Palace",
@@ -54,6 +55,7 @@ SITES = {
         "far_bbox": (34.575, 72.230, 34.755, 72.460),
         "osm_use": "the Marghazar road and streams",
         "road": "Marghazar road",
+        "drive_km": 1.0,
     },
 }
 COVER = {10: 1, 20: 7, 30: 2, 40: 2, 50: 3, 60: 3, 70: 4, 80: 5, 90: 2, 95: 1, 100: 6}
@@ -304,12 +306,19 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         if t.get("waterway") in ("river", "stream"):
             p = [to_local(g, q_["lat"], q_["lon"]) for q_ in w["geometry"]]
             p = [(x, z) for x, z in p if abs(x) < g["W"] / 2 and abs(z) < g["H"] / 2]
-            if "landmark" in site:                 # streams across the levelled grounds are dropped there (they would float)
+            parts = [resample(p, 10.0)] if len(p) > 2 else []
+            if "landmark" in site:                 # the river is cut where it meets the levelled grounds, never bridged across them
                 lx, lz = to_local(g, *site["landmark"]["point"])
-                p = [(x, z) for x, z in p if math.hypot(x - lx, z - lz) > 90]
-            if len(p) > 2:
-                streams.append({"kind": t["waterway"], "name": t.get("name"),
-                                "pts": [[round(x, 1), round(z, 1)] for x, z in resample(p, 10.0)]})
+                cut, run = [], []
+                for x, z in parts[0] if parts else []:
+                    if math.hypot(x - lx, z - lz) > 110:
+                        run.append((x, z))
+                    elif run:
+                        cut.append(run); run = []
+                parts = cut + ([run] if run else [])
+            for q in parts:
+                if len(q) > 2:
+                    streams.append({"kind": t["waterway"], "name": t.get("name"), "pts": [[round(x, 1), round(z, 1)] for x, z in q]})
 
     seglen = [math.dist(a, b) for a, b in zip(drive, drive[1:])]
     climb = float(np.sum(np.clip(np.diff(prof), 0, None)))
@@ -361,6 +370,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
             *(["The palace grounds are levelled to a terrace 58 m around the place point and kept as lawn."] if "landmark" in site else []),
             *(["The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 24 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."] if "landmark" in site else []),
             "Season colours, snow, ice and dawn mist are illustrative.",
+            "Traffic on the drive is illustrative: the vehicle kinds are those seen on Swat roads (Willys jeeps, Hilux, Suzuki vans, Mehran cars, CD70 motorbikes, Qingqi rickshaws, painted trucks); their number and movement are not counted.",
         ],
         "sources": ([{"name": "Copernicus Sentinel-2 L2A", "use": f"the lake outline (NDWI, scene {lake_source.split()[-1]})",
                       "licence": "Contains modified Copernicus Sentinel data 2025", "url": "https://registry.opendata.aws/sentinel-2-l2a-cogs/"}] if s2 else []) + [
@@ -375,8 +385,28 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
              "url": "https://www.openstreetmap.org/copyright"},
         ],
     }
+    if site.get("drive_km"):
+        meta = shorten(meta, site["drive_km"])
+        facts = meta["facts"]
     (out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(json.dumps(facts, indent=1), g["cols"], g["rows"], len(drive))
+
+
+def shorten(meta, km):
+    """Keep the last `km` of the drive (the climb into the site), and measure its facts again from the same profile."""
+    d = meta["drive"]
+    acc, i = 0.0, len(d) - 1
+    while i > 0 and acc < km * 1000:
+        acc += math.dist(d[i][:2], d[i - 1][:2]); i -= 1
+    d = meta["drive"] = d[i:]
+    seg = [math.dist(a[:2], b[:2]) for a, b in zip(d, d[1:])]
+    prof = np.array([p[2] for p in d])
+    gsm = np.convolve(np.diff(prof) / np.maximum(seg, 0.1), np.ones(15) / 15, "same")
+    F = meta["facts"]
+    F.update(drive_km=round(sum(seg) / 1000, 2), drive_start_m=round(float(prof[0])), drive_end_m=round(float(prof[-1])),
+             drive_climb_m=round(float(np.sum(np.clip(np.diff(prof), 0, None)))), drive_max_grade_pct=round(float(np.max(np.abs(gsm))) * 100),
+             drive_minutes_at_9kmh=round(sum(seg) / 1000 / 9 * 60))
+    return meta
 
 
 def pca(xz):
@@ -388,9 +418,14 @@ def pca(xz):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("site", choices=sorted(SITES))
-    ap.add_argument("--dem", required=True)
-    ap.add_argument("--worldcover", required=True)
-    ap.add_argument("--osm", required=True)
+    ap.add_argument("--dem")
+    ap.add_argument("--worldcover")
+    ap.add_argument("--osm")
+    ap.add_argument("--shorten-only", action="store_true", help="trim an existing meta.json's drive to the site's drive_km")
     ap.add_argument("--s2", help="Sentinel-2 L2A COG item base URL (sentinel-cogs bucket) for the lake outline")
     a = ap.parse_args()
+    if a.shorten_only:
+        f = ROOT / "web" / "data" / "diorama" / a.site / "meta.json"
+        f.write_text(json.dumps(shorten(json.loads(f.read_text(encoding="utf-8")), SITES[a.site]["drive_km"]), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        raise SystemExit
     build(a.site, a.dem, a.worldcover, a.osm, a.s2)

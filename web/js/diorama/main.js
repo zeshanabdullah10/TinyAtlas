@@ -17,6 +17,7 @@ import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, wate
 import { Life, boat as boatModel, horse as horseModel } from "./life.js";
 import { Weather } from "./weather.js";
 import { palace } from "./palace.js";
+import { Traffic, Riders } from "./traffic.js";
 import { SEASONS, seasonU, mist } from "./season.js";
 
 const qs = new URLSearchParams(location.search);
@@ -60,8 +61,26 @@ const plants = flora(site, path, tier); scene.add(plants);
 const lm = meta.landmark ? palace(site, meta.landmark, path.at(path.length), meta.landmark.model ? base + meta.landmark.model : null) : null; if (lm) scene.add(lm);
 const jeep = jeepModel(); scene.add(jeep.root);
 const ride = new Ride(path, jeep);
+const traffic = new Traffic(scene, path, meta.lake ? "track" : "road", null);   // illustrative traffic, road rules on the drive
 const dust = new Dust(scene, tier === "high" ? 800 : 400);
 const sound = new Sound();
+traffic.sound = sound;
+const riders = new Riders(scene, path, jeep);
+let toastT = 0;
+function toast(text, secs = 4) { const el = document.getElementById("toast"); el.textContent = text; el.hidden = false; toastT = secs; }
+function setLow(on) { ride.low = on; document.getElementById("btn-low").setAttribute("aria-pressed", on); }
+/** A postcard: the current view with the place, height and date written on it, saved as a PNG. */
+function photo() {
+  renderer.render(scene, camera);
+  const src = renderer.domElement, c = document.createElement("canvas"); c.width = src.width; c.height = src.height;
+  const x = c.getContext("2d"); x.drawImage(src, 0, 0);
+  const h = Math.round(c.height * 0.11); x.fillStyle = "rgba(20,18,15,.72)"; x.fillRect(0, c.height - h, c.width, h);
+  x.fillStyle = "#f3e9d2"; x.font = `600 ${Math.round(h * 0.38)}px Georgia, serif`; x.fillText(meta.title, h * 0.4, c.height - h * 0.52);
+  x.font = `${Math.round(h * 0.22)}px system-ui, sans-serif`; x.fillStyle = "#e9a23b";
+  x.fillText(`${meta.subtitle} · ${Math.round((ride.alt ?? 0) + Y0).toLocaleString("en")} m · ${new Date().toLocaleDateString("en-GB")} · Tiny Atlas`, h * 0.4, c.height - h * 0.18);
+  const a = document.createElement("a"); a.download = `${SITE}-postcard.png`; a.href = c.toDataURL("image/png"); a.click();
+  toast("Postcard saved", 2.5);
+}
 ride.update(0.016, { throttle: 0, brake: 0, steer: 0 });
 
 // the place the visit is about: the lake, or (on a site without one) the arrival viewpoint
@@ -197,6 +216,9 @@ addEventListener("keydown", (e) => {
   if (state === "drive") {
     if (e.key === " ") { input.cruise = !input.cruise; hud.cruise(input.cruise); e.preventDefault(); }
     if (e.key === "c" || e.key === "C") cycleCam();
+    if (e.key === "h" || e.key === "H") traffic.horn(ride);
+    if (e.key === "g" || e.key === "G") setLow(!ride.low);
+    if (e.key === "p" || e.key === "P") photo();
     if (e.key === "t" || e.key === "T") hud.emit("pace");
     if (e.key.startsWith("Arrow")) e.preventDefault();
   }
@@ -275,6 +297,11 @@ hud.on("season", () => {
   season = (season + 1) % SEASONS.length;
   hud.season(SEASONS[season].name, SEASONS[season].note);
 });
+hud.on("low", () => setLow(!ride.low));
+hud.on("photo", photo);
+hud.on("more", () => { const on = document.body.classList.toggle("more"); document.querySelector('[data-act="more"]').setAttribute("aria-pressed", on); });
+hud.on("horn", () => { sound.start(); traffic.horn(ride); });
+document.getElementById("p-horn")?.addEventListener("pointerdown", (e) => { e.preventDefault(); sound.start(); traffic.horn(ride); });
 hud.on("skip", () => { if (state === "drive") ride.s = path.length - 40; });
 
 let arrived = false;
@@ -330,6 +357,7 @@ function backToModel() {
 }
 
 function arrive() {
+  if (riders.aboard) toast(`You brought ${riders.aboard} ${riders.aboard > 1 ? "people" : "person"} up. Shukriya!`, 5);
   state = "arrive"; hud.driving(false);
   const fwd = new THREE.Vector3(-Math.sin(jeep.root.rotation.y), 0, -Math.cos(jeep.root.rotation.y));
   const j = jeep.root.position.clone();
@@ -359,9 +387,10 @@ function arrive() {
 const camP = new THREE.Vector3(), camL = new THREE.Vector3(), tmpV = new THREE.Vector3(), tmpL = new THREE.Vector3();
 function chasePose(k) {
   const r = jeep.root, fwd = new THREE.Vector3(-Math.sin(r.rotation.y), 0, -Math.cos(r.rotation.y));
-  const p = r.position.clone().addScaledVector(fwd, -9.5 * k).add(new THREE.Vector3(0, 3.8, 0));
-  p.y = Math.max(p.y, site.heightAt(p.x, p.z) + 1.6);
-  return { p, look: r.position.clone().addScaledVector(fwd, 5).add(new THREE.Vector3(0, 1.3, 0)) };
+  const tall = innerHeight > innerWidth;                 // a phone held upright sees less sideways: pull back further
+  const p = r.position.clone().addScaledVector(fwd, (tall ? -17 : -14) * k).add(new THREE.Vector3(0, tall ? 7.5 : 6.2, 0));
+  p.y = Math.max(p.y, site.heightAt(p.x, p.z) + 2.4);
+  return { p, look: r.position.clone().addScaledVector(fwd, 14).add(new THREE.Vector3(0, 0.8, 0)) };
 }
 let side = null;
 function driveCamera(dt) {
@@ -388,7 +417,7 @@ function driveCamera(dt) {
     camera.lookAt(tmpL.copy(r.position).setY(r.position.y + 1));
     camP.copy(camera.position); camL.copy(tmpL);
   }
-  const fov = 50 + ride.v * 0.6;
+  const fov = (innerHeight > innerWidth ? 62 : 52) + ride.v * 0.6;
   if (Math.abs(camera.fov - fov) > 0.05) { camera.fov += (fov - camera.fov) * Math.min(1, dt * 2); camera.updateProjectionMatrix(); }
 }
 
@@ -435,15 +464,23 @@ function tick(dt) {
     if (ride.v > 0.6) for (const c of ride.rearContacts(contacts)) dust.emit(c, ride.v, Math.random() < ride.v * dt * 7 ? 1 : 0);
     sound.update(dt, { engine: 1, speed: Math.max(ride.v, 0), throttle, rough: Math.min(ride.jolt * 2, 1), wind: 0.4,
       water: Math.max(0, 1 - camera.position.distanceTo(lakeC) / 700) });
+    let tip = traffic.update(dt * reps, ride, driving);
+    const boarded = riders.update(dt, ride, driving);
+    if (boarded) { toast(boarded); document.body.classList.add("has-riders"); document.getElementById("g-riders").textContent = riders.aboard; }
+    if (!tip && driving && ride.lugging && ride.v < 3.5) tip = "Steep pitch: shift to 4×4 low (G)";
+    if (!tip && driving && riders.near(ride)) tip = "Someone is waving: stop beside them to give a ride";
+    const rt = document.getElementById("roadtip"); if (rt.textContent !== tip) rt.textContent = tip; rt.hidden = !tip || !driving;
     hud.update(ride, Y0, path.length);
     if (driving) {
       driveCamera(dt);
       if (ride.done) arrive();
     }
   } else {
+    traffic.update(dt, ride, false);
     sound.update(dt, { engine: 0, speed: 0, throttle: 0, rough: 0, wind: env === "real" ? 0.6 : 0.15,
       water: env === "real" ? Math.max(sound.lake || 0, 1 - camera.position.distanceTo(lakeC) / 900) : 0 });
   }
+  if (toastT > 0 && (toastT -= dt) <= 0) document.getElementById("toast").hidden = true;
   dust.update(dt, wind);
   life.update(dt, elapsed, wind);
   // seasons ease in; mist follows dawn

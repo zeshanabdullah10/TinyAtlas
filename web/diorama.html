@@ -41,28 +41,34 @@
 
   <section id="hud" class="hud" hidden aria-live="off">
     <div class="gauge big"><b id="g-speed">0</b><small>km/h</small></div>
-    <div class="gauge"><b id="g-alt">0</b><small>m altitude</small></div>
+    <div class="gauge alt"><b id="g-alt">0</b><small>m altitude</small></div>
     <div class="gauge"><b id="g-left">0</b><small id="g-left-l">km to the lake</small></div>
     <div class="gauge"><b id="g-grade">0</b><small>% grade</small></div>
+    <div class="gauge rides"><b id="g-riders">0</b><small>passengers</small></div>
     <svg id="prof" class="prof" aria-hidden="true"><polygon id="prof-fill"/><polyline id="prof-line"/><circle id="prof-dot" r="4"/></svg>
   </section>
 
   <nav class="dock" aria-label="Diorama controls">
-    <button class="chip drive-only" data-act="cam" title="Camera (C)">Camera: <span id="cam-name">Chase</span></button>
-    <button class="chip drive-only" id="btn-pace" data-act="pace" aria-pressed="false" title="Time-lapse (T): the jeep's speed stays real, time runs faster">Pace <span id="pace-x">1×</span></button>
-    <button class="chip drive-only" id="btn-cruise" data-act="cruise" aria-pressed="false" title="Cruise (Space)">Cruise</button>
-    <button class="chip drive-only" data-act="skip" title="Skip to the end of the drive">Skip ahead</button>
-    <button class="chip" id="btn-sound" data-act="sound" aria-pressed="false">Sound</button>
-    <button class="chip" id="btn-places" type="button" aria-controls="places">Places</button>
-    <button class="chip" id="btn-season" data-act="season" title="Season (illustrative)">Season: <span id="season-name">Summer</span></button>
-    <label class="chip sun"><span>Sun</span><input id="sun" type="range" min="5.2" max="19.6" step="0.05" value="16.9" aria-label="Time of day"><output id="sun-out"></output></label>
+    <button class="chip drive-only extra" data-act="cam" title="Camera (C)">Camera: <span id="cam-name">Chase</span></button>
+    <button class="chip drive-only extra" id="btn-pace" data-act="pace" aria-pressed="false" title="Time-lapse (T): the jeep's speed stays real, time runs faster">Pace <span id="pace-x">1×</span></button>
+    <button class="chip drive-only extra" id="btn-cruise" data-act="cruise" aria-pressed="false" title="Cruise (Space)">Cruise</button>
+    <button class="chip drive-only extra" data-act="skip" title="Skip to the end of the drive">Skip ahead</button>
+    <button class="chip drive-only" id="btn-low" data-act="low" aria-pressed="false" title="4×4 low (G): crawl up the steep pitches with more pull">4×4 low</button>
+    <button class="chip drive-only" data-act="photo" title="Photo (P): save a postcard of this view">Photo</button>
+    <button class="chip drive-only more-btn" data-act="more" aria-pressed="false" title="More options">More</button>
+    <button class="chip extra" id="btn-sound" data-act="sound" aria-pressed="false">Sound</button>
+    <button class="chip extra" id="btn-places" type="button" aria-controls="places">Places</button>
+    <button class="chip extra" id="btn-season" data-act="season" title="Season (illustrative)">Season: <span id="season-name">Summer</span></button>
+    <label class="chip sun extra"><span>Sun</span><input id="sun" type="range" min="5.2" max="19.6" step="0.05" value="16.9" aria-label="Time of day"><output id="sun-out"></output></label>
     <button class="chip not-intro" data-act="model">Whole model</button>
   </nav>
 
-  <p class="hint drive-only">W / ↑ gas · S / ↓ brake · A D steer · C camera · Space cruise · T pace</p>
+  <p class="roadtip drive-only" id="roadtip" hidden></p>
+  <p class="toast" id="toast" hidden role="status"></p>
+  <p class="hint drive-only">W / ↑ gas · S / ↓ brake · A D steer · H horn · G 4×4 low · P photo · keep left · C camera · Space cruise</p>
   <div class="pedals drive-only" aria-hidden="true">
     <div class="steer"><button id="p-left" type="button">◀</button><button id="p-right" type="button">▶</button></div>
-    <div class="feet"><button id="p-brake" type="button">Brake</button><button id="p-gas" type="button">Gas</button></div>
+    <div class="feet"><div class="stack"><button id="p-horn" type="button" class="small">Horn</button><button id="p-brake" type="button">Brake</button></div><button id="p-gas" type="button">Gas</button></div>
   </div>
 
   <section id="arrive" class="card arrive" hidden>

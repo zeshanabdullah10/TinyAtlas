@@ -43,6 +43,21 @@ export class Sound {
     g.gain.setValueAtTime(Math.min(strength, 1) * 0.55, C.currentTime); g.gain.exponentialRampToValueAtTime(0.001, C.currentTime + 0.22);
     s.connect(f).connect(g).connect(this.out); s.start(C.currentTime, Math.random()); s.stop(C.currentTime + 0.25);
   }
+  /** A horn: a truck's two-tone "paa-paaa", a car's double beep, a motorbike's thin peep. */
+  horn(kind = "car") {
+    if (!this.on) return;
+    const C = this.ctx, t0 = C.currentTime;
+    const spec = { truck: [[196, 247], [[0, 0.35], [0.45, 1.1]], 0.16], car: [[415, 523], [[0, 0.16], [0.24, 0.42]], 0.1], bike: [[740, 880], [[0, 0.12], [0.18, 0.3]], 0.06] }[kind] || [[415, 523], [[0, 0.2]], 0.1];
+    const [freqs, beats, vol] = spec;
+    for (const [a, b] of beats) for (const f of freqs) {
+      const o = C.createOscillator(), g = C.createGain(), lp = C.createBiquadFilter();
+      o.type = "square"; o.frequency.value = f * (1 + (Math.random() - 0.5) * 0.01);
+      lp.type = "lowpass"; lp.frequency.value = 2200;
+      g.gain.setValueAtTime(0.0001, t0 + a); g.gain.linearRampToValueAtTime(vol, t0 + a + 0.02);
+      g.gain.setValueAtTime(vol, t0 + b - 0.03); g.gain.linearRampToValueAtTime(0.0001, t0 + b);
+      o.connect(lp).connect(g).connect(this.out); o.start(t0 + a); o.stop(t0 + b + 0.05);
+    }
+  }
   /** one footstep on grass and gravel */
   step(loud = 1) {
     if (!this.on) return;
