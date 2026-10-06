@@ -112,6 +112,19 @@ water, boats and life, and the walk is a 150 m circle around the point. For a la
 URL>` traces the outline from a recent cloud-free scene (NDWI > 0.05, thin channels opened away) instead of
 WorldCover 2021. Mahodand uses scene S2C_43SBV_20250921_0_L2A: the lake is a 1.4 km ribbon, 0.08 km².
 
+### White Palace (`?site=white-palace`)
+The second site has no lake. The drive is the last 3 km of the OSM road up the Marghazar valley to the palace gate
+(the build starts it where the road enters the model). OSM maps no footprint for the palace, so `meta.landmark` places
+an illustrative model (`web/js/diorama/palace.js`) laid out after visitors' photos: a white house with a gabled upper
+floor over a columned veranda, cream one-storey wings, a lawn with marble table sets, hedges, a metal arch, trees and
+the flag. The grounds are levelled to a terrace 58 m around the place point (listed in `meta.edits`), and the walk is
+a 52 m circle around the house with four viewpoints. `practical.json` quotes Wikipedia and The News. No Commons photos
+yet (the API was rate-limited when it was built).
+
+Inputs: `Copernicus_DSM_COG_10_N34_00_E072_00_DEM.tif` (the build reads the tile corner from the file name), WorldCover
+N33E072, and an OSM extract from the main API (`/api/0.6/map?bbox=72.30,34.63,72.38,34.69`, converted to Overpass
+`out geom` JSON).
+
 ## Known limits (v1)
 - The lake outline is one Sentinel-2 scene (21 Sep 2025) at 10 m; the level changes through the season.
 - Shadows cover the area around the jeep while driving and around the view in the overview, not the whole valley.

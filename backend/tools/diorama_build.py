@@ -42,6 +42,19 @@ SITES = {
         "track_ways": [345805207, 491297270, 1156049685, 1156049686, 1156052434, 1156052435],
         "far_bbox": (35.600, 72.545, 35.796, 72.779),     # the horizon seen from the drive, coarse
     },
+    "white-palace": {
+        "title": "White Palace",
+        "subtitle": "Marghazar, Swat",
+        "bbox": (34.641, 72.318, 34.687, 72.372),
+        "arrival": {"name": "White Palace", "point": (34.66328, 72.34486)},   # the place point in regions.py
+        "landmark": {"kind": "palace", "name": "White Palace", "point": (34.66328, 72.34486)},
+        "drive_ways": [445432654, 1467739884],          # OSM road up the Marghazar valley from Saidu Sharif, past the palace gate
+        "drive_start": (34.687, 72.3456),
+        "track_ways": [445432654, 1467739884],
+        "far_bbox": (34.575, 72.230, 34.755, 72.460),
+        "osm_use": "the Marghazar road and streams",
+        "road": "Marghazar road",
+    },
 }
 COVER = {10: 1, 20: 7, 30: 2, 40: 2, 50: 3, 60: 3, 70: 4, 80: 5, 90: 2, 95: 1, 100: 6}
 
@@ -169,8 +182,10 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     out = ROOT / "web" / "data" / "diorama" / name
     out.mkdir(parents=True, exist_ok=True)
 
-    dem = tifffile.imread(dem_path)                      # 3600x3600, top-left 36N 72E for the N35E072 tile
-    dem_top, dem_left = 36.0, 72.0
+    dem = tifffile.imread(dem_path)                      # 3600x3600, 1 degree tile; top-left from the name (N35_00_E072 -> 36N 72E)
+    import re
+    tn = re.search(r"N(\d+)_00_E(\d+)", Path(dem_path).name)
+    dem_top, dem_left = (int(tn[1]) + 1.0, float(tn[2])) if tn else (36.0, 72.0)
     h = sample_tile(dem, dem_top, dem_left, 1 / 3600, g, 1)
     wc = tifffile.TiffFile(wc_path).pages[0].asarray()  # 36000x36000, top-left 36N 72E for N33E072
     cls = sample_tile(wc, 36.0, 72.0, 1 / 12000, g, 0)
@@ -218,6 +233,9 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     # The drive: OSM jeep track to the first point within 40 m of the lake, resampled every 4 m.
     line = chain(ways, site["drive_ways"], site["drive_start"])
     pts = resample([to_local(g, la, lo) for la, lo in line], 4.0)
+    inbox = [abs(x) < g["W"] / 2 - 60 and abs(z) < g["H"] / 2 - 60 for x, z in pts]
+    first = 0 if inbox[0] else next((i for i in range(len(pts)) if all(inbox[i:i + 200])), 0)
+    pts = pts[first:]                              # the drive starts where the road enters the model for good
     lr, lc = np.nonzero(lake)
     lake_xz = np.stack([lc * CELL - g["W"] / 2, lr * CELL - g["H"] / 2], 1)
     end = len(pts) - 1
@@ -234,6 +252,17 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     arr = np.array(drive)
     sm = np.array([arr[max(0, i - 3): i + 4].mean(0) for i in range(len(arr))])
     drive = [tuple(p) for p in sm]
+    # A landmark stands on a level terrace of lawn (its grounds); trees are kept off it.
+    if "landmark" in site:
+        lx, lz = to_local(g, *site["landmark"]["point"])
+        rr_, cc_ = np.mgrid[0:g["rows"], 0:g["cols"]]
+        dl = np.hypot(cc_ * CELL - g["W"] / 2 - lx, rr_ * CELL - g["H"] / 2 - lz)
+        ly = float(bilerp(h, g, lx, lz))
+        t = np.clip((dl - 58) / 25, 0, 1)
+        t = t * t * (3 - 2 * t)
+        h = np.where(dl < 83, ly * (1 - t) + h * t, h)
+        cover[(dl < 70) & (cover != 5)] = 2
+
     # Road profile: DEM along the track, smoothed over ~80 m, then a bench cut so the track sits on it.
     prof = np.array([bilerp(h, g, x, z) for x, z in drive])
     k = 10
@@ -305,13 +334,15 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         "arrival_m": round(arrival["y"]),
     }
     meta = {
-        "version": 1, "site": name, "title": site["title"], "subtitle": site["subtitle"],
+        "version": 1, "site": name, "title": site["title"], "subtitle": site["subtitle"], "road": site.get("road", "Mahodand Lake Road"),
         "grid": {"cols": g["cols"], "rows": g["rows"], "cell": CELL, "width": g["W"], "height": g["H"],
                  "hmin": hmin, "hmax": float(h.max()), "bbox": site["bbox"]},
         "far": {"cols": fg["cols"], "rows": fg["rows"], "cell": FAR_CELL, "x0": round(fx0, 1), "z0": round(fz0, 1),
                 "hmin": fmin, "scale": 0.5},
         "lake": {"level": round(level, 1), "seed": [round(sx, 1), round(sz, 1)], "outline": lake_source} if has_lake else None,
         "arrival": arrival,
+        "landmark": ({**{k: v for k, v in site["landmark"].items() if k != "point"}, "x": round(to_local(g, *site["landmark"]["point"])[0], 1),
+                      "z": round(to_local(g, *site["landmark"]["point"])[1], 1)} if "landmark" in site else None),
         "drive": [[round(x, 1), round(z, 1), round(float(y), 2)] for (x, z), y in zip(drive, prof)],
         "track": track,
         "streams": streams,
@@ -324,6 +355,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
             *(["At the lake, the positions of the boats, tents, tea stalls and horses are illustrative (boating is described by the sources and seen in Commons photos).",
                "The shore path is traced 20 m outside the lake outline; it is not a mapped trail."] if has_lake else
               ["The walking loop is a 150 m circle around the arrival point; it is not a mapped trail."]),
+            *(["The palace grounds are levelled to a terrace 58 m around the place point and kept as lawn."] if "landmark" in site else []),
+            *(["The palace model is illustrative: a white marble block, its shape taken from photos, not a survey (OSM maps no footprint)."] if "landmark" in site else []),
             "Season colours, snow, ice and dawn mist are illustrative.",
         ],
         "sources": ([{"name": "Copernicus Sentinel-2 L2A", "use": f"the lake outline (NDWI, scene {lake_source.split()[-1]})",
@@ -332,7 +365,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
              "url": "https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model"},
             {"name": "ESA WorldCover 10 m 2021 v200", "use": "trees, meadow, rock, snow" + ("" if s2 else ", the lake outline"), "licence": "CC BY 4.0, © ESA WorldCover project 2021",
              "url": "https://esa-worldcover.org"},
-            {"name": "OpenStreetMap", "use": "the jeep track (Mahodand Lake Road) and streams", "licence": "ODbL, © OpenStreetMap contributors",
+            {"name": "OpenStreetMap", "use": site.get("osm_use", "the jeep track (Mahodand Lake Road) and streams"), "licence": "ODbL, © OpenStreetMap contributors",
              "url": "https://www.openstreetmap.org/copyright"},
         ],
     }
