@@ -1,0 +1,30 @@
+{
+  "checked": "2026-10-08",
+  "note": "Only numbers confirmed on an official or primary page. Numbers not confirmed are left out. Check before travel.",
+  "numbers": [
+    {
+      "name": "Rescue 1122 (KP)",
+      "number": "1122",
+      "covers": "Ambulance, fire, rescue and accidents in Khyber Pakhtunkhwa",
+      "source": "Rescue 1122 KP, FAQ page",
+      "url": "https://rescuekp.gov.pk/site/faq",
+      "checked": "2026-10-08"
+    },
+    {
+      "name": "National Highway and Motorway Police helpline",
+      "number": "130",
+      "covers": "Motorway and national highway incidents, road and weather information",
+      "source": "Pakistan Telecommunication Authority (PTA), quoting NH&MP",
+      "url": "https://pta.gov.pk/category/motorway-helpline-calls-made-free-983111816-2023-06-01",
+      "checked": "2026-10-08"
+    },
+    {
+      "name": "Edhi ambulance",
+      "number": "115",
+      "covers": "Ambulance (Edhi Foundation, a charity)",
+      "source": "Edhi Foundation website, homepage",
+      "url": "https://www.edhi.org/",
+      "checked": "2026-10-08"
+    }
+  ]
+}

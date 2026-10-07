@@ -1,0 +1,74 @@
+{
+ "title": "Seasonal herder migration in Upper Swat",
+ "checked": "2026-10-08",
+ "note": "Sourced facts only. The flock in the diorama is illustrative; it shows the pattern described, not real herds or real pastures. Utror and Mankyal are not named in any fetched page, so they are not claimed.",
+ "seasons": {
+  "Summer": "grazing: flock on the grass above the arrival (sources: herders spend three to four months in Upper Swat in summer)",
+  "Autumn": "on the move: flock walks down the drive path (sources: migration begins as winter descends on the snow)",
+  "Winter": "none: herds are down in the plains (sources: families winter in the plains)"
+ },
+ "facts": [
+  {
+   "text": "Herders spend three to four months in Upper Swat during the summer, then as winter sets in they make the journey to the plains.",
+   "source": "The Friday Times, 'The cultural cost of Swat's seasonal migrations', 21 Nov 2024",
+   "url": "https://thefridaytimes.com/21-Nov-2024/the-cultural-cost-of-swat-s-seasonal-migrations",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "Families migrate to the plain areas for the winter and return in the summer. Households from Kalam, Ushu, Matiltan, Gujjar Gabral and Mahodand join the winter exodus.",
+   "source": "The Friday Times, 'The cultural cost of Swat's seasonal migrations', 21 Nov 2024",
+   "url": "https://thefridaytimes.com/21-Nov-2024/the-cultural-cost-of-swat-s-seasonal-migrations",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "As winter descends on the snow-covered mountains of Swat, shepherd families begin their annual migration; with the arrival of spring they return to their home regions.",
+   "source": "The Network Times (TNN), 'Through snow and struggles: the annual migration of Swat's shepherd families'",
+   "url": "https://tnnenglish.com/through-snow-and-struggles-the-annual-migration-of-swats-shepherd-families",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "A shepherd from Upper Kalam (Bahram Khan, 45) led his family and over 200 sheep and goats down from the snowbound home. The route runs through Kanju, Barikot, Dargai and on to Charsadda.",
+   "source": "The Network Times (TNN), 'Through snow and struggles: the annual migration of Swat's shepherd families'",
+   "url": "https://tnnenglish.com/through-snow-and-struggles-the-annual-migration-of-swats-shepherd-families",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "Thousands of people migrate with their goats and sheep to the warmer regions. One herder's flock was 80 sheep, two cows and a dog.",
+   "source": "The Friday Times, 'The cultural cost of Swat's seasonal migrations', 21 Nov 2024",
+   "url": "https://thefridaytimes.com/21-Nov-2024/the-cultural-cost-of-swat-s-seasonal-migrations",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "Many herders take their herds to mountain pastures in summer, often with buffaloes. Full-time nomads move between the foothills or plains and the high pastures.",
+   "source": "FAO, Pakistan livestock and herding chapter (western Himalaya, Chapter IX)",
+   "url": "https://www.fao.org/4/Y4856E/y4856e0e.htm",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "Private afforestation and land development in Swat have disrupted nomadic grazing systems, obstructing traditional routes. The FAO text is older, so its details may be dated.",
+   "source": "FAO, Pakistan livestock and herding chapter (western Himalaya, Chapter IX)",
+   "url": "https://www.fao.org/4/Y4856E/y4856e0e.htm",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "Swat's Deputy Commissioner says official records show over 100,000 people migrate each year because of harsh weather and heavy snowfall (people, not herds). Local NGOs and researchers think the number could be far higher.",
+   "source": "The Friday Times, 'The cultural cost of Swat's seasonal migrations', 21 Nov 2024",
+   "url": "https://thefridaytimes.com/21-Nov-2024/the-cultural-cost-of-swat-s-seasonal-migrations",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "One family is recorded leaving the valley on 2 September 2015, hoping to escape the harsh winter. This is a single example, not a general departure date.",
+   "source": "The Friday Times, 'The cultural cost of Swat's seasonal migrations', 21 Nov 2024",
+   "url": "https://thefridaytimes.com/21-Nov-2024/the-cultural-cost-of-swat-s-seasonal-migrations",
+   "checked": "2026-10-08"
+  },
+  {
+   "text": "Estimate: the exact months of departure and return are not stated by any source found. The diorama shows a summer grazing season and an autumn descent only as an illustration.",
+   "source": "estimate (no source gives the months)",
+   "url": "https://thefridaytimes.com/21-Nov-2024/the-cultural-cost-of-swat-s-seasonal-migrations",
+   "checked": "2026-10-08",
+   "estimate": true
+  }
+ ],
+ "label": "Herders' flock (illustrative; up in summer, down for winter, per The Friday Times 2024)"
+}

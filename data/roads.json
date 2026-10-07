@@ -1,0 +1,107 @@
+{
+  "checked": "2026-10-08",
+  "roads": [
+    {
+      "id": "n95-mingora-bahrain",
+      "name": "N-95 Mingora–Bahrain",
+      "segment_slugs": [
+        "bahrain"
+      ],
+      "advisories": [
+        {
+          "date": "2026-06-13",
+          "status": "caution",
+          "text": "CM asks NHA to restore flood-damaged sections, incl. Qandeel and Damlai Madyan, before the tourist season ends.",
+          "source": "The News (KP CM letter)",
+          "url": "https://www.thenews.pk/print/1420275-kp-cm-asks-federal-govt-to-rehab-kalam-road-urgently"
+        }
+      ],
+      "seasonal": []
+    },
+    {
+      "id": "n95-bahrain-kalam",
+      "name": "N-95 Bahrain–Kalam",
+      "segment_slugs": [
+        "bahrain",
+        "kalam"
+      ],
+      "advisories": [
+        {
+          "date": "2026-06-13",
+          "status": "caution",
+          "text": "About 4.9 km critically damaged across seven 2022 flood sections; CM asks NHA to finish before season ends.",
+          "source": "The News (KP CM letter)",
+          "url": "https://www.thenews.pk/print/1420275-kp-cm-asks-federal-govt-to-rehab-kalam-road-urgently"
+        },
+        {
+          "date": "2024-02-22",
+          "status": "closed",
+          "text": "Snow blocked the Kalam valley road at Pilogah; 11 tourists stranded four days were rescued by excavator.",
+          "source": "Aaj News",
+          "url": "https://english.aaj.tv/news/30352052"
+        },
+        {
+          "date": "2023-02-11",
+          "status": "closed",
+          "text": "Avalanches blocked the road at Gureet and Jakh; tourists stranded in Kalam, machinery could not clear it.",
+          "source": "Dawn",
+          "url": "https://www.dawn.com/news/1736426/heavy-snowfall-landslides-disrupt-life-in-malakand-hazara"
+        }
+      ],
+      "seasonal": []
+    },
+    {
+      "id": "kalam-ushu-mahodand",
+      "name": "Kalam–Ushu–Mahodand jeep track",
+      "segment_slugs": [
+        "kalam",
+        "ushu",
+        "mahodand-lake"
+      ],
+      "advisories": [],
+      "seasonal": [
+        {
+          "months": "Nov–Mar",
+          "text": "Heavy snow; the lake freezes and is inaccessible. Travel guide, not a dated report.",
+          "source": "Graana (travel guide)",
+          "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"
+        }
+      ]
+    },
+    {
+      "id": "kalam-utror-gabral",
+      "name": "Kalam–Utror–Gabral road",
+      "segment_slugs": [
+        "kalam",
+        "utror",
+        "gabral"
+      ],
+      "advisories": [],
+      "seasonal": []
+    },
+    {
+      "id": "malam-jabba-road",
+      "name": "Malam Jabba road",
+      "segment_slugs": [
+        "malam-jabba"
+      ],
+      "advisories": [
+        {
+          "date": "2025-10-05",
+          "status": "closed",
+          "text": "First snow; hail closed connecting roads near Gabin Jabba and Lalco. Rescue teams clearing blocked routes.",
+          "source": "The News",
+          "url": "https://www.thenews.pk/print/1375683-kalam-receives-snowfall"
+        },
+        {
+          "date": "2020-01-14",
+          "status": "caution",
+          "text": "Heavy snow in Malam Jabba and Kalam: use tyre chains, or hire local vehicles if yours have none.",
+          "source": "Pakistan Observer",
+          "url": "https://www.pakobserver.net/tourists-advised-to-use-tyre-chain-in-travel-to-tourist-spots-in-swat/"
+        }
+      ],
+      "seasonal": []
+    }
+  ]
+}

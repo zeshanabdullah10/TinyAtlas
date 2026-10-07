@@ -1,0 +1,364 @@
+{
+  "_about": "Heritage provenance per site. Every statement carries source, url and checked (date fetched). Only fields found on fetched pages are present; unknown fields are omitted.",
+  "butkara-i-stupa": {
+    "slug": "butkara-i-stupa",
+    "period": {
+      "text": "Generally dated to the 2nd century BCE; the article notes it may have been built by Ashoka but is generally dated slightly later. Enlarged five times in later centuries.",
+      "source": "Wikipedia: Butkara Stupa",
+      "url": "https://en.wikipedia.org/wiki/Butkara_Stupa",
+      "checked": "2026-10-08"
+    },
+    "excavations": [
+      {
+        "years": "from 1956",
+        "by": "Italian mission (IsIAO), led by Domenico Faccenna",
+        "source": "Wikipedia: Butkara Stupa",
+        "url": "https://en.wikipedia.org/wiki/Butkara_Stupa",
+        "checked": "2026-10-08"
+      }
+    ],
+    "records_held_by": [
+      {
+        "name": "National Museum of Oriental Art, Rome (part of the finds)",
+        "source": "Wikipedia: Butkara Stupa",
+        "url": "https://en.wikipedia.org/wiki/Butkara_Stupa",
+        "checked": "2026-10-08"
+      },
+      {
+        "name": "City Museum of Ancient Oriental Art, Turin (MAO) (part of the finds)",
+        "source": "Wikipedia: Butkara Stupa",
+        "url": "https://en.wikipedia.org/wiki/Butkara_Stupa",
+        "checked": "2026-10-08"
+      }
+    ],
+    "disputed": [
+      {
+        "claim": "Date of the seated Buddha statue",
+        "views": [
+          {
+            "text": "Van Lohuizen-de Leeuw dates the statue to the late 1st century BCE to the early 1st century.",
+            "source": "Wikipedia: Butkara Stupa",
+            "url": "https://en.wikipedia.org/wiki/Butkara_Stupa",
+            "checked": "2026-10-08"
+          },
+          {
+            "text": "More conservative estimates date it to the 1st-2nd century CE.",
+            "source": "Wikipedia: Butkara Stupa (view as summarised by the article; underlying authors not named there)",
+            "url": "https://en.wikipedia.org/wiki/Butkara_Stupa",
+            "checked": "2026-10-08"
+          }
+        ]
+      }
+    ],
+    "further_reading": [
+      {
+        "title": "Wikipedia: Butkara Stupa (with its cited sources)",
+        "url": "https://en.wikipedia.org/wiki/Butkara_Stupa",
+        "checked": "2026-10-08",
+        "source": "Wikipedia: Butkara Stupa (with its cited sources)"
+      }
+    ]
+  },
+  "saidu-sharif-stupa": {
+    "slug": "saidu-sharif-stupa",
+    "period": {
+      "text": "First building period between 25 BCE and the end of the 1st century CE; second and third periods 2nd-3rd century CE and 4th-5th century CE.",
+      "source": "Wikipedia: Saidu Sharif Stupa (citing Le Huu Phuoc, Buddhist Architecture, 2009, pp. 174-176)",
+      "url": "https://en.wikipedia.org/wiki/Saidu_Sharif_Stupa",
+      "checked": "2026-10-08"
+    },
+    "excavations": [
+      {
+        "years": "1963-1982, with a pause 1966-1977",
+        "by": "Italian Archaeological Mission (IsMEO)",
+        "source": "Wikipedia: Saidu Sharif Stupa (citing Le Huu Phuoc, 2009)",
+        "url": "https://en.wikipedia.org/wiki/Saidu_Sharif_Stupa",
+        "checked": "2026-10-08"
+      }
+    ],
+    "conservation": {
+      "status": "Infobox lists the status as 'Artifacts removed'; the article gives no further detail.",
+      "date": "undated",
+      "source": "Wikipedia: Saidu Sharif Stupa",
+      "url": "https://en.wikipedia.org/wiki/Saidu_Sharif_Stupa",
+      "checked": "2026-10-08"
+    },
+    "further_reading": [
+      {
+        "title": "Wikipedia: Saidu Sharif Stupa (cites Callieri, ed., Italian Archaeological Mission (IsMEO), Pakistan, Swat, 1956-1981, 1982)",
+        "url": "https://en.wikipedia.org/wiki/Saidu_Sharif_Stupa",
+        "checked": "2026-10-08",
+        "source": "Wikipedia: Saidu Sharif Stupa (cites Callieri, ed., Italian Archaeological Mission (IsMEO), Pakistan, Swat, 1956-1981, 1982)"
+      }
+    ]
+  },
+  "amluk-dara-stupa": {
+    "slug": "amluk-dara-stupa",
+    "period": {
+      "text": "Believed to have been built in the third century (the article gives no further dating detail).",
+      "source": "Wikipedia: Amluk-Dara stupa",
+      "url": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa",
+      "checked": "2026-10-08"
+    },
+    "excavations": [
+      {
+        "years": "1926",
+        "by": "Sir Aurel Stein (discovery; the article does not describe excavation)",
+        "source": "Wikipedia: Amluk-Dara stupa",
+        "url": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa",
+        "checked": "2026-10-08"
+      },
+      {
+        "years": "1960s-1970s",
+        "by": "Domenico Faccenna (study)",
+        "source": "Wikipedia: Amluk-Dara stupa",
+        "url": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa",
+        "checked": "2026-10-08"
+      }
+    ],
+    "conservation": {
+      "status": "Described as unprotected and being damaged by treasure seekers.",
+      "date": "undated",
+      "source": "Wikipedia: Amluk-Dara stupa",
+      "url": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa",
+      "checked": "2026-10-08"
+    },
+    "further_reading": [
+      {
+        "title": "Wikipedia: Amluk-Dara stupa",
+        "url": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa",
+        "checked": "2026-10-08",
+        "source": "Wikipedia: Amluk-Dara stupa"
+      }
+    ]
+  },
+  "swat-museum": {
+    "slug": "swat-museum",
+    "records_held_by": [
+      {
+        "name": "Swat Museum, Saidu Sharif (the objects; the article does not say where its records are kept)",
+        "source": "Wikipedia: Swat Museum",
+        "url": "https://en.wikipedia.org/wiki/Swat_Museum",
+        "checked": "2026-10-08"
+      }
+    ],
+    "conservation": {
+      "status": "Damaged by the 2005 Kashmir earthquake; closed in 2007 and contents moved to Taxila; a bomb exploded nearby in February 2008; 2,700 objects returned in July 2011; reopened in a new seismic-resistant building.",
+      "date": "2014-12-11",
+      "source": "Wikipedia: Swat Museum",
+      "url": "https://en.wikipedia.org/wiki/Swat_Museum",
+      "checked": "2026-10-08"
+    },
+    "further_reading": [
+      {
+        "title": "Wikipedia: Swat Museum",
+        "url": "https://en.wikipedia.org/wiki/Swat_Museum",
+        "checked": "2026-10-08",
+        "source": "Wikipedia: Swat Museum"
+      }
+    ]
+  },
+  "shingardar-stupa": {
+    "slug": "shingardar-stupa",
+    "period": {
+      "text": "No date is given; the article calls it a remnant of the Buddhist era.",
+      "source": "Wikipedia: Ghalegay",
+      "url": "https://en.wikipedia.org/wiki/Ghalegay",
+      "checked": "2026-10-08"
+    },
+    "excavations": [
+      {
+        "years": "British period (no year given)",
+        "by": "Colonel Deane and S.A. Stein (identification; no excavation described)",
+        "source": "Wikipedia: Ghalegay",
+        "url": "https://en.wikipedia.org/wiki/Ghalegay",
+        "checked": "2026-10-08"
+      }
+    ],
+    "conservation": {
+      "status": "The article does not describe current condition. Its cited headlines describe decline: Dawn, 'The Swat stupa in shambles' (2002); Express Tribune, 'Crumbling heritage: Neglected monument fading into time' (2012). Not verified by us.",
+      "date": "2002-2012 (cited headlines)",
+      "source": "Wikipedia: Ghalegay (citing Dawn and Express Tribune)",
+      "url": "https://en.wikipedia.org/wiki/Ghalegay",
+      "checked": "2026-10-08"
+    },
+    "disputed": [
+      {
+        "claim": "Attribution to king Uttarasena",
+        "views": [
+          {
+            "text": "Tradition: built by Uttarasena, an ancient king of Swat, to enshrine his share of the Buddha's relics.",
+            "source": "Wikipedia: Ghalegay",
+            "url": "https://en.wikipedia.org/wiki/Ghalegay",
+            "checked": "2026-10-08"
+          },
+          {
+            "text": "Weak sourcing: the article's citations to Dawn and Express Tribune are not clearly linked to this attribution.",
+            "source": "Wikipedia: Ghalegay (editorial note in the article's citations)",
+            "url": "https://en.wikipedia.org/wiki/Ghalegay",
+            "checked": "2026-10-08"
+          }
+        ]
+      }
+    ],
+    "further_reading": [
+      {
+        "title": "Wikipedia: Ghalegay",
+        "url": "https://en.wikipedia.org/wiki/Ghalegay",
+        "checked": "2026-10-08",
+        "source": "Wikipedia: Ghalegay"
+      }
+    ]
+  },
+  "bazira-barikot-ghundai": {
+    "slug": "bazira-barikot-ghundai",
+    "period": {
+      "text": "Phases from c. 1700-1400 BCE (Bronze Age) to the Shahi and Ghaznavid periods (c. 680-1100 CE); Early Kushan c. 70-200 CE; abandonment c. 400-550 CE. Dates are approximate.",
+      "source": "Wikipedia: Barikot",
+      "url": "https://en.wikipedia.org/wiki/Barikot",
+      "checked": "2026-10-08"
+    },
+    "excavations": [
+      {
+        "years": "since 1984 (campaigns 1980s-1990s, 2011, 2016-2017)",
+        "by": "Italian Archaeological Mission (ISMEO), founded by Giuseppe Tucci",
+        "source": "Wikipedia: Barikot",
+        "url": "https://en.wikipedia.org/wiki/Barikot",
+        "checked": "2026-10-08"
+      }
+    ],
+    "records_held_by": [
+      {
+        "name": "Hindu Shahi inscription found at Barikot in the late 19th century: Lahore Museum (the article does not say where excavation finds are kept)",
+        "source": "Wikipedia: Barikot",
+        "url": "https://en.wikipedia.org/wiki/Barikot",
+        "checked": "2026-10-08"
+      }
+    ],
+    "disputed": [
+      {
+        "claim": "Start of urban settlement at Bazira",
+        "views": [
+          {
+            "text": "Earlier accepted sequence: fortified city founded at the end of the 2nd century BCE; urban living before c. 150 BCE was not found until 2015.",
+            "source": "Wikipedia: Barikot",
+            "url": "https://en.wikipedia.org/wiki/Barikot",
+            "checked": "2026-10-08"
+          },
+          {
+            "text": "Early phases are now placed from c. 600 BCE (early-historic fortified town) and c. 600-400 BCE (start of the city, Achaemenid influence).",
+            "source": "Wikipedia: Barikot",
+            "url": "https://en.wikipedia.org/wiki/Barikot",
+            "checked": "2026-10-08"
+          }
+        ]
+      },
+      {
+        "claim": "Origin and dating of the Old Apsidal Temple",
+        "views": [
+          {
+            "text": "First dated to c. 250 BCE under Ashoka.",
+            "source": "Wikipedia: Barikot",
+            "url": "https://en.wikipedia.org/wiki/Barikot",
+            "checked": "2026-10-08"
+          },
+          {
+            "text": "Olivieri (2024): modified from an earlier, non-Buddhist shrine from the time of Alexander's 327 BCE siege.",
+            "source": "Wikipedia: Barikot (citing Olivieri, 2024)",
+            "url": "https://en.wikipedia.org/wiki/Barikot",
+            "checked": "2026-10-08"
+          }
+        ]
+      },
+      {
+        "claim": "End of the Old Apsidal Temple",
+        "views": [
+          {
+            "text": "The December 2021 announcement places it in the third or fourth century CE.",
+            "source": "Wikipedia: Barikot",
+            "url": "https://en.wikipedia.org/wiki/Barikot",
+            "checked": "2026-10-08"
+          },
+          {
+            "text": "Other sources tie abandonment to third-century earthquakes.",
+            "source": "Wikipedia: Barikot (other sources, not named in the article's summary)",
+            "url": "https://en.wikipedia.org/wiki/Barikot",
+            "checked": "2026-10-08"
+          }
+        ]
+      }
+    ],
+    "further_reading": [
+      {
+        "title": "Wikipedia: Barikot",
+        "url": "https://en.wikipedia.org/wiki/Barikot",
+        "checked": "2026-10-08",
+        "source": "Wikipedia: Barikot"
+      }
+    ]
+  },
+  "jahanabad-buddha": {
+    "slug": "jahanabad-buddha",
+    "period": {
+      "text": "Stylistic comparison only: the article says the relief 'may be compared to 7th - 8th century Tang sculpture in central Asia'. No other date is given.",
+      "source": "Wikipedia: Buddhist rock carving in Manglawar (citing ValleySwat and The News, 30 Nov 2007)",
+      "url": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar",
+      "checked": "2026-10-08"
+    },
+    "conservation": {
+      "status": "Attack with explosives in 2007 damaged the top of the head (article cites no source for this sentence). A protective coating was applied in 2012; the face was reconstructed from laser surveys and old photographs; restoration completed with some damage deliberately left visible. Restoration credited to the Italian Archaeological Mission in Swat (article cites The Express Tribune, 13 July 2018).",
+      "date": "2016-10",
+      "source": "Wikipedia: Buddhist rock carving in Manglawar",
+      "url": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar",
+      "checked": "2026-10-08"
+    },
+    "further_reading": [
+      {
+        "title": "Wikipedia: Buddhist rock carving in Manglawar (cites Anna Filigenzi, Buddhist Rock Sculptures of Late Antique Swat/Uddiyana, 2015)",
+        "url": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar",
+        "checked": "2026-10-08",
+        "source": "Wikipedia: Buddhist rock carving in Manglawar (cites Anna Filigenzi, Buddhist Rock Sculptures of Late Antique Swat/Uddiyana, 2015)"
+      }
+    ]
+  },
+  "gumbat-balo-kale-stupa": {
+    "slug": "gumbat-balo-kale-stupa",
+    "period": {
+      "text": "Radiocarbon dating estimates the shrine and buildings were built in the 2nd century.",
+      "source": "Wikipedia: Gumbat Stupa",
+      "url": "https://en.wikipedia.org/wiki/Gumbat_Stupa",
+      "checked": "2026-10-08"
+    },
+    "excavations": [
+      {
+        "years": "first recorded 1930",
+        "by": "A. Stein (recording; no excavation described)",
+        "source": "Wikipedia: Gumbat Stupa",
+        "url": "https://en.wikipedia.org/wiki/Gumbat_Stupa",
+        "checked": "2026-10-08"
+      },
+      {
+        "years": "2011",
+        "by": "Unnamed archaeologists; about a quarter of the terrace excavated",
+        "source": "Wikipedia: Gumbat Stupa",
+        "url": "https://en.wikipedia.org/wiki/Gumbat_Stupa",
+        "checked": "2026-10-08"
+      }
+    ],
+    "conservation": {
+      "status": "Ruins restored; the article notes it is now marked as the Balo Kalay Stupa of Swat.",
+      "date": "2011-2012",
+      "source": "Wikipedia: Gumbat Stupa",
+      "url": "https://en.wikipedia.org/wiki/Gumbat_Stupa",
+      "checked": "2026-10-08"
+    },
+    "further_reading": [
+      {
+        "title": "Wikipedia: Gumbat Stupa (cites Olivieri 2019; Khan and Wahab 2012)",
+        "url": "https://en.wikipedia.org/wiki/Gumbat_Stupa",
+        "checked": "2026-10-08",
+        "source": "Wikipedia: Gumbat Stupa (cites Olivieri 2019; Khan and Wahab 2012)"
+      }
+    ]
+  }
+}

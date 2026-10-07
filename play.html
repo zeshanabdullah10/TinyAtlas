@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where is this view? · Tiny Atlas</title>
+<meta name="description" content="Guess where a credited photo of the Swat valley was taken.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Literata:opsz,wght@7..72,400;7..72,500&family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/play.css">
+</head>
+<body class="play-body">
+<main id="play" class="play-main"></main>
+<script type="module">
+  import { mountGame } from "./js/play/game.js";
+  mountGame(document.getElementById("play"), { atlasUrl: "atlas.html" });
+</script>
+</body>
+</html>

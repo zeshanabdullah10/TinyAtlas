@@ -7,7 +7,7 @@ import { loadSite } from "./site.js";
 import { nearTerrain, farTerrain, tabletop } from "./land.js";
 import { lake, streams, waterUniforms } from "./water.js";
 import { flora } from "./flora.js";
-import { Path, driveRibbon, trackRibbons, roadStones } from "./road.js";
+import { Path, driveRibbon, trackRibbons, trailRibbon, roadStones } from "./road.js";
 import { jeepModel, Ride } from "./jeep.js";
 import { Dust } from "./dust.js";
 import { Sky } from "./sky.js";
@@ -17,6 +17,12 @@ import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, wate
 import { Life, boat as boatModel, horse as horseModel } from "./life.js";
 import { Weather } from "./weather.js";
 import { palace } from "./palace.js";
+import { buildings } from "./buildings.js";
+import { makePostcard, postcardSheet } from "../postcard.js";
+import { roadStatusCard, loadRoads } from "../roadstatus.js";
+import { Herders } from "./herders.js";
+import { applyI18n } from "../i18n.js";
+applyI18n("diorama");
 import { Traffic, Riders } from "./traffic.js";
 import { SEASONS, seasonU, mist } from "./season.js";
 
@@ -61,9 +67,10 @@ const table = tabletop(site); scene.add(table);
 const water = meta.lake ? lake(site) : null; if (water) scene.add(water);
 scene.add(streams(site));
 const path = new Path(meta.drive, Y0);
-scene.add(driveRibbon(path), ...trackRibbons(site, path), roadStones(path));
+scene.add(driveRibbon(path), ...trackRibbons(site, path), ...trailRibbon(site), roadStones(path));
 const plants = flora(site, path, tier); scene.add(plants);
 const lm = meta.landmark ? palace(site, meta.landmark, path.at(path.length), meta.landmark.model ? base + meta.landmark.model : null) : null; if (lm) scene.add(lm);
+scene.add(buildings(site));
 const jeep = jeepModel(); scene.add(jeep.root);
 const ride = new Ride(path, jeep);
 const traffic = new Traffic(scene, path, meta.lake ? "track" : "road", null);   // illustrative traffic, road rules on the drive
@@ -74,17 +81,15 @@ const riders = new Riders(scene, path, jeep);
 let toastT = 0;
 function toast(text, secs = 4) { const el = document.getElementById("toast"); el.textContent = text; el.hidden = false; toastT = secs; }
 function setLow(on) { ride.low = on; document.getElementById("btn-low").setAttribute("aria-pressed", on); }
-/** A postcard: the current view with the place, height and date written on it, saved as a PNG. */
-function photo() {
+/** A postcard: the current view with the site's measured facts and sources, shared from a sheet (WhatsApp first). */
+async function photo() {
   renderer.render(scene, camera);
-  const src = renderer.domElement, c = document.createElement("canvas"); c.width = src.width; c.height = src.height;
-  const x = c.getContext("2d"); x.drawImage(src, 0, 0);
-  const h = Math.round(c.height * 0.11); x.fillStyle = "rgba(20,18,15,.72)"; x.fillRect(0, c.height - h, c.width, h);
-  x.fillStyle = "#f3e9d2"; x.font = `600 ${Math.round(h * 0.38)}px Georgia, serif`; x.fillText(meta.title, h * 0.4, c.height - h * 0.52);
-  x.font = `${Math.round(h * 0.22)}px system-ui, sans-serif`; x.fillStyle = "#e9a23b";
-  x.fillText(`${meta.subtitle} · ${Math.round((ride.alt ?? 0) + Y0).toLocaleString("en")} m · ${new Date().toLocaleDateString("en-GB")} · Tiny Atlas`, h * 0.4, c.height - h * 0.18);
-  const a = document.createElement("a"); a.download = `${SITE}-postcard.png`; a.href = c.toDataURL("image/png"); a.click();
-  toast("Postcard saved", 2.5);
+  const G = meta.facts, facts = [
+    G.arrival_m != null && { label: G.lake_area_km2 != null ? "Lake" : "Height", value: `${Number(G.arrival_m).toLocaleString("en")} m` },
+    G.lake_area_km2 != null && { label: "Area", value: `${G.lake_area_km2} km²` },
+    G.walk_km != null ? { label: "Walk", value: `${G.walk_km} km` } : G.drive_km != null && { label: "Drive", value: `${G.drive_km} km` }].filter(Boolean);
+  const blob = await makePostcard(renderer.domElement, { title: meta.title, subtitle: meta.subtitle, facts, painted: true });
+  postcardSheet({ blob, title: meta.title, url: `${location.origin}${location.pathname}?site=${meta.site}` });
 }
 ride.update(0.016, { throttle: 0, brake: 0, steer: 0 });
 
@@ -98,10 +103,16 @@ if (!meta.lake) {
   document.getElementById("g-left-l").textContent = `km to the ${meta.arrival.name}`;
   document.querySelector('[data-act="lakeview"]').textContent = "Overview";
   document.querySelector("#intro .lede").textContent = `Built from real elevation, land cover and the mapped road. Take the wheel for the last stretch of the ${meta.road || "road"}, feel every bump, and roll out at the ${meta.arrival.name}.`;
+} else if (meta.walk) {
+  document.querySelector("#intro .lede").textContent = `Built from real elevation, land cover and the mapped track and footpath. Drive the last stretch of the ${meta.road || "track"} to where it ends, then follow the ${meta.walk.km} km path on foot up to the lake.`;
+} else if (meta.site !== "mahodand") {
+  document.querySelector("#intro .lede").textContent = `Built from real elevation, land cover and the mapped jeep track. Take the wheel for the last stretch of the ${meta.road || "track"}, feel every rut, and roll out at the lake.`;
 }
 hud.profile(path);
 // optional, hand-kept: web/data/diorama/<site>/practical.json, [{label, value, source, url}], each with a source
 fetch(base + "practical.json").then((r) => (r.ok ? r.json() : null)).then((p) => hud.practical(p)).catch(() => {});
+const PLACE_SLUG = { mahodand: "mahodand-lake", "white-palace": "white-palace-marghazar" }[SITE] || SITE;
+loadRoads().then((r) => { const c = roadStatusCard(r, { slug: PLACE_SLUG }); if (c?.childElementCount) { const b = document.getElementById("before"); b.append(c); b.hidden = false; } });
 
 // ---- the shore: footpath, viewpoints, walker, life, mist
 const loop = meta.lake ? shoreLoop(site) : ringLoop(site, A.x, A.z, meta.landmark ? 52 : 150);
@@ -126,15 +137,30 @@ const holdKeys = new Set();
 // photos taken near here (Wikimedia Commons, geotagged, credited)
 let photos = [];
 fetch(base + "photos.json").then((r) => (r.ok ? r.json() : [])).then((list) => {
-  photos = list.map((p) => { const [x, z] = site.toLocal(p.lat, p.lon); return { ...p, x, z }; });
-  hud.addLabels(photos.map((p) => ({ text: `📷 ${p.caption}`, name: p.caption, sub: `${p.author}, ${p.date.slice(0, 4)}`, photo: p, group: "Photos",
+  // geotagged photos are pinned where they were taken; the rest (lat/lon null) are listed under "Before you go"
+  photos = list.filter((p) => p.lat != null && p.lon != null).map((p) => { const [x, z] = site.toLocal(p.lat, p.lon); return { ...p, x, z }; });
+  const placeless = list.filter((p) => p.lat == null || p.lon == null);
+  if (placeless.length) {
+    const g = document.createElement("div"); g.className = "photo-strip";
+    for (const p of placeless) {
+      const a = document.createElement("a"); a.href = p.page; a.target = "_blank"; a.rel = "noopener";
+      a.title = `${p.caption} · ${p.author}${p.date ? ", " + p.date.slice(0, 4) : ""} · ${p.licence} (Wikimedia Commons)`;
+      const im = document.createElement("img"); im.src = p.thumb; im.alt = p.caption; im.loading = "lazy"; a.append(im); g.append(a);
+    }
+    const b = document.getElementById("before"); b.append(g); b.hidden = false;
+  }
+  hud.addLabels(photos.map((p) => ({ text: `📷 ${p.caption}`, name: p.caption, sub: `${p.author}${p.date ? ", " + p.date.slice(0, 4) : ""}`, photo: p, group: "Photos",
     hint: "Open the photo and walk to where it was taken", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 300 })));
 }).catch(() => {});
 const weather = new Weather(latC, (meta.grid.bbox[1] + meta.grid.bbox[3]) / 2, F.arrival_m);
+weather.place = meta.lake ? "the lake" : meta.arrival.name;
 weather.load().then((t) => hud.weather(t)).catch(() => {});
 const life = meta.lake ? new Life(scene, site, loop, path, lakeC) : { labels: [], horses: [], update() {} };
 const mistG = mist(lakeC); scene.add(mistG);
 let season = 0;
+// herders' flocks (illustrative): the upper-valley village sites, where the sources describe summer grazing
+const herders = ["kalam", "ushu", "utror", "gabral", "matiltan"].includes(SITE) ? new Herders(scene, site, path, {}) : null;
+herders?.setSeason(SEASONS[season].name);
 let _overview = null;
 function lakeView() {           // the overview: high behind the track you came up, the whole site in view, never inside a ridge
   if (_overview) return { p: _overview.p.clone(), look: _overview.look.clone() };
@@ -163,7 +189,7 @@ const labels = [
 if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, group: "On the map", p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
 hud.makeLabels(labels);
 hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: meta.lake ? "On the shore path" : "On the walk round the grounds", p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
-hud.addLabels(life.labels.map((l) => ({ ...l, name: l.text.split(" · ")[0], sub: l.text.split(" · ")[1], group: `At the ${meta.lake ? "lake" : "site"}` })));
+hud.addLabels([...life.labels, ...(herders?.labels ?? [])].map((l) => ({ ...l, name: l.text.split(" · ")[0], sub: l.text.split(" · ")[1], group: `At the ${meta.lake ? "lake" : "site"}` })));
 
 // ---- tags and the Places list: go to what was chosen
 hud.on("goto", (l) => {
@@ -313,6 +339,7 @@ hud.on("nextvp", () => {
 hud.on("lakeview", () => leaveWalk());
 hud.on("season", () => {
   season = (season + 1) % SEASONS.length;
+  herders?.setSeason(SEASONS[season].name);
   hud.season(SEASONS[season].name, SEASONS[season].note);
 });
 hud.on("low", () => setLow(!ride.low));
@@ -377,8 +404,36 @@ function backToModel() {
 function arrive() {               // a short rise from the jeep to the overview; nothing flies low through the hills
   if (riders.aboard) toast(`You brought ${riders.aboard} ${riders.aboard > 1 ? "people" : "person"} up. Shukriya!`, 5);
   state = "arrive"; hud.driving(false); arrived = true;
+  if (meta.walk && !hike) { hikeToLake(); return; }
+  hike = null;
   flyTo({ dur: 5, to: () => lakeView(), lift: 0, done: () => { state = "explore"; orbit.enabled = true; orbit.target.copy(lakeC); setExploreOrbit(); } });
   setTimeout(() => { if (state === "arrive" || state === "explore") hud.arrive(F, { arrived: true }); }, 1800);
+}
+
+// A lake reached on foot (meta.walk): the jeep stops at the trailhead; the camera follows the path to the shore, sped up.
+let hike = null;
+function hikeToLake() {
+  const W = meta.walk, P = W.pts, cum = [0];
+  for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+  const hours = W.km / 3 + W.climb_m / 400;     // walking pace with Naismith's rule for the climb
+  toast(`The jeep track ends here. ${W.km} km on foot to ${meta.lake ? "the lake" : meta.arrival.name}, about ${hours.toFixed(1)} h` +
+        (W.traced_km ? ` (the last ${W.traced_km} km has no mapped path)` : "") + ".", 7);
+  hike = { s: 0, cum, P, dur: Math.min(40, 14 + W.km * 3) };
+  state = "hike";
+}
+function hikeStep(dt) {
+  const h = hike, L = h.cum[h.cum.length - 1];
+  h.s = Math.min(L, h.s + (L / h.dur) * dt);
+  let i = 1; while (i < h.P.length - 1 && h.cum[i] < h.s) i++;
+  const a = h.P[i - 1], b = h.P[i], t = (h.s - h.cum[i - 1]) / Math.max(h.cum[i] - h.cum[i - 1], 0.01);
+  const x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t;
+  const ahead = h.P[Math.min(i + 12, h.P.length - 1)];
+  const eye = new THREE.Vector3(x, site.heightAt(x, z) + 9, z);
+  const back = new THREE.Vector3(x - ahead[0], 0, z - ahead[1]).normalize().multiplyScalar(14);
+  eye.add(back); eye.y = Math.max(eye.y, site.heightAt(eye.x, eye.z) + 6);
+  camera.position.lerp(eye, 1 - Math.exp(-dt * 3));
+  camera.lookAt(ahead[0], site.heightAt(ahead[0], ahead[1]) + 2, ahead[1]);
+  if (h.s >= L) { hike.done = true; arrive(); }
 }
 
 // ---- drive camera
@@ -447,6 +502,7 @@ function tick(dt) {
   waterUniforms.uTime.value = elapsed;
   waterUniforms.uSky.value.copy(sky.horizon);
 
+  if (state === "hike") hikeStep(dt);
   if (state === "drive" || state === "arrive" || state === "dive") {
     const kb = (k) => keys.has(k);
     const driving = state === "drive";
@@ -481,6 +537,7 @@ function tick(dt) {
   if (toastT > 0 && (toastT -= dt) <= 0) document.getElementById("toast").hidden = true;
   dust.update(dt, wind);
   life.update(dt, elapsed, wind);
+  herders?.update(dt, elapsed);
   // seasons ease in; mist follows dawn
   const S = SEASONS[season], k = Math.min(1, dt * 1.5);
   seasonU.uAutumn.value += (S.autumn - seasonU.uAutumn.value) * k;

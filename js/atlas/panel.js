@@ -1,7 +1,15 @@
 // Place side sheet (440 px on the right, bottom sheet on mobile): photo with credit, kind, name (+Urdu), stats, story, sources.
 import { h, fill, KIND_LABEL } from "../dom.js";
+import { heritageSection } from "./heritage.js";
+import { voicesSection } from "../voices.js";
+import { roadStatusCard, loadRoads } from "../roadstatus.js";
+let ROADS = []; loadRoads().then((r) => { ROADS = r; });
 
-const DIORAMA = { "mahodand-lake": "mahodand", "white-palace-marghazar": "white-palace" };   // place slug → web/data/diorama/<site>/
+const DIORAMA = { "mahodand-lake": "mahodand", "white-palace-marghazar": "white-palace",   // place slug → web/data/diorama/<site>/
+  kalam: "kalam", ushu: "ushu", utror: "utror", gabral: "gabral", matiltan: "matiltan",
+  "kundol-lake": "kundol-lake", "spin-khwar-lake": "spin-khwar-lake", "jabba-zomalu-lake": "jabba-zomalu-lake", bahrain: "bahrain",
+  madyan: "madyan", miandam: "miandam", "izmis-lake": "izmis-lake", "mushroom-lake": "mushroom-lake", "daral-lake": "daral-lake",
+  "pari-lake": "pari-lake", "shahi-bagh": "shahi-bagh", "desan-meadows": "desan-meadows" };
 
 const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : null);
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return "source"; } };
@@ -81,10 +89,11 @@ export class Panel {
             : h("button", { class: "primary", type: "button", onClick: () => this.onFly?.(p) }, "Fly there"),
           h("button", { type: "button", onClick: () => { dispatchEvent(new CustomEvent("atlas:plan", { detail: p })); this.onPlan?.(p); } }, "Plan a day"),
           this.listenBtn = h("button", { type: "button", class: "listen-btn", onClick: () => this.toggleListen(p) }, "Listen"),
-          DIORAMA[p.slug] ? h("button", { type: "button", onClick: () => location.assign(`diorama.html?site=${DIORAMA[p.slug]}&view=lake`) }, DIORAMA[p.slug] === "mahodand" ? "See the lake" : "See it up close") : null),
+          DIORAMA[p.slug] ? h("button", { type: "button", onClick: () => location.assign(`diorama.html?site=${DIORAMA[p.slug]}&view=lake`) }, p.kind === "lake" ? "See the lake" : "See it up close") : null),
         this.listenSlot = h("div", { class: "pn-listen" })),
       p.access ? h("section", null, h("h3", null, "Getting there"), h("p", null, p.access)) : null,
-      this.timeline(p), this.sources(p),
+      ROADS.some((r) => r.segment_slugs?.includes(p.slug)) ? roadStatusCard(ROADS, { slug: p.slug }) : null,
+      this.timeline(p), heritageSection(this.heritage?.[p.slug]), this.voices ? voicesSection(this.voices, { slug: p.slug }) : null, this.sources(p),
       p.photos?.length > 1 ? this.gallery(p) : null);
     this.paintAudio();
     this.el.hidden = false; document.body.classList.add("has-panel");

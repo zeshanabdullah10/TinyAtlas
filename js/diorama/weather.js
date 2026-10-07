@@ -26,7 +26,7 @@ export class Weather {
       const name = new Date(`${date}T12:00:00`).toLocaleDateString("en", { weekday: "short" });
       return `${name} ${Math.round(day.temperature_2m_min[i + 1])}–${t(day.temperature_2m_max[i + 1])}`;
     });
-    return `<b>Now at the lake:</b> ${t(c.temperature_2m)}, ${WMO[c.weather_code] || "—"}, wind ${Math.round(c.wind_speed_10m)} km/h. ` +
+    return `<b>Now at ${this.place || "the lake"}:</b> ${t(c.temperature_2m)}, ${WMO[c.weather_code] || "—"}, wind ${Math.round(c.wind_speed_10m)} km/h. ` +
       `Today ${Math.round(day.temperature_2m_min[0])}–${t(day.temperature_2m_max[0])} · ${days.join(" · ")}<br>` +
       `<small>Forecast by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> for ${Math.round(this.el).toLocaleString("en")} m, not a measurement.</small>`;
   }

@@ -19,6 +19,12 @@ import { makeListen } from "../listen.js";
 import { DayRoute } from "./day.js";
 import { PlanSheet } from "./sheet.js";
 import { openOffline } from "./offline.js";
+import { tripKitPanel, lowDataMode } from "../tripkit.js";
+import { loadHeritage } from "./heritage.js";
+import { StoryFlight, storyButton } from "./storyflight.js";
+import { loadVoices } from "../voices.js";
+import { applyI18n } from "../i18n.js";
+applyI18n("atlas");
 
 // offline support (not in automated test browsers, which must always see fresh files)
 if ("serviceWorker" in navigator && !navigator.webdriver) navigator.serviceWorker.register(`${BASE}sw.js`).catch(() => {});
@@ -35,11 +41,24 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadow
 
 function detectTier() {
   if (forced === "high" || forced === "low") return forced;
+  if (lowDataMode()) return "low";                       // the trip kit's low-data choice
   const coarse = matchMedia("(pointer: coarse)").matches || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
   const weak = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || renderer.capabilities.maxTextureSize < 8192;
   return coarse || weak ? "low" : "high";
 }
 let tier = detectTier();
+
+/** The trip kit (download size, low-data mode, emergency numbers, printable plan) in a modal; Save opens the offline download. */
+function openTripKit(pack) {
+  const close = () => { card.remove(); removeEventListener("keydown", esc); };
+  const esc = (e) => { if (e.key === "Escape") close(); };
+  const kit = tripKitPanel({ pack, places: pack.places, onDownload: () => { close(); openOffline(pack); }, onLowData: () => location.reload() });
+  const x = document.createElement("button"); x.type = "button"; x.className = "modal-x"; x.textContent = "Close"; x.onclick = close;
+  const card = document.createElement("div"); card.className = "modal"; card.setAttribute("role", "dialog"); card.setAttribute("aria-modal", "true");
+  const inner = document.createElement("div"); inner.className = "modal-card"; inner.append(kit, x); card.append(inner);
+  card.addEventListener("click", (e) => { if (e.target === card) close(); });
+  document.body.append(card); addEventListener("keydown", esc);
+}
 
 /** Build one pack's map. Returns a handle whose dispose() frees every listener, DOM node and GPU resource it made. */
 async function boot(slug, { base, time = null } = {}) {
@@ -109,6 +128,8 @@ async function boot(slug, { base, time = null } = {}) {
     onState: () => { labels.block = panel.rect(); },                          // peek <-> full changes the blocked rect
     onFly: (pl) => { const [ax, az] = anchorOf(pl); flyToPlace(ax, az, 2800, 1800); panel.collapse(); },
   });
+  loadHeritage().then((hr) => { panel.heritage = hr; });
+  loadVoices().then((v) => { panel.voices = v; }).catch(() => {});
   const open = (pl, opener) => {
     sheet.close();
     labels.select(pl.slug); panel.open(pl, opener); labels.block = panel.rect();
@@ -118,6 +139,9 @@ async function boot(slug, { base, time = null } = {}) {
   const labels = new Labels(pack, labelLayer, { onPick: (pl) => open(pl, document.activeElement), anchorLift: (s) => landmarks.heightOf(s) });
   roads.setRoutes(false);
   const day = new DayRoute(pack, scene, root);
+  const stories = await fetch(`${BASE}data/stories/swat-road.json`).then((r) => r.json()).catch(() => ({ stories: [] }));
+  const flight = new StoryFlight({ camera, controls, pack, places: pack.places, vectors: pack.vectors, root, lowPower: tier === "low",
+    openPlace: (slug) => { flight.stop("cancelled"); const pl = pack.places.find((p) => p.slug === slug); if (pl) open(pl, canvas); } });
   const sheet = new PlanSheet(root, pack, {
     signal, onOpen: () => { panel.close(); labels.block = sheet.rect(); }, onClose: () => { labels.block = null; },
     onShowDay: (d) => {
@@ -144,8 +168,9 @@ async function boot(slug, { base, time = null } = {}) {
   const neighbors = pack.meta.neighbors || [];
   ui = buildUI(root, {
     pack, controls, settings, tier, showFps: qs.get("fps") === "1", sky, openPlace: (pl) => open(pl, canvas),
-    areas: makeAreas(pack, controls, () => ui.routes(true)), neighbors, onNeighbor: (s) => switchPack(s), onOffline: () => openOffline(pack),
+    areas: makeAreas(pack, controls, () => ui.routes(true)), neighbors, onNeighbor: (s) => switchPack(s), onOffline: () => openTripKit(pack),
   });
+  { const sb = storyButton(flight, stories, pack.slug); if (sb) root.querySelector(".dock")?.append(sb); }   // story flight along the real road
 
   const steps = [["sky", sky.load()], ["overview", terrain.loadOverview()], ["landmarks", landmarks.load(() => labels.elevAnchor())]];
   let nDone = 0;
@@ -195,6 +220,7 @@ async function boot(slug, { base, time = null } = {}) {
   // ---- loop
   const fpsBox = { frames: 0, t: performance.now(), fps: 0 };
   let settled = 0, frameCount = 0;
+  let lastNow = 0;
   function frame(now) {
     shared.uTime.value = now / 1000;
     controls.update();
@@ -207,6 +233,7 @@ async function boot(slug, { base, time = null } = {}) {
     landmarks.update(camera);
     labels.update(camera, sizeW, sizeH, dist, now);
     day.update(camera, sizeW, sizeH);
+    flight.update(Math.min(0.25, (now - (lastNow || now)) / 1000)); lastNow = now;
     ui.compass(controls.heading);
     if (frameCount % 10 === 0) ui.edge(edgeNear());
     renderer.render(scene, camera);
@@ -230,6 +257,7 @@ async function boot(slug, { base, time = null } = {}) {
 
   const toScene = (e, n) => ({ x: e - pack.meta.origin_utm[0], z: pack.meta.origin_utm[1] - n });
   return {
+    openPlace: (pl) => open(pl, canvas),
     slug, pack, sky, controls, labels, landmarks, terrain, trees, roads, water, panel, sheet, day, ui, settings, scene, camera, toScene, renderer, THREE, shared,
     get time() { return sky.time; },
     info: () => ({
@@ -243,7 +271,7 @@ async function boot(slug, { base, time = null } = {}) {
     },
     dispose() {
       renderer.setAnimationLoop(null); ac.abort(); clearTimeout(reshadeT);
-      controls.dispose(); day.dispose(); terrain.dispose(); disposeScene(scene, renderer);
+      controls.dispose(); day.dispose(); flight.dispose(); terrain.dispose(); disposeScene(scene, renderer);
       for (const el of [...root.children]) if (!keep.has(el)) el.remove();
       labelLayer.replaceChildren();
     },
@@ -265,4 +293,5 @@ addEventListener("popstate", () => switchPack(new URLSearchParams(location.searc
 
 current = await boot(qs.get("pack") || "swat", { base: qs.get("base") || undefined, time: qs.get("t") != null ? +qs.get("t") : null });
 window.__atlas = current;
+{ const pl = qs.get("place") && current.pack.places.find((p) => p.slug === qs.get("place")); if (pl) current.openPlace(pl); }   // ?place=<slug> (game, links)
 window.__switch = (slug) => switchPack(slug);
