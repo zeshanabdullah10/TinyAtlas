@@ -1,0 +1,37 @@
+[
+ {
+  "label": "Season",
+  "value": "Summer only; the trails close in winter under heavy snow",
+  "quote": "Daral Lake is accessible only during the summer; during the winter, the trails which lead to the lake, are closed due to heavy snowfall.",
+  "source": "Wikipedia, Daral Lake (fetched Oct 2026)",
+  "url": "https://en.wikipedia.org/wiki/Daral_Lake"
+ },
+ {
+  "label": "Trek from Gabina Jabba (the favoured trail)",
+  "value": "Jeep road ends at Gabina Jabba; about 4 to 5 hours on foot",
+  "quote": "An unmetalled-cum-jeepable road ends at Gabina Jabba where the trekking journey begins.",
+  "source": "Wikipedia, Daral Lake (fetched Oct 2026)",
+  "url": "https://en.wikipedia.org/wiki/Daral_Lake"
+ },
+ {
+  "label": "Trek from Bahrain (the other side)",
+  "value": "About 3 to 4 hours on bare mountains; this side is outside the model",
+  "quote": "While in summer, it can be accessed from Bahrain in three to four hours of trekking on bare mountains.",
+  "source": "Wikipedia, Daral Lake (fetched Oct 2026)",
+  "url": "https://en.wikipedia.org/wiki/Daral_Lake"
+ },
+ {
+  "label": "Elevation (two sources differ)",
+  "value": "Wikipedia gives 3,505.2 m; the model's surface over the water reads about 3,212 m",
+  "quote": "at an elevation of 3,505.2 m (11,500 ft)",
+  "source": "Wikipedia, Daral Lake (fetched Oct 2026); model height from Copernicus DEM",
+  "url": "https://en.wikipedia.org/wiki/Daral_Lake"
+ },
+ {
+  "label": "Drainage",
+  "value": "Fed by melting glaciers; the outflow is Daral Khwar, a left tributary of the Swat River",
+  "quote": "The lake is fed by melting glaciers of the surrounding mountains and gives rise to Daral Khwar which is the main left tributary of Swat River.",
+  "source": "Wikipedia, Daral Lake (fetched Oct 2026)",
+  "url": "https://en.wikipedia.org/wiki/Daral_Lake"
+ }
+]

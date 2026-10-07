@@ -88,4 +88,7 @@ def test_optional_files_carry_sources(d):
     if p.exists():
         for ph in json.loads(p.read_text(encoding="utf-8")):
             assert ph["author"] and ph["licence"].startswith("CC") and ph["page"].startswith("https://commons.wikimedia.org/")
-            assert -90 < ph["lat"] < 90 and ph["thumb"].startswith("https://")
+            assert ph["thumb"].startswith("https://") and "NC" not in ph["licence"] and "ND" not in ph["licence"]
+            if ph["lat"] is not None:          # geotagged photos are pinned in the model, so they must lie on it
+                s_, w_, n_, e_ = json.loads((d / "meta.json").read_text(encoding="utf-8"))["grid"]["bbox"]
+                assert s_ <= ph["lat"] <= n_ and w_ <= ph["lon"] <= e_

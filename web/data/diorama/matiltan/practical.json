@@ -1,14 +1,17 @@
 [
- {"label": "From Kalam", "value": "About 11 km; a non-metalled road that needs a four-wheel-drive vehicle",
+ {"label": "From Kalam", "value": "About 11 km to Matiltan; a non-metalled road that needs a four-wheel-drive vehicle",
   "quote": "accessible through a non-metalled road from Kalam by a four-wheel drive vehicle", "source": "Wikipedia, Matiltan",
   "url": "https://en.wikipedia.org/wiki/Matiltan"},
  {"label": "The view", "value": "Falak Sar, the tallest peak of Swat, can be seen from the village",
   "quote": "The tallest peak of Swat, Falak Sar can be viewed from it.", "source": "Wikipedia, Matiltan",
   "url": "https://en.wikipedia.org/wiki/Matiltan"},
- {"label": "Altitude (Ushu valley)", "value": "About 2,300 m above sea level",
-  "quote": "it is about 2,300 metres (7,550 feet) above sea level.", "source": "Visit Pakistan, Ushu Valley",
+ {"label": "Ushu valley (not Matiltan)", "value": "Ushu is a separate place, about 8 km from Kalam and about 2,300 m up",
+  "quote": "The distance of Ushu from Kalam is roughly 8 km and it is about 2,300 metres (7,550 feet) above sea level.", "source": "Visit Pakistan, Ushu Valley (undated)",
   "url": "https://vepakistan.com/location/pakistan/khyber-pakhtunkhwa/ushu-valley/"},
- {"label": "Climate", "value": "Cold winters and mild summers, with summer rain",
-  "quote": "Ushu Valley has a temperate climate, with cold winters and mild summers.", "source": "Visit Pakistan, Ushu Valley",
+ {"label": "Climate", "value": "Cold winters and mild summers, with heavy winter snowfall",
+  "quote": "Ushu Valley has a temperate climate, with cold winters and mild summers.", "source": "Visit Pakistan, Ushu Valley (undated)",
+  "url": "https://vepakistan.com/location/pakistan/khyber-pakhtunkhwa/ushu-valley/"},
+ {"label": "Where to stay", "value": "Limited accommodation: guest houses, cottages and campsites",
+  "quote": "You can choose from guest houses, cottages, and campsites.", "source": "Visit Pakistan, Ushu Valley (undated)",
   "url": "https://vepakistan.com/location/pakistan/khyber-pakhtunkhwa/ushu-valley/"}
 ]

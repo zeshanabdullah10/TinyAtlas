@@ -1,0 +1,19 @@
+{
+  "title": "Desan Meadows",
+  "subtitle": "High meadow above Kalam, Upper Swat",
+  "bbox": [35.45, 72.51, 35.48, 72.585],
+  "arrival": {
+    "name": "Desan Meadows",
+    "point": [35.46519, 72.51827]
+  },
+  "drive_ways": [446741561],
+  "drive_start": [35.47624, 72.58203],
+  "track_ways": [446741561],
+  "trailhead": [35.4696, 72.57615],
+  "walk_ways": [],
+  "far_bbox": [35.30, 72.42, 35.60, 72.66],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "Kalam residential road (OSM way 446741561)",
+  "osm_use": "the Kalam road to the trailhead; the walk is traced over the DEM to the meadow (no mapped path)"
+}

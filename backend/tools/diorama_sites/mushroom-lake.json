@@ -1,0 +1,57 @@
+{
+  "title": "Mushroom Lake",
+  "subtitle": "High lake above Shahi Bagh, Gabral valley, Upper Swat",
+  "bbox": [
+    35.55,
+    72.282,
+    35.645,
+    72.362
+  ],
+  "lake_seed": [
+    35.6357,
+    72.29624
+  ],
+  "drive_ways": [
+    302601285,
+    491297284,
+    1159077668,
+    1159077663,
+    1159077659,
+    1159075888,
+    1159075882,
+    1159075878,
+    1159075869,
+    1159075857
+  ],
+  "track_ways": [
+    302601285,
+    491297284,
+    1159077668,
+    1159077663,
+    1159077659,
+    1159075888,
+    1159075882,
+    1159075878,
+    1159075869,
+    1159075857
+  ],
+  "drive_start": [
+    35.490439,
+    72.4709
+  ],
+  "trailhead": [
+    35.567646,
+    72.340829
+  ],
+  "walk_ways": [],
+  "far_bbox": [
+    35.47,
+    72.18,
+    35.73,
+    72.46
+  ],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "unnamed jeep track from Gabral to Shahi Bagh",
+  "osm_use": "the Gabral to Shahi Bagh jeep track and the Mushroom Lake outline"
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Pari Lake",
+  "subtitle": "Above Kundol, Utror valley, Upper Swat",
+  "bbox": [35.395, 72.405, 35.478, 72.455],
+  "lake_seed": [35.40638, 72.41399],
+  "drive_ways": [302600422],
+  "track_ways": [302600422],
+  "drive_start": [35.49044, 72.4709],
+  "trailhead": [35.472851, 72.441251],
+  "walk_ways": [69905516],
+  "far_bbox": [35.2835, 72.267, 35.5535, 72.599],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "Utror track",
+  "osm_use": "the Utror track, the footpath from the trailhead past Kundol, and the Paristan Lake outline"
+}

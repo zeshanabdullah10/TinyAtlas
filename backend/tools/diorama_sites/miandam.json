@@ -1,0 +1,17 @@
+{
+  "title": "Miandam",
+  "subtitle": "Hill resort village above the Madyan valley, Upper Swat",
+  "bbox": [35.0309, 72.5332, 35.0759, 72.5880],
+  "arrival": {
+    "name": "Miandam village",
+    "point": [35.05325, 72.56067]
+  },
+  "drive_ways": [477789378, 1240353987, 1240353986],
+  "drive_start": [35.07548, 72.49045],
+  "track_ways": [477789378, 1240353987, 1240353986],
+  "far_bbox": [34.9184, 72.3956, 35.1884, 72.7256],
+  "osm_use": "the Miandam Road up the side valley from the N-95, and the Miandam Khwar",
+  "road": "Miandam Road",
+  "drive_km": 0.6,
+  "pack": "swat"
+}

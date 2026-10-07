@@ -1,0 +1,16 @@
+{
+  "title": "Izmis Lake",
+  "subtitle": "Above Utror, Upper Swat",
+  "bbox": [35.37, 72.33, 35.46, 72.42],
+  "lake_seed": [35.39996, 72.37728],
+  "drive_ways": [302600422],
+  "track_ways": [302600422],
+  "drive_start": [35.4904, 72.4709],
+  "trailhead": [35.45265, 72.38699],
+  "walk_ways": [],
+  "far_bbox": [35.265, 72.22, 35.535, 72.54],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "Utror jeep track",
+  "osm_use": "the Utror jeep track to its end at the trailhead, and the lake outline"
+}

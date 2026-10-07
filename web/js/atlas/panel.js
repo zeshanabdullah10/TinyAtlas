@@ -7,7 +7,9 @@ let ROADS = []; loadRoads().then((r) => { ROADS = r; });
 
 const DIORAMA = { "mahodand-lake": "mahodand", "white-palace-marghazar": "white-palace",   // place slug → web/data/diorama/<site>/
   kalam: "kalam", ushu: "ushu", utror: "utror", gabral: "gabral", matiltan: "matiltan",
-  "kundol-lake": "kundol-lake", "spin-khwar-lake": "spin-khwar-lake", "jabba-zomalu-lake": "jabba-zomalu-lake", bahrain: "bahrain" };
+  "kundol-lake": "kundol-lake", "spin-khwar-lake": "spin-khwar-lake", "jabba-zomalu-lake": "jabba-zomalu-lake", bahrain: "bahrain",
+  madyan: "madyan", miandam: "miandam", "izmis-lake": "izmis-lake", "mushroom-lake": "mushroom-lake", "daral-lake": "daral-lake",
+  "pari-lake": "pari-lake", "shahi-bagh": "shahi-bagh", "desan-meadows": "desan-meadows" };
 
 const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : null);
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return "source"; } };

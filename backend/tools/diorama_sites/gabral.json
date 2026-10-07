@@ -27,13 +27,13 @@
     491297284
   ],
   "far_bbox": [
-    35.426,
-    72.3093,
-    35.606,
-    72.5307
+    35.381,
+    72.253,
+    35.651,
+    72.587
   ],
   "drive_km": 0.6,
   "pack": "swat",
-  "road": "the road from Utror",
+  "road": "road from Utror",
   "osm_use": "the road from Utror to Gabral and streams"
 }

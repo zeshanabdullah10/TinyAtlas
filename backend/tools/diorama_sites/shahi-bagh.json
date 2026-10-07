@@ -1,0 +1,53 @@
+{
+  "title": "Shahi Bagh",
+  "subtitle": "Meadow at the head of the Gabral valley, Upper Swat",
+  "bbox": [
+    35.545,
+    72.312,
+    35.59,
+    72.372
+  ],
+  "arrival": {
+    "name": "Shahi Bagh",
+    "point": [
+      35.56765,
+      72.34083
+    ]
+  },
+  "drive_ways": [
+    302601285,
+    491297284,
+    1159077668,
+    1159077663,
+    1159075888,
+    1159075882,
+    1159075878,
+    1159075869,
+    1159075857
+  ],
+  "track_ways": [
+    302601285,
+    491297284,
+    1159077668,
+    1159077663,
+    1159075888,
+    1159075882,
+    1159075878,
+    1159075869,
+    1159075857
+  ],
+  "drive_start": [
+    35.49044,
+    72.4709
+  ],
+  "far_bbox": [
+    35.45,
+    72.2,
+    35.69,
+    72.48
+  ],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "jeep track from Gabral",
+  "osm_use": "the jeep track from the Utror road up the Gabral valley to the meadow, and the streams"
+}

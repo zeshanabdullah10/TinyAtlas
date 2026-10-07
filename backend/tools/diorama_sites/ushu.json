@@ -39,5 +39,6 @@
   "osm_use": "the Kalam to Ushu road and streams",
   "road": "Kalam to Ushu road",
   "drive_km": 0.6,
-  "pack": "swat"
+  "pack": "swat",
+  "ndvi_trees": 0.55
 }

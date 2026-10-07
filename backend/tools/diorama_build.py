@@ -139,8 +139,9 @@ def chain(ways, ids, start):
 
 
 def trace_walk(site, ways, g, h, lake, lake_xz, start):
-    """The foot route from the trailhead to the shore: the mapped OSM path, then (if it stops short) the easiest
-    route over the DEM (cost = length x (1 + (slope / 0.25)^2)) to the nearest shore cell."""
+    """The foot route from the trailhead to the shore (or, on a site without a lake, to the arrival point: a meadow,
+    a pass): the mapped OSM path, then (if it stops short) the easiest route over the DEM
+    (cost = length x (1 + (slope / 0.25)^2)) to the nearest shore cell or the point."""
     from scipy.sparse import coo_matrix
     from scipy.sparse.csgraph import dijkstra
     pts = [tuple(start)]
@@ -149,6 +150,8 @@ def trace_walk(site, ways, g, h, lake, lake_xz, start):
         pts += resample([to_local(g, la, lo) for la, lo in line], 4.0)
     inbox = lambda x, z: abs(x) < g["W"] / 2 - 20 and abs(z) < g["H"] / 2 - 20
     pts = [p for p in pts if inbox(*p)]
+    if not lake.any():                              # walk to a point: the goal is the arrival point itself
+        lake_xz = np.array([to_local(g, *site["arrival"]["point"])])
     near = lambda p: float(np.min(np.hypot(*(lake_xz - p).T)))
     k = next((i for i, p in enumerate(pts) if near(p) < 30), None)
     if k is None:                                   # leave the mapped path where it comes closest to the lake
@@ -172,7 +175,11 @@ def trace_walk(site, ways, g, h, lake, lake_xz, start):
         x0, z0 = mapped[-1]
         src = int(idx[int(round((z0 + g["H"] / 2) / CELL)), int(round((x0 + g["W"] / 2) / CELL))])
         dist, pred = dijkstra(G, indices=src, return_predecessors=True)
-        shore = np.nonzero((~lake & (blur(lake.astype(float), 1) > 0.01)).ravel())[0]
+        if lake.any():
+            shore = np.nonzero((~lake & (blur(lake.astype(float), 1) > 0.01)).ravel())[0]
+        else:
+            gx, gz = lake_xz[0]
+            shore = np.array([int(idx[int(round((gz + g["H"] / 2) / CELL)), int(round((gx + g["W"] / 2) / CELL))])])
         node = int(shore[np.argmin(dist[shore])])
         path = []
         while node != src and node >= 0:
@@ -238,6 +245,28 @@ def s2_water(base, g):
     return (bands["B03"] - bands["B08"]) / (bands["B03"] + bands["B08"] + 1e-6)
 
 
+def s2_ndvi(base, g):
+    """NDVI (nir - red) / (nir + red) from the same Sentinel-2 item, on the local grid."""
+    import rasterio
+    from rasterio.warp import transform, transform_bounds
+    from rasterio.windows import from_bounds
+    lon = g["w"] + np.arange(g["cols"]) * g["cell"] / g["mx"]
+    lat = g["n"] - np.arange(g["rows"]) * g["cell"] / g["my"]
+    LON, LAT = np.meshgrid(lon, lat)
+    bands = {}
+    with rasterio.Env(AWS_NO_SIGN_REQUEST="YES", GDAL_HTTP_MULTIRANGE="YES", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif"):
+        for b in ("B04", "B08"):
+            with rasterio.open(f"/vsicurl/{base.rstrip('/')}/{b}.tif") as ds:
+                win = from_bounds(*transform_bounds("EPSG:4326", ds.crs, g["w"], g["s"], g["e"], g["n"], densify_pts=21), ds.transform)
+                a = ds.read(1, window=win, boundless=True).astype(float)
+                tr = ds.window_transform(win)
+                X, Y = transform("EPSG:4326", ds.crs, LON.ravel().tolist(), LAT.ravel().tolist())
+                col = np.clip(((np.array(X) - tr.c) / tr.a).astype(int), 0, a.shape[1] - 1)
+                row = np.clip(((np.array(Y) - tr.f) / tr.e).astype(int), 0, a.shape[0] - 1)
+                bands[b] = a[row, col].reshape(LON.shape)
+    return (bands["B08"] - bands["B04"]) / (bands["B08"] + bands["B04"] + 1e-6)
+
+
 def build(name, dem_path, wc_path, osm_path, s2=None):
     import tifffile
     site = SITES[name]
@@ -248,12 +277,19 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     dem = tifffile.imread(dem_path)                      # 3600x3600, 1 degree tile; top-left from the name (N35_00_E072 -> 36N 72E)
     import re
     tn = re.search(r"N(\d+)_00_E(\d+)", Path(dem_path).name)
-    dem_top, dem_left = (int(tn[1]) + 1.0, float(tn[2])) if tn else (36.0, 72.0)
+    dem_top, dem_left = (int(tn[1]) + dem.shape[0] / 3600, float(tn[2])) if tn else (36.0, 72.0)   # a stacked N34+N35 file is 7200 rows tall
     h = sample_tile(dem, dem_top, dem_left, 1 / 3600, g, 1)
     wc = tifffile.TiffFile(wc_path).pages[0].asarray()  # 36000x36000, top-left 36N 72E for N33E072
     cls = sample_tile(wc, 36.0, 72.0, 1 / 12000, g, 0)
     cover = np.vectorize(lambda v: COVER.get(int(v), 2))(cls).astype(np.uint8)
 
+    # Forest the 2021 map reads as meadow: where a site asks for it, grass and cropland cells as green as the mapped
+    # forest (Sentinel-2 NDVI above the site's threshold) become trees. Water, rock and snow are never touched.
+    ndvi_trees = 0
+    if site.get("ndvi_trees") and s2:
+        nd = s2_ndvi(s2, g)
+        conv = (cover == 2) & np.isin(cls, (30, 40)) & (nd > site["ndvi_trees"])
+        ndvi_trees = int(conv.sum()); cover[conv] = 1
     has_lake = "lake_seed" in site
     lake = np.zeros(h.shape, bool)
     level, lake_source, sx, sz = None, None, 0.0, 0.0
@@ -460,14 +496,17 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
                + (f"; the last {walk['traced_km']} km is not mapped and is traced over the ground (easiest slope on the DEM)." if walk["traced_km"] else ".")]
               if walk else []),
             *([f"The {len(buildings)} buildings stand on their OSM footprints; their height (OSM levels where mapped, else one or two storeys), roofs and colours are illustrative, after visitors' photos."] if buildings else []),
+            *([f"{ndvi_trees * CELL * CELL / 1e6:.2f} km² that WorldCover 2021 maps as grass or cropland is drawn as forest: Sentinel-2 NDVI there is above {site['ndvi_trees']} (as green as the mapped forest), and photos show deodar."] if ndvi_trees else []),
             "Season colours, snow, ice and dawn mist are illustrative.",
             "Traffic on the drive is illustrative: the vehicle kinds are those seen on Swat roads (Willys jeeps, Hilux, Suzuki vans, Mehran cars, CD70 motorbikes, Qingqi rickshaws, painted trucks); their number and movement are not counted.",
         ],
-        "sources": ([{"name": "Copernicus Sentinel-2 L2A", "use": f"the lake outline (NDWI, scene {lake_source.split()[-1]})",
-                      "licence": "Contains modified Copernicus Sentinel data 2025", "url": "https://registry.opendata.aws/sentinel-2-l2a-cogs/"}] if s2 else []) + [
+        "sources": ([{"name": "Copernicus Sentinel-2 L2A",
+                      "use": " and ".join(u for u in (f"the lake outline (NDWI)" if s2 and has_lake else "", "forest the 2021 map reads as meadow (NDVI)" if ndvi_trees else "") if u)
+                      + f", scene {s2.rstrip('/').split('/')[-1]}",
+                      "licence": "Contains modified Copernicus Sentinel data 2025", "url": "https://registry.opendata.aws/sentinel-2-l2a-cogs/"}] if s2 and (has_lake or ndvi_trees) else []) + [
             {"name": "Copernicus DEM GLO-30", "use": "terrain heights", "licence": "© DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA",
              "url": "https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model"},
-            {"name": "ESA WorldCover 10 m 2021 v200", "use": "trees, meadow, rock, snow" + ("" if s2 else ", the lake outline"), "licence": "CC BY 4.0, © ESA WorldCover project 2021",
+            {"name": "ESA WorldCover 10 m 2021 v200", "use": "trees, meadow, rock, snow" + ("" if s2 or not has_lake else ", the lake outline"), "licence": "CC BY 4.0, © ESA WorldCover project 2021",
              "url": "https://esa-worldcover.org"},
             *([{"name": "White Palace model (TRELLIS, MIT)", "use": "the palace, generated from Commons photos by Adilswati, Arszul123 and Ihsan Farid",
                  "licence": "CC BY-SA 3.0 / 4.0 (texture derived from the photos)", "url": "https://commons.wikimedia.org/wiki/File:White_Palace_Maraghzar,_Swat.jpg"}]

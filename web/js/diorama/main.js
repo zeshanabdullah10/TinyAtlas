@@ -137,11 +137,23 @@ const holdKeys = new Set();
 // photos taken near here (Wikimedia Commons, geotagged, credited)
 let photos = [];
 fetch(base + "photos.json").then((r) => (r.ok ? r.json() : [])).then((list) => {
-  photos = list.map((p) => { const [x, z] = site.toLocal(p.lat, p.lon); return { ...p, x, z }; });
-  hud.addLabels(photos.map((p) => ({ text: `📷 ${p.caption}`, name: p.caption, sub: `${p.author}, ${p.date.slice(0, 4)}`, photo: p, group: "Photos",
+  // geotagged photos are pinned where they were taken; the rest (lat/lon null) are listed under "Before you go"
+  photos = list.filter((p) => p.lat != null && p.lon != null).map((p) => { const [x, z] = site.toLocal(p.lat, p.lon); return { ...p, x, z }; });
+  const placeless = list.filter((p) => p.lat == null || p.lon == null);
+  if (placeless.length) {
+    const g = document.createElement("div"); g.className = "photo-strip";
+    for (const p of placeless) {
+      const a = document.createElement("a"); a.href = p.page; a.target = "_blank"; a.rel = "noopener";
+      a.title = `${p.caption} · ${p.author}${p.date ? ", " + p.date.slice(0, 4) : ""} · ${p.licence} (Wikimedia Commons)`;
+      const im = document.createElement("img"); im.src = p.thumb; im.alt = p.caption; im.loading = "lazy"; a.append(im); g.append(a);
+    }
+    const b = document.getElementById("before"); b.append(g); b.hidden = false;
+  }
+  hud.addLabels(photos.map((p) => ({ text: `📷 ${p.caption}`, name: p.caption, sub: `${p.author}${p.date ? ", " + p.date.slice(0, 4) : ""}`, photo: p, group: "Photos",
     hint: "Open the photo and walk to where it was taken", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 300 })));
 }).catch(() => {});
 const weather = new Weather(latC, (meta.grid.bbox[1] + meta.grid.bbox[3]) / 2, F.arrival_m);
+weather.place = meta.lake ? "the lake" : meta.arrival.name;
 weather.load().then((t) => hud.weather(t)).catch(() => {});
 const life = meta.lake ? new Life(scene, site, loop, path, lakeC) : { labels: [], horses: [], update() {} };
 const mistG = mist(lakeC); scene.add(mistG);
@@ -404,7 +416,7 @@ function hikeToLake() {
   const W = meta.walk, P = W.pts, cum = [0];
   for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
   const hours = W.km / 3 + W.climb_m / 400;     // walking pace with Naismith's rule for the climb
-  toast(`The jeep track ends here. ${W.km} km on foot to the lake, about ${hours.toFixed(1)} h` +
+  toast(`The jeep track ends here. ${W.km} km on foot to ${meta.lake ? "the lake" : meta.arrival.name}, about ${hours.toFixed(1)} h` +
         (W.traced_km ? ` (the last ${W.traced_km} km has no mapped path)` : "") + ".", 7);
   hike = { s: 0, cum, P, dur: Math.min(40, 14 + W.km * 3) };
   state = "hike";

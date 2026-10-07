@@ -1,0 +1,17 @@
+{
+  "title": "Madyan",
+  "subtitle": "Swat River on the N-95, Upper Swat",
+  "bbox": [35.1188, 72.5100, 35.1638, 72.5649],
+  "arrival": {
+    "name": "Madyan bazaar",
+    "point": [35.14099, 72.53861]
+  },
+  "drive_ways": [1240353989],
+  "drive_start": [35.0723257, 72.4916768],
+  "track_ways": [1240353989, 850198232, 850198233, 1240922502, 1296215266],
+  "far_bbox": [35.00, 72.43, 35.28, 72.65],
+  "osm_use": "the N-95 road into Madyan from the south, the Swat River and the buildings of the bazaar and riverside hotels",
+  "road": "N-95",
+  "drive_km": 0.6,
+  "pack": "swat"
+}

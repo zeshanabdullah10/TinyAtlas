@@ -1,0 +1,16 @@
+{
+  "title": "Daral Lake",
+  "subtitle": "Daral valley above Gabin Jabba, Upper Swat",
+  "bbox": [35.14, 72.33, 35.245, 72.43],
+  "lake_seed": [35.21710, 72.37524],
+  "drive_ways": [697528068, 697528069, 697527861],
+  "drive_start": [35.1412, 72.3831],
+  "track_ways": [697527861, 697528069, 697528068, 697527862, 697527863, 697539261, 697522625, 697522624, 357560223],
+  "trailhead": [35.1768, 72.3706],
+  "walk_ways": [],
+  "far_bbox": [35.07, 72.24, 35.36, 72.51],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "Gabin Jabba Road (OSM, unclassified)",
+  "osm_use": "the Gabin Jabba road to the trailhead, the Bagh Deri road below it, the Daral lake outline (OSM water, name Daral Jheel) and the Daral Khwar"
+}
