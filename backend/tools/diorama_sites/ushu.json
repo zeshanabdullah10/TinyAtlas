@@ -1,0 +1,43 @@
+{
+  "title": "Ushu Forest",
+  "subtitle": "Ushu valley, Upper Swat",
+  "bbox": [
+    35.58,
+    72.657,
+    35.635,
+    72.723
+  ],
+  "arrival": {
+    "name": "Ushu",
+    "point": [
+      35.607141,
+      72.68827
+    ]
+  },
+  "drive_ways": [
+    1155994354,
+    485183412,
+    507506231
+  ],
+  "drive_start": [
+    35.5648,
+    72.6706
+  ],
+  "track_ways": [
+    1155994354,
+    485183412,
+    507506231,
+    507506230,
+    345805207
+  ],
+  "far_bbox": [
+    35.473,
+    72.524,
+    35.743,
+    72.856
+  ],
+  "osm_use": "the Kalam to Ushu road and streams",
+  "road": "Kalam to Ushu road",
+  "drive_km": 0.6,
+  "pack": "swat"
+}

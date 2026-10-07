@@ -1,0 +1,575 @@
+{
+ "index": [
+  {
+   "sel": "title",
+   "key": "index.title"
+  },
+  {
+   "sel": "body:nth-of-type(1) > a:nth-of-type(1)",
+   "key": "index.skip"
+  },
+  {
+   "sel": "body:nth-of-type(1) > header:nth-of-type(1) > a:nth-of-type(1)",
+   "key": "index.brand.aria",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "body:nth-of-type(1) > header:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(1)",
+   "key": "index.brand"
+  },
+  {
+   "sel": "body:nth-of-type(1) > header:nth-of-type(1) > nav:nth-of-type(1)",
+   "key": "index.nav.sections",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "body:nth-of-type(1) > header:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(1)",
+   "key": "index.nav.valleys"
+  },
+  {
+   "sel": "body:nth-of-type(1) > header:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(2)",
+   "key": "index.nav.time"
+  },
+  {
+   "sel": "body:nth-of-type(1) > header:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(3)",
+   "key": "index.nav.how"
+  },
+  {
+   "sel": "body:nth-of-type(1) > header:nth-of-type(1) > nav:nth-of-type(1) > a:nth-of-type(4)",
+   "key": "index.nav.github"
+  },
+  {
+   "sel": "#h-title",
+   "key": "index.hero.title"
+  },
+  {
+   "sel": "#main > section:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1) > em:nth-of-type(1)",
+   "key": "index.hero.places"
+  },
+  {
+   "sel": "#main > section:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)",
+   "key": "index.hero.lead"
+  },
+  {
+   "sel": "#main > section:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3) > a:nth-of-type(1)",
+   "key": "index.hero.open"
+  },
+  {
+   "sel": "#main > section:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3) > a:nth-of-type(2)",
+   "key": "index.hero.lower"
+  },
+  {
+   "sel": "#main > section:nth-of-type(1) > p:nth-of-type(1)",
+   "key": "index.hero.caption"
+  },
+  {
+   "sel": "#h-valleys",
+   "key": "index.valleys.title"
+  },
+  {
+   "sel": "#valleys > p:nth-of-type(1)",
+   "key": "index.valleys.sub"
+  },
+  {
+   "sel": "#regions > noscript:nth-of-type(1) > p:nth-of-type(1) > a:nth-of-type(1)",
+   "key": "index.valleys.noscript.swat"
+  },
+  {
+   "sel": "#regions > noscript:nth-of-type(1) > p:nth-of-type(1) > a:nth-of-type(2)",
+   "key": "index.valleys.noscript.lower"
+  },
+  {
+   "sel": "#h-do",
+   "key": "index.do.title"
+  },
+  {
+   "sel": "#main > section:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(1) > h3:nth-of-type(1)",
+   "key": "index.do.1.title"
+  },
+  {
+   "sel": "#main > section:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(1) > p:nth-of-type(1)",
+   "key": "index.do.1.body"
+  },
+  {
+   "sel": "#main > section:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(2) > h3:nth-of-type(1)",
+   "key": "index.do.2.title"
+  },
+  {
+   "sel": "#main > section:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(2) > p:nth-of-type(1)",
+   "key": "index.do.2.body"
+  },
+  {
+   "sel": "#main > section:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(3) > h3:nth-of-type(1)",
+   "key": "index.do.3.title"
+  },
+  {
+   "sel": "#main > section:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(3) > p:nth-of-type(1)",
+   "key": "index.do.3.body"
+  },
+  {
+   "sel": "#main > section:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(4) > h3:nth-of-type(1)",
+   "key": "index.do.4.title"
+  },
+  {
+   "sel": "#main > section:nth-of-type(3) > ul:nth-of-type(1) > li:nth-of-type(4) > p:nth-of-type(1)",
+   "key": "index.do.4.body"
+  },
+  {
+   "sel": "#h-time",
+   "key": "index.time.title"
+  },
+  {
+   "sel": "#through-time > p:nth-of-type(1)",
+   "key": "index.time.sub"
+  },
+  {
+   "sel": "#timeline",
+   "key": "index.timeline.aria",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "#h-how",
+   "key": "index.how.title"
+  },
+  {
+   "sel": "#how > div:nth-of-type(1) > p:nth-of-type(1)",
+   "key": "index.how.p1"
+  },
+  {
+   "sel": "#how > div:nth-of-type(1) > p:nth-of-type(2)",
+   "key": "index.how.p2"
+  },
+  {
+   "sel": "#how > div:nth-of-type(1) > p:nth-of-type(3) > a:nth-of-type(1)",
+   "key": "index.how.github"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(1) > dt:nth-of-type(1)",
+   "key": "index.src.copernicus"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(1) > dd:nth-of-type(1)",
+   "key": "index.src.copernicus.desc"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(2) > dt:nth-of-type(1)",
+   "key": "index.src.worldcover"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(2) > dd:nth-of-type(1)",
+   "key": "index.src.worldcover.desc"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(3) > dt:nth-of-type(1)",
+   "key": "index.src.sentinel"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(3) > dd:nth-of-type(1)",
+   "key": "index.src.sentinel.desc"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(4) > dt:nth-of-type(1)",
+   "key": "index.src.osm"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(4) > dd:nth-of-type(1)",
+   "key": "index.src.osm.desc"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(5) > dt:nth-of-type(1)",
+   "key": "index.src.commons"
+  },
+  {
+   "sel": "#how > dl:nth-of-type(1) > div:nth-of-type(5) > dd:nth-of-type(1)",
+   "key": "index.src.commons.desc"
+  },
+  {
+   "sel": "body:nth-of-type(1) > footer:nth-of-type(1) > p:nth-of-type(1) > a:nth-of-type(1)",
+   "key": "index.hero.open"
+  },
+  {
+   "sel": "body:nth-of-type(1) > footer:nth-of-type(1) > p:nth-of-type(2)",
+   "key": "index.foot.credits"
+  },
+  {
+   "sel": "body:nth-of-type(1) > footer:nth-of-type(1) > p:nth-of-type(3)",
+   "key": "index.foot.open_source",
+   "text": 0
+  },
+  {
+   "sel": "body:nth-of-type(1) > footer:nth-of-type(1) > p:nth-of-type(3) > a:nth-of-type(1)",
+   "key": "index.foot.code"
+  },
+  {
+   "sel": "body:nth-of-type(1) > noscript:nth-of-type(1) > p:nth-of-type(1)",
+   "key": "index.nojs"
+  }
+ ],
+ "atlas": [
+  {
+   "sel": "title",
+   "key": "atlas.title"
+  },
+  {
+   "sel": "#gl",
+   "key": "atlas.canvas_label",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "body:nth-of-type(1) > noscript:nth-of-type(1) > p:nth-of-type(1)",
+   "key": "atlas.nojs"
+  }
+ ],
+ "diorama": [
+  {
+   "sel": "title",
+   "key": "diorama.title"
+  },
+  {
+   "sel": "#gl",
+   "key": "diorama.canvas_label",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "#loading",
+   "key": "diorama.loading"
+  },
+  {
+   "sel": "#intro > p:nth-of-type(1)",
+   "key": "diorama.intro.eyebrow"
+  },
+  {
+   "sel": "#title",
+   "key": "diorama.intro.title"
+  },
+  {
+   "sel": "#intro > p:nth-of-type(3)",
+   "key": "diorama.intro.lede"
+  },
+  {
+   "sel": "#intro > div:nth-of-type(1) > button:nth-of-type(1)",
+   "key": "diorama.intro.drive_pre",
+   "text": 0
+  },
+  {
+   "sel": "#intro > div:nth-of-type(1) > button:nth-of-type(1)",
+   "key": "diorama.intro.drive_post",
+   "text": 1
+  },
+  {
+   "sel": "#intro > div:nth-of-type(1) > button:nth-of-type(2)",
+   "key": "diorama.intro.explore"
+  },
+  {
+   "sel": "#intro > p:nth-of-type(4)",
+   "key": "diorama.intro.sound",
+   "text": 0
+  },
+  {
+   "sel": "#about-open",
+   "key": "diorama.intro.about"
+  },
+  {
+   "sel": "#back-atlas",
+   "key": "diorama.back"
+  },
+  {
+   "sel": "#back-atlas",
+   "key": "diorama.back.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#hud > div:nth-of-type(1) > small:nth-of-type(1)",
+   "key": "diorama.gauge.speed"
+  },
+  {
+   "sel": "#hud > div:nth-of-type(2) > small:nth-of-type(1)",
+   "key": "diorama.gauge.altitude"
+  },
+  {
+   "sel": "#g-left-l",
+   "key": "diorama.gauge.to_lake"
+  },
+  {
+   "sel": "#hud > div:nth-of-type(4) > small:nth-of-type(1)",
+   "key": "diorama.gauge.grade"
+  },
+  {
+   "sel": "#hud > div:nth-of-type(5) > small:nth-of-type(1)",
+   "key": "diorama.gauge.passengers"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1)",
+   "key": "diorama.dock.label",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(1)",
+   "key": "diorama.dock.camera",
+   "text": 0
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(1)",
+   "key": "diorama.dock.camera.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#btn-pace",
+   "key": "diorama.dock.pace",
+   "text": 0
+  },
+  {
+   "sel": "#btn-pace",
+   "key": "diorama.dock.pace.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#btn-cruise",
+   "key": "diorama.dock.cruise"
+  },
+  {
+   "sel": "#btn-cruise",
+   "key": "diorama.dock.cruise.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(4)",
+   "key": "diorama.dock.skip"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(4)",
+   "key": "diorama.dock.skip.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#btn-low",
+   "key": "diorama.dock.low"
+  },
+  {
+   "sel": "#btn-low",
+   "key": "diorama.dock.low.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(6)",
+   "key": "diorama.dock.photo"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(6)",
+   "key": "diorama.dock.photo.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(7)",
+   "key": "diorama.dock.more"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(7)",
+   "key": "diorama.dock.more.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#btn-sound",
+   "key": "diorama.dock.sound"
+  },
+  {
+   "sel": "#btn-places",
+   "key": "diorama.dock.places"
+  },
+  {
+   "sel": "#btn-season",
+   "key": "diorama.dock.season",
+   "text": 0
+  },
+  {
+   "sel": "#btn-season",
+   "key": "diorama.dock.season.title",
+   "attr": "title"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > label:nth-of-type(1) > span:nth-of-type(1)",
+   "key": "diorama.dock.sun"
+  },
+  {
+   "sel": "#sun",
+   "key": "diorama.dock.sun.label",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "#app > nav:nth-of-type(1) > button:nth-of-type(11)",
+   "key": "diorama.dock.whole"
+  },
+  {
+   "sel": "#app > p:nth-of-type(3)",
+   "key": "diorama.hint.drive"
+  },
+  {
+   "sel": "#p-left",
+   "key": "diorama.pedal.left"
+  },
+  {
+   "sel": "#p-right",
+   "key": "diorama.pedal.right"
+  },
+  {
+   "sel": "#p-horn",
+   "key": "diorama.pedal.horn"
+  },
+  {
+   "sel": "#p-brake",
+   "key": "diorama.pedal.brake"
+  },
+  {
+   "sel": "#p-gas",
+   "key": "diorama.pedal.gas"
+  },
+  {
+   "sel": "#arrive-eyebrow",
+   "key": "diorama.arrive.eyebrow"
+  },
+  {
+   "sel": "#arrive > h2:nth-of-type(1)",
+   "key": "diorama.intro.title"
+  },
+  {
+   "sel": "#before > summary:nth-of-type(1)",
+   "key": "diorama.arrive.before"
+  },
+  {
+   "sel": "#arrive > div:nth-of-type(1) > button:nth-of-type(1)",
+   "key": "diorama.arrive.tour"
+  },
+  {
+   "sel": "#arrive > div:nth-of-type(1) > button:nth-of-type(2)",
+   "key": "diorama.arrive.walk"
+  },
+  {
+   "sel": "#btn-again",
+   "key": "diorama.arrive.again"
+  },
+  {
+   "sel": "#arrive > div:nth-of-type(1) > button:nth-of-type(4)",
+   "key": "diorama.dock.whole"
+  },
+  {
+   "sel": "#arrive > p:nth-of-type(4)",
+   "key": "diorama.arrive.note"
+  },
+  {
+   "sel": "#photo-close",
+   "key": "diorama.photo.close_label"
+  },
+  {
+   "sel": "#photo-close",
+   "key": "diorama.photo.close",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "#vp-name",
+   "key": "diorama.walk.default_vp"
+  },
+  {
+   "sel": "#walkbar > div:nth-of-type(1)",
+   "key": "diorama.walk.how",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "#m-foot",
+   "key": "diorama.walk.foot"
+  },
+  {
+   "sel": "#m-horse",
+   "key": "diorama.walk.horse"
+  },
+  {
+   "sel": "#m-boat",
+   "key": "diorama.walk.boat"
+  },
+  {
+   "sel": "#p-walk",
+   "key": "diorama.walk.hold"
+  },
+  {
+   "sel": "#btn-auto",
+   "key": "diorama.walk.auto"
+  },
+  {
+   "sel": "#walkbar > div:nth-of-type(2) > button:nth-of-type(3)",
+   "key": "diorama.walk.next"
+  },
+  {
+   "sel": "#walkbar > div:nth-of-type(2) > button:nth-of-type(4)",
+   "key": "diorama.walk.lake"
+  },
+  {
+   "sel": "#walkbar > p:nth-of-type(2)",
+   "key": "diorama.walk.hint"
+  },
+  {
+   "sel": "#places",
+   "key": "diorama.dock.places",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "#places > header:nth-of-type(1) > h2:nth-of-type(1)",
+   "key": "diorama.dock.places"
+  },
+  {
+   "sel": "#places-close",
+   "key": "diorama.places.close"
+  },
+  {
+   "sel": "#places > p:nth-of-type(1)",
+   "key": "diorama.places.note"
+  },
+  {
+   "sel": "#lb-close",
+   "key": "diorama.places.close"
+  },
+  {
+   "sel": "#lb-x",
+   "key": "diorama.photo.close_label"
+  },
+  {
+   "sel": "#lb-x",
+   "key": "diorama.places.close",
+   "attr": "aria-label"
+  },
+  {
+   "sel": "#about > h2:nth-of-type(1)",
+   "key": "diorama.intro.about"
+  },
+  {
+   "sel": "#about > p:nth-of-type(1)",
+   "key": "diorama.about.p"
+  },
+  {
+   "sel": "#about > h3:nth-of-type(1)",
+   "key": "diorama.about.measured"
+  },
+  {
+   "sel": "#about > h3:nth-of-type(2)",
+   "key": "diorama.about.sources"
+  },
+  {
+   "sel": "#about > h3:nth-of-type(3)",
+   "key": "diorama.about.illustrative"
+  },
+  {
+   "sel": "#about > h3:nth-of-type(4)",
+   "key": "diorama.arrive.before"
+  },
+  {
+   "sel": "#about-practical",
+   "key": "diorama.about.practical"
+  },
+  {
+   "sel": "#about-close",
+   "key": "diorama.places.close"
+  },
+  {
+   "sel": "body:nth-of-type(1) > noscript:nth-of-type(1) > p:nth-of-type(1)",
+   "key": "diorama.nojs"
+  }
+ ]
+}

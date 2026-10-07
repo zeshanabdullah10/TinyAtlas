@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trip plan</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/tripkit.css">
+</head>
+<body>
+<div class="no-print" style="padding:12px;display:flex;gap:8px;align-items:center">
+  <button type="button" id="print-now" style="min-height:44px;padding:0 14px">Print</button>
+  <span style="font-size:13px;color:#555">Use A4 paper. Choose "Save as PDF" to keep a copy.</span>
+</div>
+<main class="plan" id="plan"><p>Loading your plan…</p></main>
+<script type="module">
+import { h } from "./js/dom.js";
+
+const q = new URLSearchParams(location.search);
+const pack = q.get("pack") || "swat";
+const want = (q.get("slugs") || "").split(",").filter(Boolean);
+const base = `/packs/${encodeURIComponent(pack)}/atlas/`;
+const plan = document.getElementById("plan");
+document.getElementById("print-now").addEventListener("click", () => print());
+
+async function json(url) { try { return await (await fetch(url)).json(); } catch { return null; } }
+
+const [places, emergency, files] = await Promise.all([
+  json(`${base}places.json`), json("data/emergency.json"), json(`${base}files.json`)]);
+const today = new Date().toISOString().slice(0, 10);
+const chosen = (places || []).filter((p) => !want.length || want.includes(p.slug));
+
+const placeBlock = (p) => h("div", { class: "place" },
+  h("h3", null, p.name, p.name_ur ? h("span", { class: "ur", lang: "ur" }, `  ${p.name_ur}`) : null),
+  h("p", { class: "meta" }, [
+    p.ground_m != null ? `Ground ${Math.round(p.ground_m)} m` : null,
+    p.kind ? p.kind : null, p.area ? p.area : null].filter(Boolean).join(" · ")),
+  p.access ? h("p", null, h("strong", null, "Access: "), p.access) : null,
+  p.summary ? h("p", null, p.summary) : null);
+
+plan.replaceChildren(
+  h("h1", null, "My trip plan"),
+  h("p", { class: "meta" }, `Printed ${today}. Map: ${pack}. Heights are measured from the terrain data; access notes are estimates.`),
+  h("h2", null, "Places"),
+  chosen.length ? chosen.map(placeBlock) : h("p", null, "No places were chosen. Pick places in the trip kit and print again."),
+  h("h2", null, "Emergency numbers"),
+  h("ul", null, (emergency?.numbers || []).map((n) => h("li", null, `${n.name}: ${n.number} (${n.covers}). Checked ${n.checked}.`))),
+  h("p", { class: "meta" }, "Numbers are listed only when confirmed on an official page. Check them again before travel."),
+  h("h2", null, "Sources"),
+  h("ul", { class: "sources" }, [
+    ...(emergency?.numbers || []).map((n) => h("li", null, `${n.source}: ${n.url}`)),
+    h("li", null, `Place summaries and access notes: Tiny Atlas map data for ${pack} (see each place in the atlas for its sources).`),
+    files ? h("li", null, `Map files: ${files.length} files in the offline pack.`) : null,
+  ]));
+</script>
+</body>
+</html>

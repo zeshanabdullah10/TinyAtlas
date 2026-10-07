@@ -1,0 +1,10 @@
+.floods-panel { background: var(--glass-soft, rgba(24,20,17,.86)); color: var(--ink, #f3ebdd); border: 1px solid var(--line, rgba(243,235,221,.16)); border-radius: 10px; padding: 14px 16px; max-width: 460px; font-size: 14px; line-height: 1.5; }
+.floods-panel h3 { margin: 0 0 8px; font-size: 16px; }
+.floods-toggle { display: flex; gap: 8px; margin-bottom: 8px; }
+.floods-year { background: #15120f; color: inherit; border: 1px solid var(--line, rgba(243,235,221,.16)); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.floods-year[aria-pressed="true"] { border-color: #4fa3d9; box-shadow: inset 0 0 0 1px #4fa3d9; }
+.floods-facts-list { padding-left: 18px; margin: 6px 0; }
+.floods-facts-list a { color: #e9a23b; }
+.floods-note { opacity: .75; font-size: 12px; margin: 8px 0 0; }
+.floods-panel [hidden] { display: none; }
+@media (max-width: 480px) { .floods-panel { max-width: none; margin: 0 16px; } }

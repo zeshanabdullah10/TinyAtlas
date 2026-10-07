@@ -1,0 +1,436 @@
+{
+  "_meta": {
+    "source": "Wikivoyage Urdu phrasebook (CC BY-SA), https://en.wikivoyage.org/wiki/Urdu_phrasebook, fetched 2026-10-08 via WebFetch in 3 passes (Basics/Problems/Numbers; Lodging/Eating/Money/Transportation; Taxi). Romanisations are the page's own and inconsistent; Urdu needs native review.",
+    "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+    "checked": "2026-10-08",
+    "status": "extracted from source page; needs native review",
+    "take_me_construction": "Taxi section: 'مجھے ___ لے چلے' (Take me to ___, please). Place names from places.json name_ur substitute for ___."
+  },
+  "phrases": [
+    {
+      "en": "Hello.",
+      "ur": "السلام علیکم",
+      "roman_ur": "as-SALAAM alaykum",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Thank you.",
+      "ur": "شکریہ",
+      "roman_ur": "SHukriyaa",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Please.",
+      "ur": "برائے مہربانی",
+      "roman_ur": "Ba-raa-ay may-har-baa-ni",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Goodbye.",
+      "ur": "خدا حافظ",
+      "roman_ur": "Khud-da Haa-fiz",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Yes.",
+      "ur": "جی/ہاں۔",
+      "roman_ur": "Jee/Haa",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "No.",
+      "ur": "نہیں۔",
+      "roman_ur": "Nahee",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Excuse me.",
+      "ur": "سنئے۔",
+      "roman_ur": "Sun-ni-ay",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "I'm sorry.",
+      "ur": "معاف کیجئے۔",
+      "roman_ur": "Maaf kee-jee-ay",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Good morning.",
+      "ur": "صبح بخیر۔",
+      "roman_ur": "Subah ba-khayr",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Good night.",
+      "ur": "شب بخیر۔",
+      "roman_ur": "Shab ba-khayr",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Do you speak English?",
+      "ur": "آپ انگلش/انگریزی بولتے ہے؟",
+      "roman_ur": "Aap Ang-ray-zi/English bool-tay hai?",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "I don't understand.",
+      "ur": "مجھے سمجھ نہیں آیا۔",
+      "roman_ur": "Muj-hay sam-maj nahi aaya",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Where is the toilet?",
+      "ur": "غسل خانہ کہاں پر ہے؟",
+      "roman_ur": "Ghusal-khaana kahaa hai?",
+      "category": "Basics",
+      "source": "Wikivoyage Urdu phrasebook (section: Basics)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Help!",
+      "ur": "مدد",
+      "roman_ur": "Ma-dad",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "It's an emergency.",
+      "ur": "ایمرجنسی ہے۔",
+      "roman_ur": "Emergency hai.",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "I need a doctor.",
+      "ur": "مجھے ڈاکٹر کی ضرورت ہے۔",
+      "roman_ur": "Mujhe doctor ki zaroorat hai.",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "I'm sick.",
+      "ur": "میں بیمار ہوں۔",
+      "roman_ur": "Mein bimaar hoon.",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "I've been injured.",
+      "ur": "میں زخمی ہوگیا ہوں۔",
+      "roman_ur": "Mein zakhmi ho gaya hoo.",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "I lost my wallet.",
+      "ur": "میرا بٹوہ گم ہوگیا ہے۔",
+      "roman_ur": "Mera battwa ghum ho gaya hai.",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "I'm lost.",
+      "ur": "میں گم ہو گیا ہوں۔",
+      "roman_ur": "Mein ghum ho gaya hoon.",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "I'll call the police.",
+      "ur": "میں پولیس کو کال کروں گا/کروں گی۔",
+      "roman_ur": "Mai police ko call karoon ga/karoon gi",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "Can I use your phone?",
+      "ur": "کیا میں آپکا فون استعمال کرسکتا ہوں؟",
+      "roman_ur": "Kya mein apka phone istamaal kar sakta hoo?",
+      "category": "Emergencies",
+      "source": "Wikivoyage Urdu phrasebook (section: Problems)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "review": "required"
+    },
+    {
+      "en": "Do you have any rooms available?",
+      "ur": "کیا آپ کے پاس کمرے دستیاب ہیں؟",
+      "roman_ur": "Kya aap kay pass kamray dastiaab hai?",
+      "category": "Lodging",
+      "source": "Wikivoyage Urdu phrasebook (section: Lodging)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "How much is a room for one person?",
+      "ur": "ایک افراد کے لیئے کمرے کا کرایا کتنا ہوگا؟",
+      "roman_ur": "Aik afraad kay liye kamray ka kiraya kitna hoga?",
+      "category": "Lodging",
+      "source": "Wikivoyage Urdu phrasebook (section: Lodging)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "May I see the room first?",
+      "ur": "کیا میں پہلے کمرہ دیکھ لوں؟",
+      "roman_ur": "Kya mein pehlay kamra daikh sakta hoo?",
+      "category": "Lodging",
+      "source": "Wikivoyage Urdu phrasebook (section: Lodging)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Is breakfast included?",
+      "ur": "کیا ناشتہ شامل ہے؟",
+      "roman_ur": "Kya nashta shamil hai?",
+      "category": "Lodging",
+      "source": "Wikivoyage Urdu phrasebook (section: Lodging)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "I want to check out.",
+      "ur": "مجھے چیک آوٹ کرنا ہے۔",
+      "roman_ur": "Mujhay check out karna hai",
+      "category": "Lodging",
+      "source": "Wikivoyage Urdu phrasebook (section: Lodging)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "A table for one person, please.",
+      "ur": "برائے مہربانی، ایک افراد کے لئے میز۔",
+      "roman_ur": "Baraayay meharbaani, aik afraad kay liye maize.",
+      "category": "Eating",
+      "source": "Wikivoyage Urdu phrasebook (section: Eating)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Can I look at the menu, please?",
+      "ur": "برائے مہربانی، کیا میں مینیو دیکھ سکتا ہوں؟",
+      "roman_ur": "Baraayay meharbaani, kya mein menu daikh sakta hoo?",
+      "category": "Eating",
+      "source": "Wikivoyage Urdu phrasebook (section: Eating)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "I'm a vegetarian.",
+      "ur": "میں صرف سبزی کھاتا ہوں۔",
+      "roman_ur": "Mein sirf sabzi khaata hoo.",
+      "category": "Eating",
+      "source": "Wikivoyage Urdu phrasebook (section: Eating)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "I don't eat beef.",
+      "ur": "میں بڑا گوشت نہیں کھاتا۔",
+      "roman_ur": "Mein barra ghost nahi khaata.",
+      "category": "Eating",
+      "source": "Wikivoyage Urdu phrasebook (section: Eating)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "It was delicious.",
+      "ur": "بہت لزیز تھا۔",
+      "roman_ur": "Buhat lazeez tha.",
+      "category": "Eating",
+      "source": "Wikivoyage Urdu phrasebook (section: Eating)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "The check, please.",
+      "ur": "برائے مہربانی، بل لے آیئے۔",
+      "roman_ur": "Baraayay meharbaani, bil lay ae-yay.",
+      "category": "Eating",
+      "source": "Wikivoyage Urdu phrasebook (section: Eating)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Do you accept credit cards?",
+      "ur": "کیا آپ کریڈٹ کارڈ قبول کرتے ہے؟",
+      "roman_ur": "Kya app credit card kabool kartay hai?",
+      "category": "Money",
+      "source": "Wikivoyage Urdu phrasebook (section: Money)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Can you change money for me?",
+      "ur": "کیا آپ میرے لیئے پیسے تبدیل کرسکتے ہیں؟",
+      "roman_ur": "Kya app mere liye paisay tabdeel kar saktay hai?",
+      "category": "Money",
+      "source": "Wikivoyage Urdu phrasebook (section: Money)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "What is the exchange rate?",
+      "ur": "ایکسچینج ریٹ کیا ہے؟",
+      "roman_ur": "Exchange rate kya hai?",
+      "category": "Money",
+      "source": "Wikivoyage Urdu phrasebook (section: Money)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Where is an automatic teller machine (ATM)?",
+      "ur": "اے ٹی ایم مشین کہاں ہے؟",
+      "roman_ur": "ATM machine kahaa hai?",
+      "category": "Money",
+      "source": "Wikivoyage Urdu phrasebook (section: Money)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Turn left.",
+      "ur": "بائیں طرف مڑیں",
+      "roman_ur": "Baa-yay taraf murray",
+      "category": "Directions",
+      "source": "Wikivoyage Urdu phrasebook (section: Transportation / Directions)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Turn right.",
+      "ur": "دائیں طرف مڑیں",
+      "roman_ur": "Daa-yay taraf murray",
+      "category": "Directions",
+      "source": "Wikivoyage Urdu phrasebook (section: Transportation / Directions)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Can you show me on the map?",
+      "ur": "کیا آپ مجھے نقشے میں دکھا سکتے ہے؟",
+      "roman_ur": "Kya aap mujhay nakshay mai dikha saktay hai?",
+      "category": "Directions",
+      "source": "Wikivoyage Urdu phrasebook (section: Transportation / Directions)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Taxi!",
+      "ur": "ٹیکسی!",
+      "roman_ur": "Taxi",
+      "category": "Taxi",
+      "source": "Wikivoyage Urdu phrasebook (section: Transportation: Taxi)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Take me to {place}, please.",
+      "ur": "برائے مہربانی، مجھے {place_ur} لے چلے۔",
+      "roman_ur": "Baraayay meharbaani, mujhay {place} lay chal-lay",
+      "category": "Taxi",
+      "source": "Wikivoyage Urdu phrasebook (section: Transportation: Taxi)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "placeholder": "place"
+    },
+    {
+      "en": "How much does it cost to get to {place}?",
+      "ur": "{place_ur} پر جانے کا کتنا کرایہ ہوگا؟",
+      "roman_ur": "{place} par janay ka kitna karaya hoo ga?",
+      "category": "Taxi",
+      "source": "Wikivoyage Urdu phrasebook (section: Transportation: Taxi)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08",
+      "placeholder": "place"
+    },
+    {
+      "en": "One",
+      "ur": "ایک",
+      "roman_ur": "Aik",
+      "category": "Numbers",
+      "source": "Wikivoyage Urdu phrasebook (section: Numbers)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "Ten",
+      "ur": "دس",
+      "roman_ur": "Dass",
+      "category": "Numbers",
+      "source": "Wikivoyage Urdu phrasebook (section: Numbers)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    },
+    {
+      "en": "One hundred",
+      "ur": "ایک سو",
+      "roman_ur": "Aik sou",
+      "category": "Numbers",
+      "source": "Wikivoyage Urdu phrasebook (section: Numbers)",
+      "url": "https://en.wikivoyage.org/wiki/Urdu_phrasebook",
+      "checked": "2026-10-08"
+    }
+  ]
+}

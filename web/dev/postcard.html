@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Postcard test</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/postcard.css">
+<style>
+body { margin: 0; background: #0d0b09; color: #f3ebdd; font-family: system-ui, sans-serif; padding: 16px; }
+button { min-height: 44px; padding: 0 16px; border-radius: 10px; background: #e9a23b; border: 0; font: inherit; }
+</style>
+</head>
+<body>
+<canvas id="src" width="1280" height="800" style="display:none"></canvas>
+<button id="go" type="button">Make postcard</button>
+<script type="module">
+import { makePostcard, postcardSheet } from "../js/postcard.js";
+const c = document.getElementById("src"), x = c.getContext("2d");
+const g = x.createLinearGradient(0, 0, 0, c.height);
+g.addColorStop(0, "#2d4a6b"); g.addColorStop(0.55, "#e9a23b"); g.addColorStop(1, "#3b5d32");
+x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
+document.getElementById("go").onclick = async () => {
+  const blob = await makePostcard(c, {
+    title: "Test Lake", subtitle: "Test valley · dev page",
+    facts: [{ label: "Lake", value: "2,864 m" }, { label: "Track", value: "0.6 km" }, { label: "Arrival", value: "2,700 m" }],
+    painted: true,
+  });
+  window.lastBlob = blob;
+  postcardSheet({ blob, title: "Test Lake", url: location.origin + "/diorama.html?site=test" });
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{
+  "title": "Utror",
+  "subtitle": "Utror valley, Upper Swat",
+  "bbox": [
+    35.469,
+    72.4415,
+    35.514,
+    72.4965
+  ],
+  "arrival": {
+    "name": "Utror",
+    "point": [
+      35.49151,
+      72.46902
+    ]
+  },
+  "drive_ways": [
+    81646671,
+    69905517,
+    302600424,
+    302600423,
+    69902753,
+    302601285
+  ],
+  "drive_start": [
+    35.51853,
+    72.560914
+  ],
+  "track_ways": [
+    81646671,
+    69905517,
+    302600424,
+    302600423,
+    69902753,
+    302601285,
+    302600422,
+    69905519
+  ],
+  "far_bbox": [
+    35.4,
+    72.36,
+    35.58,
+    72.58
+  ],
+  "osm_use": "the Kalam-Utror road and the Utror valley tracks",
+  "road": "Kalam-Utror road",
+  "drive_km": 0.6,
+  "pack": "swat"
+}

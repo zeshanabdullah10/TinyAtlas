@@ -158,6 +158,25 @@ export function trackRibbons(site, path) {
   return meshes;
 }
 
+/** The foot route from the trailhead to the shore (meta.walk): a narrow worn path, mapped and traced parts alike. */
+export function trailRibbon(site) {
+  const r = site.meta.walk?.pts;
+  if (!r || r.length < 3) return [];
+  const across = 3, n = r.length, pos = new Float32Array(n * across * 3), road = new Float32Array(n * across * 2);
+  let s = 0;
+  for (let i = 0; i < n; i++) {
+    const a = r[Math.max(i - 1, 0)], b = r[Math.min(i + 1, n - 1)];
+    const dx = b[0] - a[0], dz = b[1] - a[1], d = Math.hypot(dx, dz) || 1;
+    if (i) s += Math.hypot(r[i][0] - r[i - 1][0], r[i][1] - r[i - 1][1]);
+    for (let j = 0; j < across; j++) {
+      const l = (j - 1) * 0.7, x = r[i][0] - (dz / d) * l, z = r[i][1] + (dx / d) * l, k = i * across + j;
+      pos.set([x, site.heightAt(x, z) + 0.35, z], k * 3);
+      road.set([l * 2, s], k * 2);
+    }
+  }
+  return [ribbonMesh(pos, road, n, across, seasonize(roadMaterial(false), "ground"))];
+}
+
 function ribbonMesh(pos, road, ns, across, mat) {
   const idx = [];
   for (let i = 0; i < ns - 1; i++) for (let j = 0; j < across - 1; j++) {

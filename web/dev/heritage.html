@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heritage record test</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/heritage.css">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 16px; background: #15120f; color: #f3ebdd; font: 14px/1.5 system-ui, sans-serif; }
+  .wrap { max-width: 420px; background: var(--glass-soft, rgba(24,20,17,.86)); padding: 16px; border-radius: 10px; }
+  nav a { color: #e9a23b; margin-right: 8px; font-size: 12px; }
+</style>
+</head>
+<body>
+<nav id="nav"></nav>
+<div class="wrap" id="out">Loading heritage data...</div>
+<script type="module">
+  import { h, fill } from "../js/dom.js";
+  import { loadHeritage, heritageSection } from "../js/atlas/heritage.js";
+
+  const data = await loadHeritage("../data/heritage.json");
+  const slugs = Object.keys(data).filter((k) => !k.startsWith("_"));
+  const want = new URLSearchParams(location.search).get("slug") || slugs[0];
+  document.getElementById("nav").replaceChildren(...slugs.map((s) => h("a", { href: `?slug=${s}` }, s)));
+  fill(document.getElementById("out"), heritageSection(data[want]) || h("p", null, `No heritage record for ${want}.`));
+</script>
+</body>
+</html>

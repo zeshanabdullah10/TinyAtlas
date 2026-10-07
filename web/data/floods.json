@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "note": "Only facts from pages fetched on 2026-10-08. Figures from search snippets were not used. Extents: none verified for Swat, so extent is null for both years.",
+  "events": [
+    {
+      "year": 2010,
+      "summary": "Upper Swat floods. A 2010 hotel rebuild was raised in 2022 coverage, but the 2010 damage totals are not verified in this build.",
+      "facts": [
+        {"text": "Hotels destroyed in the 2010 floods were reported as rebuilt on the same sites.", "source": "The Friday Times, News Desk, 30 Aug 2022", "url": "https://www.thefridaytimes.com/2022/08/30/action-must-over-k-p-riverside-construction-coas-says/", "checked": "2026-10-08"}
+      ],
+      "extent": null
+    },
+    {
+      "year": 2022,
+      "summary": "Monsoon floods in Swat. Rescue and relief work was under way in Kumrat, Kalam and Kanju by late August 2022.",
+      "facts": [
+        {"text": "Rescue and relief operations were under way in Kumrat, Kalam and Kanju, with aerial reconnaissance over several Swat areas.", "source": "The Friday Times, News Desk, 30 Aug 2022 (no figures given)", "url": "https://www.thefridaytimes.com/2022/08/30/action-must-over-k-p-riverside-construction-coas-says/", "checked": "2026-10-08"}
+      ],
+      "extent": null
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>i18n and phrase card test</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap">
+<link rel="stylesheet" href="../css/i18n.css">
+<style>body { margin: 16px; background: #15120f; color: #f3ebdd; font-family: system-ui; }</style>
+</head>
+<body>
+<p><button id="toggle" class="chip" type="button">اردو</button></p>
+<div id="card"></div>
+<script type="module">
+  import { loadLang, applyI18n, setLang, lang, t } from "../js/i18n.js";
+  import { phraseCard } from "../js/phrasecard.js";
+  await loadLang();
+  document.documentElement.lang = lang() === "ur" ? "ur" : "en";
+  document.documentElement.dir = lang() === "ur" ? "rtl" : "ltr";
+  document.getElementById("toggle").addEventListener("click", () => setLang(lang() === "ur" ? "en" : "ur"));
+  document.getElementById("toggle").textContent = t("lang.toggle");
+  const [data, places] = await Promise.all([
+    fetch("../data/phrases.json").then((r) => r.json()),
+    fetch("/packs/swat/atlas/places.json").then((r) => r.json()),
+  ]);
+  document.getElementById("card").append(phraseCard(data.phrases, places));
+</script>
+</body>
+</html>

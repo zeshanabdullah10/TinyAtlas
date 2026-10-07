@@ -1,0 +1,39 @@
+{
+  "title": "Gabral",
+  "subtitle": "Gabral valley above Utror, Upper Swat",
+  "bbox": [
+    35.4935,
+    72.3923,
+    35.5385,
+    72.4477
+  ],
+  "arrival": {
+    "name": "Gabral",
+    "point": [
+      35.51629,
+      72.42038
+    ]
+  },
+  "drive_ways": [
+    302601285,
+    491297284
+  ],
+  "drive_start": [
+    35.49044,
+    72.4709
+  ],
+  "track_ways": [
+    302601285,
+    491297284
+  ],
+  "far_bbox": [
+    35.426,
+    72.3093,
+    35.606,
+    72.5307
+  ],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "the road from Utror",
+  "osm_use": "the road from Utror to Gabral and streams"
+}

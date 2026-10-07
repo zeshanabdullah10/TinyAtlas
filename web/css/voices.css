@@ -1,0 +1,16 @@
+/* Voices of the valley section. Uses tokens from tokens.css. */
+.vo-section { display: grid; gap: 10px; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.vo-section * { min-width: 0; box-sizing: border-box; }
+.vo-section h3 { margin: 0; font-size: 1rem; color: var(--accent, #e9a23b); }
+.vo-section h4 { margin: 8px 0 4px; font-size: .9rem; }
+.vo-langs { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.vo-langs li, .vo-lang { min-width: 0; overflow-wrap: anywhere; }
+.vo-lang { padding: 8px 10px; border: 1px solid var(--line, rgba(243,235,221,.16)); border-radius: 8px; }
+.vo-aka, .vo-meta, .vo-src, .vo-empty, .vo-credit { font-size: .82rem; opacity: .85; }
+.vo-src a, .vo-empty a { color: var(--accent, #e9a23b); }
+.vo-rec { margin: 0 0 14px; }
+.vo-rec audio { width: 100%; }
+.vo-transcript { margin: 6px 0; font-size: .95rem; }
+.vo-translation { margin: 4px 0; font-style: italic; }
+.vo-credit { margin: 4px 0 0; }
+@media (max-width: 480px) { .vo-section { padding: 0 16px; } }

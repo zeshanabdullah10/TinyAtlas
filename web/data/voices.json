@@ -1,0 +1,96 @@
+{
+  "_status": "no recordings yet",
+  "_note": "Infrastructure only. No recordings, transcripts, quotes or speakers are included or generated. Every fact carries a source and url of a page that was fetched on the checked date. Speaker counts vary by source; where a field could not be verified from a fetched page it is omitted or marked 'not assessed'.",
+  "_recording_schema": {
+    "id": "unique string, e.g. trw-bahrain-001",
+    "lang": "language code from languages[].code",
+    "place_slug": "place slug from the pack places.json or web/data/diorama/<slug>",
+    "speaker_credit": "name or pseudonym the speaker chose, with their stated role; required",
+    "consent_ref": "id of the signed consent record held by the partner organisation; required",
+    "licence": "CC BY-SA 4.0 or CC BY-NC 4.0 as chosen by the speaker; required",
+    "audio_url": "URL of the audio file, served only after consent is recorded",
+    "transcript": "original-language transcript, as agreed with the speaker",
+    "translation_en": "English translation, as agreed with the speaker",
+    "recorded_on": "ISO date YYYY-MM-DD"
+  },
+  "languages": [
+    {
+      "code": "trw",
+      "name": "Torwali",
+      "also_known_as": [],
+      "where_spoken": "Bahrain (Sinkaen) and Chail valleys of Swat Kohistan, upper Swat Valley; Madyan separates the two valleys",
+      "places": [
+        "bahrain"
+      ],
+      "speakers_estimate": "About 130,000 native speakers (2020, Ethnologue as cited on Wikipedia); about 140,000 (2021, cited on Wikipedia)",
+      "status": "Vulnerable (Catalogue of Endangered Languages, as cited on Wikipedia); revitalisation efforts since 2004",
+      "source": "Wikipedia, Torwali language",
+      "url": "https://en.wikipedia.org/wiki/Torwali_language",
+      "checked": "2026-10-08"
+    },
+    {
+      "code": "gwc",
+      "name": "Gawri (Kalami)",
+      "also_known_as": [
+        "Kalami",
+        "Kalam Kohistani",
+        "Bashkarik",
+        "Garwi",
+        "Kohistani (traditional name used by speakers)"
+      ],
+      "where_spoken": "Kalam tahsil, Swat, and Swat Kohistan / Dir Kohistan",
+      "places": [
+        "kalam"
+      ],
+      "speakers_estimate": "About 141,460 (2025 estimate, Wikipedia)",
+      "status": "Classified as endangered; Pashto, Urdu and other dominant languages are displacing it, especially among urban migrants and younger generations",
+      "source": "Wikipedia, Gawri people",
+      "url": "https://en.wikipedia.org/wiki/Gawri_people",
+      "checked": "2026-10-08"
+    },
+    {
+      "code": "pus",
+      "name": "Pashto",
+      "also_known_as": [
+        "Pakhto"
+      ],
+      "where_spoken": "Regional language of Khyber Pakhtunkhwa and northern Balochistan (Wikipedia, Pashto)",
+      "places": [],
+      "speakers_estimate": "About 51 million first-language speakers (2017-2023) and 4.9 million second-language (2022), Ethnologue as cited on Wikipedia",
+      "status": "not assessed in this file",
+      "source": "Wikipedia, Pashto",
+      "url": "https://en.wikipedia.org/wiki/Pashto",
+      "checked": "2026-10-08"
+    },
+    {
+      "code": "gju",
+      "name": "Gujari (Gojri)",
+      "also_known_as": [
+        "Gojri",
+        "Gurjari"
+      ],
+      "where_spoken": "Azad Kashmir (all ten districts), Khyber Pakhtunkhwa (Hazara, Swat, Dir, Chitral, Kaghan, Kohistan), Gilgit-Baltistan, and plains of Punjab (Wikipedia, Gujari). Wider-region language, not specific to Swat.",
+      "places": [],
+      "speakers_estimate": "About 800,000 in Azad Kashmir (2001, Baart and Baart-Bremer, cited on Wikipedia); about 223,505 Gujjar speakers in Khyber Pakhtunkhwa (an estimate, not from a census, per Wikipedia)",
+      "status": "No formal rating in the article; many Gujjars in the plains have stopped speaking Gujari, and a government-backed revival programme exists",
+      "source": "Wikipedia, Gujari",
+      "url": "https://en.wikipedia.org/wiki/Gujari",
+      "checked": "2026-10-08"
+    },
+    {
+      "code": "ush",
+      "name": "Ushojo (Ushoji)",
+      "also_known_as": [
+        "Ushoji"
+      ],
+      "where_spoken": "Districts of Kohistan and Swat, Khyber Pakhtunkhwa (Wikipedia, Ushoji language)",
+      "places": [],
+      "speakers_estimate": "About 2,000 native speakers (cited 1992; Ethnologue 2015 edition, as cited on Wikipedia)",
+      "status": "May be severely endangered because of Pashto dominance, especially in Swat (Wikipedia; assigning body not named)",
+      "source": "Wikipedia, Ushoji language",
+      "url": "https://en.wikipedia.org/wiki/Ushoji_language",
+      "checked": "2026-10-08"
+    }
+  ],
+  "recordings": []
+}

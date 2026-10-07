@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Herders dev</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1915; color: #f3ebdd; font: 13px system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 8px; left: 8px; z-index: 2; display: flex; gap: 6px; align-items: center; }
+  button { background: #15120f; color: #f3ebdd; border: 1px solid rgba(243,235,221,.16); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+  button.on { border-color: #e9a23b; color: #e9a23b; }
+  #tag { position: fixed; bottom: 8px; left: 8px; background: #15120f; padding: 4px 8px; border-radius: 6px; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="bar">
+  <button data-s="Summer" class="on">Summer</button>
+  <button data-s="Autumn">Autumn</button>
+  <button data-s="Winter">Winter</button>
+  <span id="status"></span>
+</div>
+<div id="tag">Kalam site, herders dev page (flock illustrative)</div>
+<script type="module">
+import * as THREE from "three";
+import { loadSite } from "../js/diorama/site.js";
+import { Path } from "../js/diorama/road.js";
+import { Herders } from "../js/diorama/herders.js";
+
+const status = document.querySelector("#status");
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xaec6d6);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x665544, 1.6));
+const sun = new THREE.DirectionalLight(0xfff1d6, 2.2); sun.position.set(-600, 900, 400); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -900, right: 900, top: 900, bottom: -900, far: 3000 });
+scene.add(sun);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 1, 20000);
+const base = "../data/diorama/kalam/";
+const site = await loadSite(base, (f) => status.textContent = `loaded ${f}`);
+const { meta, H, C, x0, z0 } = site;
+const g = meta.grid;
+
+// terrain from the height grid, coloured by the cover classes (grass = 2)
+const geo = new THREE.PlaneGeometry(g.width, g.height, g.cols - 1, g.rows - 1).rotateX(-Math.PI / 2);
+const pos = geo.attributes.position, col = new Float32Array(pos.count * 3);
+for (let i = 0; i < pos.count; i++) {
+  const c = Math.round((pos.getX(i) + g.width / 2) / g.cell), r = Math.round((pos.getZ(i) + g.height / 2) / g.cell);
+  const k = r * g.cols + c;
+  pos.setY(i, H[k]);
+  const grass = C[k] === 2;
+  const v = grass ? [0.36, 0.5, 0.26] : [0.45, 0.4, 0.33];
+  col.set(v, i * 3);
+}
+geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+geo.computeVertexNormals();
+const land = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
+land.receiveShadow = true; scene.add(land);
+
+const path = new Path(meta.drive, meta.arrival.y);
+const end = path.at(path.length);
+const herders = new Herders(scene, site, path, {});
+for (const l of herders.labels) {
+  const el = document.createElement("div");
+  el.textContent = l.text;
+  el.style.cssText = "position:fixed;background:#15120f;padding:3px 7px;border-radius:5px;transform:translate(-50%,-100%);pointer-events:none;color:#f3ebdd;font-size:12px";
+  document.body.appendChild(el);
+  l.el = el;
+}
+const v = new THREE.Vector3();
+const focus = herders.flocks[0] ? new THREE.Vector3(herders.flocks[0].x, herders.flocks[0].y, herders.flocks[0].z) : new THREE.Vector3(end.x, end.y, end.z);
+// a close view of the first flock
+camera.position.set(focus.x + 45, focus.y + 40, focus.z + 55);
+camera.lookAt(focus.x, focus.y + 2, focus.z);
+
+document.querySelectorAll("button[data-s]").forEach((b) => b.onclick = () => {
+  document.querySelectorAll("button[data-s]").forEach((x) => x.classList.toggle("on", x === b));
+  herders.setSeason(b.dataset.s);
+});
+
+let elapsed = 0, last = performance.now();
+const params = new URLSearchParams(location.search);
+if (params.has("season")) { herders.setSeason(params.get("season")); document.querySelectorAll("button[data-s]").forEach((x) => x.classList.toggle("on", x.dataset.s === params.get("season"))); }
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05); last = now; elapsed += dt;
+  herders.update(dt, elapsed);
+  if (herders.state === 'move') { const F = herders.flocks[0]; camera.position.set(F.lx + 40, F.ly + 30, F.lz + 40); camera.lookAt(F.lx, F.ly + 2, F.lz); }   // follow the lead flock
+  renderer.render(scene, camera);
+  for (const l of herders.labels) {
+    v.copy(l.p).project(camera);
+    l.el.style.display = herders.group.visible && v.z < 1 ? "block" : "none";
+    l.el.style.left = ((v.x + 1) / 2 * innerWidth) + "px";
+    l.el.style.top = ((1 - v.y) / 2 * innerHeight) + "px";
+  }
+  status.textContent = `${herders.state} · ${herders.animals.length} animals · ${herders.flocks.length} flocks`;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+addEventListener("resize", () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+window.__herders = herders;
+</script>
+</body>
+</html>

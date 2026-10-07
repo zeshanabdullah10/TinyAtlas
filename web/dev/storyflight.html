@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Story flight test</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/storyflight.css">
+<style>
+  html, body { margin: 0; height: 100%; background: #15120f; overflow: hidden; }
+  #app { position: fixed; inset: 0; }
+  #gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .dock { position: absolute; left: 50%; transform: translateX(-50%); bottom: 24px; display: flex; gap: 6px; padding: 6px;
+    background: rgba(24,20,17,.86); border: 1px solid rgba(243,235,221,.16); border-radius: 999px; z-index: 5; }
+  .dock button { padding: 8px 14px; border-radius: 999px; border: 1px solid transparent; background: transparent; color: #f3ebdd; font: 500 13px system-ui, sans-serif; cursor: pointer; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="gl"></canvas>
+  <nav class="dock" id="dock" aria-label="Explore"></nav>
+</div>
+<script type="module">
+// Standalone test page for js/atlas/storyflight.js: a plain height-field terrain from the pack, the road lines,
+// sourced stops as markers, and a stand-in for MapControls (only .c and .tween are used by StoryFlight).
+import * as THREE from "three";
+import { loadPack } from "../js/atlas/pack.js";
+import { StoryFlight, storyButton } from "../js/atlas/storyflight.js";
+
+const qs = new URLSearchParams(location.search);
+const slug = qs.get("pack") || "swat";
+const lowPower = qs.get("lowPower") === "1";
+const canvas = document.getElementById("gl");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcfd8dc);
+const camera = new THREE.PerspectiveCamera(40, 1, 20, 400000);
+const resize = () => { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); };
+addEventListener("resize", resize); resize();
+
+const pack = await loadPack(`/packs/${slug}/atlas/`);
+const N = 160, pos = [], idx = [];
+for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+  const x = (i / (N - 1)) * pack.W, z = (j / (N - 1)) * pack.H;
+  pos.push(x, pack.groundY(x, z), z);
+}
+for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) {
+  const a = j * N + i, b = a + 1, c = a + N, d = c + 1;
+  idx.push(a, c, b, b, c, d);
+}
+const tg = new THREE.BufferGeometry();
+tg.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+tg.setIndex(idx); tg.computeVertexNormals();
+scene.add(new THREE.Mesh(tg, new THREE.MeshLambertMaterial({ color: 0x7d8f5a, side: THREE.DoubleSide })));
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445544, 1.1));
+const sun = new THREE.DirectionalLight(0xffffff, 1.2); sun.position.set(-1, 2, 1); scene.add(sun);
+
+const roadMat = new THREE.LineBasicMaterial({ color: 0x3a2f24 });
+for (const r of pack.vectors.roads || []) {
+  if (!r.pts || r.pts.length < 2) continue;
+  const p = []; for (const [x, z] of r.pts) p.push(x, pack.groundY(x, z) + 6, z);
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(p, 3));
+  scene.add(new THREE.Line(g, roadMat));
+}
+const stories = await fetch("../data/stories/swat-road.json").then((r) => r.json());
+const story = stories.stories.find((s) => s.pack === slug);
+const stopMat = new THREE.MeshBasicMaterial({ color: 0xe9a23b });
+for (const s of story?.stops || []) {
+  const pl = pack.places.find((p) => p.slug === s.slug);
+  if (!pl) continue;
+  const [x, z] = pl.anchor || [pl.x, pl.z];
+  const m = new THREE.Mesh(new THREE.SphereGeometry(220, 12, 8), stopMat);
+  m.position.set(x, pack.groundY(x, z) + 200, z); scene.add(m);
+}
+
+const controls = { c: { enabled: true, target: new THREE.Vector3(), update() { camera.lookAt(this.target); } }, tween: null };
+const dock = document.getElementById("dock");
+const root = document.getElementById("app");
+const flight = new StoryFlight({
+  camera, controls, pack, places: pack.places, vectors: pack.vectors, lowPower, root,
+  onStop: (s) => { window.__sfLog.push(`stop:${s.slug}`); },
+  onEnd: (e) => { window.__sfLog.push(`end:${e.reason}`); },
+  openPlace: (slug) => { window.__sfLog.push(`open:${slug}`); },
+});
+window.__sfLog = [];
+const btn = storyButton(flight, stories, slug);
+if (btn) dock.append(btn);
+window.__sf = { flight, pack, story, camera, controls };
+// start the story when asked by URL (?autostart=1), for scripted checks
+if (qs.get("autostart") === "1" && story) flight.start(story);
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.25, (now - last) / 1000); last = now;
+  controls.c.update();
+  flight.update(dt);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+// initial framing above the first stop
+const first = story?.stops?.[0];
+const pl0 = first && pack.places.find((p) => p.slug === first.slug);
+if (pl0) { const [x, z] = pl0.anchor || [pl0.x, pl0.z]; camera.position.set(x, pack.groundY(x, z) + 3000, z - 4000); camera.lookAt(x, pack.groundY(x, z), z); }
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

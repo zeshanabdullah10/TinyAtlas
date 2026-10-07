@@ -1,0 +1,41 @@
+{
+  "title": "Spin Khwar Lake",
+  "subtitle": "Above Utror, Upper Swat",
+  "lake_seed": [
+    35.43375,
+    72.45202
+  ],
+  "drive_ways": [
+    302600422
+  ],
+  "track_ways": [
+    302600422
+  ],
+  "drive_start": [
+    35.49044,
+    72.4709
+  ],
+  "trailhead": [
+    35.472851,
+    72.441251
+  ],
+  "walk_ways": [
+    69905516
+  ],
+  "bbox": [
+    35.4128,
+    72.4208,
+    35.4828,
+    72.4809
+  ],
+  "far_bbox": [
+    35.2987,
+    72.286,
+    35.5687,
+    72.618
+  ],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "Utror track",
+  "osm_use": "the Utror track, the trailhead junction and the footpath"
+}

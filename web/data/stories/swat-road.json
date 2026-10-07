@@ -1,0 +1,109 @@
+{
+  "stories": [
+    {
+      "id": "kalam-to-mahodand",
+      "pack": "swat",
+      "title": "Kalam to Mahodand by road",
+      "note": "Waypoints are the sourced places in the upper pack; the camera follows the jeep and 4WD road between them.",
+      "stops": [
+        {
+          "slug": "kalam",
+          "name": "Kalam",
+          "caption": "It lies 99 km north of Mingora at about 2,000 m.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Kalam_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "matiltan",
+          "name": "Matiltan",
+          "caption": "It is reached by a non-metalled road in a four-wheel drive vehicle.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Matiltan",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "ushu",
+          "name": "Ushu (Usho)",
+          "caption": "The Ushu glacier blocks the only path to Mahodand in winter. It is known for its cloudy, rainy forest.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Usho",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "mahodand-lake",
+          "name": "Mahodand Lake",
+          "caption": "It lies about 40 km from Kalam in the Usho sub-valley. Elevation about 2,865 m.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Kalam_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Swat_River",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mingora-to-bahrain",
+      "pack": "swat-lower",
+      "title": "Mingora to Bahrain by road",
+      "note": "Mingora is in the lower pack, so this story stays inside it. Kalam and Mahodand are in the upper pack (see kalam-to-mahodand).",
+      "stops": [
+        {
+          "slug": "mingora",
+          "name": "Mingora",
+          "caption": "Mingora is the largest city of Malakand Division.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Mingora",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "khwazakhela",
+          "name": "Khwazakhela",
+          "caption": "Second-largest commercial centre in Swat. Draws people from Kalam, Kohistan and Shangla.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Khwazakhela",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "bahrain",
+          "name": "Bahrain (Behrain)",
+          "caption": "The name means 'two rivers' for the Daral/Swat confluence. It is a base camp for the Daral and Saidgai lakes trail.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Bahrain,_Pakistan",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trip kit test</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/tripkit.css">
+</head>
+<body style="background:#1d1915;padding:16px;margin:0">
+<div id="host" style="max-width:420px"></div>
+<script type="module">
+import { tripKitPanel } from "../js/tripkit.js";
+import { h } from "../js/dom.js";
+const slug = new URLSearchParams(location.search).get("pack") || "swat";
+const base = `/packs/${slug}/atlas/`;
+const places = await (await fetch(`${base}places.json`)).json();
+const pack = { slug, base, meta: { title: slug } };
+document.getElementById("host").append(tripKitPanel({
+  pack, places: places.slice(0, 8),
+  onDownload: () => console.log("save for offline (lead wires openOffline here)"),
+  onLowData: (on) => console.log("low-data mode", on),
+}));
+</script>
+</body>
+</html>

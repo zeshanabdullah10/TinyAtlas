@@ -42,14 +42,25 @@ def test_drive_is_on_the_model_and_ends_at_the_lake(d):
     h = np.frombuffer((d / "height.bin").read_bytes(), "<u2").reshape(g["rows"], g["cols"]) / 10 + g["hmin"]
     c = np.rint((drive[:, 0] + g["width"] / 2) / g["cell"]).astype(int)
     r = np.rint((drive[:, 1] + g["height"] / 2) / g["cell"]).astype(int)
-    assert np.abs(h[r, c] - drive[:, 2]).max() < 1.5
+    # nearest-cell sampling: on a steep pitch one 10 m cell spans grade x 5 m either side of the line
+    grade = np.abs(np.gradient(drive[:, 2]) / np.maximum(np.gradient(np.r_[0, np.cumsum(steps)]), 0.1))
+    assert (np.abs(h[r, c] - drive[:, 2]) < 1.5 + grade * g["cell"] * 0.6).all()
     end = drive[-1, :2]
+    if m.get("walk"):                       # a lake reached on foot: the jeep stops at the trailhead, the walk ends at the shore
+        w = np.array(m["walk"]["pts"])
+        assert math.hypot(*(w[0, :2] - end)) < 20
+        assert np.hypot(*np.diff(w[:, :2], axis=0).T).max() < 12, "the walk is sampled about every 8 m"
+        end = w[-1, :2]
+        assert m["facts"]["walk_km"] == pytest.approx(m["facts"]["walk_mapped_km"] + m["facts"]["walk_traced_km"], abs=0.02)
+        if m["facts"]["walk_traced_km"]:
+            assert any("traced over the ground" in e for e in m["edits"])
     if m["lake"]:
         cover = np.frombuffer((d / "cover.bin").read_bytes(), np.uint8).reshape(g["rows"], g["cols"])
         lr, lc = np.nonzero(cover == 5)
         gap = np.hypot(lc * g["cell"] - g["width"] / 2 - end[0], lr * g["cell"] - g["height"] / 2 - end[1]).min()
         assert gap < 60
-        assert drive[-1, 2] == pytest.approx(m["lake"]["level"], abs=12)
+        if not m.get("walk"):
+            assert drive[-1, 2] == pytest.approx(m["lake"]["level"], abs=12)
     else:
         assert math.hypot(end[0] - m["arrival"]["x"], end[1] - m["arrival"]["z"]) < 150
 

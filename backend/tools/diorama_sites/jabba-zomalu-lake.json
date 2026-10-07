@@ -1,0 +1,16 @@
+{
+  "title": "Jabba Zomalu Lake",
+  "subtitle": "Below Falak Sar, Upper Swat",
+  "bbox": [35.595, 72.681, 35.645, 72.8095],
+  "lake_seed": [35.6239, 72.7986],
+  "drive_ways": [1155994354, 485183412, 507506231],
+  "track_ways": [1155994354, 485183412, 507506231],
+  "drive_start": [35.5648102, 72.6705828],
+  "trailhead": [35.6242244, 72.6865084],
+  "walk_ways": [],
+  "far_bbox": [35.4889, 72.6329, 35.7589, 72.9643],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "Saifullah Lake Road",
+  "osm_use": "the Mahodand Lake Road and Saifullah Lake Road (jeep tracks), the streams, and the lake outline"
+}

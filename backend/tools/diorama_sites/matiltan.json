@@ -1,0 +1,45 @@
+{
+  "title": "Matiltan",
+  "subtitle": "Under Falak Sar, Ushu valley, Upper Swat",
+  "bbox": [
+    35.5185,
+    72.633,
+    35.5645,
+    72.6895
+  ],
+  "arrival": {
+    "name": "Matiltan",
+    "point": [
+      35.54145,
+      72.66128
+    ]
+  },
+  "drive_ways": [
+    844095995,
+    1155985820,
+    1155985819,
+    345805206,
+    485183413
+  ],
+  "drive_start": [
+    35.518,
+    72.6243
+  ],
+  "track_ways": [
+    844095995,
+    1155985820,
+    1155985819,
+    345805206,
+    485183413
+  ],
+  "far_bbox": [
+    35.45,
+    72.52,
+    35.72,
+    72.86
+  ],
+  "osm_use": "the Kalam to Matiltan jeep track (Mahodand Lake Road) and streams",
+  "road": "Mahodand Lake Road",
+  "drive_km": 0.6,
+  "pack": "swat"
+}

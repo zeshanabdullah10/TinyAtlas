@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voices test</title>
+<link rel="stylesheet" href="../css/tokens.css">
+<link rel="stylesheet" href="../css/voices.css">
+<style>
+body { margin: 0; background: #0d0b09; color: #f3ebdd; font-family: system-ui, sans-serif; padding: 16px; box-sizing: border-box; overflow-x: hidden; }
+.wrap { box-sizing: border-box; width: 100%; max-width: 560px; margin: 0 auto; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap" id="root">Loading voices.json...</div>
+<script type="module">
+import { loadVoices, voicesSection } from "../js/voices.js";
+const root = document.getElementById("root");
+try {
+  const voices = await loadVoices("../data/voices.json");
+  root.replaceChildren(voicesSection(voices, { slug: "bahrain" }));
+} catch (e) {
+  root.textContent = "Failed to load: " + e.message;
+}
+</script>
+</body>
+</html>

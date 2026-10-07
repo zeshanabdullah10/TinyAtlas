@@ -60,6 +60,10 @@ SITES = {
         "pack": "swat-lower",
     },
 }
+# More sites, one JSON file each (backend/tools/diorama_sites/<site>.json, same keys as above; lists stand in for tuples).
+for _f in sorted((Path(__file__).parent / "diorama_sites").glob("*.json")):
+    SITES[_f.stem] = {k: tuple(v) if isinstance(v, list) and k != "drive_ways" and k != "track_ways" else v
+                      for k, v in json.loads(_f.read_text(encoding="utf-8")).items()}
 COVER = {10: 1, 20: 7, 30: 2, 40: 2, 50: 3, 60: 3, 70: 4, 80: 5, 90: 2, 95: 1, 100: 6}
 
 
@@ -132,6 +136,61 @@ def chain(ways, ids, start):
     if math.dist(line[-1], start) < math.dist(line[0], start):
         line.reverse()
     return line
+
+
+def trace_walk(site, ways, g, h, lake, lake_xz, start):
+    """The foot route from the trailhead to the shore: the mapped OSM path, then (if it stops short) the easiest
+    route over the DEM (cost = length x (1 + (slope / 0.25)^2)) to the nearest shore cell."""
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import dijkstra
+    pts = [tuple(start)]
+    if site.get("walk_ways"):
+        line = chain(ways, site["walk_ways"], tuple(site["trailhead"]))
+        pts += resample([to_local(g, la, lo) for la, lo in line], 4.0)
+    inbox = lambda x, z: abs(x) < g["W"] / 2 - 20 and abs(z) < g["H"] / 2 - 20
+    pts = [p for p in pts if inbox(*p)]
+    near = lambda p: float(np.min(np.hypot(*(lake_xz - p).T)))
+    k = next((i for i, p in enumerate(pts) if near(p) < 30), None)
+    if k is None:                                   # leave the mapped path where it comes closest to the lake
+        dl = [near(p) for p in pts]
+        mapped = pts[: int(np.argmin(dl)) + 1]
+    else:
+        mapped = pts[: k + 1]
+    traced = []
+    if k is None:
+        R, C = h.shape
+        idx = np.arange(R * C).reshape(R, C)
+        rows, cols, cost = [], [], []
+        for dr, dc in ((0, 1), (1, 0), (1, 1), (1, -1)):
+            a = idx[max(0, -dr):R - max(0, dr), max(0, -dc):C - max(0, dc)]
+            b = idx[max(0, dr):R - max(0, -dr) or None, max(0, dc):C - max(0, -dc) or None]
+            L = CELL * math.hypot(dr, dc)
+            dh = np.abs(h.ravel()[b.ravel()] - h.ravel()[a.ravel()])
+            w = L * (1 + (dh / L / 0.25) ** 2) + np.where(lake.ravel()[b.ravel()] | lake.ravel()[a.ravel()], 1e6, 0)
+            rows += [a.ravel(), b.ravel()]; cols += [b.ravel(), a.ravel()]; cost += [w, w]
+        G = coo_matrix((np.concatenate(cost), (np.concatenate(rows), np.concatenate(cols))), shape=(R * C, R * C)).tocsr()
+        x0, z0 = mapped[-1]
+        src = int(idx[int(round((z0 + g["H"] / 2) / CELL)), int(round((x0 + g["W"] / 2) / CELL))])
+        dist, pred = dijkstra(G, indices=src, return_predecessors=True)
+        shore = np.nonzero((~lake & (blur(lake.astype(float), 1) > 0.01)).ravel())[0]
+        node = int(shore[np.argmin(dist[shore])])
+        path = []
+        while node != src and node >= 0:
+            path.append(node); node = int(pred[node])
+        traced = [((n % C) * CELL - g["W"] / 2, (n // C) * CELL - g["H"] / 2) for n in path[::-1]]
+        if len(traced) > 2:
+            arr = np.array(traced)
+            traced = [tuple(arr[max(0, i - 2): i + 3].mean(0)) for i in range(len(arr))]
+            traced = resample([mapped[-1]] + traced, 4.0)[1:]
+    allp = mapped + traced
+    ys = [float(bilerp(h, g, x, z)) for x, z in allp]
+    L = lambda q: sum(math.dist(a, b) for a, b in zip(q, q[1:]))
+    return {"trailhead": [round(start[0], 1), round(start[1], 1)],
+            "pts": [[round(x, 1), round(z, 1), round(y, 1)] for (x, z), y in zip(allp, ys)][::2],
+            "mapped_n": (len(mapped) + 1) // 2,
+            "km": round(L(allp) / 1000, 2), "mapped_km": round(L(mapped) / 1000, 2),
+            "traced_km": round((L(allp) - L(mapped)) / 1000, 2),
+            "climb_m": round(float(np.sum(np.clip(np.diff(np.convolve(ys, np.ones(9) / 9, "valid")), 0, None))))}
 
 
 def resample(pts, step):
@@ -220,7 +279,14 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         if not s2:
             wet = (blur((blur(wet.astype(float), 2) > 0.9).astype(float), 2) > 0.05) & wet   # opening drops the thin river channels
         near_seed = np.hypot(*np.mgrid[-seed[0]:g["rows"] - seed[0], -seed[1]:g["cols"] - seed[1]]) < 3
+        mapped = lake                                       # the whole WorldCover patch, before the DEM cleaning
         lake = flood(wet | near_seed, seed)
+        if not s2 and lake.sum() < 0.5 * mapped.sum():
+            # The 30 m DSM over this water is too noisy to trust (the cleaning kept under half the mapped patch):
+            # keep the WorldCover patch, with only its thin inflow channels opened away.
+            op = (blur((blur(mapped.astype(float), 1) > 0.7).astype(float), 1) > 0.05) & mapped
+            lake = flood(op | near_seed, seed)
+            lake_source = "ESA WorldCover 2021 (DEM too noisy over the water to refine it)"
         level = float(np.median(h[lake]))
         cover[(cover == 5) & ~lake] = 2                     # stray water pixels elsewhere read as wet meadow
         cover[lake] = 5
@@ -243,7 +309,10 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     lr, lc = np.nonzero(lake)
     lake_xz = np.stack([lc * CELL - g["W"] / 2, lr * CELL - g["H"] / 2], 1)
     end = len(pts) - 1
-    if has_lake:                                   # stop at the water
+    if "trailhead" in site:                        # the jeep stops where the walk to the lake begins
+        tx, tz = to_local(g, *site["trailhead"])
+        end = int(np.argmin([math.hypot(x - tx, z - tz) for x, z in pts]))
+    elif has_lake:                                 # stop at the water
         for i, p in enumerate(pts):
             if np.min(np.hypot(*(lake_xz - p).T)) < 40:
                 end = i
@@ -256,6 +325,18 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     arr = np.array(drive)
     sm = np.array([arr[max(0, i - 3): i + 4].mean(0) for i in range(len(arr))])
     drive = [tuple(p) for p in sm]
+    # Buildings: OSM footprints inside the model (local metres), with their mapped levels when tagged.
+    buildings = []
+    for w in ways.values():
+        t = w.get("tags", {})
+        if "building" not in t or len(w.get("geometry", [])) < 4:
+            continue
+        fp = [to_local(g, p["lat"], p["lon"]) for p in w["geometry"]]
+        if all(abs(x) < g["W"] / 2 - 20 and abs(z) < g["H"] / 2 - 20 for x, z in fp):
+            lv = t.get("building:levels", "")
+            buildings.append({"id": w["id"], "kind": t["building"], "levels": int(lv) if lv.isdigit() else None,
+                              "pts": [[round(x, 1), round(z, 1)] for x, z in fp[:-1]]})
+    walk = trace_walk(site, ways, g, h, lake, lake_xz, drive[-1]) if "trailhead" in site else None
     # A landmark stands on a level terrace of lawn (its grounds); trees are kept off it.
     if "landmark" in site:
         lx, lz = to_local(g, *site["landmark"]["point"])
@@ -344,6 +425,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         "drive_climb_m": round(climb),
         "drive_max_grade_pct": round(float(np.max(np.abs(gsm))) * 100),
         "drive_minutes_at_9kmh": round(sum(seglen) / 1000 / 9 * 60),
+        **({"walk_km": walk["km"], "walk_mapped_km": walk["mapped_km"], "walk_traced_km": walk["traced_km"],
+            "walk_climb_m": walk["climb_m"]} if walk else {}),
         "box_km": [round(g["W"] / 1000, 2), round(g["H"] / 1000, 2)],
         "arrival_m": round(arrival["y"]),
     }
@@ -359,6 +442,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
                       "z": round(to_local(g, *site["landmark"]["point"])[1], 1)} if "landmark" in site else None),
         "drive": [[round(x, 1), round(z, 1), round(float(y), 2)] for (x, z), y in zip(drive, prof)],
         "track": track,
+        "walk": walk,
+        "buildings": buildings,
         "streams": streams,
         "facts": facts,
         "edits": [
@@ -371,6 +456,10 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
               ["The walking loop is a 150 m circle around the arrival point; it is not a mapped trail."]),
             *(["The palace grounds are levelled to a terrace 58 m around the place point and kept as lawn."] if "landmark" in site else []),
             *(["The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 24 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."] if "landmark" in site else []),
+            *([f"The walk from the end of the jeep track follows the mapped OSM footpath for {walk['mapped_km']} km"
+               + (f"; the last {walk['traced_km']} km is not mapped and is traced over the ground (easiest slope on the DEM)." if walk["traced_km"] else ".")]
+              if walk else []),
+            *([f"The {len(buildings)} buildings stand on their OSM footprints; their height (OSM levels where mapped, else one or two storeys), roofs and colours are illustrative, after visitors' photos."] if buildings else []),
             "Season colours, snow, ice and dawn mist are illustrative.",
             "Traffic on the drive is illustrative: the vehicle kinds are those seen on Swat roads (Willys jeeps, Hilux, Suzuki vans, Mehran cars, CD70 motorbikes, Qingqi rickshaws, painted trucks); their number and movement are not counted.",
         ],

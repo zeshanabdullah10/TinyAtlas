@@ -1,0 +1,45 @@
+/* "Where is this view?" styles. Uses the shared tokens from tokens.css. */
+html, body.play-body { background: var(--ink); color: var(--cream); margin: 0; }
+.play-main, .play-wrap, .play-stage { min-width: 0; }
+body.play-body { font-family: var(--font-ui); min-height: 100vh; }
+.play-main { padding: 20px var(--gutter) 48px; box-sizing: border-box; }
+.play-wrap { max-width: 760px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.play-head h1 { font-family: var(--f-title); font-size: clamp(30px, 6vw, 44px); margin: 0 0 4px; letter-spacing: .02em; }
+.play-lede { color: var(--muted); margin: 0; font-family: var(--font-text); }
+.play-status { color: var(--faint); margin: 0; font-size: 14px; min-height: 1.2em; }
+.play-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
+.play-card { background: var(--raise); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; box-sizing: border-box; }
+.play-card h2 { font-family: var(--f-title); margin: 0; font-size: 30px; }
+.play-modes { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; }
+.play-modes legend { color: var(--muted); font-size: 14px; padding: 0; margin-bottom: 6px; }
+.play-mode { display: grid; grid-template-columns: auto 1fr; gap: 0 10px; align-items: center; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.play-mode span { font-weight: 600; }
+.play-mode small { grid-column: 2; color: var(--faint); }
+.play-best { color: var(--muted); margin: 0; }
+.play-btn { appearance: none; font: inherit; font-weight: 600; color: var(--cream); background: transparent;
+  border: 1px solid var(--line-2); border-radius: 10px; padding: 12px 18px; min-height: 44px; cursor: pointer;
+  text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.play-btn.primary { background: var(--saffron); color: var(--on-saffron); border-color: var(--saffron); }
+.play-btn:disabled { opacity: .45; cursor: not-allowed; }
+.play-btn:focus-visible, .play-choice:focus-visible, .play-mode input:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+.play-figure { margin: 0; min-width: 0; }
+.play-photo { display: block; width: 100%; max-height: 62vh; object-fit: contain; border-radius: 10px; background: #0b0a09; }
+.play-hint, .play-loading, .play-error { color: var(--muted); margin: 0; }
+.play-error { color: var(--saffron); }
+.play-choices { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.play-choice { appearance: none; font: inherit; color: var(--cream); background: var(--glass-soft); border: 1px solid var(--line);
+  border-radius: 10px; padding: 12px; min-height: 44px; cursor: pointer; text-align: left; }
+.play-choice.on { border-color: var(--saffron); box-shadow: inset 0 0 0 1px var(--saffron); }
+.play-mapbox { display: flex; justify-content: center; }
+.play-map { display: block; max-width: 100%; border-radius: 10px; border: 1px solid var(--line); cursor: crosshair; touch-action: manipulation; }
+.play-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.play-reveal { display: grid; gap: 8px; }
+.play-reveal h2 { font-family: var(--f-title); font-size: 28px; margin: 0; }
+.play-reveal p { margin: 0; }
+.play-credit { color: var(--muted); font-size: 14px; font-family: var(--font-text); }
+.play-credit a { color: var(--saffron); }
+@media (max-width: 520px) {
+  .play-choices { grid-template-columns: 1fr; }
+  .play-actions .play-btn { flex: 1 1 100%; }
+}

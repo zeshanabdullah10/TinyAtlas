@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Road status test</title>
+<link rel="stylesheet" href="../css/roadstatus.css">
+<style>
+  body { background: #15120f; margin: 0; padding: 16px; font-family: system-ui, sans-serif; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  button { background: #2a241e; color: #f3ebdd; border: 1px solid rgba(243,235,221,.16); border-radius: 6px; padding: 6px 10px; }
+  #out { max-width: 440px; }
+</style>
+</head>
+<body>
+<div class="row" id="slugs"></div>
+<div id="out"></div>
+<script type="module">
+  import { loadRoads, roadStatusCard } from "../js/roadstatus.js";
+  const slugs = ["kalam", "bahrain", "ushu", "mahodand-lake", "gabin-jabba", "utror", "nowhere"];
+  const roads = await loadRoads("..");
+  const out = document.getElementById("out");
+  const show = (slug) => out.replaceChildren(roadStatusCard(roads, { slug }));
+  for (const s of slugs) {
+    const b = document.createElement("button");
+    b.textContent = s;
+    b.onclick = () => show(s);
+    document.getElementById("slugs").append(b);
+  }
+  show("kalam");
+</script>
+</body>
+</html>

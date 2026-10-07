@@ -1,0 +1,39 @@
+{
+  "title": "Kalam",
+  "subtitle": "Swat River at the Gabral–Ushu confluence, Upper Swat",
+  "bbox": [
+    35.4595,
+    72.5505,
+    35.5125,
+    72.6195
+  ],
+  "arrival": {
+    "name": "Kalam bazaar",
+    "point": [
+      35.48611,
+      72.58458
+    ]
+  },
+  "drive_ways": [
+    1155447696,
+    291427282
+  ],
+  "drive_start": [
+    35.40562,
+    72.60486
+  ],
+  "track_ways": [
+    1155447696,
+    291427282
+  ],
+  "far_bbox": [
+    35.351,
+    72.405,
+    35.621,
+    72.765
+  ],
+  "osm_use": "the N-95 Swat road into Kalam",
+  "road": "N-95",
+  "drive_km": 0.6,
+  "pack": "swat"
+}
