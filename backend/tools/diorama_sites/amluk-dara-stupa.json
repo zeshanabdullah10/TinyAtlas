@@ -1,0 +1,72 @@
+{
+  "title": "Amluk-Dara Stupa",
+  "subtitle": "Buddhist stupa south of the Swat River, near Barikot, Lower Swat",
+  "bbox": [
+    34.63,
+    72.272,
+    34.662,
+    72.302
+  ],
+  "arrival": {
+    "name": "Amluk-Dara Stupa",
+    "point": [
+      34.64747,
+      72.28985
+    ]
+  },
+  "landmark": {
+    "kind": "stupa",
+    "name": "Amluk-Dara Stupa",
+    "point": [
+      34.64747,
+      72.28985
+    ],
+    "model": "amluk-dara-stupa.glb",
+    "terrace_m": 30,
+    "clear_m": 30,
+    "top_m": 22,
+    "ring_m": 40,
+    "heading_deg": 270,
+    "edits": [
+      "The stupa is the Atlas maquette (a procedural model, not a survey): a 34 m square plinth, 4 m high, with a stair on its east side, the drum and dome 21 m across (the published diameter); the drum and dome heights, the stair and the plinth's profile are estimated.",
+      "The ground is levelled to a 30 m terrace round the stupa so the plinth sits flat; the surrounding slope is the real DEM.",
+      "The walk from the road to the stupa has no mapped footpath: it is the easiest route over the DEM.",
+      "Rubble and wall stubs around the plinth are drawn after Commons photos; their positions are illustrative."
+    ],
+    "sources": [
+      {
+        "name": "Amluk-Dara Stupa maquette (Tiny Atlas, procedural)",
+        "use": "the stupa's plinth, drum and dome; the 21 m diameter follows the published figure, the other proportions are estimated",
+        "licence": "Tiny Atlas own procedural geometry (backend/tools/blender/stupa.py)",
+        "url": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa"
+      }
+    ],
+    "module": "amluk-dara-stupa"
+  },
+  "drive_ways": [
+    472822619
+  ],
+  "track_ways": [
+    472822619
+  ],
+  "drive_start": [
+    34.63297,
+    72.30096
+  ],
+  "trailhead": [
+    34.64756,
+    72.29169
+  ],
+  "walk_ways": [],
+  "far_bbox": [
+    34.557,
+    72.19,
+    34.737,
+    72.39
+  ],
+  "drive_km": 0.6,
+  "road": "unnamed village road (OSM unclassified)",
+  "road_kind": "road",
+  "osm_use": "the village road (unclassified, 4.5 km) that passes 170 m east of the stupa, and the stupa point (tourism=attraction)",
+  "pack": "swat-lower"
+}

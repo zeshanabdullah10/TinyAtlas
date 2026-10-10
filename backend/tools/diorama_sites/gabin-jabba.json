@@ -1,0 +1,19 @@
+{
+  "title": "Gabin Jabba",
+  "subtitle": "Forested meadow plateau above Lalko, Matta tehsil, Swat",
+  "bbox": [35.155, 72.345, 35.191, 72.389],
+  "arrival": {
+    "name": "Gabin Jabba",
+    "point": [35.17384, 72.36814]
+  },
+  "drive_ways": [697528068, 697528069, 697527861],
+  "track_ways": [697528068, 697528069, 697527861],
+  "drive_start": [35.14123, 72.3831],
+  "trailhead": [35.17676, 72.37061],
+  "walk_ways": [],
+  "far_bbox": [35.084, 72.258, 35.264, 72.478],
+  "drive_km": 0.6,
+  "pack": "swat-lower",
+  "road": "Gabin Jabba Road (OSM ways 697528068, 697528069, 697527861), from the Lalko junction",
+  "osm_use": "the unclassified Gabin Jabba Road from the tertiary road at Lalko to its mapped end (paved to 'End of paved road', then track), the streams and the forest; OSM maps no hut or hotel at the meadow, and a node tagged natural=peak 'Gabin Jaba' sits on the meadow point"
+}

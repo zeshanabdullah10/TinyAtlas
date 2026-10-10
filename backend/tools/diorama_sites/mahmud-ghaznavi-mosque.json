@@ -1,0 +1,73 @@
+{
+  "title": "Mahmud Ghaznavi Mosque",
+  "subtitle": "Excavated 11th-century mosque below Raja Gira Castle, Udegram, Lower Swat",
+  "bbox": [
+    34.7297,
+    72.2978,
+    34.7567,
+    72.3307
+  ],
+  "arrival": {
+    "name": "Mahmud Ghaznavi Mosque",
+    "point": [
+      34.74315,
+      72.31426
+    ]
+  },
+  "landmark": {
+    "kind": "mosque",
+    "name": "Mahmud Ghaznavi Mosque",
+    "point": [
+      34.74315,
+      72.31426
+    ],
+    "module": "mahmud-ghaznavi-mosque",
+    "terrace_m": 24,
+    "clear_m": 40,
+    "top_m": 6,
+    "ring_m": 36,
+    "footpath": true,
+    "heading_deg": 254,
+    "edits": [
+      "The mosque is drawn from the plan in the Wikipedia article: a rectangular prayer hall 28 m by 21 m, the mihrab square and centred in the west wall, an off-centre entrance in the east wall, a paved courtyard with a sunken ablution tank in the middle, three oblong rooms (ziyada) to the north and three bastions on their outer side. Front faces the qibla (254 degrees, computed from the coordinates).",
+      "Estimated, not published: the pillar base positions (5 by 8 as the article gives them), the tank size, the wall thickness and height (about 1.5 m, from the photos; the article mentions traces of 30-foot walls, which are not drawn at full height), the mihrab projection, the stone stair on the east side and the boulders.",
+      "The levelled ground is a 24 m radius terrace (the article says the mosque stands on an early artificial terrace); the slope beyond it is the DEM.",
+      "The OSM archaeological-site outline (about 73 m by 33 m) is not drawn as a footprint; the walking circle is a 36 m circle around the point, not a mapped path."
+    ],
+    "sources": [
+      {
+        "name": "Wikipedia: Mahmud Ghaznavi Mosque",
+        "use": "plan (28 m by 21 m), pillar bases, mihrab and entrance positions, courtyard and tank, ziyada rooms and bastions, dates and quotes",
+        "licence": "CC BY-SA 4.0",
+        "url": "https://en.wikipedia.org/wiki/Mahmud_Ghaznavi_Mosque"
+      }
+    ]
+  },
+  "drive_ways": [
+    546635490
+  ],
+  "track_ways": [
+    546635490
+  ],
+  "drive_start": [
+    34.7528691,
+    72.299758
+  ],
+  "trailhead": [
+    34.7445027,
+    72.313364
+  ],
+  "walk_ways": [],
+  "far_bbox": [
+    34.6501,
+    72.2067,
+    34.8362,
+    72.4167
+  ],
+  "drive_km": 0.6,
+  "road": "Saidu Sharif Hospital to Odigram Road Proposed",
+  "osm_use": "the OSM road to Odigram (its end is the trailhead, about 170 m from the mosque), the archaeological-site outline and the buildings near the site",
+  "pack": "swat-lower",
+  "built_up": true,
+  "buildings_radius_m": 900
+}

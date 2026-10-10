@@ -1,0 +1,100 @@
+{
+  "title": "Raja Gira Castle",
+  "subtitle": "Ruined hill fort above Udegram (Odigram), Lower Swat",
+  "pack": "swat-lower",
+  "bbox": [
+    34.7282,
+    72.2968,
+    34.7552,
+    72.3296
+  ],
+  "far_bbox": [
+    34.6519,
+    72.2039,
+    34.8317,
+    72.4225
+  ],
+  "arrival": {
+    "name": "Raja Gira Castle",
+    "point": [
+      34.74185,
+      72.31318
+    ]
+  },
+  "trailhead": [
+    34.7445,
+    72.31336
+  ],
+  "walk_ways": [],
+  "drive_ways": [
+    546635490
+  ],
+  "track_ways": [
+    546635490
+  ],
+  "drive_start": [
+    34.75287,
+    72.29976
+  ],
+  "drive_km": 0.6,
+  "road": "Saidu Sharif Hospital to Odigram Road (OSM name; tagged 'Proposed')",
+  "osm_use": "the Odigram village road to its end north of the castle, the fort outline (Raja Gira Fort) and the mosque footprint",
+  "built_up": true,
+  "buildings_radius_m": 1000,
+  "landmark": {
+    "kind": "fort_ruin",
+    "name": "Raja Gira Castle",
+    "point": [
+      34.74185,
+      72.31318
+    ],
+    "module": "raja-gira-castle",
+    "terrace_m": 0,
+    "clear_m": 40,
+    "top_m": 12,
+    "ring_m": 40,
+    "footpath": true,
+    "outline": [
+      [
+        34.7422,
+        72.31283
+      ],
+      [
+        34.74229,
+        72.31323
+      ],
+      [
+        34.74151,
+        72.31353
+      ],
+      [
+        34.7414,
+        72.31315
+      ]
+    ],
+    "edits": [
+      "The ruin's outline is the OSM fort area (historic=archaeological_site, 'Raja Gira Fort', way 889059633): a narrow spur about 90 m long and 35 m wide, its north end toward the road.",
+      "The walls follow that outline as grey schist dry-stone walls 1.8 to 4.5 m high, with gaps where the stone has fallen. The heights and gaps are estimated from the Commons photos, not surveyed.",
+      "Round towers stand at the corners and on the east side, about 4 to 5 m high (estimated from the photos of the curved bastions).",
+      "Rectangular room foundations about 0.9 m high lie inside the walls. Their places and sizes are estimated from the photo of the rooms on the cliff (photo 01).",
+      "The great stair at the north end is in photo 06, so its existence is sourced. Its width, length and step count are estimated.",
+      "No terrace is levelled: the walls and stair sit on the Copernicus DEM slope (30 m cells), so the wall tops are their height above the ground under them.",
+      "The trailhead is the end of the Odigram road (OSM), about 280 m north of the castle. The walk climbs the slope with no mapped footpath, so the route is traced over the DEM. The mosque on the slope below is not drawn here."
+    ],
+    "sources": [
+      {
+        "name": "OpenStreetMap: way 889059633 (Raja Gira Fort) and way 546635490 (Odigram road)",
+        "use": "the fort outline, the road and its end point",
+        "licence": "ODbL 1.0",
+        "url": "https://www.openstreetmap.org/way/889059633"
+      },
+      {
+        "name": "Commons photos 01-06 by TANK RAIDER (CC BY-SA 3.0) and Fazal.Khaliq (CC BY-SA 4.0)",
+        "use": "wall courses and towers, the stair, the room foundations (heights estimated)",
+        "licence": "CC BY-SA 3.0 / CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Raja_Gira_Castle.jpg"
+      }
+    ],
+    "clear_trees_m": 70
+  }
+}

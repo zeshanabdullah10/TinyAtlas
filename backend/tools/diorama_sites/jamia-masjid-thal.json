@@ -1,0 +1,41 @@
+{
+  "title": "Jamia Masjid Thal",
+  "subtitle": "Wooden mosque on the Panjkora bank, Thal village, Kumrat",
+  "pack": "swat",
+  "bbox": [35.4648, 72.2289, 35.4920, 72.2619],
+  "far_bbox": [35.388, 72.14, 35.568, 72.36],
+  "arrival": {
+    "name": "Jamia Masjid Thal",
+    "point": [35.47843, 72.2454]
+  },
+  "landmark": {
+    "kind": "mosque",
+    "name": "Jamia Masjid Thal",
+    "point": [35.47843, 72.2454],
+    "model": "jamia-masjid-thal.glb",
+    "terrace_m": 30,
+    "clear_m": 30,
+    "top_m": 26,
+    "ring_m": 40,
+    "edits": [
+      "The mosque is the Atlas TRELLIS model made from one CC BY-SA Commons photo (Asfandyarlahor, Thall_Mosque_Dir_Kumrat.jpg); it is not a survey.",
+      "The model's size, 25 x 23 x 24 m, is estimated from that photo, not measured; OSM maps no footprint for the mosque.",
+      "The ground within 30 m of the mosque is levelled to its base; the rest of the village is the DEM slope, and its houses are not mapped in OSM so they are not drawn."
+    ],
+    "sources": [
+      {
+        "name": "Jamia Masjid Thal model (TRELLIS, MIT; photo CC BY-SA 4.0)",
+        "use": "the mosque, generated from one Commons photo by Asfandyarlahor",
+        "licence": "CC BY-SA 4.0 (photo, share-alike applies to the derived model); TRELLIS code MIT",
+        "url": "https://commons.wikimedia.org/wiki/File:Thall_Mosque_Dir_Kumrat.jpg"
+      }
+    ]
+  },
+  "drive_ways": [1010324794, 303252803, 1000337680],
+  "track_ways": [1010324794, 303252803, 1000337680],
+  "drive_start": [35.4563354, 72.2327535],
+  "drive_km": 0.6,
+  "road": "Dir to Thal paved road (OSM ref S-16)",
+  "road_kind": "road",
+  "osm_use": "the S-16 road from the south-west to the bridge at the mosque; the Panjkora river; no building footprints mapped in Thal"
+}

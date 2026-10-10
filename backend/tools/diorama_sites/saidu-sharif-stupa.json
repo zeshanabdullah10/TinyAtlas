@@ -1,0 +1,51 @@
+{
+  "title": "Saidu Sharif I Stupa",
+  "subtitle": "Buddhist stupa on the edge of Saidu Sharif, Lower Swat",
+  "bbox": [34.745, 72.345, 34.77, 72.375],
+  "arrival": {
+    "name": "Saidu Sharif I Stupa",
+    "point": [34.75747, 72.36215]
+  },
+  "landmark": {
+    "kind": "stupa",
+    "name": "Saidu Sharif I Stupa and Monastery",
+    "point": [34.75747, 72.36215],
+    "model": "saidu-sharif-stupa.glb",
+    "module": "saidu-sharif-stupa",
+    "heading_deg": 180,
+    "terrace_m": 30,
+    "clear_m": 60,
+    "top_m": 24,
+    "ring_m": 36,
+    "footpath": true,
+    "edits": [
+      "The main stupa is the Atlas maquette (backend/tools/blender/stupa.py): the square base 19.6 m x 3.2 m, the first cylindrical body (tier) 13.4 m and the drum 13.1 m are measured from the MAIP restitution drawing's scale bar; only the surviving base is modelled, and its stair faces north as Wikipedia describes. The model is placed by the build at the ground of the place point.",
+      "The lower terrace (the Terrace of the Stupas) is levelled to the ground at the place point out to 30 m and paved in grey schist; the 30 m radius is estimated, no source gives the terrace's size.",
+      "The low dressed-stone edge of the terrace (about 0.9 m high) is estimated from photo 3; its height and line are not surveyed.",
+      "Eight minor stupas on square bases, on a ring 22 m from the main stupa, are estimated from photos 1 and 2; their number, positions and sizes are illustrative, not measured.",
+      "The four corner columns with crouching lions on the top of the square base are restored, not surviving: Wikipedia says the four columns stood on the corners, and their heights (about 9 m shafts, lions to about 17 m) are estimated from the MAIP restitution drawing's scale bar.",
+      "The monastery on the upper terrace is drawn inside the OSM footprint 'Saidu Sharif Monastery' (way 1078000527) as a walled courtyard, 24 m by 38 m, with six cells along each long side: cell sizes, wall heights and flat roofs are estimated. Its ground is the DEM, which is not levelled to a separate upper terrace (no source gives that height); the 30 m DEM cannot show the cut.",
+      "Ground under the monastery and the town follows the real DEM slope; the cells sit on it and are not levelled.",
+      "The walking circle is a 36 m circle around the stupa terrace; it is not a mapped trail. The walk from the trailhead on Saidu Sharif Road to the stupa crosses the town ground on the easiest slope over the DEM."
+    ],
+    "sources": [
+      {"name": "Saidu Sharif I Stupa model (Tiny Atlas maquette, procedural)", "use": "the square base and first cylindrical body of the main stupa, placed in real metres; fidelity about 6 of 10; only the surviving base modelled", "licence": "Tiny Atlas own procedural geometry (backend/tools/blender/stupa.py)", "url": "https://commons.wikimedia.org/wiki/File:Saidu_Sharif_I,_main_stupa,_front_view_(N)_restitution_(MAIP).png"},
+      {"name": "MAIP restitution drawing, Saidu Sharif I main stupa, front view (N)", "use": "published dimensions: plinth 19.6 m x 3.2 m, tier 13.4 m, drum 13.1 m (measured from the drawing's scale bar in the Atlas maquette notes); column and lion heights estimated from the same drawing", "licence": "CC BY-SA 4.0, Luca M. Olivieri et al., via Wikimedia Commons", "url": "https://commons.wikimedia.org/wiki/File:Saidu_Sharif_I,_main_stupa,_front_view_(N)_restitution_(MAIP).png"},
+      {"name": "OpenStreetMap", "use": "node 5755621721 'Saidu Sharif Stupa' (the place point), way 1078000527 'Saidu Sharif Monastery' (the monastery footprint), Saidu Sharif Road", "licence": "ODbL, © OpenStreetMap contributors", "url": "https://www.openstreetmap.org/copyright"},
+      {"name": "Wikipedia: Saidu Sharif Stupa", "use": "stair on the north side of the main stupa, the two terraces, the four corner columns with lions, the monastery on the upper terrace", "licence": "CC BY-SA 4.0 (Wikipedia text)", "url": "https://en.wikipedia.org/wiki/Saidu_Sharif_Stupa"}
+    ]
+  },
+  "drive_ways": [1023549245, 1025568195, 1025568194, 1023549244],
+  "track_ways": [1023549245, 1025568195, 1025568194, 1023549244],
+  "drive_start": [34.749938, 72.3573383],
+  "far_bbox": [34.67, 72.26, 34.85, 72.47],
+  "trailhead": [34.75892, 72.35829],
+  "walk_ways": [],
+  "buildings_radius_m": 900,
+  "drive_km": 0.6,
+  "road_kind": "road",
+  "pack": "swat-lower",
+  "road": "Saidu Sharif Road",
+  "osm_use": "Saidu Sharif Road (primary) and the town buildings; the stupa node and the monastery footprint",
+  "built_up": true
+}

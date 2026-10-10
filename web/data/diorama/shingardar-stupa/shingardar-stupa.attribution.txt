@@ -1,0 +1,2 @@
+Procedural maquette generated for Tiny Atlas (backend/tools/blender/stupa.py).
+- shingardar-stupa.glb: 18 m high, ~21 m dia (height published, livius.org; diameter/bands estimated from photos); 5,280 tris; 1.58 MB; fidelity ~6/10 (upper masonry now a rounded quarter-ellipse dome, grass on top ~34% as a lumpy shell; grass rim still ragged).

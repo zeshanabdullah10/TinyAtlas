@@ -1,0 +1,2 @@
+Procedural maquette generated for Tiny Atlas (backend/tools/blender/stupa.py).
+- saidu-sharif-stupa.glb: plinth 19.6 m x 3.2 m, tier 13.4 m, drum 13.1 m (measured from MAIP drawing scale bar); only surviving base modelled; 1,420 tris; 0.84 MB; fidelity ~6/10.
