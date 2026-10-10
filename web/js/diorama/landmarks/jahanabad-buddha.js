@@ -1,4 +1,4 @@
-// Jahanabad Buddha (Manglawar): a tall granite face with the seated Buddha in relief in an oval niche, and boulders
+// Jahanabad Buddha (Manglawar): a tall reddish sandstone face (Wikipedia's material; the paint is grey) with the seated Buddha in relief in an oval niche, and boulders
 // beside and behind it. Local metres (x right, -z front). Sourced: the Jahan-Abad-i relief is 700 x 500 cm, its throne
 // 120 x 390 cm, relief depth 11 cm, facing north west (Wikipedia, "Buddhist rock carving in Manglawar"). The rock's
 // shape and size, the streaks, the boulders, the niche, the folds, halo and deck are estimated.
@@ -10,7 +10,7 @@ const NICHE_Z = 0.3;          // estimated: the niche floor is set 0.3 m back in
 const NICHE = { x: 3.4, y: 4.6, ry: 4.2 };    // estimated oval niche (half-widths) around the figure
 const STREAK_X = [-3.2, -1.1, 1.2, 3.1];      // estimated dark weathering streaks on the face (x, metres)
 
-// Granite surface: three octaves of lumps (unit-sphere input), so the rock reads broken and blocky, not egg-smooth.
+// Stone surface: three octaves of lumps (unit-sphere input), so the rock reads broken and blocky, not egg-smooth.
 const lump = (x, y, z, seed) => {
   let v = 0, amp = 1, f = 1.3;
   for (let k = 0; k < 3; k++, amp *= 0.5, f *= 2.1) {
@@ -19,7 +19,7 @@ const lump = (x, y, z, seed) => {
   return v * 1.6;
 };
 
-// One granite boulder: a lumped sphere scaled to `s`, centred at `c`, sunk 1 m into the ground.
+// One stone boulder: a lumped sphere scaled to `s`, centred at `c`, sunk 1 m into the ground.
 // `face` true: the front (-z) is a flat carved face at z = 0, with the niche and the dark streaks.
 function boulder(ctx, group, c, s, face, seed) {
   const tones = [ctx.mat(0x5f5b55, { roughness: 1, flatShading: true }), ctx.mat(0x6e6962, { roughness: 1, flatShading: true }),
