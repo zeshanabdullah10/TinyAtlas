@@ -16,7 +16,18 @@ content is summarised in §8 so you do not need it).
 > hygiene and token economy. Load it at the start of any session that delegates or reviews work. §11–§12 below are the
 > project-specific detail behind it.
 >
-> **Latest (2026-10-04, later):** v2.4.0 released: Lower Swat poster reframed and relit (poster-only shot `lower2`, new
+> **Latest (2026-10-10):** v2.10 released: 20 more dioramas (39 in all, every one linked from its Atlas card), then
+> a deep sweep with 16 checking agents. Fixes: practical quotes made verbatim, values cut back to what their quotes
+> say; more than 30 photos of other places removed (rules in `collect_photos.py` `EXCLUDE`/`EXCLUDE_FOR`/`ELSEWHERE`, text
+> fixes in `pack_corrections.json`); the lake camp (boats, tents, stalls, horses, boat and horse rides) is drawn only
+> where a source describes it (`lake_life`, Mahodand only); walks traced over the ground as drawn; edit lines say the
+> real walking circle, "road" for paved drives, "1 building"; Atlas offline save lists every module; the planner's
+> provider error stays in the server log; an unsaved diorama opened offline says so. Sites whose build inputs are not in
+> the checkout (Mahodand, Ushu, Utror and 12 more older sites: see `diorama_meta_sync.py`) get their words synced, not rebuilt.
+> Open: White Palace has no `photos.json`; Wikimedia 429s left a few photos unviewed (gumbat 01, Jamia Masjid Thal);
+> `ur.json` still needs a native Urdu review; Katora Lake and Chakdara Fort dioramas are parked (no road near / DEM tile).
+>
+> **Earlier (2026-10-04, later):** v2.4.0 released: Lower Swat poster reframed and relit (poster-only shot `lower2`, new
 > cover), live-map close views lighter in shade with near-detail conifers, Lower Swat road classes from OSM
 > surface/smoothness/tracktype (`backend/tools/road_classes.py`). See §14.2 for what was verified and what is still open.
 >

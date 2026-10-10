@@ -33,6 +33,8 @@ under "How this model is made".
 5. **Life at the lake (illustrative).** Rowing boats, a camp on the flattest meadow near the water, tea stalls with
    smoke beside the end of the track, grazing horses. No source places these yet, so each carries an "illustrative"
    label. When a source turns up (OSM, research notes, credited geotagged photos), they move to the sourced places.
+   They, the horse ride and the boat ride are drawn only at a lake whose site entry sets `lake_life` (Mahodand, whose
+   pack card quotes "popular for boating and camping"); the other lakes have the shore walk only.
 6. **Seasons.** Summer, autumn (golden meadows, red shrubs) and winter (snow on gentle ground and trees, an iced
    lake). Dawn mist forms over the basin before about 7:30. All of it is illustrative and the page says so.
 7. **Opening on the lake.** `?view=lake` opens on the view from the end of the drive (the Atlas "See the lake"
@@ -79,6 +81,10 @@ Inputs (download once, not committed):
 - ESA WorldCover 2021 tile: `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N33E072_Map.tif`
 - Overpass JSON (`out geom;`) of `way["highway"]` and `way["waterway"]` over the far box.
 
+When a site's inputs are not at hand (OSM changes over time, so a rebuild from a fresh extract is not the same model),
+`python backend/tools/diorama_meta_sync.py <site>|--all` brings only the words and switches that come from the site
+entry (title, subtitle, pack, road kind, lake camp, generic edit lines) up to date; on a fresh build it changes nothing.
+
 What the build does:
 - resamples the DEM (bilinear) and WorldCover (nearest) onto the 10 m grid and the 60 m horizon ring;
 - finds the lake as the WorldCover water patch holding the place point, with the inflowing river channels opened
@@ -109,7 +115,7 @@ The terrain is shown at true scale with no height exaggeration.
 
 A site does not need a lake. Leave out `lake_seed` and give `"arrival": {"name": ..., "point": (lat, lon)}`: the
 drive stops at the track point nearest it, `meta.lake` is `null`, `meta.arrival` is the viewpoint, the page skips the
-water, boats and life, and the walk is a 150 m circle around the point. For a lake, `--s2 <Sentinel-2 L2A COG item
+water, boats and life, and the walk is a 150 m circle around the point (a landmark's `ring_m`, default 52 m). For a lake, `--s2 <Sentinel-2 L2A COG item
 URL>` traces the outline from a recent cloud-free scene (NDWI > 0.05, thin channels opened away) instead of
 WorldCover 2021. Mahodand uses scene S2C_43SBV_20250921_0_L2A: the lake is a 1.4 km ribbon, 0.08 km².
 
