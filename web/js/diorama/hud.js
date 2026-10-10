@@ -90,7 +90,7 @@ export class Hud {
       $("#photo-img").src = p.thumb; $("#photo-img").alt = p.caption; $("#photo-link").href = p.page;
       $("#photo-link").onclick = (e) => { e.preventDefault(); this.lightbox(p); };
       $("#photo-cap").textContent = p.caption;
-      $("#photo-credit").innerHTML = `Photo ${esc(p.author)}, ${esc(p.date.slice(0, 4))}, <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}</a> · Wikimedia Commons · <span id="photo-d"></span>`;
+      $("#photo-credit").innerHTML = `Photo ${esc(p.author)}${p.date ? ", " + esc(p.date.slice(0, 4)) : ""}, <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}</a> · Wikimedia Commons · <span id="photo-d"></span>`;
     }
     const d = document.getElementById("photo-d"); if (d) d.textContent = `taken about ${Math.round(dist / 10) * 10} m from here`;
   }
@@ -183,7 +183,7 @@ export class Hud {
     const d = $("#lightbox"), esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
     $("#lb-img").src = p.thumb; $("#lb-img").alt = p.caption;
     $("#lb-cap").textContent = p.caption;
-    $("#lb-credit").innerHTML = `Photo ${esc(p.author)}, ${esc(p.date.slice(0, 10))} · <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}, Wikimedia Commons</a>`;
+    $("#lb-credit").innerHTML = `Photo ${esc(p.author)}${p.date ? ", " + esc(p.date.slice(0, 10)) : ""} · <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}, Wikimedia Commons</a>`;
     if (!d.open) d.showModal();
   }
   placeLabels(camera, w, h, state) {
