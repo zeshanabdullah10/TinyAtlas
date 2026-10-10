@@ -530,7 +530,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
               if site.get("landmark", {}).get("clear_trees_m") else []),
             *(site["landmark"].get("edits") or [
                 f"The palace grounds are levelled to a terrace {terrace} m around the place point and kept as lawn.",
-                "The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 24 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."]
+                "The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 28 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."]
               if "landmark" in site else []),
             *([f"The walk from the end of the jeep track follows the mapped OSM footpath for {walk['mapped_km']} km"
                + (f"; the last {walk['traced_km']} km is not mapped and is traced over the ground (easiest slope on the DEM)." if walk["traced_km"] else ".")]
