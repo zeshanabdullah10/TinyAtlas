@@ -95,7 +95,7 @@ def main():
                         if not a.close_m and not size:
                             dist = 120.0 if shot == "close" else 30.0
                         pg.evaluate(f"({CAM})(['{shot}', {dist}])")
-                    pg.screenshot(path=str(out / f"{shot}.png"))
+                    pg.screenshot(path=str(out / f"{shot}.png"), timeout=180000)   # software GL under load
                 pg.close()
             b.close()
     finally:                                            # the console log survives a failed run (a timeout, a page that never starts)
