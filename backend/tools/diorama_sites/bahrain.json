@@ -1,6 +1,7 @@
 {
   "title": "Bahrain",
   "subtitle": "Bahrain bazaar, Swat River, Upper Swat",
+  "road_kind": "road",
   "bbox": [35.185, 72.525, 35.230, 72.5665],
   "arrival": {"name": "Bahrain bazaar", "point": [35.20655, 72.54808]},
   "drive_ways": [849961795],

@@ -1,6 +1,7 @@
 {
   "title": "Madyan",
   "subtitle": "Swat River on the N-95, Upper Swat",
+  "road_kind": "road",
   "bbox": [35.1188, 72.5100, 35.1638, 72.5649],
   "arrival": {
     "name": "Madyan bazaar",
@@ -13,5 +14,5 @@
   "osm_use": "the N-95 road into Madyan from the south, the Swat River and the buildings of the bazaar and riverside hotels",
   "road": "N-95",
   "drive_km": 0.6,
-  "pack": "swat"
+  "pack": "swat-lower"
 }

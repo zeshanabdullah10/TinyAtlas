@@ -37,6 +37,7 @@ SITES = {
         "subtitle": "Ushu valley, Upper Swat",
         "bbox": (35.672, 72.632, 35.724, 72.692),      # south, west, north, east
         "lake_seed": (35.70825, 72.65398),              # the place point in regions.py
+        "lake_life": True,                              # the pack quotes "popular for boating and camping": draw the camp
         "drive_ways": [491297270],                      # OSM "Mahodand Lake Road", Kalam side to the lake
         "drive_start": (35.6773, 72.6784),
         "track_ways": [345805207, 491297270, 1156049685, 1156049686, 1156052434, 1156052435],
@@ -274,6 +275,10 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     g = geo(site)
     out = ROOT / "web" / "data" / "diorama" / name
     out.mkdir(parents=True, exist_ok=True)
+    try:                                                    # the visitors' photos shown at the site (web/data/diorama/<site>/photos.json)
+        has_photos = bool(json.loads((out / "photos.json").read_text(encoding="utf-8")))
+    except (OSError, ValueError):
+        has_photos = False
 
     dem = tifffile.imread(dem_path)                      # 3600x3600, 1 degree tile; top-left from the name (N35_00_E072 -> 36N 72E)
     import re
@@ -389,7 +394,6 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
             lv = t.get("building:levels", "")
             buildings.append({"id": w["id"], "kind": t["building"], "levels": int(lv) if lv.isdigit() else None,
                               "pts": [[round(x, 1), round(z, 1)] for x, z in fp[:-1]]})
-    walk = trace_walk(site, ways, g, h, lake, lake_xz, drive[-1]) if "trailhead" in site else None
     # A landmark stands on a level terrace of lawn (its grounds); trees are kept off it.
     # `terrace_m` (default 58, the palace lawn) sets its radius; 0 leaves the ground as it is (a waterfall, a rock relief).
     terrace = site.get("landmark", {}).get("terrace_m", 58)
@@ -424,6 +428,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     wgt = np.clip(1 - (near - 7) / 16, 0, 1)
     wgt = wgt * wgt * (3 - 2 * wgt)
     h = np.where(near < 23, h * (1 - wgt) + ph * wgt, h)
+    # The walk is traced last, over the ground as drawn (terrace and road bench included), so its heights match it.
+    walk = trace_walk(site, ways, g, h, lake, lake_xz, drive[-1]) if "trailhead" in site else None
 
     # Far ring: same sources, 60 m cells, positioned in the near grid's local frame.
     fg = geo(site, "far_bbox", FAR_CELL)
@@ -495,6 +501,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         "version": 1, "site": name, "title": site["title"], "subtitle": site["subtitle"], "road": site.get("road", "Mahodand Lake Road"), "pack": site.get("pack", "swat"),
         **({"built_up": True} if site.get("built_up") else {}),
         **({"road_kind": site["road_kind"]} if site.get("road_kind") else {}),   # "road" for a paved road; default a jeep track
+        **({"lake_life": True} if site.get("lake_life") and has_lake else {}),   # boats, camps, stalls and horses at the lake
         "grid": {"cols": g["cols"], "rows": g["rows"], "cell": CELL, "width": g["W"], "height": g["H"],
                  "hmin": hmin, "hmax": float(h.max()), "bbox": site["bbox"]},
         "far": {"cols": fg["cols"], "rows": fg["rows"], "cell": FAR_CELL, "x0": round(fx0, 1), "z0": round(fz0, 1),
@@ -515,9 +522,9 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
             "A bench up to 24 m wide is cut along the jeep track to the smoothed track profile (the 30 m DSM includes tree canopy).",
             "Road bumps and ruts in the drive are illustrative; the grade and the line of the track are real.",
             "Trees, shrubs, grass tufts and boulders are placed where WorldCover maps that cover; their size and number are illustrative.",
-            *(["At the lake, the positions of the boats, tents, tea stalls and horses are illustrative (boating is described by the sources and seen in Commons photos).",
-               "The shore path is traced 20 m outside the lake outline; it is not a mapped trail."] if has_lake else
-              ["The walking loop is a 150 m circle around the arrival point; it is not a mapped trail."]),
+            *(["At the lake, the positions of the boats, tents, tea stalls and horses are illustrative (boating is described by the sources and seen in Commons photos)."] if has_lake and site.get("lake_life") else []),
+            *(["The shore path is traced 20 m outside the lake outline; it is not a mapped trail."] if has_lake else
+              [f"The walking loop is a {site['landmark'].get('ring_m', 52) if 'landmark' in site else 150} m circle around the arrival point; it is not a mapped trail."]),
             # a landmark declares its own edits in the site file; the White Palace keeps the words it was built with
             *([f"Trees within {site['landmark']['clear_trees_m']} m of the {site['landmark']['name']} are left out so it can be seen; WorldCover 2021 maps tree cover there."]
               if site.get("landmark", {}).get("clear_trees_m") else []),
@@ -528,7 +535,9 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
             *([f"The walk from the end of the jeep track follows the mapped OSM footpath for {walk['mapped_km']} km"
                + (f"; the last {walk['traced_km']} km is not mapped and is traced over the ground (easiest slope on the DEM)." if walk["traced_km"] else ".")]
               if walk else []),
-            *([f"The {len(buildings)} buildings stand on their OSM footprints; their height (OSM levels where mapped, else one or two storeys), roofs and colours are illustrative, after visitors' photos."] if buildings else []),
+            *([("The building stands on its OSM footprint; its" if len(buildings) == 1 else f"The {len(buildings)} buildings stand on their OSM footprints; their")
+               + " height (OSM levels where mapped, else one or two storeys), roofs and colours are illustrative"
+               + (", after visitors' photos." if has_photos else ".")] if buildings else []),
             *([f"{ndvi_trees * CELL * CELL / 1e6:.2f} km² that WorldCover 2021 maps as grass or cropland is drawn as forest: Sentinel-2 NDVI there is above {site['ndvi_trees']} (as green as the mapped forest), and photos show deodar."] if ndvi_trees else []),
             "Season colours, snow, ice and dawn mist are illustrative.",
             "Traffic on the drive is illustrative: the vehicle kinds are those seen on Swat roads (Willys jeeps, Hilux, Suzuki vans, Mehran cars, CD70 motorbikes, Qingqi rickshaws, painted trucks); their number and movement are not counted.",
@@ -548,6 +557,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
              "url": "https://www.openstreetmap.org/copyright"},
         ],
     }
+    meta["edits"] = list(dict.fromkeys(meta["edits"]))      # a landmark's own edits may repeat a generic line
     if site.get("drive_km"):
         meta = shorten(meta, site["drive_km"])
         facts = meta["facts"]

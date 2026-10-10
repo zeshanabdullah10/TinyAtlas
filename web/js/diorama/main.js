@@ -120,8 +120,8 @@ if (!meta.landmark || meta.landmark.footpath) scene.add(footpath(site, loop));  
 const vps = viewpoints(site, loop, path);
 scene.add(viewpointPosts(vps));
 const walker = new Walker(site, loop, canvas);
-const rowRoute = meta.lake ? waterRoute(site, loop) : null;
-if (!rowRoute) { document.getElementById("m-boat").hidden = true; document.getElementById("m-horse").hidden = true; document.querySelector('[data-act="tour"]').textContent = "Tour around"; }
+const rowRoute = meta.lake && meta.lake_life ? waterRoute(site, loop) : null;   // boats and horses only where the sources describe them
+if (!rowRoute) { document.getElementById("m-boat").hidden = true; document.getElementById("m-horse").hidden = true; if (!meta.lake) document.querySelector('[data-act="tour"]').textContent = "Tour around"; }
 walker.mounts.horse = horseModel(0x9a6a3e);
 walker.mounts.boat = boatModel(0xe2b347, { rower: false });
 {
@@ -155,7 +155,7 @@ fetch(base + "photos.json").then((r) => (r.ok ? r.json() : [])).then((list) => {
 const weather = new Weather(latC, (meta.grid.bbox[1] + meta.grid.bbox[3]) / 2, F.arrival_m);
 weather.place = meta.lake ? "the lake" : meta.arrival.name;
 weather.load().then((t) => hud.weather(t)).catch(() => {});
-const life = meta.lake ? new Life(scene, site, loop, path, lakeC) : { labels: [], horses: [], update() {} };
+const life = meta.lake && meta.lake_life ? new Life(scene, site, loop, path, lakeC) : { labels: [], horses: [], update() {} };
 const mistG = mist(lakeC); scene.add(mistG);
 let season = 0;
 // herders' flocks (illustrative): the upper-valley village sites, where the sources describe summer grazing
