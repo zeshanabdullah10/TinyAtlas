@@ -1,6 +1,12 @@
+import warnings
+
 import pytest
-from fastapi.testclient import TestClient
-from tinyatlas import api, llm
+
+# starlette's TestClient module touches an anyio alias that anyio 4.15 deprecates; ignore just that warning here so
+# `pytest -W error::DeprecationWarning` can still collect the suite. Remove once starlette stops using the alias.
+warnings.filterwarnings("ignore", message="The anyio.abc.BlockingPortal alias", category=DeprecationWarning)
+from fastapi.testclient import TestClient  # noqa: E402
+from tinyatlas import api, llm  # noqa: E402
 
 
 @pytest.fixture
