@@ -15,15 +15,22 @@
  },
  {
   "label": "Where it is",
-  "value": "North-east of the Utror Valley, reached on foot past Kundol Lake",
+  "value": "North-east of the Utror Valley, reached by trekking from there",
   "quote": "This lake is situated to the northeast of the Utror Valley",
   "source": "Wikipedia, Pari Lake (last edited July 2026)",
   "url": "https://en.wikipedia.org/wiki/Pari_Lake"
  },
  {
   "label": "The path",
-  "value": "A long walk on a narrow, bending path; take care",
-  "quote": "the path way is often narrow with bends and turns and caution is advised",
+  "value": "The trek is called very dangerous; the path is narrow with bends and turns",
+  "quote": "This trek is very dangerous, as the path way is often narrow with bends and turns and caution is advised.",
+  "source": "Wikipedia, Pari Lake (last edited July 2026)",
+  "url": "https://en.wikipedia.org/wiki/Pari_Lake"
+ },
+ {
+  "label": "Size",
+  "value": "Larger and deeper than the other lake in its vicinity (Wikipedia)",
+  "quote": "is comparatively greater in size and depth than the other lake in its vicinity",
   "source": "Wikipedia, Pari Lake (last edited July 2026)",
   "url": "https://en.wikipedia.org/wiki/Pari_Lake"
  }

@@ -1,5 +1,6 @@
-// Pines where WorldCover maps tree cover, shrubs on its shrubland, boulders on bare ground. Positions are deterministic;
-// sizes and counts are illustrative (listed in meta.edits).
+// Pines where WorldCover maps tree cover (broadleaf trees below about 1,700 m, where the lower valleys grow chinar,
+// walnut, poplar and orchards; mixed between 1,500 and 1,900 m), shrubs on its shrubland, boulders on bare ground.
+// Positions are deterministic; sizes and counts are illustrative (listed in meta.edits).
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { hash } from "./site.js";
@@ -27,6 +28,18 @@ function pineGeometry() {
     }));
   return mergeGeometries([trunk, ...tiers]);
 }
+
+function broadleafGeometry() {
+  const trunk = painted(new THREE.CylinderGeometry(0.22, 0.38, 4.2, 5).translate(0, 2.1, 0), L(96, 74, 56));
+  const crowns = [[0, 6.4, 0, 3.3], [1.5, 5.4, 0.9, 2.4], [-1.4, 5.6, -0.8, 2.5], [0.3, 8.3, -0.4, 2.2]].map(([x, y, z, r], i) =>
+    painted(new THREE.IcosahedronGeometry(r, 0).scale(1, 0.85, 1).translate(x, y, z), (yy) => {
+      const t = Math.min(1, Math.max(0, (yy - 3) / 7));
+      return L(56 + 40 * t + i * 4, 88 + 40 * t + i * 5, 40 + 18 * t);
+    }));
+  return mergeGeometries([trunk, ...crowns]);
+}
+/** Broadleaf below about 1,700 m above sea level, pines above, mixed between 1,500 and 1,900 m. */
+const broadleafAt = (altitude, i) => hash(i, 7) < Math.min(1, Math.max(0, (1900 - altitude) / 400));
 
 export function flora(site, path, tier) {
   const g = site.meta.grid, dens = tier === "low" ? 0.45 : 1;
@@ -61,11 +74,16 @@ export function flora(site, path, tier) {
 
   // pines in 800 m tiles, so the main and shadow passes skip what is off screen
   const pineGeo = pineGeometry(), pineMat = seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }), "pine");
+  const leafGeo = broadleafGeometry(), leafMat = seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true }), "shrub");
   const TILE = 800 / g.cell, tiles = new Map();
-  pines.forEach((p, i) => { const key = Math.floor(p[0] / TILE) + "," + Math.floor(p[1] / TILE); (tiles.get(key) || tiles.set(key, []).get(key)).push(i); });
+  pines.forEach((p, i) => {
+    const x = site.x0 + p[0] * g.cell, z = site.z0 + p[1] * g.cell, leaf = broadleafAt(site.heightAt(x, z) + site.Y0, i);
+    const key = (leaf ? "b" : "p") + Math.floor(p[0] / TILE) + "," + Math.floor(p[1] / TILE);
+    (tiles.get(key) || tiles.set(key, []).get(key)).push(i);
+  });
   const pineMeshes = [];
-  for (const ids of tiles.values()) {
-    const mesh = new THREE.InstancedMesh(pineGeo, pineMat, ids.length);
+  for (const [key, ids] of tiles) {
+    const mesh = new THREE.InstancedMesh(key[0] === "b" ? leafGeo : pineGeo, key[0] === "b" ? leafMat : pineMat, ids.length);
     ids.forEach((i, j) => {
       const [c, r] = pines[i];
       const x = site.x0 + c * g.cell, z = site.z0 + r * g.cell;
@@ -133,6 +151,6 @@ export function flora(site, path, tier) {
   });
   group.add(tuftMesh);
   group.userData.tufts = tuftMesh;
-  group.userData.counts = { pines: pines.length, shrubs: shrubs.length, rocks: rocks.length };
+  group.userData.counts = { trees: pines.length, shrubs: shrubs.length, rocks: rocks.length };
   return group;
 }

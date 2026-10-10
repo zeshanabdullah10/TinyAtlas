@@ -1,23 +1,51 @@
 [
- {"label": "Best months", "value": "June to September; peak June to August",
-  "quote": "Summer (April–September): This is the best time to visit.", "source": "Graana, Dec 2024",
-  "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"},
- {"label": "From Kalam", "value": "About 40 km, about two hours by 4×4",
-  "quote": "The journey from Kalam to Mahodand Lake is approximately 40 kilometers (25 miles).", "source": "Graana, Dec 2024",
-  "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"},
- {"label": "The road", "value": "Rocky, narrow jeep track with stream crossings past Matiltan",
-  "quote": "Rocky, narrow jeep track with stream crossings", "source": "LEORK Hotels guide, Jul 2026",
-  "url": "https://www.leorkhotels.com/blog/mahodand-lake-guide/"},
- {"label": "Jeep fare", "value": "PKR 12,000–15,000 per jeep in July–August; 7,000–9,000 in June and September",
-  "quote": "PKR 12,000 to 15,000 per jeep in peak season", "source": "LEORK Hotels guide, Jul 2026",
-  "url": "https://www.leorkhotels.com/blog/mahodand-lake-guide/"},
- {"label": "Winter", "value": "The lake freezes and snow closes the track",
-  "quote": "The lake freezes solid, and heavy snowfall makes it inaccessible.", "source": "Graana, Dec 2024",
-  "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"},
- {"label": "Where to stay", "value": "Kalam is the base for the trip",
-  "quote": "Kalam town is the base for the Mahodand run.", "source": "LEORK Hotels guide, Jul 2026",
-  "url": "https://www.leorkhotels.com/blog/mahodand-lake-guide/"},
- {"label": "At the lake", "value": "Boats for hire; brown and rainbow trout",
-  "quote": "This Lake is home to both brown and rainbow trout.", "source": "Graana, Dec 2024",
-  "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"}
+ {
+  "label": "Best months",
+  "value": "Summer (April to September) is the best time to visit",
+  "quote": "Summer (April–September): This is the best time to visit.",
+  "source": "Graana, Dec 2024",
+  "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"
+ },
+ {
+  "label": "From Kalam",
+  "value": "About 40 km from Kalam",
+  "quote": "The journey from Kalam to Mahodand Lake is approximately 40 kilometers (25 miles).",
+  "source": "Graana, Dec 2024",
+  "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"
+ },
+ {
+  "label": "The road",
+  "value": "Rocky, narrow jeep track with stream crossings",
+  "quote": "Rocky, narrow jeep track with stream crossings",
+  "source": "LEORK Hotels guide, Jul 2026",
+  "url": "https://www.leorkhotels.com/blog/mahodand-lake-guide/"
+ },
+ {
+  "label": "Jeep fare",
+  "value": "PKR 12,000 to 15,000 per jeep in peak season",
+  "quote": "PKR 12,000 to 15,000 per jeep in peak season",
+  "source": "LEORK Hotels guide, Jul 2026",
+  "url": "https://www.leorkhotels.com/blog/mahodand-lake-guide/"
+ },
+ {
+  "label": "Winter",
+  "value": "The lake freezes solid; heavy snowfall makes it inaccessible",
+  "quote": "The lake freezes solid, and heavy snowfall makes it inaccessible.",
+  "source": "Graana, Dec 2024",
+  "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"
+ },
+ {
+  "label": "Where to stay",
+  "value": "Kalam town is the base for the Mahodand trip",
+  "quote": "Kalam town is the base for the Mahodand run",
+  "source": "LEORK Hotels guide, Jul 2026",
+  "url": "https://www.leorkhotels.com/blog/mahodand-lake-guide/"
+ },
+ {
+  "label": "At the lake",
+  "value": "Brown and rainbow trout live in the lake",
+  "quote": "This Lake is home to both brown and rainbow trout.",
+  "source": "Graana, Dec 2024",
+  "url": "https://www.graana.com/blog/mahodand-lake-a-complete-guide-to-swats-hidden-paradise/"
+ }
 ]

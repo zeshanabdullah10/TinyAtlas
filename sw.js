@@ -2,7 +2,7 @@
 // in full when the visitor presses "Save for offline" (the page posts the list of URLs). Place data is served from
 // the cache first when saved; everything else goes to the network first and falls back to the cache.
 
-const SHELL = "tinyatlas-shell-v4";   // v4: Urdu, trip kit, road status, heritage, voices, postcards, game
+const SHELL = "tinyatlas-shell-v5";   // v5: this release's shell changes (dioramas, photo removal); v4: Urdu, trip kit, road status, heritage, voices, postcards, game
 const DATA = "tinyatlas-data-v1";
 // The site may live under a subpath (GitHub Pages); the scope knows where it is ("/" at a domain root).
 const BASE = new URL(self.registration.scope).pathname;

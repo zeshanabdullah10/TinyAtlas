@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>Trip plan</title>
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/tripkit.css">
@@ -42,7 +43,7 @@ plan.replaceChildren(
   h("h1", null, "My trip plan"),
   h("p", { class: "meta" }, `Printed ${today}. Map: ${pack}. Heights are measured from the terrain data; access notes are estimates.`),
   h("h2", null, "Places"),
-  chosen.length ? chosen.map(placeBlock) : h("p", null, "No places were chosen. Pick places in the trip kit and print again."),
+  ...(chosen.length ? chosen.map(placeBlock) : [h("p", null, "No places were chosen. Pick places in the trip kit and print again.")]),
   h("h2", null, "Emergency numbers"),
   h("ul", null, (emergency?.numbers || []).map((n) => h("li", null, `${n.name}: ${n.number} (${n.covers}). Checked ${n.checked}.`))),
   h("p", { class: "meta" }, "Numbers are listed only when confirmed on an official page. Check them again before travel."),

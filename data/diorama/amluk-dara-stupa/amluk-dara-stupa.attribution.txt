@@ -1,0 +1,2 @@
+Procedural maquette generated for Tiny Atlas (backend/tools/blender/stupa.py).
+- amluk-dara-stupa.glb: 34 m plinth/4 m, 21 m drum (published, pakheritage/Wikipedia; tiers, stair, profile estimated); 3,260 tris; 0.89 MB; fidelity ~5/10.
