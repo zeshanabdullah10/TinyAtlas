@@ -28,6 +28,7 @@ CAM = """([mode, dist]) => {
   const end = d.path.at(d.path.length);
   let dx = end.x - x, dz = end.z - z; const L = Math.hypot(dx, dz) || 1; dx /= L; dz /= L;   // from the landmark toward the road
   const cam = d.camera;
+  d.setEnv?.("real");                                   // sky, horizon ring and fog, as the visitor sees it on the ground
   if (mode === "close") {
     const D = dist, el = 0.52;
     cam.position.set(x + dx * D * Math.cos(el), gy + D * Math.sin(el), z + dz * D * Math.cos(el));

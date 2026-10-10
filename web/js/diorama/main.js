@@ -642,7 +642,7 @@ addEventListener("pointerdown", () => sound.ctx?.resume?.(), { once: true });
 addEventListener("keydown", () => sound.ctx?.resume?.(), { once: true });
 requestAnimationFrame(frame);
 // test hook: advance the simulation by fixed steps without drawing (software GL runs at under 1 fps)
-window.__diorama = { site, path, ride, traffic, riders, camera, scene, keys, input, renderer, walker, loop, vps, rowRoute, state: () => state, start: startDrive, emit: (k, a) => hud.emit(k, a),
+window.__diorama = { site, path, ride, traffic, riders, camera, scene, keys, input, renderer, walker, loop, vps, rowRoute, state: () => state, start: startDrive, setEnv, emit: (k, a) => hud.emit(k, a),
   advance(seconds, hold = []) { paused = true; hold.forEach((k) => keys.add(k)); for (let t = 0; t < seconds; t += 1 / 30) tick(1 / 30);
     hold.forEach((k) => keys.delete(k)); renderer.render(scene, camera); clock.getDelta(); return { s: ride.s, v: ride.v, state, lat: ride.lat }; },
   resume() { paused = false; clock.getDelta(); } };
