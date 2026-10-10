@@ -126,6 +126,25 @@ Inputs: `Copernicus_DSM_COG_10_N34_00_E072_00_DEM.tif` (the build reads the tile
 N33E072, and an OSM extract from the main API (`/api/0.6/map?bbox=72.30,34.63,72.38,34.69`, converted to Overpass
 `out geom` JSON).
 
+### Landmarks, towns and heritage sites
+`meta.landmark` (from the site file's `landmark`) is drawn by `web/js/diorama/landmark.js`. The White Palace keeps
+`palace.js`. Any other landmark stands on the ground at its point and is made of up to two parts: `model`, a GLB next to
+the site data in real metres (the Atlas maquettes of the stupas, the TRELLIS models of the museum and the Thal mosque,
+credited in `landmark.sources`), and `module`, the site's own drawn geometry in `web/js/diorama/landmarks/<site>.js`
+(default export `build(ctx)`; the API is in the header of `landmarks/kit.js`: seat every piece on `ctx.ground`, merge
+static parts with `ctx.batch`, return `{ update }` for water or a moving lift). The front faces `heading_deg` or the
+end of the drive. Site-file keys: `terrace_m` (radius of the levelled ground; 0 keeps the real slope, as for a rock
+relief or a waterfall), `clear_m` (OSM buildings that are the landmark itself are dropped), `top_m`, `ring_m` (the
+visitor's walking circle), `footpath`, and `edits`/`sources` (what is drawn after photos or a plan, what is
+estimated). Town sites set `built_up` (WorldCover built-up is drawn as town ground, cover class 8, not rock),
+`buildings_radius_m` (only the OSM buildings near the arrival, so Mingora stays light) and `road_kind: "road"` (the
+page says road, not jeep track). Below about 1,700 m the trees are broadleaf; snow never lies below 3,400 m.
+
+Inputs for every site south of 36 N: the stacked DEM (`N35` over `N34`, named with `N34`, 7,200 rows) and WorldCover
+N33E072 (the build reads either the full tile or a crop with the same top-left corner). OSM comes from the main API
+(`backend/tools/osm_fetch.py S W N E out.json`, Overpass shape) when Overpass is unreachable. Check a build by eye
+with `backend/tools/diorama_shot.py <site> <dir> --shots table,lake,close,ground`.
+
 ### Driving (both sites)
 The drive is the last 600 m of the track, about a minute (`drive_km` in `SITES`; `--shorten-only` trims a built site). Traffic is
 illustrative (`web/js/diorama/traffic.js`): Willys jeeps, a Hilux and motorbikes on the Mahodand track; painted
