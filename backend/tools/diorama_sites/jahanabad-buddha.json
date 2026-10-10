@@ -41,13 +41,12 @@
     "heading_deg": 315,
     "module": "jahanabad-buddha",
     "edits": [
-      "The rock face is the Atlas's procedural model: a block about 9 m wide and 10 m high at the front, its back cut into the slope; its shape and cracks are illustrative (no survey).",
-      "The Buddha in relief is drawn to the published size: the carved figure is 7 m high and 5 m wide (700 x 500 cm), its throne 1.2 m high and 3.9 m wide (120 x 390 cm) and the relief stands 0.11 m proud of the face. Its folds, hands, head and the halo are estimated from the published description and the photos; the halo is estimated.",
-      "The figure's foot is set 1 m above the ground at the face (estimated: the photos show the relief above the slope, not at the ground).",
-      "A timber viewing deck in front (about 3.6 x 1.5 m, estimated from the photos) and the boulders around it are illustrative.",
-      "No steps are mapped in OSM and none show in the photos, so no steps are drawn; the walk up from the road is traced over the ground (easiest slope on the DEM).",
-      "The Buddha's face is shown restored (the 2007 damage to the head is not drawn) and the carving's colour is painted from the photos.",
-      "The arrival height in the DEM (about 1119 m) is lower than the 1133 m in the Atlas pack; the model uses the DEM."
+      "The boulder is the Atlas's procedural model: a rounded granite mass about 12 x 11 x 9 m, flattened on the carved face and sunk 1 m into the slope; its size, lumps and weathering tones are estimated (no survey).",
+      "The Buddha in relief is drawn to the published size: the carved figure is 7 m high and 5 m wide (700 x 500 cm), its throne 1.2 m high and 3.9 m wide (120 x 390 cm); the relief stands 0.11 m proud of the niche floor. The oval niche (about 8.8 x 8.4 m) and its depth of 0.3 m are estimated. The folds, hands, head and halo are estimated from the published description and the photos.",
+      "The figure's foot is set 1 m above the ground at the face (estimated).",
+      "Trees within 25 m of the carving are left out so it can be seen; WorldCover maps tree cover there. A timber viewing deck (about 3.6 x 1.5 m) and a few boulders in front are estimated from the photos.",
+      "No steps are mapped in OSM and none show in the photos, so none are drawn; the walk up from the road is traced over the ground (easiest slope on the DEM).",
+      "The carving is drawn restored and without the 2007 damage to the head."
     ],
     "sources": [
       {
@@ -56,7 +55,8 @@
         "licence": "CC BY-SA 4.0 (Wikipedia text)",
         "url": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar"
       }
-    ]
+    ],
+    "clear_trees_m": 25
   },
   "drive_ways": [
     460117749

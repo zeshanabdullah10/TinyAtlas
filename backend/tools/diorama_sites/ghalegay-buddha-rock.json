@@ -15,8 +15,9 @@
     "module": "ghalegay-buddha-rock",
     "terrace_m": 0,
     "clear_m": 20,
-    "top_m": 9,
+    "top_m": 10,
     "ring_m": 14,
+    "clear_trees_m": 20,
     "heading_deg": 303,
     "edits": [
       "The rock is the OSM tourism node 'Buddah' (tourism=attraction) at 34.70590 N, 72.26045 E, 18 m from the N-95 centre line; the point was checked against the photos (the carved panel faces the road).",

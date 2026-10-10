@@ -1,28 +1,38 @@
 {
   "title": "Bazira (Barikot Ghundai)",
   "subtitle": "Indo-Greek city and Italian excavations at Barikot, Lower Swat",
-  "bbox": [34.6638, 72.1973, 34.6928, 72.2322],
+  "bbox": [
+    34.6638,
+    72.1973,
+    34.6928,
+    72.2322
+  ],
   "arrival": {
-    "name": "Ancient Bazira",
-    "point": [34.67834, 72.21477]
+    "name": "Ancient Bazira excavation",
+    "point": [
+      34.67712,
+      72.21201
+    ]
   },
   "landmark": {
     "kind": "archaeological_site",
-    "name": "Ancient Bazira (Barikot Ghundai)",
-    "point": [34.67834, 72.21477],
+    "name": "Ancient Bazira (Barikot Ghundai) excavation",
+    "point": [
+      34.67712,
+      72.21201
+    ],
     "module": "bazira-barikot-ghundai",
     "terrace_m": 0,
     "clear_m": 0,
-    "top_m": 12,
+    "top_m": 10,
     "ring_m": 60,
     "footpath": true,
     "edits": [
-      "The excavated area is drawn from the Commons photos (Fawad002, Fazal.Khaliq, Jona Lendering): a grid of low wall foundations on blocks about 14 by 11 m with 5 m streets between, 0.6 to 1.6 m high, with some blocks dug (darker floors) and some left as ground. The grid, the block sizes, the wall heights and which blocks are dug are estimated.",
-      "The dug floors are darker flat patches on the surface: the page cannot cut the DEM, so the trench depth is not drawn.",
-      "The city wall is estimated: a square about 250 m a side (about 6 ha, close to the 7 ha of the lower city without the acropolis that Wikipedia gives), 1.5 m high foundations, 3 m thick, with rectangular bastions about 8 m along and 4 m proud of the wall, five per side. Wikipedia says the wall had massive rectangular bastions; its line, its size and the bastion spacing are not in the sources.",
-      "The site point is the OSM node Ancient Bazira (historic=archaeological_site, Wikidata Q3634988), 0 m away. The hill behind the dig is the DEM terrain, not a model.",
-      "The trailhead is the end of the OSM Mingora Road way nearest the site, about 270 m away. The walk is traced over the DEM only; it crosses the Swat river channel on the way (OSM river ways), not at the mapped ford.",
-      "The OSM archaeological_site outline about 260 m south-west of the point (a 70 m polygon) is not drawn: its meaning is not known."
+      "The excavation is the OSM archaeological_site outline (historic=archaeological_site, unnamed, about 3,100 m2, 67 by 75 m), about 290 m south-west of the Ancient Bazira node; the landmark point is its centre. That node is the Wikidata point for Barikot and is not used as the dig. No Commons photo is geotagged.",
+      "The walls, rooms and broken walls are estimated from Commons photos 01 and 03 (the layout, the tan wall colour and the low heights); no plan of the dig is in the sources. The rooms are of varied size, the walls 0.8 to 1.2 m thick and 0.6 to 2.5 m high, and some walls have gaps.",
+      "The bare-earth floor follows the DEM, coloured ochre (#b89a6e) from photo 03.",
+      "One stretch of town wall, 50 m long with one rectangular bastion about 8 m along and 4 m proud of the wall, is drawn beside the excavation to show the kind of wall the sources describe (Wikipedia Barikot: a defensive wall with massive rectangular bastions). Its line is not mapped; its height, thickness and placement are estimated.",
+      "The trailhead is the OSM Mingora Road node nearest the dig, about 134 m away on the same side of the Swat river channel. The walk is traced over the DEM and does not cross the river (the nearest river is about 317 m away)."
     ],
     "sources": [
       {
@@ -37,18 +47,34 @@
         "licence": "CC BY-SA 4.0 and CC0",
         "url": "https://commons.wikimedia.org/wiki/File:Bazira_Panorama_2.jpg"
       }
-    ]
+    ],
+    "clear_trees_m": 60
   },
-  "drive_ways": [289957729],
-  "track_ways": [289957729],
-  "drive_start": [34.642258, 72.0615344],
-  "trailhead": [34.6759844, 72.2155825],
+  "drive_ways": [
+    289957729
+  ],
+  "track_ways": [
+    289957729
+  ],
+  "drive_start": [
+    34.642258,
+    72.0615344
+  ],
+  "trailhead": [
+    34.6761037,
+    72.2112099
+  ],
   "walk_ways": [],
-  "far_bbox": [34.588, 72.105, 34.768, 72.325],
+  "far_bbox": [
+    34.588,
+    72.105,
+    34.768,
+    72.325
+  ],
   "drive_km": 0.6,
   "pack": "swat-lower",
   "road": "Mingora Road (trunk road at Barikot)",
-  "osm_use": "the Mingora Road trunk way to its junction nearest the site, the Swat river channel and the Ancient Bazira node",
+  "osm_use": "the Mingora Road trunk way (to the node nearest the dig), the unnamed archaeological_site outline that marks the excavation, and the Ancient Bazira node",
   "road_kind": "road",
   "built_up": true,
   "buildings_radius_m": 900

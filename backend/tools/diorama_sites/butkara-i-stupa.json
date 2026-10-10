@@ -1,16 +1,32 @@
 {
   "title": "Butkara I Stupa",
   "subtitle": "Buddhist stupa and votive court on the eastern edge of Mingora, Swat",
-  "bbox": [34.7517, 72.3518, 34.7787, 72.3846],
-  "far_bbox": [34.675, 72.26, 34.855, 72.48],
+  "bbox": [
+    34.7517,
+    72.3518,
+    34.7787,
+    72.3846
+  ],
+  "far_bbox": [
+    34.675,
+    72.26,
+    34.855,
+    72.48
+  ],
   "arrival": {
     "name": "Butkara I Stupa",
-    "point": [34.76524, 72.3682]
+    "point": [
+      34.76524,
+      72.3682
+    ]
   },
   "landmark": {
     "kind": "stupa",
     "name": "Butkara I Stupa",
-    "point": [34.76524, 72.3682],
+    "point": [
+      34.76524,
+      72.3682
+    ],
     "module": "butkara-i-stupa",
     "terrace_m": 70,
     "clear_m": 80,
@@ -18,10 +34,11 @@
     "ring_m": 56,
     "footpath": true,
     "edits": [
-      "The excavated sacred area is drawn from the Atlas photos (Front View of the main stupa, Votive Stupa Court): a flagged court, the main stupa as a stepped circular base with a whitewashed lower drum and a broken upper drum, and four rings of votive stupas and stone bases (10, 16, 18 and 20 units) with column bases on the outer ring.",
-      "No published dimensions were found for the main stupa or the votive stupas (the Wikipedia article gives none). The main stupa's outer diameter (about 19 m), base steps, drum height (about 6 m) and ruined top (about 8 m) are ESTIMATED from the photos.",
-      "The votive stupa sizes (bases 2 to 3 m square, drums under 2 m across), the ring radii, the court wall and the paving are ESTIMATED from the photos. Their number and place are invented to read as the court, not surveyed.",
-      "The OSM building that is tagged as the site (tourism=museum, 36 m from the point) and every other building within 80 m are dropped and replaced by this model. The ground within 70 m is levelled (a terrace); the rest is the real DEM slope.",
+      "The excavated sacred court is drawn from the Atlas photos (Front View of the main stupa, Votive Stupa Court): a rectangular flagged court about 60 x 50 m with a low edging wall. The court size is ESTIMATED from the photos. The photos show the court sunk about 1.5 m below the surrounding ground; that is NOT modelled, because the terrain is the build's and the court is drawn at ground level.",
+      "The main stupa is a rough stepped circular core about 19 m across, built of stacked courses with lighter bands (photos 01-03) and a broken top of rubble. No published dimensions were found (the Wikipedia article gives none): the diameter, the 6 m drum and the top are ESTIMATED from the photos.",
+      "The votive stupas are square stepped plinths 2 to 5 m across and 0.6 to 1.5 m high, in rows round the main stupa; most are ruined to the plinth and about one in six carries a small drum and dome. Their sizes, number and places are ESTIMATED from photos 03-04 and invented to read as the court, not surveyed.",
+      "The whitewashed band on the lower front drum follows photo 02. Shades vary by about 8% between plinths. The paving slabs are a drawn texture, not surveyed.",
+      "The OSM building tagged as the site (tourism=museum, 36 m from the point) and every other building within 80 m are dropped and replaced by this model. The ground within 70 m is levelled (a terrace); the rest is the real DEM slope.",
       "The earlier generic Atlas maquette (a ~22 m plinth with a ruined drum) is not used: it is not a record of this stupa."
     ],
     "sources": [
@@ -45,9 +62,20 @@
       }
     ]
   },
-  "drive_ways": [459911389, 447007136, 1022490004],
-  "track_ways": [459911389, 447007136, 1022490004],
-  "drive_start": [34.76706, 72.36248],
+  "drive_ways": [
+    459911389,
+    447007136,
+    1022490004
+  ],
+  "track_ways": [
+    459911389,
+    447007136,
+    1022490004
+  ],
+  "drive_start": [
+    34.76706,
+    72.36248
+  ],
   "drive_km": 0.6,
   "road": "Sharif-Abad Makan-Bagh Road (OSM tertiary), then an unnamed unclassified street past the site",
   "osm_use": "the Sharif-Abad Makan-Bagh Road and the unclassified street that passes 88 m from the point, the OSM node Butkara I (tourism=attraction, 6062554485) as the place, and the OSM building tagged Butkara Stupa for clearance",

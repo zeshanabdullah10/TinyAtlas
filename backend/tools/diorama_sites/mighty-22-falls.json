@@ -23,11 +23,11 @@
     ],
     "module": "mighty-22-falls",
     "terrace_m": 0,
-    "top_m": 66,
+    "top_m": 6,
     "edits": [
-      "The falls are drawn on the real slope at the stream foot; the foot is not levelled.",
-      "The rock face is drawn 60 m high and the ribbons hang on it. The height is ESTIMATED: the 30 m DEM shows the slope above the falls but cannot resolve the drop, and no published height was found.",
-      "The ribbons, their widths, the foam and the spray are illustrative; the boulders are placed by a fixed seed."
+      "The fall follows the mapped stream down the DEM slope; its height and form are illustrative (no published height).",
+      "The ribbons, foam, spray, pool and wet boulders are illustrative; the boulders are placed by a fixed seed.",
+      "No cliff or structure is drawn: nothing rises more than about 4 m above the ground."
     ],
     "sources": [
       {

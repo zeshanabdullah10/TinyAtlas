@@ -1,44 +1,67 @@
-// Jahanabad Buddha (Manglawar): a rock face with the seated Buddha in relief, in local metres (x right, -z front).
-// Sourced: the Jahan-Abad-i relief is 700 x 500 cm (Wikipedia, "Buddhist rock carving in Manglawar"), its throne 120 x 390 cm,
-// its relief 11 cm deep, facing north west. Everything else (the rock's shape, the folds, halo, deck) is estimated.
+// Jahanabad Buddha (Manglawar): a rounded granite boulder with the seated Buddha in relief in an oval niche on its face.
+// Local metres (x right, -z front). Sourced: the Jahan-Abad-i relief is 700 x 500 cm, its throne 120 x 390 cm, relief depth
+// 11 cm, facing north west (Wikipedia, "Buddhist rock carving in Manglawar"). The boulder's shape and size, the niche,
+// the folds, halo and deck are estimated.
 import * as THREE from "three";
 
 const RELIEF = 0.11;          // raised depth of the carving (source: D 11 cm)
-const ROCK_TOP = 10;          // estimated: the face rises 10 m above the foot
-const LIFT = 1.0;             // estimated: the throne's base sits 1 m above the foot of the face
+const LIFT = 1.0;             // estimated: the throne's base sits 1 m above the foot
+const NICHE_Z = 0.3;          // estimated: the niche floor is set 0.3 m back into the boulder
+const NICHE = { x: 4.4, y: 4.5, ry: 4.2 };    // estimated oval niche (half-widths) around the figure
+const C = { x: 0, y: 4.0, z: 4.5 };           // boulder centre; front face at z = 0
+const S = { x: 6, y: 5.5, z: 4.5 };           // semi-axes: about 12 x 11 x 9 m
+
+// Low-frequency lumps on the boulder surface, about +-0.6 m (estimated).
+const lump = (x, y, z) =>
+  0.5 * Math.sin(1.1 * x + 0.4) * Math.cos(0.9 * y + 1.3) +
+  0.3 * Math.sin(1.7 * z + 0.2) * Math.cos(1.2 * x - 0.6) +
+  0.2 * Math.sin(1.4 * y + 0.8 * z);
 
 export default function build(ctx) {
   const { group, M } = ctx;
-  const rockMat = ctx.mat(0x9a8266, { roughness: 1 });
-  const reliefMat = ctx.mat(0xbca084, { roughness: 0.95 });
+  const tones = [ctx.mat(0x6e6962, { roughness: 1 }), ctx.mat(0x8f8a82, { roughness: 1 }), ctx.mat(0xa6a097, { roughness: 1 })];
+  const reliefMat = ctx.mat(0xa29c93, { roughness: 0.95 });
 
-  // The rock: a block whose front face (z = 0) is the carved face, its back cut into the slope behind.
-  const geo = new THREE.BoxGeometry(9, 10, 7, 10, 10, 8);
-  geo.translate(0, 0, 3.5);
-  const pos = geo.attributes.position;
-  const top = ctx.ground(0, 0) + ROCK_TOP;
-  for (let i = 0; i < pos.count; i++) {
-    let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-    const t = (y + 5) / 10;
-    const base = ctx.ground(x, z) - 0.8;                 // the block sinks into the slope
-    let yy = base + t * (top - base);
-    if (z > 0.01) {                                      // back, sides and top: broken, not a smooth block
-      x += (ctx.hash(i, 7, 3) - 0.5) * 0.7;
-      z += (ctx.hash(i, 7, 5) - 0.5) * 0.7;
-      yy += (ctx.hash(i, 7, 9) - 0.5) * 0.5;
-    }
-    pos.setXYZ(i, x, yy, z);
+  // The boulder: a sphere, scaled, lumped, flattened on the front (z = 0) and sunk 1 m into the slope.
+  const sph = new THREE.SphereGeometry(1, 96, 64).toNonIndexed();
+  const p = sph.attributes.position;
+  const w = new Float32Array(p.count);
+  for (let i = 0; i < p.count; i++) {
+    const ux = p.getX(i), uy = p.getY(i), uz = p.getZ(i);
+    const n = lump(ux, uy, uz);
+    w[i] = n;
+    let x = ux * S.x + ux * 0.6 * n;
+    let y = C.y + uy * S.y + uy * 0.6 * n;
+    let z = C.z + uz * S.z + uz * 0.6 * n;
+    if (z < 0) z = 0;                                        // flat carved face
+    const r = Math.hypot(x / NICHE.x, (y - NICHE.y) / NICHE.ry);
+    if (r < 1 && z < NICHE_Z) z = NICHE_Z;                   // the oval niche is recessed
+    const floor = ctx.ground(x, z) - 1.0;                    // sunk 1 m into the ground
+    if (y < floor) y = floor;
+    p.setXYZ(i, x, y, z);
   }
-  geo.computeVertexNormals();
-  const rock = new THREE.Mesh(geo, rockMat);
-  rock.castShadow = rock.receiveShadow = true;
-  group.add(rock);
+  // Split the triangles into three granite tones by their lumps (weathered lighter and darker patches).
+  const bins = [[], [], []];
+  for (let t = 0; t < p.count; t += 3) {
+    const v = (w[t] + w[t + 1] + w[t + 2]) / 3;
+    const b = v < -0.25 ? 0 : v > 0.25 ? 2 : 1;
+    for (let k = 0; k < 3; k++) bins[b].push(p.getX(t + k), p.getY(t + k), p.getZ(t + k));
+  }
+  bins.forEach((arr, b) => {
+    if (!arr.length) return;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3));
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, tones[b]);
+    m.castShadow = m.receiveShadow = true;
+    group.add(m);
+  });
 
-  // The relief: flat shapes extruded 0.11 m out of the face (z from -0.11 to 0), standing on yb.
+  // The relief: flat shapes extruded 0.11 m out of the niche floor, standing on yb.
   const yb = ctx.ground(0, 0) + LIFT;
   const slab = (shape) => {
     const g = new THREE.ExtrudeGeometry(shape, { depth: RELIEF, bevelEnabled: false, curveSegments: 20 });
-    g.translate(0, 0, -RELIEF);
+    g.translate(0, 0, NICHE_Z - RELIEF);
     const m = new THREE.Mesh(g, reliefMat);
     m.position.set(0, yb, 0);
     m.castShadow = m.receiveShadow = true;
@@ -59,7 +82,7 @@ export default function build(ctx) {
     return s;
   };
 
-  // Throne (asana): two base ledges and the lotus seat, 3.9 m wide, 1.2 m high.
+  // Throne (asana): base ledges and the lotus seat, 3.9 m wide, 1.2 m high.
   slab(poly([[-2.2, 0], [2.2, 0], [2.2, 0.2], [-2.2, 0.2]]));
   slab(poly([[-2.0, 0.2], [2.0, 0.2], [2.0, 0.4], [-2.0, 0.4]]));
   slab(poly([[-1.95, 0.4], [1.95, 0.4], [1.95, 0.7], [1.6, 1.2], [-1.6, 1.2], [-1.95, 0.7]]));

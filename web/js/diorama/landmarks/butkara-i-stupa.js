@@ -1,86 +1,103 @@
-// Butkara I (Mingora, Swat): the excavated sacred area, drawn from the Atlas photos 01 (front view of the main stupa),
-// 02 (drum courses), 03-04 (the votive stupa court: rings of square stone platforms, some with small stupas, column
-// bases, flagged paving) and 06 (the stages of the stupa). No published dimensions were found for this stupa, so every
-// size here is ESTIMATED from the photos (see landmark.edits in backend/tools/diorama_sites/butkara-i-stupa.json).
-// Local metres: x right, -z front (the drive), y up. Everything is seated on ctx.ground.
+// Butkara I (Mingora, Swat): the excavated sacred court, drawn from the Atlas photos 01 (the main stupa), 02 (its drum
+// courses), 03-04 (the votive court: square stepped plinths in rows, most ruined, a few with a drum and dome; flagged
+// paving) and 06 (the stages of the stupa). No published dimensions were found, so every size is ESTIMATED from the
+// photos (see landmark.edits in backend/tools/diorama_sites/butkara-i-stupa.json). Local metres: x right, -z front
+// (the drive), y up. The court is at ground level: the terrain is the build's, and a landmark cannot cut it (the photos
+// show it sunk about 1.5 m; that is not modelled). A low wall edges it.
 import * as THREE from "three";
 
+const COURT = { w: 60, d: 50, wall: 0.8 };          // estimated: a rectangular court with a low kerb wall
+
 export default function build(ctx) {
-  const { group, M, mat, box, cyl, lathe, ground, hash } = ctx;
-  const FLAG = mat(0x9a978c, { roughness: 1 });       // excavated paving, pale grey schist flags
-  const STONE = mat(0xc2bba8, { roughness: 1 });      // dressed platforms and column bases (lighter than the rubble)
-  const SCHIST = mat(0x8c8677, { roughness: 1 });     // rubble masonry, drums, walls
-  const PLASTER = M.plaster;                          // the whitewashed lower drum (photo 02)
+  const { group, M, mat, box, lathe, ground, hash } = ctx;
   const y0 = ground(0, 0);
+  const FLOOR = y0 + 0.04;                          // the court floor, at the ground (see the header: not sunk)
 
-  // Paving: the court is a flat disc of flags, with a few lighter slabs to break it up (photos 01, 04).
-  cyl(group, 40, 40, 0.06, FLAG, 0, y0 + 0.01, 0, 48);
-  for (let i = 0; i < 60; i++) {
-    const a = hash(i, 3, 1) * Math.PI * 2, r = Math.sqrt(hash(i, 3, 2)) * 36;
-    const x = Math.cos(a) * r, z = Math.sin(a) * r;
-    box(group, 1.6 + hash(i, 3, 3) * 1.2, 0.04, 1.1 + hash(i, 3, 4) * 0.8, STONE, x, y0 + 0.06, z, hash(i, 3, 5) * 3);
+  const SCHIST = mat(0x7d786e, { roughness: 1 });   // grey schist rubble
+  const LIGHT = mat(0x9b968a, { roughness: 1 });    // lighter courses in the drum
+  const WALL = mat(0x8f8a7e, { roughness: 1 });     // retaining wall, the same stone, weathered
+  const SHADES = [0xbab3a6, 0xaca597, 0xc6bfb2, 0xb3ac9f].map((c) => mat(c, { roughness: 1 })); // +-8% plinth shades
+
+  // The low wall round the court (estimated 0.8 m high, 0.8 m thick) edging the paving.
+  box(group, 0.8, COURT.wall, COURT.d + 0.8, WALL, -COURT.w / 2 - 0.4, FLOOR, 0);
+  box(group, 0.8, COURT.wall, COURT.d + 0.8, WALL, COURT.w / 2 + 0.4, FLOOR, 0);
+  box(group, COURT.w + 0.8, COURT.wall, 0.8, WALL, 0, FLOOR, -COURT.d / 2 - 0.4);
+  box(group, COURT.w + 0.8, COURT.wall, 0.8, WALL, 0, FLOOR, COURT.d / 2 + 0.4);
+
+  // The main stupa (estimated): a stepped circular core of about 19 m across, built of stacked courses with
+  // slightly irregular radii (photos 01-03), a lighter band every other course, and a broken top of rubble.
+  const K = 7, course = 0.9;
+  const prof = [[0, 0]];
+  const radii = [];
+  for (let k = 0; k < K; k++) {
+    const R = 8.8 - k * 0.2 + (hash(k, 1, 9) - 0.5) * 0.5;
+    radii.push(R);
+    prof.push([R, k * course], [R, k * course + 0.85], [R - 0.25, k * course + course]);
+  }
+  prof.push([0, K * course]);
+  lathe(group, prof, SCHIST, 0, FLOOR, 0, 40);
+  for (let k = 1; k < K; k += 2) {
+    const R = radii[k] + 0.12, y = k * course;
+    lathe(group, [[0, y + 0.05], [R, y + 0.05], [R, y + 0.5], [0, y + 0.5]], LIGHT, 0, FLOOR, 0, 40);
+  }
+  for (let i = 0; i < 30; i++) {                    // broken top: rubble, heavier to the back
+    const a = hash(i, 7, 1) * Math.PI * 2, r = 3.5 + hash(i, 7, 2) * 3.6, k = 0.5 + hash(i, 7, 3) * 0.9;
+    box(group, k, k * 0.6, k * 0.8, SCHIST, Math.cos(a) * r, FLOOR + K * course - 0.2 + hash(i, 7, 4) * 1.0,
+      Math.sin(a) * r, hash(i, 7, 5) * 3);
   }
 
-  // The main stupa (estimated): a stepped circular plinth of outer radius 9.5 m, a drum of radius 8 m rising
-  // about 6 m, the lower part whitewashed on the front, and a broken top of rubble (photos 01, 02, 03).
-  lathe(group, [[0, 0], [9.5, 0], [9.5, 0.6], [8.6, 0.6], [8.6, 1.2], [8.0, 1.2], [8.0, 1.5], [0, 1.5]], SCHIST, 0, y0, 0, 40);
-  // The drum: rubble courses (a 0.18 m step every metre, photo 02), topped at 6.2 m.
-  const drum = [[8.0, 0]];
-  for (let k = 0; k < 6; k++) drum.push([8.18, k + 0.12], [8.18, k + 0.95], [8.0, k + 1.0]);
-  drum.push([7.8, 6.2], [0, 6.2]);
-  lathe(group, drum, SCHIST, 0, y0 + 1.5, 0, 40);
-  // Whitewash on the lower drum, the front quarter (-z is front, so phi = pi at the centre).
-  const plaster = new THREE.Mesh(new THREE.LatheGeometry(
-    [new THREE.Vector2(8.06, 0.2), new THREE.Vector2(8.06, 2.6)], 24, Math.PI * 0.62, Math.PI * 0.76), PLASTER);
-  plaster.position.set(0, y0 + 1.5, 0); plaster.castShadow = plaster.receiveShadow = true; group.add(plaster);
-  // The broken dome: a partial lathe on the back half, the rest rubble.
-  const dome = new THREE.Mesh(new THREE.LatheGeometry(
-    [new THREE.Vector2(7.8, 0), new THREE.Vector2(7.2, 0.9), new THREE.Vector2(5.6, 1.6), new THREE.Vector2(3.4, 2.0)], 28, 0, Math.PI * 1.05), SCHIST);
-  dome.position.set(0, y0 + 7.7, 0); dome.castShadow = dome.receiveShadow = true; group.add(dome);
-  for (let i = 0; i < 26; i++) {
-    const a = hash(i, 7, 1) * Math.PI * 2, r = 5 + hash(i, 7, 2) * 3.2, k = 0.5 + hash(i, 7, 3) * 0.9;
-    box(group, k, k * 0.6, k * 0.8, SCHIST, Math.cos(a) * r, y0 + 6.2 + hash(i, 7, 4) * 1.2, Math.sin(a) * r, hash(i, 7, 5) * 3);
-  }
-
-  // Low court wall on the front, a 240 degree arc of rubble at radius 16 m (photo 01, 03).
-  for (let i = 0; i < 10; i++) {
-    const a = Math.PI * (0.5 + i * 0.13), x = Math.cos(a) * 16, z = Math.sin(a) * 16;
-    box(group, 4.2, 0.9, 0.7, SCHIST, x, ground(x, z), z, -(a + Math.PI / 2));   // ry turns the box's length onto the tangent
-  }
-
-  // The votive stupa rings (photos 03, 04): square stone platforms, most with a small stupa (a drum and a dome).
-  // Radius, count, platform side and height, and the chance of a stupa on each are estimates.
-  const rings = [
-    { r: 21, n: 10, side: 3.0, h: 0.8, p: 0.9, dr: 0.9, dh: 1.2, seed: 11 },
-    { r: 31, n: 16, side: 2.6, h: 0.6, p: 0.6, dr: 0.8, dh: 1.0, seed: 23 },
-    { r: 41, n: 18, side: 2.2, h: 0.45, p: 0.3, dr: 0.7, dh: 0.8, seed: 37 },
-  ];
-  for (const R of rings) {
-    for (let i = 0; i < R.n; i++) {
-      const a = (i / R.n) * Math.PI * 2 + hash(i, R.seed, 1) * 0.2;
-      const rr = R.r + (hash(i, R.seed, 2) - 0.5) * 1.2;
-      const x = Math.cos(a) * rr, z = Math.sin(a) * rr;
-      const side = R.side * (0.9 + hash(i, R.seed, 3) * 0.2);
-      box(group, side, R.h, side, STONE, x, ground(x, z), z, hash(i, R.seed, 4) * 0.2);
-      if (hash(i, R.seed, 5) < R.p) {
-        const py = ground(x, z) + R.h, dr = R.dr * (0.9 + hash(i, R.seed, 6) * 0.2);
-        lathe(group, [[dr, 0], [dr, R.dh], [dr * 0.92, R.dh + 0.12]], SCHIST, x, py, z, 16);
-        lathe(group, [[dr, R.dh + 0.12], [dr * 0.8, R.dh + dr * 0.45], [dr * 0.45, R.dh + dr * 0.8], [0, R.dh + dr * 0.92]], STONE, x, py, z, 16);
+  // The votive court (photos 03-04): square stepped plinths in rows round the main stupa. Most are ruined to the
+  // plinth; about one in six carries a small drum and dome. Sizes 2-5 m, 0.6-1.5 m high (estimated).
+  for (let gx = -24; gx <= 24; gx += 6) {
+    for (let gz = -18; gz <= 18; gz += 6) {
+      const x = gx + (hash(gx, gz, 1) - 0.5) * 2.0, z = gz + (hash(gx, gz, 2) - 0.5) * 2.0;
+      if (Math.hypot(x, z) < 13 || hash(gx, gz, 3) < 0.25) continue;
+      const size = 2 + hash(gx, gz, 4) * 3, h = 0.6 + hash(gx, gz, 5) * 0.9;
+      const m = SHADES[Math.floor(hash(gx, gz, 6) * SHADES.length)];
+      const rot = (hash(gx, gz, 7) - 0.5) * 0.2;
+      box(group, size, h * 0.5, size, m, x, FLOOR, z, rot);                                   // the plinth
+      box(group, size * 0.72, h * 0.5, size * 0.72, m, x, FLOOR + h * 0.5, z, rot);           // its upper step
+      if (hash(gx, gz, 8) < 0.17) {
+        const dr = size * 0.18, top = FLOOR + h;
+        lathe(group, [[dr, 0], [dr, 0.9], [dr * 0.92, 1.0]], SCHIST, x, top, z, 16);
+        lathe(group, [[dr, 1.0], [dr * 0.8, 1.0 + dr * 0.45], [dr * 0.45, 1.0 + dr * 0.8], [0, 1.0 + dr * 0.92]],
+          LIGHT, x, top, z, 16);
       }
     }
   }
 
-  // Outer ring of column bases (photo 04: the round bases beside the platforms), and a broken wall at radius 52.
-  for (let i = 0; i < 20; i++) {
-    const a = (i / 20) * Math.PI * 2 + 0.07, x = Math.cos(a) * 52, z = Math.sin(a) * 52;
-    cyl(group, 0.55, 0.6, 0.35, STONE, x, ground(x, z), z, 12);
-    cyl(group, 0.34, 0.34, 0.22, SCHIST, x, ground(x, z) + 0.35, z, 10);
-  }
-  for (let i = 0; i < 12; i++) {
-    const a = Math.PI * (0.1 + i * 0.12) + 0.4, x = Math.cos(a) * 60, z = Math.sin(a) * 60;
-    box(group, 6.0, 0.8, 0.6, SCHIST, x, ground(x, z), z, -(a + Math.PI / 2));
-  }
+  // The plaster patch of photo 02: a whitewashed band on the lower front of the drum (phi = pi is the front, -z).
+  // Its points run top to bottom so the faces point outward.
+  const plaster = new THREE.Mesh(new THREE.LatheGeometry(
+    [new THREE.Vector2(8.1, 2.6), new THREE.Vector2(8.1, 0.2)], 24, Math.PI * 0.62, Math.PI * 0.76), M.plaster);
+  plaster.position.set(0, FLOOR + 1.5, 0); plaster.castShadow = plaster.receiveShadow = true; group.add(plaster);
 
   ctx.batch(group);
+
+  // The paving: one rectangle of slabs in running bond, drawn on a canvas texture. It is kept out of the batch
+  // (a merge drops texture coordinates), so it is added after it.
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = 256;
+  const g2 = cv.getContext("2d");
+  g2.fillStyle = "#ffffff"; g2.fillRect(0, 0, 256, 256);
+  g2.strokeStyle = "#cfcac0"; g2.lineWidth = 4;
+  for (let row = 0; row < 4; row++) {
+    const y = row * 64, off = row % 2 ? 32 : 0;
+    g2.beginPath(); g2.moveTo(0, y); g2.lineTo(256, y); g2.stroke();
+    for (let c = 0; c <= 4; c++) {
+      const x = off + c * 64;
+      g2.beginPath(); g2.moveTo(x, y); g2.lineTo(x, y + 64); g2.stroke();
+    }
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(COURT.w / 4, COURT.d / 4);          // one 4 m tile = 4 x 4 slabs of about 1 m
+  const paving = new THREE.Mesh(new THREE.PlaneGeometry(COURT.w, COURT.d),
+    new THREE.MeshStandardMaterial({ map: tex, color: 0xa9a39a, roughness: 1 }));
+  paving.rotation.x = -Math.PI / 2;
+  paving.position.set(0, FLOOR + 0.03, 0);
+  paving.castShadow = false; paving.receiveShadow = true;
+  paving.userData.keep = true;
+  group.add(paving);
   return {};
 }

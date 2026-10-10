@@ -67,19 +67,24 @@ export default function build(ctx) {
   // Entrance steps on the east side, from the slope up to the paving.
   for (const [z, top] of [[14.3, 0.12], [14.85, 0.25]]) solid(1.2, top, 0.5, M.stone, 3.0, z);
 
-  // The terrace: where the cut meets the slope on the downhill side, a stone retaining wall (seated on the DEM).
-  const R = 25, N = 40, y0 = ground(0, 0);
-  for (let i = 0; i < N; i++) {
-    const a0 = (i / N) * Math.PI * 2, a1 = ((i + 1) / N) * Math.PI * 2;
-    const x0 = Math.cos(a0) * R, z0 = Math.sin(a0) * R, x1 = Math.cos(a1) * R, z1 = Math.sin(a1) * R;
-    const mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, g = ground(mx, mz);
-    const drop = y0 - g;
-    if (drop < 0.3 || drop > 5) continue;
-    const L = Math.hypot(x1 - x0, z1 - z0) + 0.1;
-    const ry = Math.atan2(-(z1 - z0), x1 - x0);
-    const top = y0 + 0.05;
-    box(group, L, top - (g - 0.25), 0.8, M.schist, mx, g - 0.25, mz, ry);
-  }
+  // The platform: a rectangle 34 m by 27 m (estimated; it carries the bastions and the stair), levelled by the
+  // site's terrace. Straight stone retaining walls stand on each downhill side, seated on the DEM, in 4 m lengths.
+  const y0 = ground(0, 0), X0 = -14, X1 = 18, Z0 = -17, Z1 = 17, seg = 4;
+  const retain = (ax, az, bx, bz) => {                       // one run along a side, from a to b
+    const L = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(L / seg));
+    for (let i = 0; i < n; i++) {
+      const t0 = i / n, t1 = (i + 1) / n;
+      const x0 = ax + (bx - ax) * t0, z0 = az + (bz - az) * t0, x1 = ax + (bx - ax) * t1, z1 = az + (bz - az) * t1;
+      const mx = (x0 + x1) / 2, mz = (z0 + z1) / 2, g = ground(mx, mz), drop = y0 - g;
+      if (drop < 0.3 || drop > 5) continue;
+      const len = Math.hypot(x1 - x0, z1 - z0) + 0.1, ry = Math.atan2(-(z1 - z0), x1 - x0);
+      box(group, len, y0 + 0.05 - (g - 0.25), 0.8, M.schist, mx, g - 0.25, mz, ry);
+    }
+  };
+  retain(X0, Z1 + 0.4, X1, Z1 + 0.4);       // +z side (east, the entrance side)
+  retain(X0, Z0 - 0.4, X1, Z0 - 0.4);       // -z side (west, the mihrab side)
+  retain(X0 - 0.4, Z0, X0 - 0.4, Z1);       // -x side (south)
+  retain(X1 + 0.4, Z0, X1 + 0.4, Z1);       // +x side (north)
 
   ctx.batch(group);
   return null;

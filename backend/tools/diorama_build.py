@@ -325,6 +325,10 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
             op = (blur((blur(mapped.astype(float), 1) > 0.7).astype(float), 1) > 0.05) & mapped
             lake = flood(op | near_seed, seed)
             lake_source = "ESA WorldCover 2021 (DEM too noisy over the water to refine it)"
+        if site.get("lake_radius_m"):                       # a river runs through the lake (Kharkhari): water farther than
+            rr_, cc_ = np.mgrid[0:g["rows"], 0:g["cols"]]   # this from the lake point is the river channel, not the lake
+            lake &= np.hypot(rr_ - seed[0], cc_ - seed[1]) * CELL < site["lake_radius_m"]
+            lake = flood(lake, seed)
         level = float(np.median(h[lake]))
         cover[(cover == 5) & ~lake] = 2                     # stray water pixels elsewhere read as wet meadow
         cover[lake] = 5
@@ -505,6 +509,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         "facts": facts,
         "edits": [
             *(["Lake bed lowered under the measured water level; the depth shown is illustrative (no published bathymetry)."] if has_lake else []),
+            *([f"The river runs through the lake: mapped water more than {site['lake_radius_m']} m from the lake point is the river channel and is not drawn as lake."] if site.get("lake_radius_m") else []),
             "A bench up to 24 m wide is cut along the jeep track to the smoothed track profile (the 30 m DSM includes tree canopy).",
             "Road bumps and ruts in the drive are illustrative; the grade and the line of the track are real.",
             "Trees, shrubs, grass tufts and boulders are placed where WorldCover maps that cover; their size and number are illustrative.",

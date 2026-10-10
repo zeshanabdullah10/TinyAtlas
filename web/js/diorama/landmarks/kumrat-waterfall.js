@@ -7,8 +7,8 @@ import * as THREE_ from "three";
 
 const LINE = [[90, -79], [63, -46], [38, -16], [17, 21], [0, 62], [-40, 86]];   // lip -> foot, E/S metres
 const POOL = [-40, 86];                                                          // the foot, where the sheets land
-const SHEETS = [{ off: -2.6, w: 1.6, speed: 0.9 }, { off: -0.9, w: 2.0, speed: 1.25 },
-                { off: 0.9, w: 1.8, speed: 1.05 }, { off: 2.7, w: 1.4, speed: 0.8 }];
+const SHEETS = [{ off: -4.4, w: 2.8, speed: 0.9 }, { off: -1.5, w: 3.0, speed: 1.25 },
+                { off: 1.5, w: 2.8, speed: 1.05 }, { off: 4.4, w: 2.6, speed: 0.8 }];   // about 11 m across
 
 /** A canvas of vertical streaks (white, alpha), tiled, so scrolling it along the fall reads as moving water. */
 function streaks(seed) {

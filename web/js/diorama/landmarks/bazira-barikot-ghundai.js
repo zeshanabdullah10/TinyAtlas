@@ -1,16 +1,22 @@
-// Ancient Bazira (Barikot): the excavated Indo-Greek town as the Commons photos show it (a grid of low wall foundations
-// on blocks with streets between, some blocks dug to darker floors) and the town wall with rectangular bastions that
-// Wikipedia "Barikot" describes. Only the wall's line, size, bastion spacing and the block grid are estimated (see
-// meta.edits). Everything is seated on ctx.ground, so the walls follow the real slope.
+// Ancient Bazira (Barikot): the excavation as photo 03 shows it, a compact dug area of low walls round rooms of varied
+// size on bare ochre earth, and one stretch of town wall with a rectangular bastion (Wikipedia "Barikot": "a defensive
+// wall with massive rectangular bastions"). The walls, rooms and the wall stretch are estimated (see meta.edits).
 export default function build(ctx) {
-  const { group: g, ground, hash } = ctx;
-  const stone = ctx.mat(0xb3a183, { roughness: 0.95 });   // tan mud-brick and stone foundations, as in the photos
-  const town = ctx.mat(0x9a8a72, { roughness: 1 });       // the town wall, weathered
-  const dug = ctx.mat(0x5b4731, { roughness: 1 });        // excavated floors, darker than the ground
+  const { group: g, ground, hash, THREE } = ctx;
+  const stone = ctx.mat(0xb8a68a, { roughness: 0.95 });   // tan mud-brick and stone
+  const town = ctx.mat(0xa39478, { roughness: 1 });       // the stretch of town wall
+  const earth = ctx.mat(0xb89a6e, { roughness: 1 });      // bare excavated earth
 
-  // A straight wall from (x0, z0) to (x1, z1): pieces of at most 7 m, each seated on the lowest ground under it.
-  const seg = (x0, z0, x1, z1, h, t, m) => {
-    const L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.ceil(L / 7)), pl = L / n;
+  // A straight wall: pieces of at most 7 m, each seated on the lowest ground under it; `gap` (m) leaves an opening.
+  const seg = (x0, z0, x1, z1, h, t, m, gap = 0, gapAt = 0.5) => {
+    const L = Math.hypot(x1 - x0, z1 - z0);
+    if (gap > 0) {
+      const ux = (x1 - x0) / L, uz = (z1 - z0) / L, a = L * gapAt - gap / 2, b = L * gapAt + gap / 2;
+      seg(x0, z0, x0 + ux * a, z0 + uz * a, h, t, m);
+      seg(x0 + ux * b, z0 + uz * b, x1, z1, h, t, m);
+      return;
+    }
+    const n = Math.max(1, Math.ceil(L / 7)), pl = L / n;
     const ux = (x1 - x0) / L, uz = (z1 - z0) / L, ry = Math.atan2(-uz, ux);
     for (let i = 0; i < n; i++) {
       const a = (i + 0.5) / n, cx = x0 + (x1 - x0) * a, cz = z0 + (z1 - z0) * a;
@@ -19,57 +25,47 @@ export default function build(ctx) {
       ctx.box(g, pl, h + 0.3, t, m, cx, lo - 0.3, cz, ry);
     }
   };
-  const lowest = (cx, cz, w, d, ry = 0) => {
-    const c = Math.cos(ry), s = Math.sin(ry);
+  const lowest = (cx, cz, w, d) => {
     let lo = Infinity;
-    for (const [dx, dz] of [[-w / 2, -d / 2], [w / 2, -d / 2], [w / 2, d / 2], [-w / 2, d / 2], [0, 0]]) {
-      lo = Math.min(lo, ground(cx + dx * c + dz * s, cz - dx * s + dz * c));
-    }
+    for (const [dx, dz] of [[-w / 2, -d / 2], [w / 2, -d / 2], [w / 2, d / 2], [-w / 2, d / 2], [0, 0]]) lo = Math.min(lo, ground(cx + dx, cz + dz));
     return lo;
   };
 
-  // The excavated grid: blocks 14 x 11 m on a pitch of 19 m (E-W) and 16 m (N-S), so 5 m streets run between them.
-  const P = 19, Q = 16, W = 14, D = 11;
-  for (let i = -3; i <= 3; i++) {
-    for (let j = -3; j <= 3; j++) {
-      const k = (n) => hash(i + 10, j + 10, n);
-      if (k(31) < 0.2) continue;                                     // not dug: left as ground
-      const cx = i * P, cz = j * Q, x0 = cx - W / 2, x1 = cx + W / 2, z0 = cz - D / 2, z1 = cz + D / 2;
-      const h = 0.6 + k(37) * 1.0;                                   // 0.6 to 1.6 m high
-      const sides = [[x0, z0, x1, z0], [x1, z0, x1, z1], [x1, z1, x0, z1], [x0, z1, x0, z0]];
-      sides.forEach(([ax, az, bx, bz], s) => {
-        if (k(41 + s) < 0.45) {                                      // a doorway gap in the middle of this side
-          const p = (f) => [ax + (bx - ax) * f, az + (bz - az) * f];
-          const [ea, eb] = [p(0.4), p(0.6)];
-          seg(ax, az, ea[0], ea[1], h, 0.9, stone);
-          seg(eb[0], eb[1], bx, bz, h, 0.9, stone);
-        } else {
-          seg(ax, az, bx, bz, h, 0.9, stone);
-        }
-      });
-      if (k(53) < 0.5) seg(x0, cz, x1, cz, h * 0.7, 0.7, stone);     // a partition across the room
-      if (k(61) < 0.45) {                                            // a dug floor, inside the walls
-        const fw = W - 2.4, fd = D - 2.4;
-        ctx.box(g, fw, 0.05, fd, dug, cx, lowest(cx, cz, fw, fd) + 0.02, cz);
-      }
+  // The dug area: about 80 by 68 m, split at random into rooms of varied size (binary splits, some rooms stop early).
+  let n = 0;
+  const rnd = () => hash(++n, 17, 3);
+  const rooms = [];
+  const split = (x0, z0, x1, z1, depth) => {
+    const w = x1 - x0, d = z1 - z0;
+    if (depth === 0 || (w < 18 && d < 16) || (depth < 4 && rnd() < 0.2)) { rooms.push([x0, z0, x1, z1]); return; }
+    const r = 0.3 + 0.4 * rnd();
+    if (w / 18 >= d / 16) { const xm = x0 + w * r; split(x0, z0, xm, z1, depth - 1); split(xm, z0, x1, z1, depth - 1); }
+    else { const zm = z0 + d * r; split(x0, z0, x1, zm, depth - 1); split(x0, zm, x1, z1, depth - 1); }
+  };
+  split(-40, -34, 40, 34, 5);
+  for (const [x0, z0, x1, z1] of rooms) {
+    const sides = [[x0, z0, x1, z0], [x1, z0, x1, z1], [x1, z1, x0, z1], [x0, z1, x0, z0]];
+    for (const [ax, az, bx, bz] of sides) {
+      if (rnd() < 0.15) continue;                                       // a wall that did not survive
+      const t = 0.8 + 0.4 * rnd(), h = 0.6 + 1.9 * rnd();               // 0.8-1.2 m thick, 0.6-2.5 m high
+      const gap = rnd() < 0.25 ? 1.5 : 0, gapAt = 0.3 + 0.4 * rnd();
+      seg(ax, az, bx, bz, h, t, stone, gap, gapAt);
     }
   }
 
-  // The town wall: a square about 250 m a side (estimated), 1.5 m high, 3 m thick, with rectangular bastions.
-  const H = 125, T = 3, WH = 1.5;
-  const C = [[-H, -H], [H, -H], [H, H], [-H, H]];
-  for (let s = 0; s < 4; s++) {
-    const [ax, az] = C[s], [bx, bz] = C[(s + 1) % 4];
-    seg(ax, az, bx, bz, WH, T, town);
-    const L = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / L, uz = (bz - az) / L;
-    let nx = -uz, nz = ux;                                           // outward normal of this side
-    if (nx * (ax + bx) / 2 + nz * (az + bz) / 2 < 0) { nx = -nx; nz = -nz; }
-    const ry = Math.atan2(-uz, ux);
-    for (const f of [0.1, 0.3, 0.5, 0.7, 0.9]) {                    // five bastions per side, 8 m along, 4 m proud
-      const px = ax + (bx - ax) * f + nx * 2.5, pz = az + (bz - az) * f + nz * 2.5;
-      ctx.box(g, 8, WH + 1.0, 7, town, px, lowest(px, pz, 8, 7, ry) - 0.3, pz, ry);
-    }
-  }
+  // The bare earth under the dig: a ground-hugging mesh that follows the DEM.
+  const geo = new THREE.PlaneGeometry(92, 80, 23, 20);
+  geo.rotateX(-Math.PI / 2);
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) pos.setY(i, ground(pos.getX(i), pos.getZ(i)) + 0.05);
+  geo.computeVertexNormals();
+  const floor = new THREE.Mesh(geo, earth);
+  floor.receiveShadow = true;
+  g.add(floor);
+
+  // One stretch of town wall beside the dig (back side, away from the road): 50 m, with one rectangular bastion.
+  seg(-25, 46, 25, 46, 1.5, 3, town);
+  ctx.box(g, 8, 2.5, 7, town, 0, lowest(0, 49.5, 8, 7) - 0.3, 49.5);
 
   ctx.batch(ctx.group);
 }

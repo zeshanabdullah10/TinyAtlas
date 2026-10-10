@@ -2,38 +2,72 @@
   "title": "Jamia Masjid Thal",
   "subtitle": "Wooden mosque on the Panjkora bank, Thal village, Kumrat",
   "pack": "swat",
-  "bbox": [35.4648, 72.2289, 35.4920, 72.2619],
-  "far_bbox": [35.388, 72.14, 35.568, 72.36],
+  "bbox": [
+    35.4648,
+    72.2289,
+    35.492,
+    72.2619
+  ],
+  "far_bbox": [
+    35.388,
+    72.14,
+    35.568,
+    72.36
+  ],
   "arrival": {
     "name": "Jamia Masjid Thal",
-    "point": [35.47843, 72.2454]
+    "point": [
+      35.47843,
+      72.2454
+    ]
   },
   "landmark": {
     "kind": "mosque",
     "name": "Jamia Masjid Thal",
-    "point": [35.47843, 72.2454],
-    "model": "jamia-masjid-thal.glb",
+    "point": [
+      35.47843,
+      72.2454
+    ],
     "terrace_m": 30,
     "clear_m": 30,
-    "top_m": 26,
+    "top_m": 21,
     "ring_m": 40,
     "edits": [
-      "The mosque is the Atlas TRELLIS model made from one CC BY-SA Commons photo (Asfandyarlahor, Thall_Mosque_Dir_Kumrat.jpg); it is not a survey.",
-      "The model's size, 25 x 23 x 24 m, is estimated from that photo, not measured; OSM maps no footprint for the mosque.",
+      "The mosque is drawn in the landmark module from two CC BY-SA Commons photos (Asfandyarlahor and Asad Ullah); it is not a survey, and OSM maps no footprint for it.",
+      "Estimated, not measured: the stone base and walls 21 x 15 m, the upper timber storey 21.6 x 17.6 m with its roof at about 9 m, the tower and lantern rising to about 20 m, the front arcade of wooden posts and the two tall door pillars.",
+      "The paint (teal and yellow frieze, balusters and pillar caps) follows the photos; the carved details are simplified and the lattice screens are left out.",
       "The ground within 30 m of the mosque is levelled to its base; the rest of the village is the DEM slope, and its houses are not mapped in OSM so they are not drawn."
     ],
     "sources": [
       {
-        "name": "Jamia Masjid Thal model (TRELLIS, MIT; photo CC BY-SA 4.0)",
-        "use": "the mosque, generated from one Commons photo by Asfandyarlahor",
-        "licence": "CC BY-SA 4.0 (photo, share-alike applies to the derived model); TRELLIS code MIT",
+        "name": "Jamia Masjid Thal photo (Asfandyarlahor, CC BY-SA 4.0)",
+        "use": "the two-storey form, tiered roof, tower and stone base: proportions and colour",
+        "licence": "CC BY-SA 4.0",
         "url": "https://commons.wikimedia.org/wiki/File:Thall_Mosque_Dir_Kumrat.jpg"
+      },
+      {
+        "name": "Jamia Masjid Thal photo (Asad Ullah, CC BY-SA 4.0)",
+        "use": "the carved and painted door pillars, arcade posts and balcony",
+        "licence": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Wooden_mosque_Thal_bazar_dir_kohistan.jpg"
       }
-    ]
+    ],
+    "module": "jamia-masjid-thal"
   },
-  "drive_ways": [1010324794, 303252803, 1000337680],
-  "track_ways": [1010324794, 303252803, 1000337680],
-  "drive_start": [35.4563354, 72.2327535],
+  "drive_ways": [
+    1010324794,
+    303252803,
+    1000337680
+  ],
+  "track_ways": [
+    1010324794,
+    303252803,
+    1000337680
+  ],
+  "drive_start": [
+    35.4563354,
+    72.2327535
+  ],
   "drive_km": 0.6,
   "road": "Dir to Thal paved road (OSM ref S-16)",
   "road_kind": "road",
