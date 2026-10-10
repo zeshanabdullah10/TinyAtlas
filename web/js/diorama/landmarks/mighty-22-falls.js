@@ -78,7 +78,7 @@ export default function build(ctx) {
   };
 
   // Static parts: the pool where the water meets the road, and wet boulders along both banks (merged below).
-  const wet = mat(0x2b2723, { roughness: 0.35 });
+  const wet = mat(0x4f4b45, { roughness: 0.5 });   // wet schist, lighter than #45413b so it never reads as a hole
   const pool = new T.Mesh(
     new T.CircleGeometry(3, 24),
     new T.MeshStandardMaterial({ color: 0x9fcad6, roughness: 0.1, transparent: true, opacity: 0.75 }),
