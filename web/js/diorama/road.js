@@ -134,10 +134,25 @@ export function trackRibbons(site, path) {
     for (let i = 0; i < path.n; i += 2) if ((path.X[i] - x) ** 2 + (path.Z[i] - z) ** 2 < 100) return true;
     return false;
   };
-  let run = [];
-  const flush = () => { if (run.length > 2) out.push(run); run = []; };
-  for (const p of pts) { if (nearDrive(p[0], p[1])) flush(); else run.push(p); }
-  flush();
+  // a run of the track that leaves (or rejoins) the drive starts (or ends) on the drive itself, so the smoothed drive
+  // and the mapped track meet without a gap
+  const onDrive = (p) => {
+    let best = 0, bd = Infinity;
+    for (let i = 0; i < path.n; i++) { const d = (path.X[i] - p[0]) ** 2 + (path.Z[i] - p[1]) ** 2; if (d < bd) { bd = d; best = i; } }
+    return bd < 40 * 40 ? [path.X[best], path.Z[best]] : null;
+  };
+  let run = [], joined = false;
+  const flush = (rejoin) => {
+    if (rejoin && run.length) { const q = onDrive(run[run.length - 1]); if (q) run.push(q); }
+    if (run.length > 2) out.push(run);
+    run = [];
+  };
+  for (const p of pts) {
+    if (nearDrive(p[0], p[1])) { flush(true); joined = true; continue; }
+    if (!run.length && joined) { const q = onDrive(p); if (q) run.push(q); }
+    run.push(p);
+  }
+  flush(false);
   const meshes = [];
   for (const r of out) {
     const across = 5, n = r.length;

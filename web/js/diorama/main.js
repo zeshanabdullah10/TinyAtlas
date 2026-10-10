@@ -16,7 +16,7 @@ import { Hud } from "./hud.js";
 import { shoreLoop, ringLoop, footpath, viewpoints, viewpointPosts, Walker, waterRoute, loopAt, nearestOnLoop } from "./shore.js";
 import { Life, boat as boatModel, horse as horseModel } from "./life.js";
 import { Weather } from "./weather.js";
-import { palace } from "./palace.js";
+import { landmark } from "./landmark.js";
 import { buildings } from "./buildings.js";
 import { makePostcard, postcardSheet } from "../postcard.js";
 import { roadStatusCard, loadRoads } from "../roadstatus.js";
@@ -69,7 +69,7 @@ scene.add(streams(site));
 const path = new Path(meta.drive, Y0);
 scene.add(driveRibbon(path), ...trackRibbons(site, path), ...trailRibbon(site), roadStones(path));
 const plants = flora(site, path, tier); scene.add(plants);
-const lm = meta.landmark ? palace(site, meta.landmark, path.at(path.length), meta.landmark.model ? base + meta.landmark.model : null) : null; if (lm) scene.add(lm);
+const lm = meta.landmark ? landmark(site, meta.landmark, path.at(path.length), base) : null; if (lm) scene.add(lm);
 scene.add(buildings(site));
 const jeep = jeepModel(); scene.add(jeep.root);
 const ride = new Ride(path, jeep);
@@ -115,8 +115,8 @@ const PLACE_SLUG = { mahodand: "mahodand-lake", "white-palace": "white-palace-ma
 loadRoads().then((r) => { const c = roadStatusCard(r, { slug: PLACE_SLUG }); if (c?.childElementCount) { const b = document.getElementById("before"); b.append(c); b.hidden = false; } });
 
 // ---- the shore: footpath, viewpoints, walker, life, mist
-const loop = meta.lake ? shoreLoop(site) : ringLoop(site, A.x, A.z, meta.landmark ? 52 : 150);
-if (!meta.landmark) scene.add(footpath(site, loop));   // around a building you walk the lawn, no traced path
+const loop = meta.lake ? shoreLoop(site) : ringLoop(site, A.x, A.z, meta.landmark ? meta.landmark.ring_m || 52 : 150);
+if (!meta.landmark || meta.landmark.footpath) scene.add(footpath(site, loop));   // around a building you walk the lawn, no traced path
 const vps = viewpoints(site, loop, path);
 scene.add(viewpointPosts(vps));
 const walker = new Walker(site, loop, canvas);
@@ -416,7 +416,7 @@ function hikeToLake() {
   const W = meta.walk, P = W.pts, cum = [0];
   for (let i = 1; i < P.length; i++) cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
   const hours = W.km / 3 + W.climb_m / 400;     // walking pace with Naismith's rule for the climb
-  toast(`The jeep track ends here. ${W.km} km on foot to ${meta.lake ? "the lake" : meta.arrival.name}, about ${hours.toFixed(1)} h` +
+  toast(`The ${meta.road_kind === "road" ? "road" : "jeep track"} ends here. ${W.km} km on foot to ${meta.lake ? "the lake" : meta.arrival.name}, about ${hours.toFixed(1)} h` +
         (W.traced_km ? ` (the last ${W.traced_km} km has no mapped path)` : "") + ".", 7);
   hike = { s: 0, cum, P, dur: Math.min(40, 14 + W.km * 3) };
   state = "hike";
@@ -538,6 +538,7 @@ function tick(dt) {
   dust.update(dt, wind);
   life.update(dt, elapsed, wind);
   herders?.update(dt, elapsed);
+  lm?.userData.update?.(dt, elapsed);
   // seasons ease in; mist follows dawn
   const S = SEASONS[season], k = Math.min(1, dt * 1.5);
   seasonU.uAutumn.value += (S.autumn - seasonU.uAutumn.value) * k;

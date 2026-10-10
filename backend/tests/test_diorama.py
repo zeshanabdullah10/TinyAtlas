@@ -20,7 +20,7 @@ def test_files_match_grid(d):
     assert (d / "farcover.bin").stat().st_size == f["cols"] * f["rows"]
     assert math.isclose(g["width"], (g["cols"] - 1) * g["cell"]) and math.isclose(g["height"], (g["rows"] - 1) * g["cell"])
     cover = np.frombuffer((d / "cover.bin").read_bytes(), np.uint8)
-    assert set(np.unique(cover)) <= {1, 2, 3, 4, 5, 6, 7}
+    assert set(np.unique(cover)) <= ({1, 2, 3, 4, 5, 6, 7, 8} if m.get("built_up") else {1, 2, 3, 4, 5, 6, 7})
     if m["lake"]:
         assert (cover == 5).sum() * g["cell"] ** 2 / 1e6 == pytest.approx(m["facts"]["lake_area_km2"], abs=0.006)
     else:

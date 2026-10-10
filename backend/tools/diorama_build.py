@@ -11,7 +11,7 @@ Inputs (downloaded once, not committed):
 Outputs, committed under web/data/diorama/<site>/ (the page reads only these):
   far.bin       uint16 heights of the horizon ring, 60 m cells, half-metres above meta.far.hmin (farcover.bin alongside)
   height.bin    uint16 little-endian, row-major north to south, decimetres above meta.hmin, CELL m spacing
-  cover.bin     uint8 per cell: 1 tree, 2 grass, 3 bare/rock, 4 snow/ice, 5 water, 6 moss, 7 shrub
+  cover.bin     uint8 per cell: 1 tree, 2 grass, 3 bare/rock, 4 snow/ice, 5 water, 6 moss, 7 shrub, 8 built-up (towns only)
   meta.json     grid, the drive (track points with real heights), lake, streams, measured facts, sources
 
 Real data sets the facts: every number in meta.facts is measured here from the inputs. Two edits are made to the
@@ -65,6 +65,7 @@ for _f in sorted((Path(__file__).parent / "diorama_sites").glob("*.json")):
     SITES[_f.stem] = {k: tuple(v) if isinstance(v, list) and k != "drive_ways" and k != "track_ways" else v
                       for k, v in json.loads(_f.read_text(encoding="utf-8")).items()}
 COVER = {10: 1, 20: 7, 30: 2, 40: 2, 50: 3, 60: 3, 70: 4, 80: 5, 90: 2, 95: 1, 100: 6}
+COVER_TOWN = {**COVER, 50: 8}   # sites with `"built_up": true` (towns) keep WorldCover built-up apart from bare rock: no boulders
 
 
 def geo(site, key="bbox", cell=CELL):
@@ -281,7 +282,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     h = sample_tile(dem, dem_top, dem_left, 1 / 3600, g, 1)
     wc = tifffile.TiffFile(wc_path).pages[0].asarray()  # 36000x36000, top-left 36N 72E for N33E072
     cls = sample_tile(wc, 36.0, 72.0, 1 / 12000, g, 0)
-    cover = np.vectorize(lambda v: COVER.get(int(v), 2))(cls).astype(np.uint8)
+    CV = COVER_TOWN if site.get("built_up") else COVER
+    cover = np.vectorize(lambda v: CV.get(int(v), 2))(cls).astype(np.uint8)
 
     # Forest the 2021 map reads as meadow: where a site asks for it, grass and cropland cells as green as the mapped
     # forest (Sentinel-2 NDVI above the site's threshold) become trees. Water, rock and snow are never touched.
@@ -362,27 +364,38 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     sm = np.array([arr[max(0, i - 3): i + 4].mean(0) for i in range(len(arr))])
     drive = [tuple(p) for p in sm]
     # Buildings: OSM footprints inside the model (local metres), with their mapped levels when tagged.
+    # In a town (Mingora) `buildings_radius_m` keeps only those near the arrival point; a landmark's own footprint
+    # (within `clear_m` of its point, default its terrace) is left to the landmark's model.
     buildings = []
+    bc = to_local(g, *(site.get("arrival") or {"point": site.get("lake_seed", (g["s"], g["w"]))})["point"])
+    br = site.get("buildings_radius_m", 1e9)
+    lmc = to_local(g, *site["landmark"]["point"]) if "landmark" in site else None
+    clear = site.get("landmark", {}).get("clear_m", site.get("landmark", {}).get("terrace_m", 58)) if lmc else 0
     for w in ways.values():
         t = w.get("tags", {})
         if "building" not in t or len(w.get("geometry", [])) < 4:
             continue
         fp = [to_local(g, p["lat"], p["lon"]) for p in w["geometry"]]
+        cx, cz = sum(x for x, _ in fp) / len(fp), sum(z for _, z in fp) / len(fp)
+        if math.hypot(cx - bc[0], cz - bc[1]) > br or (lmc and math.hypot(cx - lmc[0], cz - lmc[1]) < clear):
+            continue
         if all(abs(x) < g["W"] / 2 - 20 and abs(z) < g["H"] / 2 - 20 for x, z in fp):
             lv = t.get("building:levels", "")
             buildings.append({"id": w["id"], "kind": t["building"], "levels": int(lv) if lv.isdigit() else None,
                               "pts": [[round(x, 1), round(z, 1)] for x, z in fp[:-1]]})
     walk = trace_walk(site, ways, g, h, lake, lake_xz, drive[-1]) if "trailhead" in site else None
     # A landmark stands on a level terrace of lawn (its grounds); trees are kept off it.
-    if "landmark" in site:
+    # `terrace_m` (default 58, the palace lawn) sets its radius; 0 leaves the ground as it is (a waterfall, a rock relief).
+    terrace = site.get("landmark", {}).get("terrace_m", 58)
+    if "landmark" in site and terrace:
         lx, lz = to_local(g, *site["landmark"]["point"])
         rr_, cc_ = np.mgrid[0:g["rows"], 0:g["cols"]]
         dl = np.hypot(cc_ * CELL - g["W"] / 2 - lx, rr_ * CELL - g["H"] / 2 - lz)
         ly = float(bilerp(h, g, lx, lz))
-        t = np.clip((dl - 58) / 25, 0, 1)
+        t = np.clip((dl - terrace) / 25, 0, 1)
         t = t * t * (3 - 2 * t)
-        h = np.where(dl < 83, ly * (1 - t) + h * t, h)
-        cover[(dl < 70) & (cover != 5)] = 2
+        h = np.where(dl < terrace + 25, ly * (1 - t) + h * t, h)
+        cover[(dl < terrace + 12) & (cover != 5)] = 2
 
     # Road profile: DEM along the track, smoothed over ~80 m, then a bench cut so the track sits on it.
     prof = np.array([bilerp(h, g, x, z) for x, z in drive])
@@ -403,7 +416,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     # Far ring: same sources, 60 m cells, positioned in the near grid's local frame.
     fg = geo(site, "far_bbox", FAR_CELL)
     fh = sample_tile(dem, dem_top, dem_left, 1 / 3600, fg, 1)
-    fc = np.vectorize(lambda v: COVER.get(int(v), 2))(sample_tile(wc, 36.0, 72.0, 1 / 12000, fg, 0)).astype(np.uint8)
+    fc = np.vectorize(lambda v: CV.get(int(v), 2))(sample_tile(wc, 36.0, 72.0, 1 / 12000, fg, 0)).astype(np.uint8)
     fx0, fz0 = to_local(g, fg["n"], fg["w"])
     fmin = float(np.floor(fh.min() - 1))
     (out / "far.bin").write_bytes(np.clip(np.rint((fh - fmin) * 2), 0, 65535).astype("<u2").tobytes())
@@ -426,11 +439,11 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
             p = [to_local(g, q_["lat"], q_["lon"]) for q_ in w["geometry"]]
             p = [(x, z) for x, z in p if abs(x) < g["W"] / 2 and abs(z) < g["H"] / 2]
             parts = [resample(p, 10.0)] if len(p) > 2 else []
-            if "landmark" in site:                 # the river is cut where it meets the levelled grounds, never bridged across them
+            if "landmark" in site and terrace:     # the river is cut where it meets the levelled grounds, never bridged across them
                 lx, lz = to_local(g, *site["landmark"]["point"])
                 cut, run = [], []
                 for x, z in parts[0] if parts else []:
-                    if math.hypot(x - lx, z - lz) > 110:
+                    if math.hypot(x - lx, z - lz) > terrace + 52:
                         run.append((x, z))
                     elif run:
                         cut.append(run); run = []
@@ -468,13 +481,15 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     }
     meta = {
         "version": 1, "site": name, "title": site["title"], "subtitle": site["subtitle"], "road": site.get("road", "Mahodand Lake Road"), "pack": site.get("pack", "swat"),
+        **({"built_up": True} if site.get("built_up") else {}),
+        **({"road_kind": site["road_kind"]} if site.get("road_kind") else {}),   # "road" for a paved road; default a jeep track
         "grid": {"cols": g["cols"], "rows": g["rows"], "cell": CELL, "width": g["W"], "height": g["H"],
                  "hmin": hmin, "hmax": float(h.max()), "bbox": site["bbox"]},
         "far": {"cols": fg["cols"], "rows": fg["rows"], "cell": FAR_CELL, "x0": round(fx0, 1), "z0": round(fz0, 1),
                 "hmin": fmin, "scale": 0.5},
         "lake": {"level": round(level, 1), "seed": [round(sx, 1), round(sz, 1)], "outline": lake_source} if has_lake else None,
         "arrival": arrival,
-        "landmark": ({**{k: v for k, v in site["landmark"].items() if k != "point"}, "x": round(to_local(g, *site["landmark"]["point"])[0], 1),
+        "landmark": ({**{k: v for k, v in site["landmark"].items() if k not in ("point", "edits", "sources")}, "x": round(to_local(g, *site["landmark"]["point"])[0], 1),
                       "z": round(to_local(g, *site["landmark"]["point"])[1], 1)} if "landmark" in site else None),
         "drive": [[round(x, 1), round(z, 1), round(float(y), 2)] for (x, z), y in zip(drive, prof)],
         "track": track,
@@ -490,8 +505,11 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
             *(["At the lake, the positions of the boats, tents, tea stalls and horses are illustrative (boating is described by the sources and seen in Commons photos).",
                "The shore path is traced 20 m outside the lake outline; it is not a mapped trail."] if has_lake else
               ["The walking loop is a 150 m circle around the arrival point; it is not a mapped trail."]),
-            *(["The palace grounds are levelled to a terrace 58 m around the place point and kept as lawn."] if "landmark" in site else []),
-            *(["The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 24 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."] if "landmark" in site else []),
+            # a landmark declares its own edits in the site file; the White Palace keeps the words it was built with
+            *(site["landmark"].get("edits") or [
+                f"The palace grounds are levelled to a terrace {terrace} m around the place point and kept as lawn.",
+                "The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 24 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."]
+              if "landmark" in site else []),
             *([f"The walk from the end of the jeep track follows the mapped OSM footpath for {walk['mapped_km']} km"
                + (f"; the last {walk['traced_km']} km is not mapped and is traced over the ground (easiest slope on the DEM)." if walk["traced_km"] else ".")]
               if walk else []),
@@ -508,9 +526,9 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
              "url": "https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model"},
             {"name": "ESA WorldCover 10 m 2021 v200", "use": "trees, meadow, rock, snow" + ("" if s2 or not has_lake else ", the lake outline"), "licence": "CC BY 4.0, © ESA WorldCover project 2021",
              "url": "https://esa-worldcover.org"},
-            *([{"name": "White Palace model (TRELLIS, MIT)", "use": "the palace, generated from Commons photos by Adilswati, Arszul123 and Ihsan Farid",
+            *(site["landmark"].get("sources") or [{"name": "White Palace model (TRELLIS, MIT)", "use": "the palace, generated from Commons photos by Adilswati, Arszul123 and Ihsan Farid",
                  "licence": "CC BY-SA 3.0 / 4.0 (texture derived from the photos)", "url": "https://commons.wikimedia.org/wiki/File:White_Palace_Maraghzar,_Swat.jpg"}]
-              if site.get("landmark", {}).get("model") else []),
+              if site.get("landmark", {}).get("model") or site.get("landmark", {}).get("sources") else []),
             {"name": "OpenStreetMap", "use": site.get("osm_use", "the jeep track (Mahodand Lake Road) and streams"), "licence": "ODbL, © OpenStreetMap contributors",
              "url": "https://www.openstreetmap.org/copyright"},
         ],
@@ -558,4 +576,8 @@ if __name__ == "__main__":
         f = ROOT / "web" / "data" / "diorama" / a.site / "meta.json"
         f.write_text(json.dumps(shorten(json.loads(f.read_text(encoding="utf-8")), SITES[a.site]["drive_km"]), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         raise SystemExit
-    build(a.site, a.dem, a.worldcover, a.osm, a.s2)
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from slots import slot
+    with slot("build", 3):                         # parallel workers on one machine take turns (memory)
+        build(a.site, a.dem, a.worldcover, a.osm, a.s2)

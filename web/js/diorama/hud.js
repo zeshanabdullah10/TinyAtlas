@@ -31,12 +31,13 @@ export class Hud {
 
   facts(meta) {
     const F = meta.facts;
+    this.way = meta.road_kind === "road" ? "road" : "jeep track";   // a paved road (Mingora) or a jeep track
     $("#title").textContent = meta.title;
     $("#sub").textContent = meta.subtitle;
     $("#cta-km").textContent = fmt(F.drive_km, 1);
     $("#facts").innerHTML = [
       F.lake_level_m != null ? [fmt(F.lake_level_m), "m", "lake level"] : [fmt(F.arrival_m), "m", "at the end of the drive"],
-      [fmt(F.drive_km, 1), "km", "of jeep track"],
+      [fmt(F.drive_km, 1), "km", `of ${this.way}`],
       [fmt(F.drive_climb_m), "m", "climb on the way"],
       [`~${Math.max(1, Math.round(F.drive_km * 1000 / 7 / 60))}`, "min", "to drive here"],
     ].map(([n, u, l]) => `<li><b>${n}<small>${u}</small></b><span>${l}</span></li>`).join("");
@@ -123,7 +124,7 @@ export class Hud {
     if (!F) return;
     $("#arrive-eyebrow").textContent = arrived ? "You have arrived" : "Tiny Atlas · Diorama";
     $("#btn-again").textContent = arrived ? "Drive it again" : "Drive up the track";
-    $("#arrive-facts").innerHTML = `You climbed <b>${fmt(F.drive_climb_m)} m</b> over <b>${fmt(F.drive_km, 1)} km</b> of jeep track. ` + (F.lake_level_m != null
+    $("#arrive-facts").innerHTML = `You climbed <b>${fmt(F.drive_climb_m)} m</b> over <b>${fmt(F.drive_km, 1)} km</b> of ${this.way || "jeep track"}. ` + (F.lake_level_m != null
       ? `The lake lies at <b>${fmt(F.lake_level_m)} m</b>, about <b>${fmt(F.lake_length_km, 1)} km</b> end to end.`
       : `You are at <b>${fmt(F.arrival_m)} m</b>.`);
   }
