@@ -67,5 +67,10 @@
   "road_kind": "road",
   "osm_use": "the N-95 trunk road (Mingora Road) toward Barikot, and the village lanes and buildings around the stupa",
   "built_up": true,
-  "buildings_radius_m": 1000
+  "buildings_radius_m": 1000,
+  "trailhead": [
+    34.6930959,
+    72.2456485
+  ],
+  "walk_ways": []
 }
