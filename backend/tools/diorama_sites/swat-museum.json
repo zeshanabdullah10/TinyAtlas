@@ -27,11 +27,11 @@
     "top_m": 12,
     "ring_m": 40,
     "edits": [
-      "The footprint is the OSM outline of way 450094924 (tourism=museum, name 'ajaeb ghar'), about 6,500 m2 and roughly 160 by 75 m across, which is larger than the building in the photos. It is used only to place the museum: the place point 34.7635, 72.35922 lies inside it and the node 'Swat Museum' (4447626923) lies 0.1 m from the point. The OSM outline has no height and is not drawn as a building.",
+      "The footprint is the OSM outline of way 450094924 (tourism=museum, name 'ajaeb ghar'), about 9,700 m2 and about 95 m east-west by 144 m north-south, which is larger than the building in the photos. It is used only to place the museum: the place point 34.7635, 72.35922 lies inside it and the node 'Swat Museum' (4447626923) lies 0.1 m from the point. The OSM outline has no height and is not drawn as a building.",
       "The building is drawn after Commons photos 04 and 05 (proportions, portal, columns, colours, steps, garden): a 22 m by 12 m stone block, 8 m high to the coping, with a 9 m portal and two 5 m columns. These sizes are estimated from the photos; nothing published gives them.",
-      "The cladding is warm buff-pink banded sandstone, the portal surround blue-grey, the columns grey-white, the gates dark, the lawn dry and yellow-green; the green lattice wings are simplified to solid screens. The sign is not lettered.",
+      "The cladding is warm buff-pink banded sandstone, the portal surround blue-grey, the columns grey-white, the gates dark, the lawn dry and yellow-green; the green lattice wings are simplified to solid screens. The name over the portal is lettered in the photos; the model leaves that band blank.",
       "The front faces the road, which runs 42 m west of the point. The facade orientation is estimated from the drive end.",
-      "The dry lawn, the concrete path, the dwarf hedges, the two palms, the carved stone on a plinth and the signboard are placed after the photos; their positions are estimated.",
+      "The dry lawn, the concrete path, the dwarf hedges, the two rounded shrubs (drawn as cones, not palms), the carved stone on a plinth and the signboard are placed after the photos; their positions are estimated.",
       "The 2,487 OSM buildings stand on their footprints; their height (OSM levels where mapped, else one or two storeys), roofs and colours are illustrative, after visitors' photos.",
       "The Atlas TRELLIS model from one photo is no longer used: it read as a dark box and did not match the photos."
     ],
