@@ -1,0 +1,37 @@
+[
+ {
+  "label": "Best season",
+  "value": "Summer, for the greenery and cool weather",
+  "quote": "Every summer season, thousands of tourists from different areas of Pakistan and abroad visit Kumrat Valley for its greenery and cool weather.",
+  "source": "Wikipedia: Kumrat Valley",
+  "url": "https://en.wikipedia.org/wiki/Kumrat_Valley"
+ },
+ {
+  "label": "Getting there",
+  "value": "Four-wheel drive only: the road is unmetalled",
+  "quote": "It can only be accessed via four-wheel vehicles, as the road leading to it is unmetalled",
+  "source": "Wikipedia: Kumrat Valley",
+  "url": "https://en.wikipedia.org/wiki/Kumrat_Valley"
+ },
+ {
+  "label": "Where",
+  "value": "The upper Panjkora valley, Upper Dir district",
+  "quote": "is the upper section of the alpine Panjkora Valley in the Upper Dir District",
+  "source": "Wikipedia: Kumrat Valley",
+  "url": "https://en.wikipedia.org/wiki/Kumrat_Valley"
+ },
+ {
+  "label": "Waterfalls",
+  "value": "Several in the valley, this one beside the road",
+  "quote": "There are several waterfalls there as well.",
+  "source": "Wikipedia: Kumrat Valley",
+  "url": "https://en.wikipedia.org/wiki/Kumrat_Valley"
+ },
+ {
+  "label": "On the map",
+  "value": "Mapped as a waterfall on OpenStreetMap (node 6534025186)",
+  "quote": "<tag k=\"waterway\" v=\"waterfall\"/>",
+  "source": "OpenStreetMap (main API extract)",
+  "url": "https://api.openstreetmap.org/api/0.6/map?bbox=72.1620,35.5530,72.2220,35.5870"
+ }
+]
