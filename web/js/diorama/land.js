@@ -5,7 +5,11 @@ import { seasonize } from "./season.js";
 
 const PAL = {            // sRGB
   1: [52, 86, 64], 2: [158, 172, 74], 3: [180, 142, 96], 4: [242, 240, 232], 5: [64, 102, 96], 6: [138, 146, 92], 7: [116, 134, 62], 0: [158, 172, 74],
+  8: [176, 164, 140],    // built-up (towns): packed earth, lanes and yards
 };
+// Heights here are relative to the site's y = 0 (the lake or the arrival). Snow lies above y = 1550 (about 4,400 m at
+// Mahodand) but never below 3,400 m above sea level, so the low valleys (Mingora, about 930 m) are not white in summer.
+let snowY = 1550;
 const lin = (c) => Math.pow(c / 255, 2.2);
 
 function colourAt(cover, alt, slope, out, i) {
@@ -17,8 +21,8 @@ function colourAt(cover, alt, slope, out, i) {
   }
   const steep = Math.min(Math.max((slope - 0.62) / 0.5, 0), 1);   // tan(32°)..tan(48°)
   if (cover !== 4 && cover !== 5 && cover !== 1) { r += (150 - r) * steep; g += (116 - g) * steep; b += (86 - b) * steep; }
-  if (cover !== 5 && alt > 1550) {                          // high, gentle ground holds snow late (about 4,400 m and up)
-    const t = Math.min((alt - 1550) / 300, 1) * (1 - steep * 0.8);
+  if (cover !== 5 && alt > snowY) {                         // high, gentle ground holds snow late (about 4,400 m and up)
+    const t = Math.min((alt - snowY) / 300, 1) * (1 - steep * 0.8);
     r += (238 - r) * t; g += (238 - g) * t; b += (232 - b) * t;
   }
   out[i] = lin(r); out[i + 1] = lin(g); out[i + 2] = lin(b);
@@ -90,6 +94,7 @@ function gridGeometry(cols, rows, cell, x0, z0, heights, covers, yOff = 0) {
 }
 
 export function nearTerrain(site) {
+  snowY = Math.max(1550, 3400 - site.Y0);
   const g = site.meta.grid;
   const mesh = new THREE.Mesh(gridGeometry(g.cols, g.rows, g.cell, site.x0, site.z0, site.H, site.C), seasonize(terrainMaterial(), "ground"));
   mesh.receiveShadow = true; mesh.castShadow = true;
@@ -97,6 +102,7 @@ export function nearTerrain(site) {
 }
 
 export function farTerrain(site) {
+  snowY = Math.max(1550, 3400 - site.Y0);
   const f = site.meta.far, g = site.meta.grid;
   const mesh = new THREE.Mesh(gridGeometry(f.cols, f.rows, f.cell, f.x0, f.z0, site.FH, site.FC, -2),
     seasonize(terrainMaterial({ hole: [g.width / 2 - 4, g.height / 2 - 4] }), "ground"));

@@ -1,0 +1,77 @@
+{
+  "title": "Butkara III",
+  "subtitle": "Minor stupa court on the Mingora outskirts, Lower Swat",
+  "bbox": [
+    34.745,
+    72.355,
+    34.772,
+    72.388
+  ],
+  "arrival": {
+    "name": "Butkara III",
+    "point": [
+      34.75852,
+      72.37171
+    ]
+  },
+  "landmark": {
+    "kind": "stupa",
+    "name": "Butkara III",
+    "point": [
+      34.75852,
+      72.37171
+    ],
+    "module": "butkara-iii-stupa",
+    "terrace_m": 0,
+    "clear_m": 30,
+    "top_m": 5,
+    "ring_m": 30,
+    "footpath": false,
+    "edits": [
+      "The stupas, the votive row and the shrine niches in the back wall are drawn from the Commons photos of Butkara III (CC BY-SA 3.0): their sizes are estimated, because no published dimensions for Butkara III were found.",
+      "The ground is not levelled (terrace 0): the court stands on the real slope from the DEM.",
+      "The stone courses, cobble inserts and the stepped mouldings are painted, not measured."
+    ],
+    "sources": [
+      {
+        "name": "Heritage of Pakistan, Khyber Pakhtunkhwa Department of Archaeology, site 3305 (Butkara III)",
+        "use": "the name, the coordinates (34.758583, 72.371469), the two areas A and B, the stupa court, chambers and shrines, the dating 1st-5th century CE",
+        "licence": "page text cited, not reused",
+        "url": "https://doam.gov.pk/public/sites/3305"
+      },
+      {
+        "name": "Commons photos of Butkara III (Zarghun11, CC BY-SA 3.0)",
+        "use": "the proportions and the stone courses of the stupas, plinths and the niche wall (estimated sizes)",
+        "licence": "CC BY-SA 3.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Butkara-III.JPG"
+      }
+    ]
+  },
+  "drive_ways": [
+    447689962,
+    484821378,
+    1027712908
+  ],
+  "track_ways": [
+    447689962,
+    484821378,
+    1027712908
+  ],
+  "drive_start": [
+    34.7644987,
+    72.3590566
+  ],
+  "far_bbox": [
+    34.67,
+    72.262,
+    34.85,
+    72.48
+  ],
+  "buildings_radius_m": 900,
+  "drive_km": 0.6,
+  "pack": "swat-lower",
+  "road": "unnamed asphalt town road (OSM tertiary 447689962), then residential streets to the site",
+  "osm_use": "the paved town road to the east of the site and the residential street that reaches within about 25 m of the stupa, and the buildings around it",
+  "road_kind": "road",
+  "built_up": true
+}

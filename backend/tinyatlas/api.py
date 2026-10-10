@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 import time
 from functools import lru_cache
@@ -48,12 +49,6 @@ def _region(name: str) -> dict:
 def _landmarks(name: str) -> list[dict]:
     cfg = _region(name)
     return atlaspack.landmarks(cfg["atlas"], cfg)
-
-
-@lru_cache(maxsize=None)
-def _chunks(name: str) -> list[dict]:
-    cfg = _region(name)
-    return atlaspack.chunks(cfg["atlas"], cfg)
 
 
 def _summary(name: str, cfg: dict) -> dict:
@@ -125,8 +120,9 @@ def plan_trip(region: str, body: PlanRequest, request: Request = None):
     try:
         return planner.plan(region, cfg, region_landmarks(region), region_facts(region)["facts"], text, month,
                             body.current)
-    except llm.LLMUnavailable as exc:
-        raise HTTPException(502, f"The planner couldn't make a plan just now ({exc}). Try again in a moment.")
+    except llm.LLMUnavailable as exc:                   # the provider's error (URL, status) goes to the log, not the visitor
+        logging.getLogger("tinyatlas").warning("planner: %s", exc)
+        raise HTTPException(502, "The planner couldn't make a plan just now. Try again in a moment.")
 
 
 @app.get("/api/status")

@@ -1,0 +1,40 @@
+{
+  "title": "Gumbat Stupa (Balo Kale)",
+  "subtitle": "Buddhist stupa on the Kandak valley road west of Barikot, Lower Swat",
+  "pack": "swat-lower",
+  "bbox": [34.676, 72.170, 34.703, 72.200],
+  "far_bbox": [34.60, 72.075, 34.78, 72.295],
+  "arrival": {
+    "name": "Gumbat Stupa",
+    "point": [34.6897309, 72.1854194]
+  },
+  "landmark": {
+    "kind": "stupa",
+    "name": "Gumbat Stupa (Balo Kale)",
+    "point": [34.6897309, 72.1854194],
+    "module": "gumbat-balo-kale-stupa",
+    "terrace_m": 15,
+    "clear_m": 20,
+    "top_m": 13,
+    "ring_m": 30,
+    "footpath": true,
+    "heading_deg": 175,
+    "edits": [
+      "The shrine is drawn in the module: a square chamber on a stepped podium, a stair up the front, a domed roof on a drum, and a finial. It stands on the OSM tourism=attraction node named Stupa, 52 m north of the road.",
+      "Published by Wikipedia (Gumbat Stupa article): the main stupa's plinth is 17 m a side and has 'a projection of about 3.7m'. The photos do not show a plinth that wide beside the chamber, so the plinth is estimated at about 8 m a side and the 3.7 m projection is used as the stair's run. The 17 m figure is not reconciled with the photos.",
+      "Estimated, not measured: the chamber about 5.8 m square and 4.6 m high, the podium 1.5 m high, the stair 3.2 m wide with four treads, the dome about 5 m across and 2.9 m high, and the finial. The arched niches are dark recesses, not arches.",
+      "Not modelled: the two terraces, the monastery and the more than 20 smaller stupas named in the article; the ground is the real DEM, with a levelled terrace of 15 m radius."
+    ],
+    "sources": [
+      {"name": "Wikipedia: Gumbat Stupa", "use": "the 17 m plinth and 3.7 m projection (not reconciled with the photos); the site description", "licence": "CC BY-SA 4.0", "url": "https://en.wikipedia.org/wiki/Gumbat_Stupa"},
+      {"name": "OpenStreetMap node 5759001422 (tourism=attraction, name Stupa)", "use": "the position of the shrine", "licence": "ODbL 1.0", "url": "https://www.openstreetmap.org/node/5759001422"}
+    ]
+  },
+  "drive_ways": [447684913, 1298957628],
+  "track_ways": [447684913, 1298957628],
+  "drive_start": [34.72900, 72.25993],
+  "drive_km": 0.6,
+  "road": "Kandak valley road (unnamed primary road in OSM), west of Barikot",
+  "road_kind": "road",
+  "osm_use": "the primary road west from Barikot (ways 447684913 and 1298957628) and the Stupa node at the point"
+}

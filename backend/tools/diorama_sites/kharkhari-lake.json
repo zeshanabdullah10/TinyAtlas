@@ -1,0 +1,40 @@
+{
+  "title": "Kharkhari Lake",
+  "subtitle": "Small lake at the head of the Gabral valley, Upper Swat",
+  "bbox": [
+    35.648,
+    72.382,
+    35.692,
+    72.418
+  ],
+  "lake_seed": [
+    35.6772,
+    72.4015
+  ],
+  "drive_ways": [
+    339648119
+  ],
+  "track_ways": [
+    339648119
+  ],
+  "drive_start": [
+    35.5233,
+    72.41621
+  ],
+  "trailhead": [
+    35.656759,
+    72.392968
+  ],
+  "walk_ways": [],
+  "far_bbox": [
+    35.58,
+    72.3,
+    35.76,
+    72.5
+  ],
+  "drive_km": 0.6,
+  "pack": "swat",
+  "road": "Gabral valley road",
+  "osm_use": "the unclassified road up the Gabral valley to its mapped end about 2.4 km below the lake, and the water (WorldCover) at the lake",
+  "lake_radius_m": 260
+}

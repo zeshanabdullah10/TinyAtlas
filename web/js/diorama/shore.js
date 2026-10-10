@@ -148,9 +148,10 @@ export function footpath(site, loop) {
 
 /** Viewpoints, named only by where they are. */
 export function viewpoints(site, loop, path) {
-  const end = path.at(path.length);
+  // on a site reached on foot (meta.walk) the visit starts where the path arrives, not where the track ends
+  const W = site.meta.walk?.pts, end = W ? { x: W.at(-1)[0], z: W.at(-1)[1] } : path.at(path.length);
   const sPark = nearestOnLoop(loop, end.x, end.z);
-  const list = [{ name: "Where the track ends", s: sPark }];
+  const list = [{ name: W ? "Where the path arrives" : "Where the track ends", s: sPark }];
   // the stream mouth: the OSM waterway end point closest to the lake
   let mouth = null, md = Infinity;
   for (const st of site.meta.streams) for (const p of [st.pts[0], st.pts.at(-1)]) {
@@ -158,19 +159,30 @@ export function viewpoints(site, loop, path) {
     const s = nearestOnLoop(loop, p[0], p[1]), q = loopAt(loop, s), d = Math.hypot(q.x - p[0], q.z - p[1]);
     if (d < md && Math.abs(s - sPark) > 120) { md = d; mouth = s; }
   }
-  if (!site.meta.lake) {                 // around a building: its front, its sides and the back, by where they are
-    const A = site.meta.arrival, n = A.name;
+  if (!site.meta.lake && site.meta.landmark) {   // around a building: its front, its sides and the back, by where they are
+    const n = site.meta.landmark.name || site.meta.arrival.name;
     const front = nearestOnLoop(loop, end.x, end.z);
-    list[0] = { name: `On the lawn before the ${n}`, s: front };
+    list[0] = { name: site.meta.landmark.kind === "palace" ? `On the lawn before the ${n}` : `In front of the ${n}`, s: front };
     list.push({ name: `Beside the ${n}`, s: front + loop.length / 4 }, { name: `Behind the ${n}`, s: front + loop.length / 2 },
       { name: `Beside the ${n}`, s: front + (3 * loop.length) / 4 });
+  } else if (!site.meta.lake) {                  // a meadow, a village: the walking circle round the arrival point
+    const front = nearestOnLoop(loop, end.x, end.z);
+    list[0] = { name: W ? "Where the path arrives" : "Where the road ends", s: front };
+    list.push({ name: "On the walk round", s: front + loop.length / 4 }, { name: "Across from the road", s: front + loop.length / 2 },
+      { name: "On the walk round", s: front + (3 * loop.length) / 4 });
   } else {
   if (mouth != null && md < 60) list.push({ name: "Where a stream comes in", s: mouth });
   list.push({ name: "Far end of the lake", s: sPark + loop.length / 2 });
   list.push({ name: "Along the shore", s: sPark + loop.length / 4 }, { name: "Along the shore", s: sPark + (3 * loop.length) / 4 });
   }
   list.sort((a, b) => (((a.s - sPark) % loop.length) + loop.length) % loop.length - ((((b.s - sPark) % loop.length) + loop.length) % loop.length));
-  return list.map((v) => { const q = loopAt(loop, v.s); return { ...v, x: q.x, z: q.z, y: site.heightAt(q.x, q.z) }; });
+  // a viewpoint never stands in a mapped stream or river: step along the loop until it is clear of the water
+  const wet = (x, z) => site.meta.streams.some((st) => st.pts.some((p) => (p[0] - x) ** 2 + (p[1] - z) ** 2 < (st.kind === "river" ? 14 : 8) ** 2));
+  return list.map((v) => {
+    let s = v.s, q = loopAt(loop, s);
+    for (let k = 1; k <= 30 && wet(q.x, q.z); k++) { s = v.s + Math.ceil(k / 2) * 5 * (k % 2 ? 1 : -1); q = loopAt(loop, s); }
+    return { ...v, s, x: q.x, z: q.z, y: site.heightAt(q.x, q.z) };
+  });
 }
 
 export function viewpointPosts(vps) {

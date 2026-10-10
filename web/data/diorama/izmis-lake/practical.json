@@ -1,8 +1,8 @@
 [
  {
   "label": "The road",
-  "value": "Jeep-able link road from Utror to the Loypanghalay valley; the lake is a trek from there",
-  "quote": "A small jeep-able link road from Utror leads part of the way to the lake, ending in a valley called Loypanrghalay.",
+  "value": "Jeep-able link road from Utror to the Loypanrghalay valley; the lake is a trek from there",
+  "quote": "A small jeep-able link road from Utror leads part of the way to the lake, ending in a valley called Loypanrghalay",
   "source": "Wikipedia, Izmis Lake (undated)",
   "url": "https://en.wikipedia.org/wiki/Izmis_Lake"
  },
@@ -35,9 +35,9 @@
   "url": "https://www.pakwheels.com/forums/t/7-10-june-2013-kundol-lake-trek-swat-valley/210919?page=19"
  },
  {
-  "label": "Altitude and setting",
-  "value": "High above the treeline, with several natural caves around the lake; Izmis means caves in Kohistani",
-  "quote": "The name Izmis means \"caves\" in Kohistani",
+  "label": "Setting",
+  "value": "South-west of Utror valley, at a high altitude above the treeline (Wikipedia)",
+  "quote": "located to the south-west of Utror valley at a high altitude above the treeline",
   "source": "Wikipedia, Izmis Lake (undated)",
   "url": "https://en.wikipedia.org/wiki/Izmis_Lake"
  }

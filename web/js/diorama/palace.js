@@ -107,7 +107,7 @@ function trimBase(geo) {
   geo.setIndex(keep);
 }
 
-/** The textured TRELLIS model from the Atlas (made from three CC BY-SA Commons photos), scaled to a 24 m front.
+/** The textured TRELLIS model from the Atlas (made from three CC BY-SA Commons photos), scaled to a 28 m front (its longer side).
  *  Falls back to the drawn house if it does not load. */
 function model(g, url) {
   new GLTFLoader().load(url, (gltf) => {

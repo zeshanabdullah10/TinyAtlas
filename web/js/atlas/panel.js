@@ -9,7 +9,16 @@ const DIORAMA = { "mahodand-lake": "mahodand", "white-palace-marghazar": "white-
   kalam: "kalam", ushu: "ushu", utror: "utror", gabral: "gabral", matiltan: "matiltan",
   "kundol-lake": "kundol-lake", "spin-khwar-lake": "spin-khwar-lake", "jabba-zomalu-lake": "jabba-zomalu-lake", bahrain: "bahrain",
   madyan: "madyan", miandam: "miandam", "izmis-lake": "izmis-lake", "mushroom-lake": "mushroom-lake", "daral-lake": "daral-lake",
-  "pari-lake": "pari-lake", "shahi-bagh": "shahi-bagh", "desan-meadows": "desan-meadows" };
+  "pari-lake": "pari-lake", "shahi-bagh": "shahi-bagh", "desan-meadows": "desan-meadows",
+  "butkara-i-stupa": "butkara-i-stupa", "saidu-sharif-stupa": "saidu-sharif-stupa", "swat-museum": "swat-museum",
+  "amluk-dara-stupa": "amluk-dara-stupa", "shingardar-stupa": "shingardar-stupa",
+  "gumbat-balo-kale-stupa": "gumbat-balo-kale-stupa", "butkara-iii-stupa": "butkara-iii-stupa",
+  "ghalegay-buddha-rock": "ghalegay-buddha-rock", "jahanabad-buddha": "jahanabad-buddha",
+  "gogdara-rock-carvings": "gogdara-rock-carvings", "mahmud-ghaznavi-mosque": "mahmud-ghaznavi-mosque",
+  "raja-gira-castle": "raja-gira-castle", "bazira-barikot-ghundai": "bazira-barikot-ghundai",
+  "bashigram-lake": "bashigram-lake", "malam-jabba": "malam-jabba", "jamia-masjid-thal": "jamia-masjid-thal",
+  "kumrat-waterfall": "kumrat-waterfall", "mighty-22-falls": "mighty-22-falls", "gabin-jabba": "gabin-jabba",
+  "kharkhari-lake": "kharkhari-lake" };
 
 const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : null);
 const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return "source"; } };

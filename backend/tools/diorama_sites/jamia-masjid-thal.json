@@ -1,0 +1,75 @@
+{
+  "title": "Jamia Masjid Thal",
+  "subtitle": "Wooden mosque on the Panjkora bank, Thal village, Kumrat",
+  "pack": "swat",
+  "bbox": [
+    35.4648,
+    72.2289,
+    35.492,
+    72.2619
+  ],
+  "far_bbox": [
+    35.388,
+    72.14,
+    35.568,
+    72.36
+  ],
+  "arrival": {
+    "name": "Jamia Masjid Thal",
+    "point": [
+      35.47843,
+      72.2454
+    ]
+  },
+  "landmark": {
+    "kind": "mosque",
+    "name": "Jamia Masjid Thal",
+    "point": [
+      35.47843,
+      72.2454
+    ],
+    "terrace_m": 30,
+    "clear_m": 30,
+    "top_m": 19,
+    "ring_m": 40,
+    "edits": [
+      "The mosque is drawn in the landmark module from two CC BY-SA Commons photos (Asfandyarlahor and Asad Ullah); it is not a survey, and OSM maps no footprint for it.",
+      "Estimated, not measured: the stone base and ground floor 21 x 15 m with the floor line at 3.6 m; the upper storey an open gallery 4.2 m tall; the low hipped roof about 2 m high with 1.2 m eaves; the three-tier tower (6, 4.5 and 3 m square, 1.6 m each) rising to about 17 m; the posts, lattice screens, balusters and the two gate pillars (about 5 m).",
+      "The paint (grey timber, green, red and yellow bands and balusters, white gate pillars and tower finial) follows the photos; the carving is simplified to bands and the lattice is drawn as crossed slats.",
+      "The ground within 30 m of the mosque is levelled to its base; the rest of the village is the DEM slope, and its houses are not mapped in OSM so they are not drawn."
+    ],
+    "sources": [
+      {
+        "name": "Jamia Masjid Thal photo (Asfandyarlahor, CC BY-SA 4.0)",
+        "use": "the two-storey form, tiered roof, tower and stone base: proportions and colour",
+        "licence": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Thall_Mosque_Dir_Kumrat.jpg"
+      },
+      {
+        "name": "Jamia Masjid Thal photo (Asad Ullah, CC BY-SA 4.0)",
+        "use": "the carved and painted door pillars, arcade posts and balcony",
+        "licence": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Wooden_mosque_Thal_bazar_dir_kohistan.jpg"
+      }
+    ],
+    "module": "jamia-masjid-thal"
+  },
+  "drive_ways": [
+    1010324794,
+    303252803,
+    1000337680
+  ],
+  "track_ways": [
+    1010324794,
+    303252803,
+    1000337680
+  ],
+  "drive_start": [
+    35.4563354,
+    72.2327535
+  ],
+  "drive_km": 0.6,
+  "road": "Dir to Thal paved road (OSM ref S-16)",
+  "road_kind": "road",
+  "osm_use": "the S-16 road from the south-west to the bridge at the mosque; the Panjkora river; no building footprints mapped in Thal"
+}

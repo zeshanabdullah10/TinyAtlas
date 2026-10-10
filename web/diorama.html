@@ -141,6 +141,12 @@
   </dialog>
 </main>
 <script type="module" src="js/diorama/main.js"></script>
+<script>
+  // If the page's modules never load (offline, and this diorama was not saved on the device), say so instead of waiting.
+  setTimeout(() => { const l = document.getElementById("loading"), first = l && l.dataset.first;
+    if (l && !l.hidden && !window.__diorama && l.textContent === first) l.textContent = "Could not open this diorama. If you are offline, it has not been saved on this device."; }, 30000);
+  document.getElementById("loading").dataset.first = document.getElementById("loading").textContent;
+</script>
 <noscript><p style="padding:2rem;font-family:system-ui">This diorama is drawn in the browser, so it needs JavaScript.</p></noscript>
 </body>
 </html>

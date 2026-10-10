@@ -1,0 +1,34 @@
+# Offline tools under backend/tools/ (not needed to run or test the server).
+# Install the ones a script needs; the list is what the scripts import, not pinned versions.
+
+# Used by diorama_build.py, atlas_pack.py, geo_bundle.py, tools/blender/prep.py
+rasterio
+scipy
+tifffile       # diorama_build.py
+shapely        # atlas_pack.py
+pyproj         # also in requirements.txt (tests)
+trimesh        # atlas_pack.py, buildings3d.py
+scikit-image   # tools/blender/prep.py
+
+# Image passes: passes_convert.py, atlas_pack.py, paintover.py
+opencv-python-headless
+
+# Browser checks: smoke.py, atlas_shot.py, diorama_shot.py
+playwright      # use the browser: python3 -m playwright install chromium (or set executable_path)
+
+# Audio: audio_local.py, tts_bakeoff.py
+librosa
+jiwer
+pyloudnorm
+faster-whisper
+num2words
+soundfile
+kokoro
+phonemizer
+espeakng-loader
+
+# Pod helpers: pod_run.py
+websocket-client
+
+# GPU and Blender-only: torch (audio_local, tts_bakeoff, trellis_worker), chatterbox (audio_local, tts_bakeoff),
+# trellis (trellis_worker.py), bpy/mathutils/bmesh (tools/blender/*.py, run inside Blender). Install on the GPU pod.

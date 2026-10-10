@@ -20,7 +20,7 @@ def test_files_match_grid(d):
     assert (d / "farcover.bin").stat().st_size == f["cols"] * f["rows"]
     assert math.isclose(g["width"], (g["cols"] - 1) * g["cell"]) and math.isclose(g["height"], (g["rows"] - 1) * g["cell"])
     cover = np.frombuffer((d / "cover.bin").read_bytes(), np.uint8)
-    assert set(np.unique(cover)) <= {1, 2, 3, 4, 5, 6, 7}
+    assert set(np.unique(cover)) <= ({1, 2, 3, 4, 5, 6, 7, 8} if m.get("built_up") else {1, 2, 3, 4, 5, 6, 7})
     if m["lake"]:
         assert (cover == 5).sum() * g["cell"] ** 2 / 1e6 == pytest.approx(m["facts"]["lake_area_km2"], abs=0.006)
     else:
@@ -66,6 +66,22 @@ def test_drive_is_on_the_model_and_ends_at_the_lake(d):
 
 
 @pytest.mark.parametrize("d", SITES, ids=lambda p: p.name)
+def test_landmark_is_placed_and_its_files_exist(d):
+    """meta.landmark (from the site file) carries the placed point; its model and module files are on disk."""
+    m = json.loads((d / "meta.json").read_text(encoding="utf-8"))
+    lm = m.get("landmark")
+    if not lm:
+        return
+    g = m["grid"]
+    assert abs(lm["x"]) < g["width"] / 2 and abs(lm["z"]) < g["height"] / 2, "the landmark point lies inside the model"
+    assert lm.get("model") or lm.get("module"), "a landmark is drawn by a model, a module, or both"
+    if lm.get("model"):
+        assert (d / lm["model"]).is_file(), f"{lm['model']} is copied into web/data/diorama/{d.name}/"
+    if lm.get("module"):
+        assert (ROOT / "web" / "js" / "diorama" / "landmarks" / f"{lm['module']}.js").is_file()
+
+
+@pytest.mark.parametrize("d", SITES, ids=lambda p: p.name)
 def test_sources_and_edits_are_declared(d):
     m = json.loads((d / "meta.json").read_text(encoding="utf-8"))
     names = {s["name"] for s in m["sources"]}
@@ -87,8 +103,22 @@ def test_optional_files_carry_sources(d):
     p = d / "photos.json"
     if p.exists():
         for ph in json.loads(p.read_text(encoding="utf-8")):
-            assert ph["author"] and ph["licence"].startswith("CC") and ph["page"].startswith("https://commons.wikimedia.org/")
+            assert ph["author"] and ph["licence"].startswith(("CC", "Public domain", "PD")) and ph["page"].startswith("https://commons.wikimedia.org/")
             assert ph["thumb"].startswith("https://") and "NC" not in ph["licence"] and "ND" not in ph["licence"]
             if ph["lat"] is not None:          # geotagged photos are pinned in the model, so they must lie on it
                 s_, w_, n_, e_ = json.loads((d / "meta.json").read_text(encoding="utf-8"))["grid"]["bbox"]
                 assert s_ <= ph["lat"] <= n_ and w_ <= ph["lon"] <= e_
+
+
+def test_photos_are_of_the_place():
+    """No diorama shows a Commons file known to be of another place (collect_photos.EXCLUDE / ELSEWHERE)."""
+    import sys
+    sys.path.insert(0, str(ROOT / "backend" / "tools"))
+    from collect_photos import wrong_photo
+    for d in SITES:
+        p = d / "photos.json"
+        if not p.exists():
+            continue
+        slug = {"mahodand": "mahodand-lake", "white-palace": "white-palace-marghazar"}.get(d.name, d.name)
+        bad = [ph["title"] for ph in json.loads(p.read_text(encoding="utf-8")) if wrong_photo(ph["page"], slug=slug)]
+        assert not bad, f"{d.name}: {bad}"

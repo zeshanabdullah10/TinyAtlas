@@ -18,6 +18,9 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from collect_photos import wrong_photo   # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[2]
 UA = "TinyAtlas/2 (https://github.com/zeshanabdullah10/tinyatlas; diorama photo credits)"
 API = "https://en.wikipedia.org/w/api.php"
@@ -36,8 +39,8 @@ def fetch(titles):
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
                 return json.load(r)["query"]["pages"].values()
-        except Exception as e:          # rate limit or network: back off and retry
-            print("retry", attempt + 1, e); time.sleep(20 * (attempt + 1))
+        except Exception as e:          # rate limit or network: back off and retry (brief: 60 s on HTTP 429)
+            print("retry", attempt + 1, e); time.sleep(60 if getattr(e, "code", None) == 429 else 20 * (attempt + 1))
     raise SystemExit("the API did not answer")
 
 
@@ -58,6 +61,8 @@ def main(site):
             t = p["title"].removeprefix("File:")
             if "imageinfo" not in p:
                 dropped.append((t, "not on Commons")); continue
+            if wrong_photo("File:" + t, slug={"mahodand": "mahodand-lake", "white-palace": "white-palace-marghazar"}.get(site, site)):
+                dropped.append((t, "of another place (collect_photos.EXCLUDE / ELSEWHERE)")); continue
             ii = p["imageinfo"][0]; m = {k: v.get("value") for k, v in ii.get("extmetadata", {}).items()}
             lic = plain(m.get("LicenseShortName"))
             if not FREE.match(lic) or re.search(r"\b(NC|ND)\b", lic):

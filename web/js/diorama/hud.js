@@ -31,12 +31,13 @@ export class Hud {
 
   facts(meta) {
     const F = meta.facts;
+    this.way = meta.road_kind === "road" ? "road" : "jeep track";   // a paved road (Mingora) or a jeep track
     $("#title").textContent = meta.title;
     $("#sub").textContent = meta.subtitle;
     $("#cta-km").textContent = fmt(F.drive_km, 1);
     $("#facts").innerHTML = [
       F.lake_level_m != null ? [fmt(F.lake_level_m), "m", "lake level"] : [fmt(F.arrival_m), "m", "at the end of the drive"],
-      [fmt(F.drive_km, 1), "km", "of jeep track"],
+      [fmt(F.drive_km, 1), "km", `of ${this.way}`],
       [fmt(F.drive_climb_m), "m", "climb on the way"],
       [`~${Math.max(1, Math.round(F.drive_km * 1000 / 7 / 60))}`, "min", "to drive here"],
     ].map(([n, u, l]) => `<li><b>${n}<small>${u}</small></b><span>${l}</span></li>`).join("");
@@ -89,7 +90,7 @@ export class Hud {
       $("#photo-img").src = p.thumb; $("#photo-img").alt = p.caption; $("#photo-link").href = p.page;
       $("#photo-link").onclick = (e) => { e.preventDefault(); this.lightbox(p); };
       $("#photo-cap").textContent = p.caption;
-      $("#photo-credit").innerHTML = `Photo ${esc(p.author)}, ${esc(p.date.slice(0, 4))}, <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}</a> · Wikimedia Commons · <span id="photo-d"></span>`;
+      $("#photo-credit").innerHTML = `Photo ${esc(p.author)}${p.date ? ", " + esc(p.date.slice(0, 4)) : ""}, <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}</a> · Wikimedia Commons · <span id="photo-d"></span>`;
     }
     const d = document.getElementById("photo-d"); if (d) d.textContent = `taken about ${Math.round(dist / 10) * 10} m from here`;
   }
@@ -123,7 +124,7 @@ export class Hud {
     if (!F) return;
     $("#arrive-eyebrow").textContent = arrived ? "You have arrived" : "Tiny Atlas · Diorama";
     $("#btn-again").textContent = arrived ? "Drive it again" : "Drive up the track";
-    $("#arrive-facts").innerHTML = `You climbed <b>${fmt(F.drive_climb_m)} m</b> over <b>${fmt(F.drive_km, 1)} km</b> of jeep track. ` + (F.lake_level_m != null
+    $("#arrive-facts").innerHTML = `You climbed <b>${fmt(F.drive_climb_m)} m</b> over <b>${fmt(F.drive_km, 1)} km</b> of ${this.way || "jeep track"}. ` + (F.lake_level_m != null
       ? `The lake lies at <b>${fmt(F.lake_level_m)} m</b>, about <b>${fmt(F.lake_length_km, 1)} km</b> end to end.`
       : `You are at <b>${fmt(F.arrival_m)} m</b>.`);
   }
@@ -182,7 +183,7 @@ export class Hud {
     const d = $("#lightbox"), esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
     $("#lb-img").src = p.thumb; $("#lb-img").alt = p.caption;
     $("#lb-cap").textContent = p.caption;
-    $("#lb-credit").innerHTML = `Photo ${esc(p.author)}, ${esc(p.date.slice(0, 10))} · <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}, Wikimedia Commons</a>`;
+    $("#lb-credit").innerHTML = `Photo ${esc(p.author)}${p.date ? ", " + esc(p.date.slice(0, 10)) : ""} · <a href="${esc(p.page)}" target="_blank" rel="noopener">${esc(p.licence)}, Wikimedia Commons</a>`;
     if (!d.open) d.showModal();
   }
   placeLabels(camera, w, h, state) {
@@ -197,7 +198,8 @@ export class Hud {
       const x = ((v.x + 1) / 2) * w, y = ((1 - v.y) / 2) * h;
       if (ok) {
         const bw = l.el.offsetWidth || 80, bh = l.el.offsetHeight || 24, r = [x - bw / 2, y - bh, x + bw / 2, y];
-        if (taken.some((t) => r[0] < t[2] + 4 && r[2] > t[0] - 4 && r[1] < t[3] + 2 && r[3] > t[1] - 2)) ok = false;
+        if (r[0] < 0 || r[1] < 0 || r[2] > w || r[3] > h) ok = false;   // a tag cut by the screen edge hides, not half-shows
+        else if (taken.some((t) => r[0] < t[2] + 4 && r[2] > t[0] - 4 && r[1] < t[3] + 2 && r[3] > t[1] - 2)) ok = false;
         else taken.push(r);
       }
       l.el.style.opacity = ok ? 1 : 0;

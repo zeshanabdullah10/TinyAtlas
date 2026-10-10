@@ -1,0 +1,75 @@
+{
+  "title": "Jahanabad Buddha",
+  "subtitle": "Manglawar rock relief up the Malam Jabba road, Lower Swat",
+  "pack": "swat-lower",
+  "bbox": [
+    34.798,
+    72.451,
+    34.825,
+    72.4837
+  ],
+  "far_bbox": [
+    34.71,
+    72.36,
+    34.91,
+    72.58
+  ],
+  "arrival": {
+    "name": "Jahanabad Buddha",
+    "point": [
+      34.81151,
+      72.46735
+    ]
+  },
+  "trailhead": [
+    34.81672,
+    72.46472
+  ],
+  "walk_ways": [],
+  "landmark": {
+    "kind": "rock_carving",
+    "name": "Jahanabad Buddha",
+    "point": [
+      34.81151,
+      72.46735
+    ],
+    "terrace_m": 0,
+    "clear_m": 30,
+    "top_m": 13,
+    "ring_m": 30,
+    "footpath": false,
+    "heading_deg": 315,
+    "module": "jahanabad-buddha",
+    "edits": [
+      "The rock is the Atlas's procedural model: a tall face about 9 m wide, 12 m high and 8 m deep, its carved front kept vertical; the dark streaks, the lumps and the three boulders beside and behind it (4-7 m) are estimated from the photos, not a survey. The Wikipedia table gives the boulder as 1180 x 2300 cm; the drawn face is narrower than the 23 m reading and is not reconciled with it. The Wikipedia table gives the stone as reddish sandstone; the paint is grey, so the colour is not matched to the photos.",
+      "The Buddha in relief is drawn to the Wikipedia table's measurements, H. 700 x W. 500 x D. 11 cm (7 m high, 5 m wide, relief 0.11 m deep), and its throne at 120 x 390 cm (1.2 m high, 3.9 m wide). The same article also quotes 'the colossal image of a seated Buddha some thirteen feet in height' (about 4 m); that figure is not reconciled and is not used. The oval niche, its 0.3 m depth and the relief standing proud of the niche floor are estimated; the folds, hands, head and halo are estimated from the published description and the photos.",
+      "The figure's foot is set 1 m above the ground at the face (estimated).",
+      "Trees within 25 m of the carving are left out so it can be seen; WorldCover maps tree cover there. A timber viewing deck (3.6 x 1.0 m, 0.3 m high) at the foot of the face is estimated from the photos.",
+      "No steps are mapped in OSM and none show in the photos, so none are drawn; the walk up from the road is traced over the ground (easiest slope on the DEM).",
+      "The carving is drawn restored and without the 2007 damage to the head."
+    ],
+    "sources": [
+      {
+        "name": "Buddhist rock carving in Manglawar (Wikipedia)",
+        "use": "size of the Jahan-Abad-i relief (700 x 500 cm, asana 120 x 390 cm), its orientation (facing north west), its 2007 damage and restoration",
+        "licence": "CC BY-SA 4.0 (Wikipedia text)",
+        "url": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar"
+      }
+    ],
+    "clear_trees_m": 25
+  },
+  "drive_ways": [
+    460117749
+  ],
+  "track_ways": [
+    460117749
+  ],
+  "drive_start": [
+    34.80805,
+    72.43054
+  ],
+  "drive_km": 0.6,
+  "road": "Malam Jabba Road",
+  "osm_use": "the Malam Jabba Road (S-15) to the point where the mapped departure to the Buddha begins, and the Buddha node",
+  "road_kind": "road"
+}

@@ -1,0 +1,76 @@
+{
+  "title": "Shingardar Stupa",
+  "subtitle": "Buddhist stupa beside the N-95 between Ghalegay and Barikot, Lower Swat",
+  "pack": "swat-lower",
+  "bbox": [
+    34.677,
+    72.231,
+    34.706,
+    72.264
+  ],
+  "arrival": {
+    "name": "Shingardar Stupa",
+    "point": [
+      34.69139,
+      72.24722
+    ]
+  },
+  "landmark": {
+    "kind": "stupa",
+    "name": "Shingardar Stupa",
+    "point": [
+      34.69139,
+      72.24722
+    ],
+    "model": "shingardar-stupa.glb",
+    "terrace_m": 22,
+    "clear_m": 30,
+    "top_m": 22,
+    "ring_m": 40,
+    "edits": [
+      "The stupa is the Tiny Atlas procedural maquette: its drum stands 17.9 m high and the grass cap tops it at 18.5 m, against a published height of 18 m (livius.org); it sits on a 0.5 m platform about 24 m across. The drum bands, the grass cap and the drum's diameter of about 21 m are estimated from the photos.",
+      "The levelled ground of 22 m radius around the stupa is estimated from the photos; the surrounding slope and village are the DEM and OSM data."
+    ],
+    "sources": [
+      {
+        "name": "Tiny Atlas procedural maquette (backend/tools/blender/stupa.py)",
+        "use": "the stupa model (18 m high from Livius; about 21 m across, bands and grass cap estimated from the photos)",
+        "licence": "Tiny Atlas own procedural geometry",
+        "url": "https://github.com/zeshanabdullah10/tinyatlas"
+      },
+      {
+        "name": "Shingardar, Livius (articles/place/shingardar)",
+        "use": "published height: the actual monument measures eighteen meters",
+        "licence": "Livius.org article, facts cited only",
+        "url": "https://www.livius.org/articles/place/shingardar/"
+      }
+    ]
+  },
+  "drive_ways": [
+    1130843936
+  ],
+  "track_ways": [
+    1130843936
+  ],
+  "drive_start": [
+    34.6759586,
+    72.2160274
+  ],
+  "far_bbox": [
+    34.6,
+    72.14,
+    34.78,
+    72.36
+  ],
+  "drive_km": 0.6,
+  "road": "N-95 (Mingora Road)",
+  "road_kind": "road",
+  "osm_use": "the N-95 trunk road (Mingora Road) toward Barikot, and the village lanes and buildings around the stupa",
+  "built_up": true,
+  "buildings_radius_m": 1000,
+  "trailhead": [
+    34.6930959,
+    72.2456485
+  ],
+  "walk_ways": []
+}

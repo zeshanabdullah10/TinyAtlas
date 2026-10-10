@@ -1,6 +1,6 @@
 {
   "title": "Daral Lake",
-  "subtitle": "Daral valley above Gabin Jabba, Upper Swat",
+  "subtitle": "Glacial lake above Bahrain, trek from Gabin Jabba, Upper Swat",
   "bbox": [35.14, 72.33, 35.245, 72.43],
   "lake_seed": [35.21710, 72.37524],
   "drive_ways": [697528068, 697528069, 697527861],
@@ -10,7 +10,7 @@
   "walk_ways": [],
   "far_bbox": [35.07, 72.24, 35.36, 72.51],
   "drive_km": 0.6,
-  "pack": "swat",
+  "pack": "swat-lower",
   "road": "Gabin Jabba Road (OSM, unclassified)",
   "osm_use": "the Gabin Jabba road to the trailhead, the Bagh Deri road below it, the Daral lake outline (OSM water, name Daral Jheel) and the Daral Khwar"
 }

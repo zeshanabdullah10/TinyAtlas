@@ -1,0 +1,86 @@
+{
+  "title": "Butkara I Stupa",
+  "subtitle": "Buddhist stupa and votive court on the eastern edge of Mingora, Swat",
+  "bbox": [
+    34.7517,
+    72.3518,
+    34.7787,
+    72.3846
+  ],
+  "far_bbox": [
+    34.675,
+    72.26,
+    34.855,
+    72.48
+  ],
+  "arrival": {
+    "name": "Butkara I Stupa",
+    "point": [
+      34.76524,
+      72.3682
+    ]
+  },
+  "landmark": {
+    "kind": "stupa",
+    "name": "Butkara I Stupa",
+    "point": [
+      34.76524,
+      72.3682
+    ],
+    "module": "butkara-i-stupa",
+    "terrace_m": 70,
+    "clear_m": 80,
+    "top_m": 12,
+    "ring_m": 56,
+    "footpath": true,
+    "edits": [
+      "The excavated sacred court is drawn from the Atlas photos (Front View of the main stupa, Votive Stupa Court): a rectangular flagged court about 60 x 50 m with a low edging wall. The court size is ESTIMATED from the photos. The court's depth below the surrounding ground is not measured and is NOT modelled: the court is drawn at ground level.",
+      "The main stupa is a rough stepped circular core about 19 m across, built of stacked courses with lighter bands (photos 01-03) and a broken top of rubble. No published dimensions were found (the Wikipedia article gives none): the diameter, the 6 m drum and the top are ESTIMATED from the photos.",
+      "The votive stupas are square stepped plinths 2 to 5 m across and 0.6 to 1.5 m high, in rows round the main stupa; most are ruined to the plinth and about one in six carries a small drum and dome. Their sizes, number and places are ESTIMATED from photos 01, 02 and 04 and invented to read as the court, not surveyed.",
+      "The whitewashed band on the lower front drum follows photo 03. Shades vary by about 8% between plinths. The paving slabs are a drawn texture, not surveyed.",
+      "The OSM building tagged as the site (tourism=museum, 36 m from the point) and every other building within 80 m are dropped and replaced by this model. The ground within 70 m is levelled (a terrace); the rest is the real DEM slope.",
+      "The earlier generic Atlas maquette (a ~22 m plinth with a ruined drum) is not used: it is not a record of this stupa."
+    ],
+    "sources": [
+      {
+        "name": "Wikipedia: Butkara Stupa",
+        "use": "the history: the 2nd century BCE date, the five enlargements, the Italian excavation from 1956. No dimensions are given there.",
+        "licence": "CC BY-SA 4.0",
+        "url": "https://en.wikipedia.org/wiki/Butkara_Stupa"
+      },
+      {
+        "name": "Atlas photos 01, 03, 04 (Zarghun11, Muhammad Zahir), Wikimedia Commons",
+        "use": "the layout of the court, the votive stupa rings, the column bases and the whitewashed drum (no dimensions read from them)",
+        "licence": "CC BY-SA 3.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Votive_Stupa_Court_-_Butkara-I.JPG"
+      },
+      {
+        "name": "Atlas photo 06, development diagram of the Indian stupa (Butkara), Wikimedia Commons",
+        "use": "the stages of the stupa: a round medhi with a plinth, and the later square medhi. Its scale bar was read by eye only.",
+        "licence": "CC BY-SA 3.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Butkara_Stupa_(deutsch).jpg"
+      }
+    ]
+  },
+  "drive_ways": [
+    459911389,
+    447007136,
+    1022490004
+  ],
+  "track_ways": [
+    459911389,
+    447007136,
+    1022490004
+  ],
+  "drive_start": [
+    34.76706,
+    72.36248
+  ],
+  "drive_km": 0.6,
+  "road": "Sharif-Abad Makan-Bagh Road (OSM tertiary), then an unnamed unclassified street past the site",
+  "osm_use": "the Sharif-Abad Makan-Bagh Road and the unclassified street that passes 88 m from the point, the OSM node Butkara I (tourism=attraction, 6062554485) as the place, and the OSM building tagged Butkara Stupa for clearance",
+  "road_kind": "road",
+  "built_up": true,
+  "buildings_radius_m": 900,
+  "pack": "swat-lower"
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Bashigram Lake",
+  "subtitle": "Alpine glacial lake above Bashigram village, east of Madyan",
+  "bbox": [35.0766, 72.5977, 35.1346, 72.6736],
+  "lake_seed": [35.08298, 72.66617],
+  "drive_ways": [1529943812, 1529943813],
+  "track_ways": [1529943812, 1529943813],
+  "drive_start": [35.1407906, 72.5819375],
+  "trailhead": [35.1301308, 72.6089294],
+  "walk_ways": [],
+  "far_bbox": [34.993, 72.556, 35.173, 72.776],
+  "drive_km": 0.6,
+  "pack": "swat-lower",
+  "road": "Puran Chail Road to Bashigram village",
+  "osm_use": "the road from the Madyan junction up to Bashigram village (the end of the mapped road into the village), the lake outline (Bashigram Lake way); no footpath to the lake is mapped"
+}

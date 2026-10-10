@@ -14,17 +14,24 @@
   "url": "https://www.travelertrails.com/places-to-visit-in-swat/shahi-bagh-2"
  },
  {
-  "label": "Distance from Utror and Kalam (conflicts)",
-  "value": "About 14 km from Utror and 30 km from Kalam Valley (Tripako); about 2 hours from Utror and 35 km from Kalam (Traveler Trails)",
+  "label": "Distance from Utror and Kalam (Tripako)",
+  "value": "About 14 km from Utror and 30 km from Kalam Valley (Tripako)",
   "quote": "Located at a distance of about 14 kilometers from Utror and 30 kilometers from Kalam Valley",
   "source": "Tripako (undated article)",
   "url": "https://tripako.com/shahi-bagh-gabral-a-mesmerizing-site/"
  },
  {
   "label": "Road",
-  "value": "Four-wheel-drive only; rough road, and poor conditions can make the site hard to reach",
+  "value": "Four-wheel-drive only (Traveler Trails)",
   "quote": "Shahi Bagh is only accessible through a four-wheel-drive vehicle.",
   "source": "Traveler Trails (undated page)",
+  "url": "https://www.travelertrails.com/places-to-visit-in-swat/shahi-bagh-2"
+ },
+ {
+  "label": "Distance (Traveler Trails)",
+  "value": "About a 2-hour drive from Utror, or 35 km from Kalam toward Mahodand Lake (Traveler Trails)",
+  "quote": "It is about a 2-hour drive away from Uthor or 35 kilometers from Kalam toward Mahudand Lake.",
+  "source": "Traveler Trails, Shahi Bagh (undated page)",
   "url": "https://www.travelertrails.com/places-to-visit-in-swat/shahi-bagh-2"
  },
  {
@@ -33,5 +40,12 @@
   "quote": "Some of the best hotels near Shahi Bagh include Daryal Hotel.",
   "source": "Tripako (undated article)",
   "url": "https://tripako.com/shahi-bagh-gabral-a-mesmerizing-site/"
+ },
+ {
+  "label": "Altitude (sources differ)",
+  "value": "About 10,000 ft (about 3,050 m) per Lovin Pakistan; the model's meadow reads about 2,927 m, a gap of about 120 m",
+  "quote": "Shahi Bagh is located at a distance of 30 km from Kalam Valley and 14 km from Utror Valley in Gabral at 10,000 ft above sea level.",
+  "source": "Lovin Pakistan, Shahi Bagh guide (undated; fetched Oct 2026)",
+  "url": "https://lovinpakistan.com/shahi-bagh-in-swat/"
  }
 ]

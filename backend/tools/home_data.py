@@ -49,10 +49,16 @@ def brief(text):
     return text.replace(" (neutral summary)", "").split(". ")[0].rstrip(".")
 
 
+# Checked against the cited page (Oct 2026): Wikipedia, Swat Valley says the Yusufzai conquered Swat "during the reign
+# of Sultan Awes Jahangiri in 1519"; it mentions Babur only for his conquest of Delhi, so he is not named here.
+FIXES = {"Yusufzai Pashtuns conquer Swat; Babur marches toward Swat in January 1519":
+         "Yusufzai Pashtuns conquer Swat in 1519, in the reign of Sultan Awes Jahangiri"}
+
+
 def timeline():
     ev = {e["date"]: e for e in json.loads((ROOT / "data/research/swat_timeline.json").read_text(encoding="utf-8"))}
     return [{"era": era, "years": years,
-             "events": [{"date": SHORT_DATE[k], "text": brief(ev[k]["event"]), "source": ev[k]["source"]} for k in keys]}
+             "events": [{"date": SHORT_DATE[k], "text": FIXES.get(brief(ev[k]["event"]), brief(ev[k]["event"])), "source": ev[k]["source"]} for k in keys]}
             for era, years, keys in ERAS]
 
 

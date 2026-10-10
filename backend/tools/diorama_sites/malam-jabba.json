@@ -1,0 +1,174 @@
+{
+  "title": "Malam Jabba Ski Resort",
+  "subtitle": "Pakistan's ski resort above Manglawar, Lower Swat",
+  "pack": "swat-lower",
+  "bbox": [
+    34.78,
+    72.553,
+    34.819,
+    72.588
+  ],
+  "far_bbox": [
+    34.71,
+    72.46,
+    34.89,
+    72.68
+  ],
+  "arrival": {
+    "name": "Malam Jabba Ski Resort",
+    "point": [
+      34.79978,
+      72.57152
+    ]
+  },
+  "landmark": {
+    "kind": "ski_resort",
+    "name": "Malam Jabba Ski Resort",
+    "point": [
+      34.79897,
+      72.57301
+    ],
+    "module": "malam-jabba",
+    "terrace_m": 0,
+    "top_m": 18,
+    "lifts": [
+      [
+        "Malam Jabba chairlift",
+        "chair_lift",
+        [
+          [
+            34.798969,
+            72.573013
+          ],
+          [
+            34.798914,
+            72.573568
+          ],
+          [
+            34.798796,
+            72.574769
+          ],
+          [
+            34.798688,
+            72.575871
+          ],
+          [
+            34.798511,
+            72.577678
+          ],
+          [
+            34.798392,
+            72.578693
+          ],
+          [
+            34.798244,
+            72.579966
+          ]
+        ]
+      ]
+    ],
+    "pistes": [
+      [
+        "Malam Jabba downhill (OSM piste, expert)",
+        [
+          [
+            34.799027,
+            72.572866
+          ],
+          [
+            34.798927,
+            72.573967
+          ],
+          [
+            34.798606,
+            72.576301
+          ],
+          [
+            34.798437,
+            72.577984
+          ],
+          [
+            34.798079,
+            72.579644
+          ],
+          [
+            34.797331,
+            72.579108
+          ],
+          [
+            34.798097,
+            72.575352
+          ],
+          [
+            34.79836,
+            72.574291
+          ],
+          [
+            34.798267,
+            72.572583
+          ],
+          [
+            34.798305,
+            72.571817
+          ],
+          [
+            34.798499,
+            72.571305
+          ],
+          [
+            34.798726,
+            72.571052
+          ],
+          [
+            34.798971,
+            72.571167
+          ],
+          [
+            34.798846,
+            72.571373
+          ],
+          [
+            34.798707,
+            72.571695
+          ],
+          [
+            34.798656,
+            72.572062
+          ],
+          [
+            34.798698,
+            72.572177
+          ],
+          [
+            34.798781,
+            72.572265
+          ]
+        ]
+      ]
+    ],
+    "edits": [
+      "The chairlift is the OSM chair_lift way (7 nodes: the two stations and five pylon nodes); the pylon positions and the line are OSM's.",
+      "Pylons (10 m), the station buildings, the cable sag (2.5 m) and the chairs, their spacing and speed are estimated; no published dimensions were used.",
+      "The downhill piste is the OSM piste area (expert), drawn as a pale cleared strip over the DEM; its colour is illustrative.",
+      "The resort ground is not levelled: the lift and the station are seated on the measured DSM slope."
+    ]
+  },
+  "drive_ways": [
+    699492351,
+    699497676,
+    699497674
+  ],
+  "track_ways": [
+    699492351,
+    699497676,
+    699497674
+  ],
+  "drive_start": [
+    34.85655,
+    72.56591
+  ],
+  "drive_km": 0.6,
+  "road": "Malam Jabba Road",
+  "road_kind": "road",
+  "osm_use": "the Malam Jabba Road to the resort, the chairlift and its pylons, the downhill piste and the hotel point (the hotel is a point only, not a footprint)"
+}

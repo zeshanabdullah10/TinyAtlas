@@ -1,0 +1,63 @@
+{
+  "title": "Mighty 22 Falls",
+  "subtitle": "Waterfall beside the Mahodand jeep road, Ushu, Upper Swat",
+  "bbox": [
+    35.6235,
+    72.6675,
+    35.651,
+    72.7006
+  ],
+  "arrival": {
+    "name": "Viewpoint at the falls",
+    "point": [
+      35.6368963,
+      72.683312
+    ]
+  },
+  "landmark": {
+    "kind": "waterfall",
+    "name": "Mighty 22 Falls",
+    "point": [
+      35.6372687,
+      72.6840796
+    ],
+    "module": "mighty-22-falls",
+    "terrace_m": 0,
+    "top_m": 6,
+    "edits": [
+      "The fall follows the mapped stream down the DEM slope; its height and form are illustrative (no published height).",
+      "The ribbons, foam, spray, pool and wet boulders are illustrative; the boulders are placed by a fixed seed.",
+      "No cliff or structure is drawn: nothing rises more than about 4 m above the ground."
+    ],
+    "sources": [
+      {
+        "name": "OpenStreetMap waterfall node 3524615390",
+        "use": "the point of the falls (within about 0.2 m of the Atlas place point)",
+        "licence": "ODbL",
+        "url": "https://www.openstreetmap.org/node/3524615390"
+      }
+    ]
+  },
+  "drive_ways": [
+    507506230,
+    345805207
+  ],
+  "track_ways": [
+    507506230,
+    345805207
+  ],
+  "drive_start": [
+    35.62422,
+    72.68651
+  ],
+  "far_bbox": [
+    35.5473,
+    72.5741,
+    35.7273,
+    72.7941
+  ],
+  "drive_km": 0.6,
+  "road": "Mahodand Lake Road (jeep track)",
+  "osm_use": "the Mahodand Lake jeep track (ways 507506230 and 345805207), the waterfall node, the stream and the ford where the stream crosses the road",
+  "pack": "swat"
+}

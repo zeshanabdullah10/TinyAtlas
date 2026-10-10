@@ -64,7 +64,7 @@ Kept: `GET /api/regions`, `/api/region/{slug}`, `/api/facts/{slug}`, `POST /api/
 ## Not touched (owned by the audio-guide work)
 These still mention removed things and need a follow-up once the audio guide lands: `backend/tools/audio.py`
 docstring and examples say `hunza skardu` (use `swat swat-lower`); `audio.py` calls `api.region_landmarks` and
-`api._chunks`, which are kept. `narration.py` and `atlaspack.py` were not edited. Nothing in `web/js/listen.js` or
+`api._chunks`, which were kept then and removed in the October 2026 deep sweep (nothing called them). `narration.py` and `atlaspack.py` were not edited. Nothing in `web/js/listen.js` or
 `web/js/atlas/panel.js` depends on a deleted file (listen.js uses `api.audio`/`api.audioUrl`, both kept).
 
 ## New (landing page)

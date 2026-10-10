@@ -14,6 +14,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from collect_photos import wrong_photo   # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[2]
 PACKS = ROOT / "data" / "packs"
 MAHODAND = ROOT / "web" / "data" / "diorama" / "mahodand" / "photos.json"
@@ -105,8 +108,8 @@ def build(write=True):
                 if not (credit and licence and url and rel):
                     continue
                 disk = pk["base"] / rel
-                if not disk.is_file() or url in seen:
-                    continue
+                if not disk.is_file() or url in seen or wrong_photo(url, slug=pl["slug"]):
+                    continue           # (a photo of another place never becomes a round)
                 if not inside(pk, pl["x"], pl["z"]):
                     continue           # answer must sit on the map grid so the guess can be placed
                 seen.add(url)

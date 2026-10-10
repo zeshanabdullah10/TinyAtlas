@@ -1,0 +1,46 @@
+{
+  "title": "Ghalegay Buddha",
+  "subtitle": "Seated Buddha carved in a rock face beside the Mingora-Barikot road, Lower Swat",
+  "pack": "swat-lower",
+  "bbox": [34.6923, 72.2441, 34.7194, 72.2769],
+  "far_bbox": [34.61, 72.16, 34.80, 72.36],
+  "arrival": {
+    "name": "Ghalegay Buddha",
+    "point": [34.7059, 72.26045]
+  },
+  "landmark": {
+    "kind": "rock_carving",
+    "name": "Ghalegay Buddha (rock relief)",
+    "point": [34.7059036, 72.2604455],
+    "module": "ghalegay-buddha-rock",
+    "terrace_m": 0,
+    "clear_m": 20,
+    "top_m": 10,
+    "ring_m": 14,
+    "clear_trees_m": 20,
+    "heading_deg": 303,
+    "edits": [
+      "The rock is the OSM tourism node 'Buddah' (tourism=attraction) at 34.70590 N, 72.26045 E, 18 m from the N-95 centre line; the point was checked against the photos (the carved panel faces the road).",
+      "The carved boulder is 6.80 m x 3.20 m with a depth of 0.85 m (Khyber Pakhtunkhwa DOAM record 4672); the carved face is read as the 6.80 m height by the 3.20 m width, which the record does not state.",
+      "The rock mass behind the panel and the surrounding outcrop are estimated from the photos.",
+      "The seated figure, its halo, shoulders, crossed legs and hands are estimated raised geometry (about 3.1 m wide, 4.9 m high to the halo top); the photos show a figure of similar proportion, with the face weathered.",
+      "The DOAM record gives 34.69915 N, 72.26303 E for the same carving ('Ghaligai-I'), about 0.8 km from the OSM node; the photos and the road position match the OSM node, so the node is used.",
+      "The terrace is 0 (the rock face is not levelled); the figure stands on the real slope about 1.2 m above the ground, estimated from the photos."
+    ],
+    "sources": [
+      {
+        "name": "Khyber Pakhtunkhwa DOAM site record 4672 (Ghaligai-I, Buddhist rock carvings, Swat)",
+        "use": "boulder size 6.80 m x 3.20 m, depth 0.85 m, date 7th-8th century CE, dhyani mudra, slight erosion",
+        "licence": "Government of Khyber Pakhtunkhwa record; facts only, no image used",
+        "url": "https://doam.gov.pk/public/sites/4672"
+      }
+    ]
+  },
+  "drive_ways": [1130843936],
+  "track_ways": [1130843936],
+  "drive_start": [34.6759586, 72.2160274],
+  "drive_km": 0.6,
+  "road": "Mingora Road (N-95)",
+  "road_kind": "road",
+  "osm_use": "the N-95 trunk road from Barikot to Mingora (the last 0.6 km before the rock), and the OSM tourism node 'Buddah' at the rock"
+}

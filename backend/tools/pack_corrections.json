@@ -1,0 +1,22 @@
+{
+  "_doc": "Checked corrections to the Atlas places, applied by atlas_pack.py on every build (backend/tools/pack_corrections.py). Each text edit makes the field say only what its quoted source says, or drops a claim no source supports. Found in the October 2026 sweep; the source of each is named.",
+  "places": {
+    "mingora": {"replace": [["summary", "The largest city of Swat and the district capital, on the Swat River.", "The largest city of Swat, beside Saidu Sharif, the district capital, on the Swat River."]],
+                "why": "Saidu Sharif is the district capital (Wikipedia, Saidu Sharif; kanju fact)."},
+    "malam-jabba": {"replace": [["summary", "The resort was burned in 2008", "The resort was destroyed in June 2008"]],
+                    "why": "Wikipedia, Malam Jabba: 'The resort was destroyed by Taliban militants in June 2008'."},
+    "jahanabad-buddha": {"replace": [["summary", "its face was damaged by explosives in 2007", "its head was damaged by explosives in 2007"]],
+                         "why": "Wikipedia: 'In 2007 the Taliban tried to destroy the head of the relief with explosives'."},
+    "falak-sar": {"replace": [["summary", " seen from Ushu and Matiltan.", "."]], "why": "No source says where it is seen from."},
+    "thalo-zom": {"replace": [["summary", "Glaciated 6,000 m peak", "Glaciated peak"]], "why": "No source gives 6,000 m."},
+    "saidgai-lake": {"replace": [["access", "Trek from Ushirai Dara (Dir, ~6 h) or Lalko", "Trek from Ushirai Dara (Dir) or Lalko"],
+                                 ["facts.0.text", "It is at 3,500 m near the Dir-Swat border.", "It is near the Dir-Swat border."]],
+                     "why": "The trek time contradicts sources (7-8 h is also quoted); the fact's quote does not carry the height."},
+    "gabeen-lake": {"replace": [["facts.0.text", "Gabin Lake", "Gabeen Lake"],
+                                ["summary", "Alpine lake in the Jahaz Banda/Gabeen high country.", "Alpine lake listed near Kundol Lake."]],
+                    "why": "The source (Wikipedia, Kundol Lake) lists 'Gabeen Lake'; nothing places it in Jahaz Banda."},
+    "kala-chashma": {"replace": [["summary", "known as Black Water Spring.", "known as Kala Chashma (Black Spring)."]],
+                     "why": "Wikipedia, Kumrat Valley: 'Kala Chashma (Black Spring)'."},
+    "surkar-pass": {"set": {"kind": "pass"}, "why": "A pass, as its name says (it was filed as a peak)."}
+  }
+}

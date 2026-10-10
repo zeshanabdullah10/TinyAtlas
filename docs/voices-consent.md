@@ -1,6 +1,7 @@
 # Voices of the valley: contribution and consent process
 
-Status: DRAFT for review by community partners. No recordings exist yet. Nothing in this app is recorded, synthesised or translated by machine.
+Status: DRAFT for review by community partners. No recordings exist yet, and no voice in this project is recorded, synthesised or translated by machine. (The Atlas
+audio guide is separate: its English clips are machine-generated narration, see the README.)
 
 ## 1. Principles
 
@@ -13,7 +14,7 @@ Status: DRAFT for review by community partners. No recordings exist yet. Nothing
 
 Recording is done by local partners, not by the app team. Candidate partner, confirmed in this review:
 
-- **Idara Baraye Taleem-o-Taraqqi (IBT)**, Torwali. IBT runs Mother Tongue Based multilingual education for the Torwali community; its first school opened in Bahrain in August 2008 (Mhoon School, now an ILM school), with six such schools since. Source: https://torwali.org/en/node/19 (fetched). The page gives no phone or email; it links to a contact form at https://torwali.org/en/contact.
+- **Idara Baraye Taleem-o-Taraqi (IBT)**, Torwali. IBT runs Mother Tongue Based multilingual education for the Torwali community; its first school opened in Bahrain in August 2008 (Mhoon School, now an ILM school), and, as of the page's count, six such schools so far (Bahrain, Kedam and Chail). Source: https://torwali.org/en/node/19 (fetched). The page gives no phone or email; it links to a contact form at https://torwali.org/en/contact.
 
 Other partners, including projects for Gawri (Kalam) and Ushojo, are not yet confirmed. Do not list an organisation here until its role has been checked with it directly.
 

@@ -22,7 +22,8 @@ VARIANTS = {
     "butkara-iii": [("Butkara III", r"but+kara"), ("Butkara stupa", r"but+kara")],
     "saidu": [("Saidu Sharif stupa", r"saidu"), ("Saidu Sharif Buddhist", r"saidu")],
     "swat-museum": [("Swat Museum", r"swat.?museum|museum.*swat|swat.*museum")],
-    "bazira": [("Barikot", r"barikot|bazira"), ("Bazira Barikot Ghundai", r"barikot|bazira")],
+    "bazira": [("Barikot", r"barikot|ancient.?bazira|bazira.?(panorama|fort|swat)"),   # "Bazira" alone is also a surname
+               ("Bazira Barikot Ghundai", r"barikot|ancient.?bazira|bazira.?(panorama|fort|swat)")],
     "gumbat": [("Gumbat stupa Balo Kale", r"gumbat|balo.?kale")],
     "amluk": [("Amluk Dara", r"amluk")],
     "shingardar": [("Shingardar", r"shingardar")],
@@ -45,6 +46,45 @@ VARIANTS = {
     "katora": [("Katora Lake", r"katora")],
     "kundol": [("Kundol Lake", r"kundol")],
 }
+# Search hits that are of somewhere else. Generic words in place names ("Mushroom", "Pearl", "Pari", "Shahi") matched
+# mushrooms, Pearl Harbor, Pari Mahal in Srinagar and the Qutb Shahi tombs (Oct 2026); a museum card must not show
+# objects held by another museum.
+ELSEWHERE = re.compile(r"srinagar|kashmir|dal lake|chash?ma.?shahi|mughal.?garden|hyderabad|telangana|qutb|qutub|peshawar|armenia|harbor|harbour|weser|"
+                       r"cargo ship|british museum|metropolitan museum|\bmet\b museum|musée|museum of (?!swat)", re.I)
+# Files checked by eye and found to be of another place or thing; never pick them again.
+EXCLUDE = {
+    "File:Kevin Bazira Software Engineer Image.jpg", "File:Mama Maombi Pondamali,Bazira Joeel responsables des survivants.jpg",
+    "File:Mighty Oaks-22.jpg", "File:Shahi Bagh.jpg",
+    "File:Shahi Bagh Park (5663163793).jpg", "File:Shahi Bagh Park (5663161625).jpg",
+    "File:Tiny Mushroom (48047361411).jpg", "File:Mushroom.png", "File:Mushrooms on the trail to Avalanche Lake (44175801044).jpg",
+    "File:Morel mushroom (50007783332).jpg", "File:Lake Arpi National Park, mushroom.jpg",
+    "File:Mushroom cluster near Parz Lake at Dilijan National Park Armenia in 2010.jpg",
+    "File:Standing Maitreya, 8th century CE, Swat Valley or Gilgit region.jpg",
+}
+
+# Right file, wrong place: excluded only from the named place's card.
+EXCLUDE_FOR = {
+    "butkara-iii-stupa": {"File:Butkara Stupa (deutsch).jpg", "File:Butkara stupa 2nd century BCE.jpg"},   # Butkara I drawings
+    "kumrat-waterfall": {"File:Jahaz Banda Waterfall - 3,100 m (Kumrat Valley).jpg"},                         # another fall
+    # the bridge's card: river, valley, village and waterfall views of Matiltan with no bridge in them
+    "matiltan-ushu-bridge": {"File:Ushu River in Matiltan 2015-05-17.jpg", "File:Matiltan, Kalam Valley.jpg",
+                             "File:Valley of Matiltan swat.jpg", "File:Matiltan waterfall.jpg"},
+    "mighty-22-falls": {"File:En Route Mighty 22 Falls.jpg"},                                                   # a snowy valley
+    "chakdara-fort": {"File:Swat River Chakdara.jpg"},                                                           # the river
+    "swat-museum": {"File:Swat Museum in Mingora city.jpg"},                                                     # Mingora aerial
+    "bazira-barikot-ghundai": {"File:Ancient Bazira Barikot Swat Kp Pakistan (2).jpg"},                         # a road sign
+    "mahodand-lake": {"File:Mahodand Lake, Swat Pakistan.jpg"},                                                  # a deodar forest, no lake
+}
+
+
+def wrong_photo(title, desc="", slug=None):
+    """True for a Commons file that is of another place or thing (EXCLUDE, or ELSEWHERE in its title or description).
+    The pack builder (atlas_pack.py) and the game rounds (play_rounds.py) skip these too, so a rebuild from older
+    photo manifests cannot bring them back. `title` is "File:Name.jpg" or a commons.wikimedia.org/wiki/File: URL."""
+    from urllib.parse import unquote
+    t = unquote(str(title).split("/wiki/")[-1]).replace("_", " ")
+    return (t in EXCLUDE or t in EXCLUDE_FOR.get(slug, ()) or bool(ELSEWHERE.search(t))
+            or bool(desc and ELSEWHERE.search(desc)))
 ARTEFACT = re.compile(r"sculpture|relief|coin|statue|fragment|panel|frieze|gallery|exhibit|display|artefact|artifact|"
                       r"schist|head of|bodhisattva|reliquary|stele|stela|figurine|jewel|pottery|manuscript|inscription|"
                       r"in the museum|museum collection|showcase|vitrine|pedestal|capital|scene of|buddha statue", re.I)
@@ -130,7 +170,9 @@ def queries(e):
     key = re.sub(r"\b(stupa|lake|waterfall|falls|meadows?|bridge|mosque|fort|castle|palace|ski resort|i|ii|iii|rock|carvings?|buddha|sar|over|the|at)\b", "", name, flags=re.I)
     key = re.sub(r"[^\w ]", " ", key).split()
     kw = key[0].lower() if key else name.split()[0].lower()
-    qs = [(name, re.escape(kw))]
+    # a hit must carry the whole name ("mushroom lake", not "mushroom"); one-word names need only that word
+    phrase = r"\W*".join(re.escape(w.lower()) for w in re.sub(r"[^\w ]", " ", name).split())
+    qs = [(name, phrase if len(name.split()) > 1 else re.escape(kw))]
     for p in paren:
         if re.search(r"relief|site|wooden", p):
             continue
@@ -203,7 +245,7 @@ def main():
                 cands[unquote(m.group(1)).replace("_", " ")] = "seed"
         for q, rx in queries(e):
             for t in search(q):
-                if t not in cands and re.search(rx, t, re.I):
+                if t not in cands and re.search(rx, t, re.I) and not wrong_photo(t, slug=slug):
                     cands[t] = "search"
         titles = list(cands)
         info = imageinfo(titles)
@@ -219,6 +261,8 @@ def main():
             if not lic_ok(lic) or ii.get("width", 0) < 600:
                 continue
             desc = strip(g("ImageDescription"))
+            if cands[t] == "search" and ELSEWHERE.search(desc):
+                continue                                    # described as somewhere else
             lat = lon = dist = None
             try:
                 lat, lon = float(g("GPSLatitude")), float(g("GPSLongitude"))

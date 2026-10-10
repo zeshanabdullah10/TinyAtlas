@@ -4,14 +4,19 @@ Landing page (hero, two cards with real stats, six-era timeline, no horizontal s
 hero button -> both Atlas packs load and report draw statistics -> the "Plan a day" sheet and the offline dialog open ->
 no console errors anywhere.
 
-    python backend/tools/smoke.py [base_url]
+    python backend/tools/smoke.py [base_url]   (default http://127.0.0.1:8000)
 """
+import os
 import sys
 
 from playwright.sync_api import sync_playwright
 
-BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000").rstrip("/")
+BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000").rstrip("/")
 GL = ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
+# Use the Playwright Chromium when this machine has it (the sandbox has no Edge); otherwise Playwright's default browser.
+CHROMIUM = "/opt/pw-browsers/chromium"
+# The Atlas is drawn in software WebGL here (well under 1 fps) and sets window.__ready only after ~40 frames and no pending tiles.
+MAP_TIMEOUT = 900000
 errors, fails = [], []
 
 
@@ -22,7 +27,8 @@ def check(name, ok, detail=""):
 
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge", args=GL)
+    kw = {"executable_path": CHROMIUM} if os.path.exists(CHROMIUM) else {}
+    b = p.chromium.launch(args=GL, **kw)
 
     def new_page(w, h):
         page = b.new_page(viewport={"width": w, "height": h})
@@ -48,7 +54,7 @@ with sync_playwright() as p:
         if tag == "desktop":
             page.evaluate("window.scrollTo(0, 0)")
             page.get_by_role("link", name="Open the map").first.click()
-            page.wait_for_function("window.__ready === true && window.__atlas", timeout=180000)
+            page.wait_for_function("window.__ready === true && window.__atlas", timeout=MAP_TIMEOUT)
             check("hero button opens the Swat map", "pack=swat" in page.url and page.evaluate("window.__atlas.info().calls") > 0)
             # --- planner sheet and offline dialog
             page.locator(".lbl:not(.off) .chip").first.click(force=True)
@@ -61,7 +67,7 @@ with sync_playwright() as p:
             check("offline dialog opens", True)
             page.keyboard.press("Escape")
             page.evaluate("window.__switch('swat-lower')")
-            page.wait_for_function("window.__ready === true", timeout=180000)
+            page.wait_for_function("window.__ready === true", timeout=MAP_TIMEOUT)
             check("Lower Swat pack loads", page.evaluate("window.__atlas.info().calls") > 0)
         page.close()
     b.close()
