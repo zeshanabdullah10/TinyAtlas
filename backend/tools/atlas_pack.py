@@ -17,6 +17,7 @@ from pyproj import Transformer
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from shortname import short_name
+from collect_photos import wrong_photo
 
 ROOT = Path(__file__).resolve().parents[2]
 BLENDER = Path("D:/TinyAtlas/tools/blender-5.2.2-windows-x64/blender.exe")
@@ -542,6 +543,7 @@ def step_places(ctx):
                 if len(photos) >= 6: break
                 src = pdir / p["file"]
                 if not src.exists(): continue
+                if wrong_photo(p.get("page") or p.get("title", ""), p.get("description", ""), slug): continue   # of another place
                 im = Image.open(src).convert("RGB")
                 im.thumbnail((1600, 1600), Image.LANCZOS)
                 fn = f"{len(photos) + 1:02d}.jpg"

@@ -92,3 +92,17 @@ def test_optional_files_carry_sources(d):
             if ph["lat"] is not None:          # geotagged photos are pinned in the model, so they must lie on it
                 s_, w_, n_, e_ = json.loads((d / "meta.json").read_text(encoding="utf-8"))["grid"]["bbox"]
                 assert s_ <= ph["lat"] <= n_ and w_ <= ph["lon"] <= e_
+
+
+def test_photos_are_of_the_place():
+    """No diorama shows a Commons file known to be of another place (collect_photos.EXCLUDE / ELSEWHERE)."""
+    import sys
+    sys.path.insert(0, str(ROOT / "backend" / "tools"))
+    from collect_photos import wrong_photo
+    for d in SITES:
+        p = d / "photos.json"
+        if not p.exists():
+            continue
+        slug = {"mahodand": "mahodand-lake", "white-palace": "white-palace-marghazar"}.get(d.name, d.name)
+        bad = [ph["title"] for ph in json.loads(p.read_text(encoding="utf-8")) if wrong_photo(ph["page"], slug=slug)]
+        assert not bad, f"{d.name}: {bad}"

@@ -647,186 +647,6 @@
   "id": "r041"
  },
  {
-  "image": "/packs/swat/atlas/photos/mushroom-lake/01.jpg",
-  "credit": "Photo: Forest Service - Northern Region, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Tiny_Mushroom_(48047361411).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "mushroom-lake",
-   "name": "Mushroom Lake",
-   "x": 18891.3,
-   "z": 24309.4
-  },
-  "caption": "",
-  "id": "r042"
- },
- {
-  "image": "/packs/swat/atlas/photos/mushroom-lake/02.jpg",
-  "credit": "Photo: Mathieu Landretti, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Mushroom.png",
-  "answer": {
-   "pack": "swat",
-   "slug": "mushroom-lake",
-   "name": "Mushroom Lake",
-   "x": 18891.3,
-   "z": 24309.4
-  },
-  "caption": "",
-  "id": "r043"
- },
- {
-  "image": "/packs/swat/atlas/photos/mushroom-lake/03.jpg",
-  "credit": "Photo: GlacierNPS, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Mushrooms_on_the_trail_to_Avalanche_Lake_(44175801044).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "mushroom-lake",
-   "name": "Mushroom Lake",
-   "x": 18891.3,
-   "z": 24309.4
-  },
-  "caption": "",
-  "id": "r044"
- },
- {
-  "image": "/packs/swat/atlas/photos/mushroom-lake/04.jpg",
-  "credit": "Photo: USFWSAlaska, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Morel_mushroom_(50007783332).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "mushroom-lake",
-   "name": "Mushroom Lake",
-   "x": 18891.3,
-   "z": 24309.4
-  },
-  "caption": "",
-  "id": "r045"
- },
- {
-  "image": "/packs/swat/atlas/photos/mushroom-lake/05.jpg",
-  "credit": "Photo: Մարի Ավետիսյան, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Lake_Arpi_National_Park,_mushroom.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "mushroom-lake",
-   "name": "Mushroom Lake",
-   "x": 18891.3,
-   "z": 24309.4
-  },
-  "caption": "",
-  "id": "r046"
- },
- {
-  "image": "/packs/swat/atlas/photos/mushroom-lake/06.jpg",
-  "credit": "Photo: Xelgen, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Mushroom_cluster_near_Parz_Lake_at_Dilijan_National_Park_Armenia_in_2010.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "mushroom-lake",
-   "name": "Mushroom Lake",
-   "x": 18891.3,
-   "z": 24309.4
-  },
-  "caption": "",
-  "id": "r047"
- },
- {
-  "image": "/packs/swat/atlas/photos/pearl-lake/01.jpg",
-  "credit": "Photo: JoachimKohler-HB, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:General_cargo_ship_%E2%80%98Lake_Pearl%E2%80%99_on_the_Weser_near_Brake_(2025).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pearl-lake",
-   "name": "Pearl Lake",
-   "x": 46105.8,
-   "z": 28719.7
-  },
-  "caption": "",
-  "id": "r048"
- },
- {
-  "image": "/packs/swat/atlas/photos/pearl-lake/02.jpg",
-  "credit": "Photo: U.S. Air Force JBPHH by Petty Officer 2nd Class Courtney Strahan, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Joint_Base_Pearl_Harbor-Hickam_Salt_Lake_Walkway_Cleanup_and_Genki_Ball-Making_(9179466).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pearl-lake",
-   "name": "Pearl Lake",
-   "x": 46105.8,
-   "z": 28719.7
-  },
-  "caption": "",
-  "id": "r049"
- },
- {
-  "image": "/packs/swat/atlas/photos/pearl-lake/03.jpg",
-  "credit": "Photo: U.S. Air Force JBPHH by Petty Officer 2nd Class Courtney Strahan, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Joint_Base_Pearl_Harbor-Hickam_Salt_Lake_Walkway_Cleanup_and_Genki_Ball-Making_(9179493).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pearl-lake",
-   "name": "Pearl Lake",
-   "x": 46105.8,
-   "z": 28719.7
-  },
-  "caption": "",
-  "id": "r050"
- },
- {
-  "image": "/packs/swat/atlas/photos/pearl-lake/04.jpg",
-  "credit": "Photo: U.S. Air Force JBPHH by Petty Officer 2nd Class Courtney Strahan, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Joint_Base_Pearl_Harbor-Hickam_Salt_Lake_Walkway_Cleanup_and_Genki_Ball-Making_(9179488).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pearl-lake",
-   "name": "Pearl Lake",
-   "x": 46105.8,
-   "z": 28719.7
-  },
-  "caption": "",
-  "id": "r051"
- },
- {
-  "image": "/packs/swat/atlas/photos/pearl-lake/05.jpg",
-  "credit": "Photo: U.S. Air Force JBPHH by Petty Officer 2nd Class Courtney Strahan, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Joint_Base_Pearl_Harbor-Hickam_Salt_Lake_Walkway_Cleanup_and_Genki_Ball-Making_(9179495).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pearl-lake",
-   "name": "Pearl Lake",
-   "x": 46105.8,
-   "z": 28719.7
-  },
-  "caption": "",
-  "id": "r052"
- },
- {
-  "image": "/packs/swat/atlas/photos/pearl-lake/06.jpg",
-  "credit": "Photo: U.S. Air Force JBPHH by Petty Officer 2nd Class Courtney Strahan, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Joint_Base_Pearl_Harbor-Hickam_Salt_Lake_Walkway_Cleanup_and_Genki_Ball-Making_(9179498).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pearl-lake",
-   "name": "Pearl Lake",
-   "x": 46105.8,
-   "z": 28719.7
-  },
-  "caption": "",
-  "id": "r053"
- },
- {
   "image": "/packs/swat/atlas/photos/spin-khwar-lake/01.jpg",
   "credit": "Photo: Isruma, CC BY 3.0, via Wikimedia Commons",
   "licence": "CC BY 3.0",
@@ -839,7 +659,7 @@
    "z": 47091.1
   },
   "caption": "",
-  "id": "r054"
+  "id": "r042"
  },
  {
   "image": "/packs/swat/atlas/photos/spin-khwar-lake/02.jpg",
@@ -854,7 +674,7 @@
    "z": 47091.1
   },
   "caption": "",
-  "id": "r055"
+  "id": "r043"
  },
  {
   "image": "/packs/swat/atlas/photos/spin-khwar-lake/03.jpg",
@@ -869,7 +689,7 @@
    "z": 47091.1
   },
   "caption": "",
-  "id": "r056"
+  "id": "r044"
  },
  {
   "image": "/packs/swat/atlas/photos/spin-khwar-lake/04.jpg",
@@ -884,7 +704,7 @@
    "z": 47091.1
   },
   "caption": "",
-  "id": "r057"
+  "id": "r045"
  },
  {
   "image": "/packs/swat/atlas/photos/jamia-masjid-thal/01.jpg",
@@ -899,7 +719,7 @@
    "z": 41630.3
   },
   "caption": "",
-  "id": "r058"
+  "id": "r046"
  },
  {
   "image": "/packs/swat/atlas/photos/jamia-masjid-thal/02.jpg",
@@ -914,7 +734,7 @@
    "z": 41630.3
   },
   "caption": "",
-  "id": "r059"
+  "id": "r047"
  },
  {
   "image": "/packs/swat/atlas/photos/pari-lake/01.jpg",
@@ -929,22 +749,7 @@
    "z": 50037.8
   },
   "caption": "",
-  "id": "r060"
- },
- {
-  "image": "/packs/swat/atlas/photos/pari-lake/02.jpg",
-  "credit": "Photo: Harvinder Chandigarh, CC BY 4.0, via Wikimedia Commons",
-  "licence": "CC BY 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:View_of_Dal_Lake_from_Pari_Mahal_,_Srinagar.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pari-lake",
-   "name": "Pari (Paristan) Lake",
-   "x": 28888.5,
-   "z": 50037.8
-  },
-  "caption": "",
-  "id": "r061"
+  "id": "r048"
  },
  {
   "image": "/packs/swat/atlas/photos/pari-lake/03.jpg",
@@ -959,22 +764,7 @@
    "z": 50037.8
   },
   "caption": "",
-  "id": "r062"
- },
- {
-  "image": "/packs/swat/atlas/photos/pari-lake/04.jpg",
-  "credit": "Photo: Harvinder Chandigarh, CC BY 4.0, via Wikimedia Commons",
-  "licence": "CC BY 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Pari_Mahal_,Srinagar.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pari-lake",
-   "name": "Pari (Paristan) Lake",
-   "x": 28888.5,
-   "z": 50037.8
-  },
-  "caption": "",
-  "id": "r063"
+  "id": "r049"
  },
  {
   "image": "/packs/swat/atlas/photos/pari-lake/05.jpg",
@@ -989,22 +779,7 @@
    "z": 50037.8
   },
   "caption": "",
-  "id": "r064"
- },
- {
-  "image": "/packs/swat/atlas/photos/pari-lake/06.jpg",
-  "credit": "Photo: Deepank Ranka, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Pari_Mahal_Srinagar_J%26K_03.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "pari-lake",
-   "name": "Pari (Paristan) Lake",
-   "x": 28888.5,
-   "z": 50037.8
-  },
-  "caption": "",
-  "id": "r065"
+  "id": "r050"
  },
  {
   "image": "/packs/swat/atlas/photos/matiltan-ushu-bridge/01.jpg",
@@ -1019,7 +794,7 @@
    "z": 35754.0
   },
   "caption": "",
-  "id": "r066"
+  "id": "r051"
  },
  {
   "image": "/packs/swat/atlas/photos/matiltan-ushu-bridge/02.jpg",
@@ -1034,7 +809,7 @@
    "z": 35754.0
   },
   "caption": "",
-  "id": "r067"
+  "id": "r052"
  },
  {
   "image": "/packs/swat/atlas/photos/matiltan-ushu-bridge/03.jpg",
@@ -1049,7 +824,7 @@
    "z": 35754.0
   },
   "caption": "",
-  "id": "r068"
+  "id": "r053"
  },
  {
   "image": "/packs/swat/atlas/photos/matiltan-ushu-bridge/04.jpg",
@@ -1064,7 +839,7 @@
    "z": 35754.0
   },
   "caption": "",
-  "id": "r069"
+  "id": "r054"
  },
  {
   "image": "/packs/swat/atlas/photos/matiltan-ushu-bridge/05.jpg",
@@ -1079,7 +854,7 @@
    "z": 35754.0
   },
   "caption": "",
-  "id": "r070"
+  "id": "r055"
  },
  {
   "image": "/packs/swat/atlas/photos/matiltan-ushu-bridge/06.jpg",
@@ -1094,7 +869,7 @@
    "z": 35754.0
   },
   "caption": "",
-  "id": "r071"
+  "id": "r056"
  },
  {
   "image": "/packs/swat/atlas/photos/desan-meadows/01.jpg",
@@ -1109,7 +884,7 @@
    "z": 43756.4
   },
   "caption": "",
-  "id": "r072"
+  "id": "r057"
  },
  {
   "image": "/packs/swat/atlas/photos/jahaz-banda/01.jpg",
@@ -1124,7 +899,7 @@
    "z": 50874.7
   },
   "caption": "",
-  "id": "r073"
+  "id": "r058"
  },
  {
   "image": "/packs/swat/atlas/photos/jahaz-banda/02.jpg",
@@ -1139,7 +914,7 @@
    "z": 50874.7
   },
   "caption": "",
-  "id": "r074"
+  "id": "r059"
  },
  {
   "image": "/packs/swat/atlas/photos/jahaz-banda/03.jpg",
@@ -1154,7 +929,7 @@
    "z": 50874.7
   },
   "caption": "",
-  "id": "r075"
+  "id": "r060"
  },
  {
   "image": "/packs/swat/atlas/photos/jahaz-banda/04.jpg",
@@ -1169,7 +944,7 @@
    "z": 50874.7
   },
   "caption": "",
-  "id": "r076"
+  "id": "r061"
  },
  {
   "image": "/packs/swat/atlas/photos/jahaz-banda/05.jpg",
@@ -1184,7 +959,7 @@
    "z": 50874.7
   },
   "caption": "",
-  "id": "r077"
+  "id": "r062"
  },
  {
   "image": "/packs/swat/atlas/photos/jahaz-banda/06.jpg",
@@ -1199,7 +974,7 @@
    "z": 50874.7
   },
   "caption": "",
-  "id": "r078"
+  "id": "r063"
  },
  {
   "image": "/packs/swat/atlas/photos/kumrat-waterfall/01.jpg",
@@ -1214,7 +989,7 @@
    "z": 31387.3
   },
   "caption": "",
-  "id": "r079"
+  "id": "r064"
  },
  {
   "image": "/packs/swat/atlas/photos/kumrat-waterfall/02.jpg",
@@ -1229,7 +1004,7 @@
    "z": 31387.3
   },
   "caption": "",
-  "id": "r080"
+  "id": "r065"
  },
  {
   "image": "/packs/swat/atlas/photos/kumrat-waterfall/03.jpg",
@@ -1244,22 +1019,7 @@
    "z": 31387.3
   },
   "caption": "",
-  "id": "r081"
- },
- {
-  "image": "/packs/swat/atlas/photos/kumrat-waterfall/04.jpg",
-  "credit": "Photo: Shahbaz Aslam, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Jahaz_Banda_Waterfall_-_3,100_m_(Kumrat_Valley).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "kumrat-waterfall",
-   "name": "Kumrat Waterfall",
-   "x": 9241.1,
-   "z": 31387.3
-  },
-  "caption": "",
-  "id": "r082"
+  "id": "r066"
  },
  {
   "image": "/packs/swat/atlas/photos/kumrat-waterfall/05.jpg",
@@ -1274,7 +1034,7 @@
    "z": 31387.3
   },
   "caption": "",
-  "id": "r083"
+  "id": "r067"
  },
  {
   "image": "/packs/swat/atlas/photos/kumrat-waterfall/06.jpg",
@@ -1289,7 +1049,7 @@
    "z": 31387.3
   },
   "caption": "",
-  "id": "r084"
+  "id": "r068"
  },
  {
   "image": "/packs/swat/atlas/photos/mighty-22-falls/01.jpg",
@@ -1304,7 +1064,7 @@
    "z": 25032.3
   },
   "caption": "",
-  "id": "r085"
+  "id": "r069"
  },
  {
   "image": "/packs/swat/atlas/photos/mighty-22-falls/02.jpg",
@@ -1319,112 +1079,7 @@
    "z": 25032.3
   },
   "caption": "",
-  "id": "r086"
- },
- {
-  "image": "/packs/swat/atlas/photos/mighty-22-falls/03.jpg",
-  "credit": "Photo: Pistenwolf, CC BY-SA 3.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 3.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Mighty_Oaks-22.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "mighty-22-falls",
-   "name": "Mighty 22 Falls",
-   "x": 54021.5,
-   "z": 25032.3
-  },
-  "caption": "",
-  "id": "r087"
- },
- {
-  "image": "/packs/swat/atlas/photos/shahi-bagh/01.jpg",
-  "credit": "Photo: USAID Pakistan, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Shahi_Bagh_Park_(5663163793).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "shahi-bagh",
-   "name": "Shahi Bagh",
-   "x": 22538.7,
-   "z": 31977.7
-  },
-  "caption": "",
-  "id": "r088"
- },
- {
-  "image": "/packs/swat/atlas/photos/shahi-bagh/02.jpg",
-  "credit": "Photo: USAID Pakistan, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Shahi_Bagh_Park_(5663161625).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "shahi-bagh",
-   "name": "Shahi Bagh",
-   "x": 22538.7,
-   "z": 31977.7
-  },
-  "caption": "",
-  "id": "r089"
- },
- {
-  "image": "/packs/swat/atlas/photos/shahi-bagh/03.jpg",
-  "credit": "Photo: AMAR20811, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Shahi_Bagh.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "shahi-bagh",
-   "name": "Shahi Bagh",
-   "x": 22538.7,
-   "z": 31977.7
-  },
-  "caption": "",
-  "id": "r090"
- },
- {
-  "image": "/packs/swat/atlas/photos/shahi-bagh/04.jpg",
-  "credit": "Photo: BhuyanBhaskar, CC BY 4.0, via Wikimedia Commons",
-  "licence": "CC BY 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Qutub_Shahi_Tomb,_Hyderabad_(Telangana).jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "shahi-bagh",
-   "name": "Shahi Bagh",
-   "x": 22538.7,
-   "z": 31977.7
-  },
-  "caption": "",
-  "id": "r091"
- },
- {
-  "image": "/packs/swat/atlas/photos/shahi-bagh/05.jpg",
-  "credit": "Photo: Sheikhaijaz 786, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Chasma-shahi-bagh-mughal-garden-b3.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "shahi-bagh",
-   "name": "Shahi Bagh",
-   "x": 22538.7,
-   "z": 31977.7
-  },
-  "caption": "",
-  "id": "r092"
- },
- {
-  "image": "/packs/swat/atlas/photos/shahi-bagh/06.jpg",
-  "credit": "Photo: Ishanjyotibora, CC BY 4.0, via Wikimedia Commons",
-  "licence": "CC BY 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Qutub_Shahi_Tombs3.jpg",
-  "answer": {
-   "pack": "swat",
-   "slug": "shahi-bagh",
-   "name": "Shahi Bagh",
-   "x": 22538.7,
-   "z": 31977.7
-  },
-  "caption": "",
-  "id": "r093"
+  "id": "r070"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/daral-lake/01.jpg",
@@ -1439,7 +1094,7 @@
    "z": 10193.9
   },
   "caption": "",
-  "id": "r094"
+  "id": "r071"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/daral-lake/02.jpg",
@@ -1454,7 +1109,7 @@
    "z": 10193.9
   },
   "caption": "",
-  "id": "r095"
+  "id": "r072"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/daral-lake/03.jpg",
@@ -1469,7 +1124,7 @@
    "z": 10193.9
   },
   "caption": "",
-  "id": "r096"
+  "id": "r073"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/daral-lake/04.jpg",
@@ -1484,7 +1139,7 @@
    "z": 10193.9
   },
   "caption": "",
-  "id": "r097"
+  "id": "r074"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/daral-lake/05.jpg",
@@ -1499,7 +1154,7 @@
    "z": 10193.9
   },
   "caption": "",
-  "id": "r098"
+  "id": "r075"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/daral-lake/06.jpg",
@@ -1514,7 +1169,7 @@
    "z": 10193.9
   },
   "caption": "",
-  "id": "r099"
+  "id": "r076"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/amluk-dara-stupa/01.jpg",
@@ -1529,7 +1184,7 @@
    "z": 73178.7
   },
   "caption": "",
-  "id": "r100"
+  "id": "r077"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/amluk-dara-stupa/02.jpg",
@@ -1544,7 +1199,7 @@
    "z": 73178.7
   },
   "caption": "",
-  "id": "r101"
+  "id": "r078"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/amluk-dara-stupa/03.jpg",
@@ -1559,7 +1214,7 @@
    "z": 73178.7
   },
   "caption": "",
-  "id": "r102"
+  "id": "r079"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/amluk-dara-stupa/04.jpg",
@@ -1574,7 +1229,7 @@
    "z": 73178.7
   },
   "caption": "",
-  "id": "r103"
+  "id": "r080"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/amluk-dara-stupa/05.jpg",
@@ -1589,7 +1244,7 @@
    "z": 73178.7
   },
   "caption": "",
-  "id": "r104"
+  "id": "r081"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/amluk-dara-stupa/06.jpg",
@@ -1604,7 +1259,7 @@
    "z": 73178.7
   },
   "caption": "",
-  "id": "r105"
+  "id": "r082"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/bazira-barikot-ghundai/01.jpg",
@@ -1619,7 +1274,7 @@
    "z": 69566.2
   },
   "caption": "",
-  "id": "r106"
+  "id": "r083"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/bazira-barikot-ghundai/02.jpg",
@@ -1634,7 +1289,7 @@
    "z": 69566.2
   },
   "caption": "",
-  "id": "r107"
+  "id": "r084"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/bazira-barikot-ghundai/03.jpg",
@@ -1649,7 +1304,7 @@
    "z": 69566.2
   },
   "caption": "",
-  "id": "r108"
+  "id": "r085"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/bazira-barikot-ghundai/04.jpg",
@@ -1664,37 +1319,7 @@
    "z": 69566.2
   },
   "caption": "",
-  "id": "r109"
- },
- {
-  "image": "/packs/swat-lower/atlas/photos/bazira-barikot-ghundai/05.jpg",
-  "credit": "Photo: KBazira (WMF), CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Kevin_Bazira_Software_Engineer_Image.jpg",
-  "answer": {
-   "pack": "swat-lower",
-   "slug": "bazira-barikot-ghundai",
-   "name": "Bazira (Barikot Ghundai)",
-   "x": 20026.9,
-   "z": 69566.2
-  },
-  "caption": "",
-  "id": "r110"
- },
- {
-  "image": "/packs/swat-lower/atlas/photos/bazira-barikot-ghundai/06.jpg",
-  "credit": "Photo: Bwami, CC BY-SA 3.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 3.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Mama_Maombi_Pondamali,Bazira_Joeel_responsables_des_survivants.jpg",
-  "answer": {
-   "pack": "swat-lower",
-   "slug": "bazira-barikot-ghundai",
-   "name": "Bazira (Barikot Ghundai)",
-   "x": 20026.9,
-   "z": 69566.2
-  },
-  "caption": "",
-  "id": "r111"
+  "id": "r086"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-i-stupa/01.jpg",
@@ -1709,7 +1334,7 @@
    "z": 60304.7
   },
   "caption": "",
-  "id": "r112"
+  "id": "r087"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-i-stupa/02.jpg",
@@ -1724,7 +1349,7 @@
    "z": 60304.7
   },
   "caption": "",
-  "id": "r113"
+  "id": "r088"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-i-stupa/03.jpg",
@@ -1739,7 +1364,7 @@
    "z": 60304.7
   },
   "caption": "",
-  "id": "r114"
+  "id": "r089"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-i-stupa/04.jpg",
@@ -1754,7 +1379,7 @@
    "z": 60304.7
   },
   "caption": "",
-  "id": "r115"
+  "id": "r090"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-i-stupa/05.jpg",
@@ -1769,7 +1394,7 @@
    "z": 60304.7
   },
   "caption": "",
-  "id": "r116"
+  "id": "r091"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-i-stupa/06.jpg",
@@ -1784,7 +1409,7 @@
    "z": 60304.7
   },
   "caption": "",
-  "id": "r117"
+  "id": "r092"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-iii-stupa/01.jpg",
@@ -1799,7 +1424,7 @@
    "z": 61058.6
   },
   "caption": "",
-  "id": "r118"
+  "id": "r093"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-iii-stupa/02.jpg",
@@ -1814,7 +1439,7 @@
    "z": 61058.6
   },
   "caption": "",
-  "id": "r119"
+  "id": "r094"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-iii-stupa/03.jpg",
@@ -1829,22 +1454,7 @@
    "z": 61058.6
   },
   "caption": "",
-  "id": "r120"
- },
- {
-  "image": "/packs/swat-lower/atlas/photos/butkara-iii-stupa/05.jpg",
-  "credit": "Photo: User:World Imaging, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Butkara_stupa_2nd_century_BCE.jpg",
-  "answer": {
-   "pack": "swat-lower",
-   "slug": "butkara-iii-stupa",
-   "name": "Butkara III Stupa (minor stupa site)",
-   "x": 34642.0,
-   "z": 61058.6
-  },
-  "caption": "",
-  "id": "r121"
+  "id": "r095"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/butkara-iii-stupa/06.jpg",
@@ -1859,7 +1469,7 @@
    "z": 61058.6
   },
   "caption": "",
-  "id": "r122"
+  "id": "r096"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/chakdara-fort/01.jpg",
@@ -1874,7 +1484,7 @@
    "z": 72537.1
   },
   "caption": "",
-  "id": "r123"
+  "id": "r097"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/ghalegay-buddha-rock/01.jpg",
@@ -1889,7 +1499,7 @@
    "z": 66623.8
   },
   "caption": "",
-  "id": "r124"
+  "id": "r098"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/ghalegay-buddha-rock/02.jpg",
@@ -1904,7 +1514,7 @@
    "z": 66623.8
   },
   "caption": "",
-  "id": "r125"
+  "id": "r099"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/ghalegay-buddha-rock/03.jpg",
@@ -1919,7 +1529,7 @@
    "z": 66623.8
   },
   "caption": "",
-  "id": "r126"
+  "id": "r100"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/ghalegay-buddha-rock/04.jpg",
@@ -1934,7 +1544,7 @@
    "z": 66623.8
   },
   "caption": "",
-  "id": "r127"
+  "id": "r101"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/ghalegay-buddha-rock/05.jpg",
@@ -1949,7 +1559,7 @@
    "z": 66623.8
   },
   "caption": "",
-  "id": "r128"
+  "id": "r102"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/ghalegay-buddha-rock/06.jpg",
@@ -1964,7 +1574,7 @@
    "z": 66623.8
   },
   "caption": "",
-  "id": "r129"
+  "id": "r103"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gogdara-rock-carvings/01.jpg",
@@ -1979,7 +1589,7 @@
    "z": 62586.2
   },
   "caption": "",
-  "id": "r130"
+  "id": "r104"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gogdara-rock-carvings/02.jpg",
@@ -1994,7 +1604,7 @@
    "z": 62586.2
   },
   "caption": "",
-  "id": "r131"
+  "id": "r105"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gogdara-rock-carvings/03.jpg",
@@ -2009,7 +1619,7 @@
    "z": 62586.2
   },
   "caption": "",
-  "id": "r132"
+  "id": "r106"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gogdara-rock-carvings/04.jpg",
@@ -2024,7 +1634,7 @@
    "z": 62586.2
   },
   "caption": "",
-  "id": "r133"
+  "id": "r107"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gogdara-rock-carvings/05.jpg",
@@ -2039,7 +1649,7 @@
    "z": 62586.2
   },
   "caption": "",
-  "id": "r134"
+  "id": "r108"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gogdara-rock-carvings/06.jpg",
@@ -2054,7 +1664,7 @@
    "z": 62586.2
   },
   "caption": "",
-  "id": "r135"
+  "id": "r109"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gumbat-balo-kale-stupa/01.jpg",
@@ -2069,7 +1679,7 @@
    "z": 68227.8
   },
   "caption": "",
-  "id": "r136"
+  "id": "r110"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gumbat-balo-kale-stupa/02.jpg",
@@ -2084,7 +1694,7 @@
    "z": 68227.8
   },
   "caption": "",
-  "id": "r137"
+  "id": "r111"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jahanabad-buddha/01.jpg",
@@ -2099,7 +1709,7 @@
    "z": 55405.3
   },
   "caption": "",
-  "id": "r138"
+  "id": "r112"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jahanabad-buddha/02.jpg",
@@ -2114,7 +1724,7 @@
    "z": 55405.3
   },
   "caption": "",
-  "id": "r139"
+  "id": "r113"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jahanabad-buddha/03.jpg",
@@ -2129,7 +1739,7 @@
    "z": 55405.3
   },
   "caption": "",
-  "id": "r140"
+  "id": "r114"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jahanabad-buddha/04.jpg",
@@ -2144,7 +1754,7 @@
    "z": 55405.3
   },
   "caption": "",
-  "id": "r141"
+  "id": "r115"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jahanabad-buddha/05.jpg",
@@ -2159,7 +1769,7 @@
    "z": 55405.3
   },
   "caption": "",
-  "id": "r142"
+  "id": "r116"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/mahmud-ghaznavi-mosque/01.jpg",
@@ -2174,7 +1784,7 @@
    "z": 62624.5
   },
   "caption": "",
-  "id": "r143"
+  "id": "r117"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/mahmud-ghaznavi-mosque/02.jpg",
@@ -2189,7 +1799,7 @@
    "z": 62624.5
   },
   "caption": "",
-  "id": "r144"
+  "id": "r118"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/mahmud-ghaznavi-mosque/03.jpg",
@@ -2204,7 +1814,7 @@
    "z": 62624.5
   },
   "caption": "",
-  "id": "r145"
+  "id": "r119"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/mahmud-ghaznavi-mosque/04.jpg",
@@ -2219,7 +1829,7 @@
    "z": 62624.5
   },
   "caption": "",
-  "id": "r146"
+  "id": "r120"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/mahmud-ghaznavi-mosque/05.jpg",
@@ -2234,7 +1844,7 @@
    "z": 62624.5
   },
   "caption": "",
-  "id": "r147"
+  "id": "r121"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/mahmud-ghaznavi-mosque/06.jpg",
@@ -2249,7 +1859,7 @@
    "z": 62624.5
   },
   "caption": "",
-  "id": "r148"
+  "id": "r122"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/nimogram-stupa/01.jpg",
@@ -2264,7 +1874,7 @@
    "z": 64162.3
   },
   "caption": "",
-  "id": "r149"
+  "id": "r123"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/raja-gira-castle/01.jpg",
@@ -2279,7 +1889,7 @@
    "z": 62766.0
   },
   "caption": "",
-  "id": "r150"
+  "id": "r124"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/raja-gira-castle/02.jpg",
@@ -2294,7 +1904,7 @@
    "z": 62766.0
   },
   "caption": "",
-  "id": "r151"
+  "id": "r125"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/raja-gira-castle/03.jpg",
@@ -2309,7 +1919,7 @@
    "z": 62766.0
   },
   "caption": "",
-  "id": "r152"
+  "id": "r126"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/raja-gira-castle/04.jpg",
@@ -2324,7 +1934,7 @@
    "z": 62766.0
   },
   "caption": "",
-  "id": "r153"
+  "id": "r127"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/raja-gira-castle/05.jpg",
@@ -2339,7 +1949,7 @@
    "z": 62766.0
   },
   "caption": "",
-  "id": "r154"
+  "id": "r128"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/raja-gira-castle/06.jpg",
@@ -2354,7 +1964,7 @@
    "z": 62766.0
   },
   "caption": "",
-  "id": "r155"
+  "id": "r129"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidu-sharif-stupa/01.jpg",
@@ -2369,7 +1979,7 @@
    "z": 61152.1
   },
   "caption": "",
-  "id": "r156"
+  "id": "r130"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidu-sharif-stupa/02.jpg",
@@ -2384,7 +1994,7 @@
    "z": 61152.1
   },
   "caption": "",
-  "id": "r157"
+  "id": "r131"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidu-sharif-stupa/03.jpg",
@@ -2399,7 +2009,7 @@
    "z": 61152.1
   },
   "caption": "",
-  "id": "r158"
+  "id": "r132"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidu-sharif-stupa/04.jpg",
@@ -2414,7 +2024,7 @@
    "z": 61152.1
   },
   "caption": "",
-  "id": "r159"
+  "id": "r133"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidu-sharif-stupa/05.jpg",
@@ -2429,7 +2039,7 @@
    "z": 61152.1
   },
   "caption": "",
-  "id": "r160"
+  "id": "r134"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidu-sharif-stupa/06.jpg",
@@ -2444,7 +2054,7 @@
    "z": 61152.1
   },
   "caption": "",
-  "id": "r161"
+  "id": "r135"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/shingardar-stupa/01.jpg",
@@ -2459,7 +2069,7 @@
    "z": 68200.4
   },
   "caption": "",
-  "id": "r162"
+  "id": "r136"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/shingardar-stupa/02.jpg",
@@ -2474,7 +2084,7 @@
    "z": 68200.4
   },
   "caption": "",
-  "id": "r163"
+  "id": "r137"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/shingardar-stupa/03.jpg",
@@ -2489,7 +2099,7 @@
    "z": 68200.4
   },
   "caption": "",
-  "id": "r164"
+  "id": "r138"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/shingardar-stupa/04.jpg",
@@ -2504,7 +2114,7 @@
    "z": 68200.4
   },
   "caption": "",
-  "id": "r165"
+  "id": "r139"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/shingardar-stupa/05.jpg",
@@ -2519,7 +2129,7 @@
    "z": 68200.4
   },
   "caption": "",
-  "id": "r166"
+  "id": "r140"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/shingardar-stupa/06.jpg",
@@ -2534,7 +2144,7 @@
    "z": 68200.4
   },
   "caption": "",
-  "id": "r167"
+  "id": "r141"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/swat-museum/01.jpg",
@@ -2549,37 +2159,7 @@
    "z": 60476.1
   },
   "caption": "",
-  "id": "r168"
- },
- {
-  "image": "/packs/swat-lower/atlas/photos/swat-museum/02.jpg",
-  "credit": "Photo: British Museum. Department of British and Mediaeval Antiquities; Franks, Augustus Wollaston, 1826-1897; Dalton, O. M. (Ormonde Maddock), 1866-1945. Publication date 1905, Public domain, via Wikimedia Commons",
-  "licence": "Public domain",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Two_Kidarite_Princes._Silver_bowl_460-479_CE._Swat_District,_Pakistan._British_Museum_1963,1210.1.jpg",
-  "answer": {
-   "pack": "swat-lower",
-   "slug": "swat-museum",
-   "name": "Swat Museum",
-   "x": 33513.0,
-   "z": 60476.1
-  },
-  "caption": "",
-  "id": "r169"
- },
- {
-  "image": "/packs/swat-lower/atlas/photos/swat-museum/03.jpg",
-  "credit": "Photo: Metropolitan Museum of Art, CC0, via Wikimedia Commons",
-  "licence": "CC0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:Standing_Maitreya,_8th_century_CE,_Swat_Valley_or_Gilgit_region.jpg",
-  "answer": {
-   "pack": "swat-lower",
-   "slug": "swat-museum",
-   "name": "Swat Museum",
-   "x": 33513.0,
-   "z": 60476.1
-  },
-  "caption": "",
-  "id": "r170"
+  "id": "r142"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/swat-museum/04.jpg",
@@ -2594,7 +2174,7 @@
    "z": 60476.1
   },
   "caption": "",
-  "id": "r171"
+  "id": "r143"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/swat-museum/05.jpg",
@@ -2609,22 +2189,7 @@
    "z": 60476.1
   },
   "caption": "",
-  "id": "r172"
- },
- {
-  "image": "/packs/swat-lower/atlas/photos/swat-museum/06.jpg",
-  "credit": "Photo: SpeakingArch, CC BY-SA 4.0, via Wikimedia Commons",
-  "licence": "CC BY-SA 4.0",
-  "source_url": "https://commons.wikimedia.org/wiki/File:First_Sermon,_100-300_CE,_Lower_Swat_Valley,_Pakistan,_British_Museum.jpg",
-  "answer": {
-   "pack": "swat-lower",
-   "slug": "swat-museum",
-   "name": "Swat Museum",
-   "x": 33513.0,
-   "z": 60476.1
-  },
-  "caption": "",
-  "id": "r173"
+  "id": "r144"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/white-palace-marghazar/01.jpg",
@@ -2639,7 +2204,7 @@
    "z": 71559.2
   },
   "caption": "",
-  "id": "r174"
+  "id": "r145"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/white-palace-marghazar/02.jpg",
@@ -2654,7 +2219,7 @@
    "z": 71559.2
   },
   "caption": "",
-  "id": "r175"
+  "id": "r146"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/white-palace-marghazar/03.jpg",
@@ -2669,7 +2234,7 @@
    "z": 71559.2
   },
   "caption": "",
-  "id": "r176"
+  "id": "r147"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/white-palace-marghazar/04.jpg",
@@ -2684,7 +2249,7 @@
    "z": 71559.2
   },
   "caption": "",
-  "id": "r177"
+  "id": "r148"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/white-palace-marghazar/05.jpg",
@@ -2699,7 +2264,7 @@
    "z": 71559.2
   },
   "caption": "",
-  "id": "r178"
+  "id": "r149"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/white-palace-marghazar/06.jpg",
@@ -2714,7 +2279,7 @@
    "z": 71559.2
   },
   "caption": "",
-  "id": "r179"
+  "id": "r150"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/bashigram-lake/01.jpg",
@@ -2729,7 +2294,7 @@
    "z": 25733.2
   },
   "caption": "",
-  "id": "r180"
+  "id": "r151"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/bashigram-lake/02.jpg",
@@ -2744,7 +2309,7 @@
    "z": 25733.2
   },
   "caption": "",
-  "id": "r181"
+  "id": "r152"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidgai-lake/01.jpg",
@@ -2759,7 +2324,7 @@
    "z": 12897.4
   },
   "caption": "",
-  "id": "r182"
+  "id": "r153"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidgai-lake/02.jpg",
@@ -2774,7 +2339,7 @@
    "z": 12897.4
   },
   "caption": "",
-  "id": "r183"
+  "id": "r154"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidgai-lake/03.jpg",
@@ -2789,7 +2354,7 @@
    "z": 12897.4
   },
   "caption": "",
-  "id": "r184"
+  "id": "r155"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidgai-lake/04.jpg",
@@ -2804,7 +2369,7 @@
    "z": 12897.4
   },
   "caption": "",
-  "id": "r185"
+  "id": "r156"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidgai-lake/05.jpg",
@@ -2819,7 +2384,7 @@
    "z": 12897.4
   },
   "caption": "",
-  "id": "r186"
+  "id": "r157"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/saidgai-lake/06.jpg",
@@ -2834,7 +2399,7 @@
    "z": 12897.4
   },
   "caption": "",
-  "id": "r187"
+  "id": "r158"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gabin-jabba/01.jpg",
@@ -2849,7 +2414,7 @@
    "z": 14976.0
   },
   "caption": "",
-  "id": "r188"
+  "id": "r159"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gabin-jabba/02.jpg",
@@ -2864,7 +2429,7 @@
    "z": 14976.0
   },
   "caption": "",
-  "id": "r189"
+  "id": "r160"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gabin-jabba/03.jpg",
@@ -2879,7 +2444,7 @@
    "z": 14976.0
   },
   "caption": "",
-  "id": "r190"
+  "id": "r161"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gabin-jabba/04.jpg",
@@ -2894,7 +2459,7 @@
    "z": 14976.0
   },
   "caption": "",
-  "id": "r191"
+  "id": "r162"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gabin-jabba/05.jpg",
@@ -2909,7 +2474,7 @@
    "z": 14976.0
   },
   "caption": "",
-  "id": "r192"
+  "id": "r163"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/gabin-jabba/06.jpg",
@@ -2924,7 +2489,7 @@
    "z": 14976.0
   },
   "caption": "",
-  "id": "r193"
+  "id": "r164"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jarogo-waterfall/01.jpg",
@@ -2939,7 +2504,7 @@
    "z": 22528.4
   },
   "caption": "",
-  "id": "r194"
+  "id": "r165"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jarogo-waterfall/02.jpg",
@@ -2954,7 +2519,7 @@
    "z": 22528.4
   },
   "caption": "",
-  "id": "r195"
+  "id": "r166"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jarogo-waterfall/03.jpg",
@@ -2969,7 +2534,7 @@
    "z": 22528.4
   },
   "caption": "",
-  "id": "r196"
+  "id": "r167"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jarogo-waterfall/04.jpg",
@@ -2984,7 +2549,7 @@
    "z": 22528.4
   },
   "caption": "",
-  "id": "r197"
+  "id": "r168"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jarogo-waterfall/05.jpg",
@@ -2999,7 +2564,7 @@
    "z": 22528.4
   },
   "caption": "",
-  "id": "r198"
+  "id": "r169"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/jarogo-waterfall/06.jpg",
@@ -3014,7 +2579,7 @@
    "z": 22528.4
   },
   "caption": "",
-  "id": "r199"
+  "id": "r170"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/malam-jabba/01.jpg",
@@ -3029,7 +2594,7 @@
    "z": 57010.7
   },
   "caption": "",
-  "id": "r200"
+  "id": "r171"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/malam-jabba/02.jpg",
@@ -3044,7 +2609,7 @@
    "z": 57010.7
   },
   "caption": "",
-  "id": "r201"
+  "id": "r172"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/malam-jabba/03.jpg",
@@ -3059,7 +2624,7 @@
    "z": 57010.7
   },
   "caption": "",
-  "id": "r202"
+  "id": "r173"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/malam-jabba/04.jpg",
@@ -3074,7 +2639,7 @@
    "z": 57010.7
   },
   "caption": "",
-  "id": "r203"
+  "id": "r174"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/malam-jabba/05.jpg",
@@ -3089,7 +2654,7 @@
    "z": 57010.7
   },
   "caption": "",
-  "id": "r204"
+  "id": "r175"
  },
  {
   "image": "/packs/swat-lower/atlas/photos/malam-jabba/06.jpg",
@@ -3104,6 +2669,6 @@
    "z": 57010.7
   },
   "caption": "",
-  "id": "r205"
+  "id": "r176"
  }
 ]
