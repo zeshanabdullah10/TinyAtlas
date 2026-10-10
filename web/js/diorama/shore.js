@@ -148,9 +148,10 @@ export function footpath(site, loop) {
 
 /** Viewpoints, named only by where they are. */
 export function viewpoints(site, loop, path) {
-  const end = path.at(path.length);
+  // on a site reached on foot (meta.walk) the visit starts where the path arrives, not where the track ends
+  const W = site.meta.walk?.pts, end = W ? { x: W.at(-1)[0], z: W.at(-1)[1] } : path.at(path.length);
   const sPark = nearestOnLoop(loop, end.x, end.z);
-  const list = [{ name: "Where the track ends", s: sPark }];
+  const list = [{ name: W ? "Where the path arrives" : "Where the track ends", s: sPark }];
   // the stream mouth: the OSM waterway end point closest to the lake
   let mouth = null, md = Infinity;
   for (const st of site.meta.streams) for (const p of [st.pts[0], st.pts.at(-1)]) {

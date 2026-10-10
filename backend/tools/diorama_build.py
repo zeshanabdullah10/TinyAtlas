@@ -396,6 +396,12 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         t = t * t * (3 - 2 * t)
         h = np.where(dl < terrace + 25, ly * (1 - t) + h * t, h)
         cover[(dl < terrace + 12) & (cover != 5)] = 2
+    # `clear_trees_m`: open ground round a landmark on its real slope (a hilltop ruin the 2021 canopy would hide)
+    if site.get("landmark", {}).get("clear_trees_m"):
+        lx, lz = to_local(g, *site["landmark"]["point"])
+        rr_, cc_ = np.mgrid[0:g["rows"], 0:g["cols"]]
+        dl = np.hypot(cc_ * CELL - g["W"] / 2 - lx, rr_ * CELL - g["H"] / 2 - lz)
+        cover[(dl < site["landmark"]["clear_trees_m"]) & np.isin(cover, (1, 7))] = 2
 
     # Road profile: DEM along the track, smoothed over ~80 m, then a bench cut so the track sits on it.
     prof = np.array([bilerp(h, g, x, z) for x, z in drive])
@@ -506,6 +512,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
                "The shore path is traced 20 m outside the lake outline; it is not a mapped trail."] if has_lake else
               ["The walking loop is a 150 m circle around the arrival point; it is not a mapped trail."]),
             # a landmark declares its own edits in the site file; the White Palace keeps the words it was built with
+            *([f"Trees within {site['landmark']['clear_trees_m']} m of the {site['landmark']['name']} are left out so it can be seen; WorldCover 2021 maps tree cover there."]
+              if site.get("landmark", {}).get("clear_trees_m") else []),
             *(site["landmark"].get("edits") or [
                 f"The palace grounds are levelled to a terrace {terrace} m around the place point and kept as lawn.",
                 "The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 24 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."]
