@@ -72,24 +72,29 @@ def main():
     with slot("render", 2), sync_playwright() as p:      # software GL is heavy: two renders at a time on this machine
         exe = next((str(x) for x in (Path("/opt/pw-browsers/chromium"),) if x.exists()), None)   # a preinstalled Chromium, when the pinned one is absent
         b = p.chromium.launch(executable_path=exe, args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
-        for shot in a.shots.split(","):
+        shots = a.shots.split(",")
+        # table, close and ground share one page load (the camera moves between them); lake and walk need their own
+        groups = [[x for x in ("table", "close", "ground") if x in shots]] + [[x] for x in shots if x in ("lake", "walk")]
+        for group in [g for g in groups if g]:
+            tag = "+".join(group)
             pg = b.new_page(viewport={"width": W, "height": H})
-            pg.on("console", lambda msg, s=shot: log.append(f"[{s}] {msg.type}: {msg.text}"))
-            pg.on("pageerror", lambda err, s=shot: log.append(f"[{s}] PAGEERROR: {err}"))
-            q = "&view=lake" if shot == "lake" else ""
+            pg.on("console", lambda msg, s=tag: log.append(f"[{s}] {msg.type}: {msg.text}"))
+            pg.on("pageerror", lambda err, s=tag: log.append(f"[{s}] PAGEERROR: {err}"))
+            q = "&view=lake" if group == ["lake"] else ""
             pg.goto(f"http://127.0.0.1:{port}/diorama.html?site={a.site}&tier=low{q}", wait_until="load", timeout=120000)
             pg.wait_for_function("window.__diorama", timeout=180000)
             pg.wait_for_timeout(4000)                           # GLB and module parts load asynchronously
             pg.evaluate("window.__diorama.advance(3)")
-            if shot == "walk":
-                pg.evaluate("window.__diorama.emit('walk')"); pg.evaluate("window.__diorama.advance(4)")
-            if shot in ("close", "ground"):
-                size = pg.evaluate("(() => { const m = window.__diorama.site.meta; return m.landmark ? (m.landmark.top_m || 20) : 0; })()")
-                dist = a.close_m or (max(60.0, size * 3.5) if shot == "close" else max(25.0, size * 1.6))
-                if not a.close_m and not size:
-                    dist = 120.0 if shot == "close" else 30.0
-                pg.evaluate(f"({CAM})(['{shot}', {dist}])")
-            pg.screenshot(path=str(out / f"{shot}.png"))
+            for shot in group:
+                if shot == "walk":
+                    pg.evaluate("window.__diorama.emit('walk')"); pg.evaluate("window.__diorama.advance(4)")
+                if shot in ("close", "ground"):
+                    size = pg.evaluate("(() => { const m = window.__diorama.site.meta; return m.landmark ? (m.landmark.top_m || 20) : 0; })()")
+                    dist = a.close_m or (max(60.0, size * 3.5) if shot == "close" else max(25.0, size * 1.6))
+                    if not a.close_m and not size:
+                        dist = 120.0 if shot == "close" else 30.0
+                    pg.evaluate(f"({CAM})(['{shot}', {dist}])")
+                pg.screenshot(path=str(out / f"{shot}.png"))
             pg.close()
         b.close()
     (out / "console.txt").write_text("\n".join(log) or "(no console output)", encoding="utf-8")
