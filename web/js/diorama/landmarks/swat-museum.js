@@ -23,7 +23,7 @@ export default function build(ctx) {
   // portal: a blue-grey surround 9 m wide, its gates behind it, and a flight of five steps up to the columns
   box(group, 1.2, 6.8, 0.6, trim, -3.9, g0, -6.3);      // left jamb
   box(group, 1.2, 6.8, 0.6, trim, 3.9, g0, -6.3);       // right jamb
-  box(group, 9, 0.8, 0.6, trim, 0, g0 + 6.0, -6.3);     // top band (the sign sits on it)
+  box(group, 9, 0.8, 0.6, trim, 0, g0 + 6.0, -6.3);     // top band (the name is lettered here in the photos; left blank)
   box(group, 6.6, 6.0, 0.3, gate, 0, g0, -6.15);        // dark lattice gates in the opening
   for (let i = 0; i < 5; i++) {
     const top = 0.3 * (i + 1), zNear = -6.6 - 0.5 * (4 - i);   // each tread 0.5 m deep, 0.3 m rise

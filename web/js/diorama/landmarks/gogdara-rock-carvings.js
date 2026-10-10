@@ -10,7 +10,7 @@ import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 const W = 12, H = 6;            // face width and height, metres (estimated)
 const PX_W = 1024, PX_H = 512;  // carving texture, same aspect as the face
 const GRANITE = "#8e8a80", LINE = "#a7a296";
-const OFF_X = -4, OFF_Z = 4;   // the boulder sits 5 m off the village lane (OSM), within 6 m of the point
+const OFF_X = -4, OFF_Z = 4;   // the boulder's centre: 4 m west and 4 m south of the place point (5.7 m away)
 
 /** Carvings in viewer coordinates: mx to the viewer's right (-W/2 .. W/2), my up (-H/2 .. H/2), metres. */
 function drawCarvings(c) {

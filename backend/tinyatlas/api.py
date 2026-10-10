@@ -50,12 +50,6 @@ def _landmarks(name: str) -> list[dict]:
     return atlaspack.landmarks(cfg["atlas"], cfg)
 
 
-@lru_cache(maxsize=None)
-def _chunks(name: str) -> list[dict]:
-    cfg = _region(name)
-    return atlaspack.chunks(cfg["atlas"], cfg)
-
-
 def _summary(name: str, cfg: dict) -> dict:
     w, h = atlaspack.size_m(cfg["atlas"]) if atlaspack.available(cfg["atlas"]) else (0.0, 0.0)
     return {"name": cfg["name"], "subtitle": cfg.get("subtitle", ""), "bbox": cfg["bbox"], "center": cfg.get("center"),

@@ -63,9 +63,10 @@ export default function build(ctx) {
   floor.receiveShadow = true;
   g.add(floor);
 
-  // One stretch of town wall beside the dig (back side, away from the road): 50 m, with one rectangular bastion.
+  // One stretch of town wall beside the dig (back side, away from the road): 50 m, with one rectangular bastion
+  // 8 m along and 4 m proud of the wall's outer face (wall z 44.5-47.5; bastion z 46-51.5).
   seg(-25, 46, 25, 46, 1.5, 3, town);
-  ctx.box(g, 8, 2.5, 7, town, 0, lowest(0, 49.5, 8, 7) - 0.3, 49.5);
+  ctx.box(g, 8, 2.5, 5.5, town, 0, lowest(0, 48.75, 8, 5.5) - 0.3, 48.75);
 
   ctx.batch(ctx.group);
 }

@@ -1,7 +1,13 @@
-numpy
-pillow
-httpx
+# The server: uvicorn tinyatlas.api:app (backend/tinyatlas/*.py)
 fastapi
 uvicorn
+httpx          # tinyatlas/llm.py, tinyatlas/stylize.py
+numpy          # tinyatlas/atlaspack.py, tinyatlas/stylize.py
+pillow         # tinyatlas/stylize.py
+
+# The test suite (python3 -m pytest -q backend/tests)
 pytest
-playwright
+beautifulsoup4  # tests/test_i18n.py
+pyproj          # tests/test_atlas.py loads tools/atlas_pack.py, which imports pyproj
+
+# Offline build tools and their browser checks are in requirements-tools.txt.

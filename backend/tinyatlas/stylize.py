@@ -67,61 +67,6 @@ def build_workflow(base: str, depth: str, line: str, seed: int = 7, denoise: flo
     }
 
 
-XL_CKPT = "RealVisXL_V5.0_fp16.safetensors"
-XL_CN_DEPTH = "controlnet-depth-sdxl-1.0.safetensors"
-
-
-def depth_painting_workflow(depth: str, text: str, negative: str = NEGATIVE, seed: int = 11, width: int = 1216,
-                            height: int = 832, strength: float = 0.75, steps: int = 30, cfg: float = 5.5,
-                            prefix: str = "tinyatlas_view", ckpt: str = XL_CKPT, cn: str = XL_CN_DEPTH,
-                            init: str | None = None, denoise: float = 0.9) -> dict:
-    """txt2img pinned by a depth image (a filename already uploaded to ComfyUI): the picture follows the real
-    skyline, the prompt decides season, light and style. SDXL by default. With `init` (an uploaded colour picture)
-    it starts from that instead of noise, so mapped features like lakes land where they really are."""
-    latent = {"class_type": "EmptyLatentImage", "inputs": {"width": width, "height": height, "batch_size": 1}}
-    if init:
-        latent = {"class_type": "VAEEncode", "inputs": {"pixels": ["15", 0], "vae": ["1", 2]}}
-    wf = {
-        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": ckpt}},
-        "2": {"class_type": "CLIPTextEncode", "inputs": {"text": text, "clip": ["1", 1]}},
-        "3": {"class_type": "CLIPTextEncode", "inputs": {"text": negative, "clip": ["1", 1]}},
-        "5": {"class_type": "LoadImage", "inputs": {"image": depth}},
-        "7": {"class_type": "ControlNetLoader", "inputs": {"control_net_name": cn}},
-        "9": {"class_type": "ControlNetApplyAdvanced", "inputs": {
-            "positive": ["2", 0], "negative": ["3", 0], "control_net": ["7", 0], "image": ["5", 0],
-            "strength": strength, "start_percent": 0.0, "end_percent": 0.9, "vae": ["1", 2]}},
-        "11": latent,
-        "12": {"class_type": "KSampler", "inputs": {
-            "model": ["1", 0], "positive": ["9", 0], "negative": ["9", 1], "latent_image": ["11", 0],
-            "seed": seed, "steps": steps, "cfg": cfg, "sampler_name": "dpmpp_2m", "scheduler": "karras",
-            "denoise": denoise if init else 1.0}},
-        "13": {"class_type": "VAEDecode", "inputs": {"samples": ["12", 0], "vae": ["1", 2]}},
-        "14": {"class_type": "SaveImage", "inputs": {"images": ["13", 0], "filename_prefix": prefix}},
-    }
-    if init:
-        wf["15"] = {"class_type": "LoadImage", "inputs": {"image": init}}
-    return wf
-
-
-def img2img_workflow(image: str, text: str, negative: str = NEGATIVE, denoise: float = 0.72, seed: int = 5,
-                     steps: int = 30, cfg: float = 6.0, prefix: str = "tinyatlas_img", ckpt: str = XL_CKPT) -> dict:
-    """SDXL img2img from an uploaded picture (used to redraw a landmark photo as a clean scale model)."""
-    return {
-        "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": ckpt}},
-        "2": {"class_type": "CLIPTextEncode", "inputs": {"text": text, "clip": ["1", 1]}},
-        "3": {"class_type": "CLIPTextEncode", "inputs": {"text": negative, "clip": ["1", 1]}},
-        "4": {"class_type": "LoadImage", "inputs": {"image": image}},
-        "5": {"class_type": "ImageScale", "inputs": {"image": ["4", 0], "upscale_method": "lanczos", "width": 1024,
-                                                      "height": 1024, "crop": "center"}},
-        "11": {"class_type": "VAEEncode", "inputs": {"pixels": ["5", 0], "vae": ["1", 2]}},
-        "12": {"class_type": "KSampler", "inputs": {
-            "model": ["1", 0], "positive": ["2", 0], "negative": ["3", 0], "latent_image": ["11", 0],
-            "seed": seed, "steps": steps, "cfg": cfg, "sampler_name": "dpmpp_2m", "scheduler": "karras", "denoise": denoise}},
-        "13": {"class_type": "VAEDecode", "inputs": {"samples": ["12", 0], "vae": ["1", 2]}},
-        "14": {"class_type": "SaveImage", "inputs": {"images": ["13", 0], "filename_prefix": prefix}},
-    }
-
-
 def _png(img: Image.Image) -> bytes:
     b = io.BytesIO()
     img.save(b, format="PNG")

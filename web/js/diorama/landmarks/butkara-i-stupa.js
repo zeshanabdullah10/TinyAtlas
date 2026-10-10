@@ -1,9 +1,9 @@
-// Butkara I (Mingora, Swat): the excavated sacred court, drawn from the Atlas photos 01 (the main stupa), 02 (its drum
-// courses), 03-04 (the votive court: square stepped plinths in rows, most ruined, a few with a drum and dome; flagged
-// paving) and 06 (the stages of the stupa). No published dimensions were found, so every size is ESTIMATED from the
+// Butkara I (Mingora, Swat): the excavated sacred court, drawn from the Atlas photos 01 (the main stupa behind the
+// court), 03 (its drum courses), 02 and 04 (the votive court: square stepped plinths in rows, most ruined, a few with
+// a drum and dome; flagged paving) and 06 (the stages of the stupa). No published dimensions were found, so every size is ESTIMATED from the
 // photos (see landmark.edits in backend/tools/diorama_sites/butkara-i-stupa.json). Local metres: x right, -z front
 // (the drive), y up. The court is at ground level: the terrain is the build's, and a landmark cannot cut it (the photos
-// show it sunk about 1.5 m; that is not modelled). A low wall edges it.
+// do not show a measured sinking, so none is modelled). A low wall edges it.
 import * as THREE from "three";
 
 const COURT = { w: 60, d: 50, wall: 0.8 };          // estimated: a rectangular court with a low kerb wall
@@ -66,7 +66,7 @@ export default function build(ctx) {
     }
   }
 
-  // The plaster patch of photo 02: a whitewashed band on the lower front of the drum (phi = pi is the front, -z).
+  // The plaster patch of photo 03: a whitewashed band on the lower front of the drum (phi = pi is the front, -z).
   // Its points run top to bottom so the faces point outward.
   const plaster = new THREE.Mesh(new THREE.LatheGeometry(
     [new THREE.Vector2(8.1, 2.6), new THREE.Vector2(8.1, 0.2)], 24, Math.PI * 0.62, Math.PI * 0.76), M.plaster);

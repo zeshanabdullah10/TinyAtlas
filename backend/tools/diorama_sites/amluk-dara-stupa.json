@@ -36,7 +36,7 @@
     "sources": [
       {
         "name": "Amluk-Dara Stupa maquette (Tiny Atlas, procedural)",
-        "use": "the stupa's plinth, drum and dome; the 21 m diameter follows the published figure, the other proportions are estimated",
+        "use": "the stupa's plinth, drum and dome; the 21 m diameter and the 4 m plinth follow the published figures (Wikipedia); the 34 m plinth width is unverified and the other proportions are estimated",
         "licence": "Tiny Atlas own procedural geometry (backend/tools/blender/stupa.py)",
         "url": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa"
       }

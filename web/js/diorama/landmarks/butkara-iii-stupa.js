@@ -10,7 +10,10 @@ function stupa(ctx, s) {
   const { box, lathe, ground, group } = ctx;
   const { x, z, r, ph, dr, dh, mats } = s;
   const { schist, pale } = mats;
-  const y = ground(x, z), side = r * 2.5, k = r;
+  const side = r * 2.5, k = r;
+  // Seat the plinth on the lowest ground under its corners (the centre alone leaves a corner floating on the slope).
+  const h2 = side / 2;
+  const y = Math.min(ground(x, z), ground(x - h2, z - h2), ground(x + h2, z - h2), ground(x - h2, z + h2), ground(x + h2, z + h2));
   box(group, side, ph, side, schist, x, y, z);                         // square plinth of schist rubble
   const b = y + ph;
   lathe(group, [[r * 1.22, 0], [r * 1.22, 0.12 * k], [r * 1.08, 0.2 * k], [r * 1.08, 0.36 * k]], pale, x, b, z, 24); // base mouldings, lighter cut stone
@@ -28,7 +31,7 @@ function stupa(ctx, s) {
 /** The earth cut behind the stupas (+z), with three shallow niches set into its face. */
 function cutWall(ctx, mats) {
   const { box, ground, group } = ctx;
-  for (const x of [-4.5, -1.5, 1.5, 4.5]) box(group, 3, 3.4, 0.8, mats.earth, x, ground(x, 4.4), 4.4);
+  for (const x of [-4.5, -1.5, 1.5, 4.5]) box(group, 3, 3.4, 0.8, mats.earth, x, Math.min(ground(x - 1.5, 4.0), ground(x + 1.5, 4.0)) - 0.2, 4.4);
   for (const x of [-3, 0, 3]) {
     const y = ground(x, 3.95);
     box(group, 1.1, 1.7, 0.12, mats.niche, x, y, 3.95);                 // shallow niche recess

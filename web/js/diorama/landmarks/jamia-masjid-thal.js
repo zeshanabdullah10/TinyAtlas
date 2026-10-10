@@ -109,7 +109,7 @@ export default function build(ctx) {
   frustum(24.0, 20.0, S2, 16.0, 12.0, R, roof);
 
   // Stepped tower of three tiers (6, 4.5 and 3 m square), each 1.6 m tall with a window band and its own low roof.
-  let y = R, size = 6.0;
+  let y = R;
   const tiers = [6.0, 4.5, 3.0];
   for (const s of tiers) {
     box(g, s, 1.6, s, timber, 0, y, 0);
@@ -119,7 +119,6 @@ export default function build(ctx) {
     }
     frustum(s + 0.8, s + 0.8, y + 1.6, s - 1.0, s - 1.0, y + 2.1, roof);
     y += 2.1;
-    size = s;
   }
   cyl(g, 0.05, 0.9, 0.9, white, 0, y, 0, 10);            // small dome finial
   cyl(g, 0.02, 0.02, 0.8, yellow, 0, y + 0.9, 0, 6);

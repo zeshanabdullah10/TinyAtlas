@@ -4,8 +4,8 @@ export default function build(ctx) {
   const { THREE, group, ground } = ctx;
   const stone = ctx.mat(0x8d8a84, { roughness: 0.95 }), rockMat = ctx.mat(0x8d8a84, { roughness: 1, flatShading: true });
 
-  // The rock: a subdivided icosahedron about 7 m x 5 m x 4 m, its road face flattened to the plane z = 0,
-  // roughened by displacement, its foot 0.8 m into the real ground.
+  // The rock: a subdivided icosahedron 3.2 m wide, 6.8 m high (the DOAM boulder record) and 4 m deep, its road face
+  // flattened to the plane z = 0, roughened by displacement, its foot 0.8 m into the real ground.
   const rock = new THREE.IcosahedronGeometry(1, 3);
   const p = rock.attributes.position;
   // displacement from the vertex position, not its index: the geometry repeats each corner once per face, and an
@@ -14,14 +14,14 @@ export default function build(ctx) {
     + 0.5 * Math.sin(5.1 * x + 2.0) * Math.sin(4.3 * y + 0.3) * Math.sin(4.7 * z + 1.9);
   for (let i = 0; i < p.count; i++) {
     const ux = p.getX(i), uy = p.getY(i), uz = p.getZ(i);
-    let x = ux * 3.5, y = uy * 2.5 + 1.7, z = uz * 2 + 2;
+    let x = ux * 1.6, y = uy * 3.4 + 2.6, z = uz * 2 + 2;
     if (z < 0.6) z *= 0.2;                                          // flat road face
-    const nx = x / 3.5, ny = (y - 1.7) / 2.5, nz = (z - 2) / 2;
+    const nx = x / 1.6, ny = (y - 2.6) / 3.4, nz = (z - 2) / 2;
     const len = Math.hypot(nx, ny, nz) || 1;
     const k = lump(ux, uy, uz) * (z < 0.6 ? 0.08 : 0.35);           // the carved face stays nearly flat
     x += (k * nx) / len; y += (k * ny) / len; z += (k * nz) / len;
     // shallow oval niche in the face: the figure sits on its floor
-    if (z < 0.6 && (x / 2.1) ** 2 + ((y - 2.2) / 2.3) ** 2 < 1) z = Math.max(z, 0.25);
+    if (z < 0.6 && (x / 1.5) ** 2 + ((y - 2.9) / 2.8) ** 2 < 1) z = Math.max(z, 0.25);
     y = Math.max(y, ground(x, z) - 0.8);                            // foot 0.8 m into the ground
     p.setXYZ(i, x, y, z);
   }
@@ -31,7 +31,7 @@ export default function build(ctx) {
   group.add(rockMesh);
 
   // The figure: rounded masses in the same stone, raised 0.3-0.6 m from the niche floor (z = 0.25).
-  const base = ground(0, 0) + 0.3;
+  const base = ground(0, 0) + 1.2;   // the figure's seat, 1.2 m above the ground (estimated)
   const sph = new THREE.SphereGeometry(1, 20, 14);
   const add = (x, y, z, s) => {
     const o = new THREE.Mesh(sph, stone);

@@ -50,14 +50,6 @@ def nearest_node(graph, p: Node, size_m) -> Node:
     return min(graph, key=lambda n: ((n[0] - p[0]) * w) ** 2 + ((n[1] - p[1]) * h) ** 2)
 
 
-def snap_distance_m(graph, p: Node, size_m) -> float:
-    """Metres from p to the nearest vertex of the (largest-component) road graph; inf if there is no graph."""
-    if not graph:
-        return math.inf
-    n = nearest_node(graph, p, size_m)
-    return math.hypot((n[0] - p[0]) * size_m[0], (n[1] - p[1]) * size_m[1])
-
-
 def shortest_path(graph, src: Node, dst: Node) -> list[Node]:
     """Dijkstra. Returns [] if dst is unreachable."""
     dist, prev, pq = {src: 0.0}, {}, [(0.0, src)]

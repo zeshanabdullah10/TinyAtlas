@@ -84,6 +84,7 @@
   "drive_km": 0.6,
   "pack": "swat-lower",
   "road": "Saidu Sharif Road",
+  "road_kind": "road",
   "osm_use": "Saidu Sharif Road, the streams and the buildings near the museum",
   "built_up": true
 }

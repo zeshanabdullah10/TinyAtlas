@@ -79,19 +79,6 @@ def landmarks(slug: str, cfg: dict) -> list[dict]:
     return out
 
 
-def chunks(slug: str, cfg: dict) -> list[dict]:
-    """Retrieval chunks for the guide: each place's summary and its sourced facts."""
-    out = []
-    keep = {lm.get("slug") for lm in cfg["landmarks"]}
-    for p in places(slug):
-        if p["slug"] not in keep:
-            continue
-        texts = [p.get("summary", "")] + [f["text"] for f in p.get("facts") or []]
-        url = next((f["source"] for f in p.get("facts") or [] if f.get("source")), "")
-        out.append({"source": p["name"], "slug": p["slug"], "url": url, "section": "", "text": " ".join(t for t in texts if t)[:1800], "first": True})
-    return [c for c in out if c["text"]]
-
-
 def facts(slug: str, cfg: dict) -> dict:
     keep = {lm.get("slug") for lm in cfg["landmarks"]}
     items = [{"text": f["text"], "topic": "place", "source": p["name"], "url": f.get("source", "")}

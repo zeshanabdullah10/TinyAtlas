@@ -1,20 +1,44 @@
 [
- {"label": "Built", "value": "1940–41, by Miangul Abdul Wadud (Badshah Sahib), the first Wali of Swat",
-  "quote": "built in 1940 by the first king of Swat, Miangul Abdul Wadud (Badshah Sahib)", "source": "Wikipedia, White Palace (Marghazar)",
-  "url": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"},
- {"label": "The marble", "value": "White marble from the quarry that supplied the Taj Mahal",
-  "quote": "imported from Jaypure India, the same quarry that supplied marble to the Taj Mahal Agra", "source": "Wikipedia, White Palace (Marghazar)",
-  "url": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"},
- {"label": "From Saidu Sharif", "value": "About 13 km up the Marghazar valley",
-  "quote": "about 13 kilometers away from Saidu Sharif", "source": "Wikipedia, White Palace (Marghazar)",
-  "url": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"},
- {"label": "A royal guest", "value": "Queen Elizabeth II stayed three days in 1961; her suite is kept",
-  "quote": "It has preserved the Royal Suite, the Wali of Swat's bedroom where Queen Elizabeth stayed for three days.", "source": "The News, Mar 2017",
-  "url": "https://www.thenews.com.pk/print/193899-Swats-White-Palace-is-a-major-tourist-attraction"},
- {"label": "Today", "value": "A hotel; you can stay or visit the grounds",
-  "quote": "converted into a tourist resort", "source": "Wikipedia, White Palace (Marghazar)",
-  "url": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"},
- {"label": "Around it", "value": "Meadows and springs below Mount Elum",
-  "quote": "Surrounded by lush green meadows and springs, the palace is set in a beautiful place.", "source": "The News, Mar 2017",
-  "url": "https://www.thenews.com.pk/print/193899-Swats-White-Palace-is-a-major-tourist-attraction"}
+ {
+  "label": "Built",
+  "value": "Built in 1940 by Miangul Abdul Wadud (Badshah Sahib), the first king of Swat",
+  "quote": "built in 1940 by the first king of Swat, Miangul Abdul Wadud (Badshah Sahib)",
+  "source": "Wikipedia, White Palace (Marghazar)",
+  "url": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"
+ },
+ {
+  "label": "The marble",
+  "value": "Imported from Jaypure, India, the quarry that supplied marble to the Taj Mahal",
+  "quote": "imported from Jaypure India, the same quarry that supplied marble to the Taj Mahal Agra",
+  "source": "Wikipedia, White Palace (Marghazar)",
+  "url": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"
+ },
+ {
+  "label": "From Saidu Sharif",
+  "value": "About 13 km away from Saidu Sharif",
+  "quote": "about 13 kilometers away from Saidu Sharif",
+  "source": "Wikipedia, White Palace (Marghazar)",
+  "url": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"
+ },
+ {
+  "label": "A royal guest",
+  "value": "Queen Elizabeth stayed three days; the room is kept as the Royal Suite",
+  "quote": "It has preserved the Royal Suite, the Wali of Swat's bedroom where Queen Elizabeth stayed for three days.",
+  "source": "The News, Mar 2017",
+  "url": "https://www.thenews.com.pk/print/193899-Swats-White-Palace-is-a-major-tourist-attraction"
+ },
+ {
+  "label": "Today",
+  "value": "Converted into a tourist resort",
+  "quote": "converted into a tourist resort",
+  "source": "Wikipedia, White Palace (Marghazar)",
+  "url": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"
+ },
+ {
+  "label": "Around it",
+  "value": "Surrounded by lush green meadows and springs",
+  "quote": "Surrounded by lush green meadows and springs, the palace is set in a beautiful place.",
+  "source": "The News, Mar 2017",
+  "url": "https://www.thenews.com.pk/print/193899-Swats-White-Palace-is-a-major-tourist-attraction"
+ }
 ]

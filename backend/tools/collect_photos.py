@@ -66,6 +66,13 @@ EXCLUDE = {
 EXCLUDE_FOR = {
     "butkara-iii-stupa": {"File:Butkara Stupa (deutsch).jpg", "File:Butkara stupa 2nd century BCE.jpg"},   # Butkara I drawings
     "kumrat-waterfall": {"File:Jahaz Banda Waterfall - 3,100 m (Kumrat Valley).jpg"},                         # another fall
+    # the bridge's card: river, valley, village and waterfall views of Matiltan with no bridge in them
+    "matiltan-ushu-bridge": {"File:Ushu River in Matiltan 2015-05-17.jpg", "File:Matiltan, Kalam Valley.jpg",
+                             "File:Valley of Matiltan swat.jpg", "File:Matiltan waterfall.jpg"},
+    "mighty-22-falls": {"File:En Route Mighty 22 Falls.jpg"},                                                   # a snowy valley
+    "chakdara-fort": {"File:Swat River Chakdara.jpg"},                                                           # the river
+    "swat-museum": {"File:Swat Museum in Mingora city.jpg"},                                                     # Mingora aerial
+    "bazira-barikot-ghundai": {"File:Ancient Bazira Barikot Swat Kp Pakistan (2).jpg"},                         # a road sign
 }
 
 

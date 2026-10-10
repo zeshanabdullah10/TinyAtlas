@@ -7,10 +7,11 @@ export default function build(ctx) {
   const dark = ctx.mat(0x2a2320, { roughness: 1 });
   const top = ctx.mat(0x9c8062, { roughness: 0.9 });
 
-  // podium: 8 m square, 1.5 m high, seated on the real slope (sunk 0.6 m so no edge floats)
-  box(g, 8, 1.5, 8, podium, 0, ground(0, 0) - 0.6, 0);
+  // podium: 8 m square, 1.5 m high above the ground (top at y 1.5, where the chamber stands), seated on the real slope
+  // (sunk 0.6 m so no edge floats)
+  box(g, 8, 2.1, 8, podium, 0, ground(0, 0) - 0.6, 0);
   // stair down the front (-z): four treads, 0.3 m apart in height, each 3.2 m wide and 0.925 m deep (run 3.7 m)
-  const tops = [1.2, 0.9, 0.6, 0.3];
+  const tops = [1.5, 1.2, 0.9, 0.6];   // treads step down from the podium edge, about 0.3 m a riser
   tops.forEach((h, k) => {
     const z = -4 - (k + 0.5) * 0.925;
     box(g, 3.2, h + 0.6, 0.925, podium, 0, ground(0, z) - 0.6, z);

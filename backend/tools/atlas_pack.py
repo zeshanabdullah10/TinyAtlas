@@ -18,6 +18,7 @@ from pyproj import Transformer
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from shortname import short_name
 from collect_photos import wrong_photo
+from pack_corrections import apply as apply_corrections
 
 ROOT = Path(__file__).resolve().parents[2]
 BLENDER = Path("D:/TinyAtlas/tools/blender-5.2.2-windows-x64/blender.exe")
@@ -564,6 +565,7 @@ def step_places(ctx):
             pl["estimated_scale"] = True
         places.append(pl)
     places.sort(key=lambda p: (p["tier"], p["name"]))
+    log(f"pack_corrections: {apply_corrections(places)} checked text fixes")   # backend/tools/pack_corrections.json
     jdump(out / "places.json", places)
     ctx["places"], ctx["dropped"] = places, dropped
     log("places", len(places), "dropped (outside near+far):", len(dropped), dropped)

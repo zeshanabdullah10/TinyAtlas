@@ -1,39 +1,88 @@
 {
   "title": "Gogdara Rock Carvings",
   "subtitle": "Prehistoric petroglyphs and a Buddhist addition in Gogdara, a hamlet of Udegram, Lower Swat",
-  "bbox": [34.7296, 72.2784, 34.7566, 72.3117],
+  "bbox": [
+    34.7296,
+    72.2784,
+    34.7566,
+    72.3117
+  ],
   "arrival": {
     "name": "Gogdara Rock Carvings",
-    "point": [34.74307, 72.29508]
+    "point": [
+      34.74307,
+      72.29508
+    ]
   },
   "landmark": {
     "kind": "rock_carving",
     "name": "Gogdara Rock Carvings",
-    "point": [34.74307, 72.29508],
+    "point": [
+      34.74307,
+      72.29508
+    ],
     "module": "gogdara-rock-carvings",
     "terrace_m": 0,
     "top_m": 8,
     "ring_m": 16,
     "edits": [
-      "The boulder is drawn (no source gives its size or shape): about 12 m wide, 6 m high and 8 m deep, a weathered granite block leaning back about 30 degrees, its base sunk 1 m into the real DEM slope at the place point; no levelled terrace (terrace 0). Its colour (granite with lichen-ochre patches) is estimated from the photos.",
+      "The boulder is drawn (no source gives its size or shape): about 12 m wide, 6 m high and 8 m deep, a weathered granite block leaning back about 30 degrees, its centre set 4 m west and 4 m south of the place point (so it stands clear of the lane), its base sunk 1 m into the real DEM slope; no levelled terrace (terrace 0). Its colour (granite with lichen-ochre patches) is estimated from the photos.",
       "The incised figures are drawn after photos Zainul Abideen and Yusra.Amin123 (Commons, CC BY-SA 4.0): a row of animal outlines with horns or necks, a few human-like figures, a spoked wheeled form, and dots and rings, as thin pale lines about 18% lighter than the rock (drawn after photos). Their number, size and places are estimated from the photos, not measured.",
       "The sources give a chariot only in one line (Livius: 'the animals and chariots'); the drawn wheeled form is after that line and the photos, not measured.",
-      "The sources give 'more than 100 carvings' and 71 animals, 17 objects and 29 unidentified (Olivieri, via Dawn); the drawing shows a sample, not all of them.",
+      "The sources give 'more than 100 carvings' and 71 animals, 17 objects and 29 unidentified (Olivieri, via Dawn); the drawing shows a sample, not all of them. The Dawn article could not be fetched here (HTTP 403), so these counts are unverified.",
       "The Buddhist relief (sixth century CE, Livius) is not visible in the photos used and is not drawn.",
       "The face is turned to the end of the drive (no compass bearing is given in any source); the photos show the cliff, not its orientation.",
       "The village lanes that bring the visitor here are OSM roads; the N-95 Mingora road is about 0.46 km off, so the drive takes the lanes from the junction and stops at the rock."
     ],
     "sources": [
-      {"name": "Livius.org (Jona Lendering), Gogdara", "use": "location (just off the main road in a small village), c.1000 BCE dating of the petroglyphs, the sixth-century CE Buddhist addition, the 'animals and chariots' line", "licence": "text quoted for the practical facts; all rights with the author", "url": "https://www.livius.org/articles/place/gogdara/"},
-      {"name": "Xplore Open heritage database, Gogdara Rock Carvings", "use": "more than 100 carvings on a rocky cliff; animals, humans, geometric patterns and inscriptions; dating 2nd century BCE to 5th century CE; free entry; hamlet of Udegram", "licence": "text quoted; the database lists CC BY SA", "url": "https://xploreopen.org/heritage_sites/gogdara-rock-carvings/"},
-      {"name": "Dawn, 'Rock carving depicts ancient lifestyle of Swat'", "use": "71 animal, 17 object and 29 unidentified graffiti (Olivieri); rock at the foot of the northern slopes of Mt Sakhi-sar; early first millennium BCE", "licence": "news text, all rights with Dawn", "url": "https://www.dawn.com/news/1447677"},
-      {"name": "Wikimedia Commons photos (Gogdara Rock Carvings)", "use": "the six reference photos the drawn figures follow", "licence": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Rock_carvings_-_Gogdara.jpg"}
+      {
+        "name": "Livius.org (Jona Lendering), Gogdara",
+        "use": "location (just off the main road in a small village), c.1000 BCE dating of the petroglyphs, the sixth-century CE Buddhist addition, the 'animals and chariots' line",
+        "licence": "text quoted for the practical facts; all rights with the author",
+        "url": "https://www.livius.org/articles/place/gogdara/"
+      },
+      {
+        "name": "Xplore Open heritage database, Gogdara Rock Carvings",
+        "use": "more than 100 carvings on a rocky cliff; animals, humans, geometric patterns and inscriptions; dating 2nd century BCE to 5th century CE; free entry; hamlet of Udegram",
+        "licence": "text quoted; the database lists CC BY SA",
+        "url": "https://xploreopen.org/heritage_sites/gogdara-rock-carvings/"
+      },
+      {
+        "name": "Dawn, 'Rock carving depicts ancient lifestyle of Swat'",
+        "use": "71 animal, 17 object and 29 unidentified graffiti (Olivieri); rock at the foot of the northern slopes of Mt Sakhi-sar; early first millennium BCE",
+        "licence": "news text, all rights with Dawn",
+        "url": "https://www.dawn.com/news/1447677"
+      },
+      {
+        "name": "Wikimedia Commons photos (Gogdara Rock Carvings)",
+        "use": "the six reference photos the drawn figures follow",
+        "licence": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Rock_carvings_-_Gogdara.jpg"
+      }
     ]
   },
-  "drive_ways": [1027712714, 684092850, 1424645581, 1027712711],
-  "track_ways": [1027712714, 684092850, 1424645581, 1027712711],
-  "drive_start": [34.74472, 72.29048],
-  "far_bbox": [34.65, 72.18, 34.83, 72.40],
+  "drive_ways": [
+    1027712714,
+    684092850,
+    1424645581,
+    1027712711
+  ],
+  "track_ways": [
+    1027712714,
+    684092850,
+    1424645581,
+    1027712711
+  ],
+  "drive_start": [
+    34.74472,
+    72.29048
+  ],
+  "far_bbox": [
+    34.65,
+    72.18,
+    34.83,
+    72.4
+  ],
   "drive_km": 0.6,
   "built_up": true,
   "buildings_radius_m": 700,
