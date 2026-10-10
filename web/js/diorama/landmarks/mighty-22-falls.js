@@ -84,7 +84,8 @@ export default function build(ctx) {
     new T.MeshStandardMaterial({ color: 0x9fcad6, roughness: 0.1, transparent: true, opacity: 0.75 }),
   );
   pool.rotation.x = -Math.PI / 2;
-  pool.position.set(end.x, end.g + 0.05, end.z);
+  const lastP = P[P.length - 1];
+  pool.position.set(lastP.x, lastP.g + 0.05, lastP.z);
   group.add(pool);
   for (let i = 0; i < P.length; i += 7) {
     const { nx, nz } = normal(i);

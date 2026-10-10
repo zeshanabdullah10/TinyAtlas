@@ -30,12 +30,12 @@
     ],
     "terrace_m": 30,
     "clear_m": 30,
-    "top_m": 21,
+    "top_m": 19,
     "ring_m": 40,
     "edits": [
       "The mosque is drawn in the landmark module from two CC BY-SA Commons photos (Asfandyarlahor and Asad Ullah); it is not a survey, and OSM maps no footprint for it.",
-      "Estimated, not measured: the stone base and walls 21 x 15 m, the upper timber storey 21.6 x 17.6 m with its roof at about 9 m, the tower and lantern rising to about 20 m, the front arcade of wooden posts and the two tall door pillars.",
-      "The paint (teal and yellow frieze, balusters and pillar caps) follows the photos; the carved details are simplified and the lattice screens are left out.",
+      "Estimated, not measured: the stone base and ground floor 21 x 15 m with the floor line at 3.6 m; the upper storey an open gallery 4.2 m tall; the low hipped roof about 2 m high with 1.2 m eaves; the three-tier tower (6, 4.5 and 3 m square, 1.6 m each) rising to about 17 m; the posts, lattice screens, balusters and the two gate pillars (about 5 m).",
+      "The paint (grey timber, green, red and yellow bands and balusters, white gate pillars and tower finial) follows the photos; the carving is simplified to bands and the lattice is drawn as crossed slats.",
       "The ground within 30 m of the mosque is levelled to its base; the rest of the village is the DEM slope, and its houses are not mapped in OSM so they are not drawn."
     ],
     "sources": [
