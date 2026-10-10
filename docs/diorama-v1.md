@@ -145,6 +145,21 @@ N33E072 (the build reads either the full tile or a crop with the same top-left c
 (`backend/tools/osm_fetch.py S W N E out.json`, Overpass shape) when Overpass is unreachable. Check a build by eye
 with `backend/tools/diorama_shot.py <site> <dir> --shots table,lake,close,ground`.
 
+### Lower Swat heritage and more attractions (Oct 2026)
+Twenty more sites, each with its site file, a landmark module where one is drawn, sourced `practical.json` and
+credited Commons photos: Butkara I, Butkara III, Saidu Sharif I stupa and monastery, the Swat Museum, Amluk-Dara,
+Shingardar, Gumbat (Balo Kale), the Ghalegay and Jahanabad Buddhas, the Gogdara carvings, the Mahmud Ghaznavi mosque,
+Raja Gira castle, Bazira (Barikot), Malam Jabba (the OSM chairlift with moving chairs), the Thal wooden mosque, the
+Kumrat and Mighty 22 waterfalls, Gabin Jabba meadow, and Bashigram and Kharkhari lakes. Every drawn landmark is laid
+out after the Commons photos and any published plan or size; what is estimated is said in `landmark.edits`. Notes:
+- Kharkhari: the Gabral river runs through the lake, so `lake_radius_m` (260) keeps the lake apart from the river.
+- Bazira: the dig is the OSM archaeological-site outline 290 m south-west of the Wikidata node; one stretch of town
+  wall is drawn to show its kind, not its line.
+- Bashigram: the jeep road ends at Bishigram village (sources: "jeep to Bashigram"); the 9.5 km walk is traced.
+- Waterfalls: no published heights; the falls follow the mapped stream (Mighty 22) or the DEM gully (Kumrat).
+- Parked: Katora Lake (no mapped road within 4.5 km of Jandrai, where the trek starts) and Chakdara Fort (its horizon
+  ring runs west of the E072 DEM tile the build reads).
+
 ### Driving (both sites)
 The drive is the last 600 m of the track, about a minute (`drive_km` in `SITES`; `--shorten-only` trims a built site). Traffic is
 illustrative (`web/js/diorama/traffic.js`): Willys jeeps, a Hilux and motorbikes on the Mahodand track; painted

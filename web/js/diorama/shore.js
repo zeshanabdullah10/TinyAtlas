@@ -160,7 +160,7 @@ export function viewpoints(site, loop, path) {
     if (d < md && Math.abs(s - sPark) > 120) { md = d; mouth = s; }
   }
   if (!site.meta.lake && site.meta.landmark) {   // around a building: its front, its sides and the back, by where they are
-    const A = site.meta.arrival, n = A.name;
+    const n = site.meta.landmark.name || site.meta.arrival.name;
     const front = nearestOnLoop(loop, end.x, end.z);
     list[0] = { name: site.meta.landmark.kind === "palace" ? `On the lawn before the ${n}` : `In front of the ${n}`, s: front };
     list.push({ name: `Beside the ${n}`, s: front + loop.length / 4 }, { name: `Behind the ${n}`, s: front + loop.length / 2 },

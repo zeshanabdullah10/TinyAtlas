@@ -10,28 +10,32 @@ const NICHE_Z = 0.3;          // estimated: the niche floor is set 0.3 m back in
 const NICHE = { x: 3.4, y: 4.6, ry: 4.2 };    // estimated oval niche (half-widths) around the figure
 const STREAK_X = [-3.2, -1.1, 1.2, 3.1];      // estimated dark weathering streaks on the face (x, metres)
 
-// Low-frequency lumps on a rock surface (estimated shape, unit-sphere input).
-const lump = (x, y, z) =>
-  0.5 * Math.sin(1.1 * x + 0.4) * Math.cos(0.9 * y + 1.3) +
-  0.3 * Math.sin(1.7 * z + 0.2) * Math.cos(1.2 * x - 0.6) +
-  0.2 * Math.sin(1.4 * y + 0.8 * z);
+// Granite surface: three octaves of lumps (unit-sphere input), so the rock reads broken and blocky, not egg-smooth.
+const lump = (x, y, z, seed) => {
+  let v = 0, amp = 1, f = 1.3;
+  for (let k = 0; k < 3; k++, amp *= 0.5, f *= 2.1) {
+    v += amp * Math.sin(f * x + seed * 1.7 + k) * Math.sin(f * 1.3 * y + seed + 2.1 * k) * Math.sin(f * 0.9 * z + 0.6 * seed + 0.7 * k);
+  }
+  return v * 1.6;
+};
 
 // One granite boulder: a lumped sphere scaled to `s`, centred at `c`, sunk 1 m into the ground.
 // `face` true: the front (-z) is a flat carved face at z = 0, with the niche and the dark streaks.
 function boulder(ctx, group, c, s, face, seed) {
-  const tones = [ctx.mat(0x5f5b55, { roughness: 1 }), ctx.mat(0x6e6962, { roughness: 1 }),
-                 ctx.mat(0x8f8a82, { roughness: 1 }), ctx.mat(0xa6a097, { roughness: 1 })];
-  const sph = new THREE.SphereGeometry(1, 96, 64).toNonIndexed();
+  const tones = [ctx.mat(0x5f5b55, { roughness: 1, flatShading: true }), ctx.mat(0x6e6962, { roughness: 1, flatShading: true }),
+                 ctx.mat(0x8f8a82, { roughness: 1, flatShading: true }), ctx.mat(0xa6a097, { roughness: 1, flatShading: true })];
+  const sph = new THREE.SphereGeometry(1, face ? 72 : 22, face ? 48 : 14).toNonIndexed();   // the face needs detail for the niche
   const p = sph.attributes.position;
   const bins = [[], [], [], []];
   const ptsOf = [];
   for (let i = 0; i < p.count; i++) {
     const ux = p.getX(i), uy = p.getY(i), uz = p.getZ(i);
-    const n = lump(ux + seed, uy, uz);
-    const amp = face && uz < 0 ? 0.25 : 0.9;                // the carved face is kept smooth; the rest is broken
-    let x = c[0] + ux * s[0] + ux * amp * n;
-    let y = c[1] + uy * s[1] + uy * amp * n;
-    let z = c[2] + uz * s[2] + uz * amp * n;
+    const n = lump(ux, uy, uz, seed);
+    const amp = (face && uz < 0 ? 0.04 : 0.16) * (1 + 0.2 * Math.sign(n));   // the carved face is kept smooth; the rest is broken
+    const top = uy > 0.55 ? 1 - (uy - 0.55) * 0.45 : 1;     // a flatter crown: boulders, not eggs
+    let x = c[0] + ux * s[0] * (1 + amp * n);
+    let y = c[1] + uy * s[1] * top * (1 + amp * n);
+    let z = c[2] + uz * s[2] * (1 + amp * n);
     if (face && z < 0) z = 0;                                // the flat carved face
     if (face) {
       const r = Math.hypot(x / NICHE.x, (y - NICHE.y) / NICHE.ry);

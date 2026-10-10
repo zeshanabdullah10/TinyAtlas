@@ -67,32 +67,42 @@ export default function build(ctx) {
     return new T.Vector3(x, H(x, z), z).addScaledVector(new T.Vector3(-gx, 1, -gz).normalize(), lift);
   };
 
-  // Gorge walls: two rows of displaced low-poly blocks along the line, 8-15 m tall, about 7 m apart, seated on the ground.
-  const wallMat = [ctx.mat(GREY, { roughness: 0.95 }), ctx.mat(LICHEN, { roughness: 1 })];
-  const block = (w, h, d, seed) => {
-    const geo = new T.BoxGeometry(w, h, d, 2, 2, 2), p = geo.attributes.position, k = 0.14 * Math.min(w, d);
-    for (let i = 0; i < p.count; i++) {
-      p.setXYZ(i, p.getX(i) + (hash(i, seed, 31) - 0.5) * 2 * k, p.getY(i) + (hash(i, seed, 37) - 0.5) * k,
-               p.getZ(i) + (hash(i, seed, 41) - 0.5) * 2 * k);
-    }
-    geo.translate(0, h / 2, 0);
-    geo.computeVertexNormals();
-    return geo;
-  };
-  let bi = 0;
+  // Gorge walls: one continuous cliff per side. Blocks 12 m long every 7 m along the line (overlap 42%), the top
+  // height 10 + 4 sin(s/18) m above the ground (smooth, not random), each block sunk 3 m and set 2 m outward into the
+  // slope, with a sloped cap leaning away from the water. Each block sits in its own group, turned to the line.
+  const wallMat = [ctx.mat(GREY, { roughness: 0.95, flatShading: true }), ctx.mat(LICHEN, { roughness: 1, flatShading: true })];
+  const SPACING = 7, LEN = 12, THICK = 6;
+  const tanOf = (nrm) => new T.Vector2(nrm.y, -nrm.x);
   for (const side of [-1, 1]) {
-    let s = 0;
-    for (let n = 0; s < 1.02; n++) {
-      const { p, nrm } = at(s), seed = 60 + bi++;
-      const x = p.x + nrm.x * side * WALL_OFF, z = p.y + nrm.y * side * WALL_OFF;
-      const h = 9 + hash(n, seed, 3) * 7;                         // 8-15 m above the ground (sunk 1 m)
-      const m = new T.Mesh(block(4 + hash(n, seed, 5) * 2, h, 4 + hash(n, seed, 9) * 2, seed),
-                           hash(n, seed, 13) < 0.3 ? wallMat[1] : wallMat[0]);
-      m.position.set(x, H(x, z) - 1, z);                          // sunk 1 m so the base is hidden in the slope
-      m.rotation.y = hash(n, seed, 17) * 0.6 - 0.3;
-      m.castShadow = m.receiveShadow = true;
-      g.add(m);
-      s += 7 / L;                                                  // ~7 m apart along the line
+    for (let sm = 0, n = 0; sm <= L + 0.01; sm += SPACING, n++) {
+      const { p, nrm } = at(sm / L), tan = tanOf(nrm), seed = 60 + n + (side > 0 ? 100 : 0);
+      const c = new T.Vector2(p.x + nrm.x * side * (WALL_OFF + 2), p.y + nrm.y * side * (WALL_OFF + 2));
+      // Sample the ground under the footprint so the base is below every point of it.
+      let minG = Infinity;
+      for (const a of [-LEN / 2, 0, LEN / 2]) for (const b of [-THICK / 2, 0, THICK / 2]) {
+        const q = new T.Vector2(c.x + tan.x * a + nrm.x * side * b, c.y + tan.y * a + nrm.y * side * b);
+        minG = Math.min(minG, H(q.x, q.y));
+      }
+      const base = minG - 3;
+      const top = H(c.x, c.y) + 10 + 4 * Math.sin(sm / 18);
+      const height = top - base;
+      const grp = new T.Group();
+      grp.position.set(c.x, base, c.y);
+      grp.rotation.y = Math.atan2(-tan.y, tan.x) + (side < 0 ? Math.PI : 0);   // local x along the line, local +z outward
+      // a rough rock mass, not a box: a low-poly sphere stretched to the block, its corners pushed in and out by
+      // position-based lumps (shared corners move together, so no seams), leaning back from the water
+      const rock = new T.IcosahedronGeometry(1, 2);
+      const rp = rock.attributes.position;
+      for (let i = 0; i < rp.count; i++) {
+        const ux = rp.getX(i), uy = rp.getY(i), uz = rp.getZ(i);
+        const k = 1 + 0.22 * Math.sin(3.1 * ux + seed) * Math.sin(2.7 * uy + 0.5 * seed) * Math.sin(3.3 * uz + 1.3);
+        rp.setXYZ(i, ux * LEN * 0.62 * k, (uy * 0.5 + 0.5) * height * k - (uy < -0.6 ? 2 : 0), uz * THICK * 0.62 * k);
+      }
+      rock.computeVertexNormals();
+      const body = new T.Mesh(rock, hash(n, seed, 13) < 0.3 ? wallMat[1] : wallMat[0]);
+      body.rotation.set(0.12 + 0.08 * (hash(n, seed, 17) - 0.5), 0.5 * (hash(n, seed, 19) - 0.5), 0.1 * (hash(n, seed, 23) - 0.5));
+      body.castShadow = body.receiveShadow = true; grp.add(body);
+      g.add(grp);
     }
   }
 

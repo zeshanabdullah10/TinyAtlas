@@ -5,9 +5,12 @@
 // spoked wheeled form, rings and dots) as pale thin lines only ~18% lighter than the rock. The sources give
 // animals, humans, geometric patterns and inscriptions, and "animals and chariots" (Livius). The sixth-century CE
 // Buddhist relief is not drawn.
+import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
+
 const W = 12, H = 6;            // face width and height, metres (estimated)
 const PX_W = 1024, PX_H = 512;  // carving texture, same aspect as the face
 const GRANITE = "#8e8a80", LINE = "#a7a296";
+const OFF_X = -4, OFF_Z = 4;   // the boulder sits 5 m off the village lane (OSM), within 6 m of the point
 
 /** Carvings in viewer coordinates: mx to the viewer's right (-W/2 .. W/2), my up (-H/2 .. H/2), metres. */
 function drawCarvings(c) {
@@ -93,7 +96,6 @@ export default function build(ctx) {
   const pos = geo.attributes.position;
   const col = new Float32Array(pos.count * 3);
   const uv = new Float32Array(pos.count * 2);
-  const hash = (a, b) => Math.sin(a * 127.1 + b * 311.7) * 43758.5453 % 1;
   for (let i = 0; i < pos.count; i++) {
     const px = pos.getX(i), py = pos.getY(i), pz = pos.getZ(i);
     // toward a box: a cube-like boulder with rounded edges (blend 0.8 of the way to the cube surface)
@@ -110,21 +112,23 @@ export default function build(ctx) {
       Z = zf + 0.08 * Math.sin(X * 2.1 + Y * 3.3);
     }
     // seat the base 1 m into the real slope
-    const g = ground(X, Z);
-    pos.setXYZ(i, X, Y + H / 2 + g - 1, Z);
+    const sx = X + OFF_X, sz = Z + OFF_Z;
+    const g = ground(sx, sz);
+    pos.setXYZ(i, sx, Y + H / 2 + g - 1, sz);
     // planar uv for the carved face (viewer's right is -x); the back and sides use a plain corner of the texture
     if (Z < -0.2) { uv[i * 2] = (W / 2 - X) / W; uv[i * 2 + 1] = (Y + H / 2) / H; }
     else { uv[i * 2] = 0.01; uv[i * 2 + 1] = 0.01; }
     // granite colour with vertex variation and lichen-ochre patches
-    const v = 0.92 + 0.12 * (0.5 + 0.5 * Math.sin(X * 0.9 + Y * 1.3) * Math.cos(Z * 0.7)) + 0.03 * hash(i, 3);
+    const v = 0.92 + 0.12 * (0.5 + 0.5 * Math.sin(X * 0.9 + Y * 1.3) * Math.cos(Z * 0.7));
     const o = Math.sin(X * 0.6 - Z * 0.5 + 1.7) * Math.sin(Y * 1.1 + X * 0.3) > 0.55 ? 0.3 : 0;
     col[i * 3] = v * (1 + 0.1 * o); col[i * 3 + 1] = v * (1 - 0.04 * o); col[i * 3 + 2] = v * (1 - 0.25 * o);
   }
   geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
   geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
-  geo.computeVertexNormals();
+  const smooth = mergeVertices(geo);                      // shared vertices: smooth shading (the carved face stays flat)
+  smooth.computeVertexNormals();
   const mat = new THREE.MeshStandardMaterial({ map: rockTexture(THREE), vertexColors: true, roughness: 0.95, metalness: 0 });
-  const rock = new THREE.Mesh(geo, mat);
+  const rock = new THREE.Mesh(smooth, mat);
   rock.castShadow = true; rock.receiveShadow = false;    // self-shadowing of the bulged face made a diamond acne
   rock.userData.keep = true;                              // keep out of ctx.batch: it carries its own uv and colour
   group.add(rock);
