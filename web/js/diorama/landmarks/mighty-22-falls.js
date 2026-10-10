@@ -53,13 +53,13 @@ export default function build(ctx) {
   const phi = Math.atan2(GULLY_RUN, DROP);                         // tilt of the face from vertical
   const L = Math.hypot(DROP, GULLY_RUN);
   const base = ground(0, 0);
-  const wet = new T.MeshStandardMaterial({ color: 0x4a443c, roughness: 0.4, side: T.DoubleSide });
+  const wet = new T.MeshStandardMaterial({ color: 0x4a443c, emissive: 0x2a2620, roughness: 0.4, side: T.DoubleSide });
   const face = new T.Mesh(new T.PlaneGeometry(GULLY_W, L), wet);
   face.rotation.x = phi;
   face.position.set(0, base + DROP / 2, GULLY_RUN / 2 + 0.3);
   group.add(face);
   for (const sx of [-1, 1]) {                                       // the two gully walls, rock on each side
-    const wall = new T.Mesh(new T.PlaneGeometry(GULLY_RUN * 1.6, L), mat(0x5a5248, { roughness: 0.9, side: T.DoubleSide }));
+    const wall = new T.Mesh(new T.PlaneGeometry(GULLY_RUN * 1.6, L), mat(0x5a5248, { emissive: 0x2e2a24, roughness: 0.9, side: T.DoubleSide }));
     wall.rotation.set(phi, sx * Math.PI / 2, 0);
     wall.position.set(sx * GULLY_W / 2, base + DROP / 2, GULLY_RUN / 2);
     group.add(wall);
@@ -87,7 +87,7 @@ export default function build(ctx) {
     );
     m.rotation.x = phi;
     const along = h / 2;                                            // centre of the run from the foot
-    m.position.set(x, base + along * Math.cos(phi), along * Math.sin(phi) + 0.35);
+    m.position.set(x, base + along * Math.cos(phi), along * Math.sin(phi) - 0.45);  // on the road side of the face
     m.userData.keep = true;
     m.userData.speed = speed;
     m.userData.tex = t;
