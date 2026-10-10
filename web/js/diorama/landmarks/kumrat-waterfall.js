@@ -132,9 +132,9 @@ export default function build(ctx) {
       const m = new T.Mesh(geo, mat);
       m.userData.keep = true;
       g.add(m);
-      fall.push(tex);
-      tex.userData = { speed };
     }
+    fall.push(tex);
+    tex.userData = { speed };
   }
 
   // Spray: a cloud of points that rise and drift at each step and over the pool.

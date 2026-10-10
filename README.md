@@ -102,4 +102,5 @@ Contains modified Copernicus DEM GLO-30 data, © DLR e.V. 2010-2014 and © Airbu
 provided under COPERNICUS by the European Union and ESA. © ESA WorldCover project 2021 (CC BY 4.0). Imagery:
 Sentinel-2 cloudless 2016 by EOX IT Services GmbH (CC BY 4.0). © OpenStreetMap contributors (ODbL). Photos via
 Wikimedia Commons, each credited (CC0, public domain, CC BY or CC BY-SA). Sky: Poly Haven (CC0). 3D shapes: TRELLIS
-(MIT) and procedural stupas. Facts and history from Wikipedia and Wikidata (CC BY-SA), each linked.
+(MIT) and procedural stupas. Facts and history from Wikipedia and Wikidata (CC BY-SA), each linked. Diorama weather forecasts: Open-Meteo (open-meteo.com), shown in the app. Audio guide voice: Chatterbox
+(Resemble AI, MIT).
