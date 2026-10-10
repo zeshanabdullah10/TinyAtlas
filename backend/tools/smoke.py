@@ -4,14 +4,17 @@ Landing page (hero, two cards with real stats, six-era timeline, no horizontal s
 hero button -> both Atlas packs load and report draw statistics -> the "Plan a day" sheet and the offline dialog open ->
 no console errors anywhere.
 
-    python backend/tools/smoke.py [base_url]
+    python backend/tools/smoke.py [base_url]   (default http://127.0.0.1:8000)
 """
+import os
 import sys
 
 from playwright.sync_api import sync_playwright
 
-BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000").rstrip("/")
+BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000").rstrip("/")
 GL = ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"]
+# Use the Playwright Chromium when this machine has it (the sandbox has no Edge); otherwise Playwright's default browser.
+CHROMIUM = "/opt/pw-browsers/chromium"
 errors, fails = [], []
 
 
@@ -22,7 +25,8 @@ def check(name, ok, detail=""):
 
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge", args=GL)
+    kw = {"executable_path": CHROMIUM} if os.path.exists(CHROMIUM) else {}
+    b = p.chromium.launch(args=GL, **kw)
 
     def new_page(w, h):
         page = b.new_page(viewport={"width": w, "height": h})

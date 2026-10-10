@@ -1,10 +1,10 @@
 [
   {
     "label": "Where",
-    "value": "Gogdara, a western hamlet of Udegram, Swat District",
-    "quote": "Gogdara rock is just off the main road in a small village.",
-    "source": "Livius.org (Jona Lendering), Gogdara",
-    "url": "https://www.livius.org/articles/place/gogdara/"
+    "value": "Gogdara, a western hamlet of Udegram",
+    "quote": "nearby village, a western hamlet of Udegram",
+    "source": "Xplore Open heritage database, Gogdara Rock Carvings",
+    "url": "https://xploreopen.org/heritage_sites/gogdara-rock-carvings/"
   },
   {
     "label": "Entry",
@@ -22,14 +22,21 @@
   },
   {
     "label": "Date",
-    "value": "Disputed: c.1000 BCE (Livius); 2nd century BCE to 5th century CE (Xplore Open)",
+    "value": "Incised c.1000 BCE, according to several scholars (Livius)",
     "quote": "According to several scholars, the petroglyphs were incised in c.1000 BCE.",
     "source": "Livius.org (Jona Lendering), Gogdara",
     "url": "https://www.livius.org/articles/place/gogdara/"
   },
   {
+    "label": "Other dating",
+    "value": "Dated by Xplore Open to the 2nd century BCE to the 5th century CE",
+    "quote": "The carvings were discovered by Giuseppe Tucci in 1955, and date back to the 2nd century BCE to the 5th century CE.",
+    "source": "Xplore Open heritage database, Gogdara Rock Carvings",
+    "url": "https://xploreopen.org/heritage_sites/gogdara-rock-carvings/"
+  },
+  {
     "label": "Buddhist addition",
-    "value": "Sixth-century CE Buddhist relief beside the older carvings",
+    "value": "A Buddhist addition from the sixth century CE",
     "quote": "This is a Buddhist addition from the sixth century CE.",
     "source": "Livius.org (Jona Lendering), Gogdara",
     "url": "https://www.livius.org/articles/place/gogdara/"

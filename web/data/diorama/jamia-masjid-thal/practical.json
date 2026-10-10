@@ -1,51 +1,51 @@
 [
- {
-  "label": "Where",
-  "value": "Thal village, Upper Dir district, on the Panjkora bank",
-  "quote": "is situated on the banks of the Panjkora River",
-  "source": "Wikipedia: Jamia Masjid Thal",
-  "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
- },
- {
-  "label": "Getting there",
-  "value": "The gateway to the Kumrat valley, in Upper Dir district",
-  "quote": "the gateway to the picturesque Kumrat valley in Upper Dir district",
-  "source": "The News International (M. Daud Jan, 5 Jan 2020)",
-  "url": "https://www.thenews.com.pk/print/593810-centuries-old-mosque-in-thall-draws-crowds-of-tourists"
- },
- {
-  "label": "History",
-  "value": "Built 1865; damaged by fire in 1950 and rebuilt in wood",
-  "quote": "This mosque was originally built in 1865.",
-  "source": "Wikipedia: Jamia Masjid Thal",
-  "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
- },
- {
-  "label": "Material",
-  "value": "Made of pure wood: very large pillars and beams",
-  "quote": "The specialty of this mosque is that it is made of pure wood",
-  "source": "Wikipedia: Jamia Masjid Thal",
-  "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
- },
- {
-  "label": "Pillars",
-  "value": "Big wooden pillars, carried in by villagers on their shoulders",
-  "quote": "big wooden pillars carried by the local people on their shoulders were used in the construction of the mosque",
-  "source": "The News International (M. Daud Jan, 5 Jan 2020)",
-  "url": "https://www.thenews.com.pk/print/593810-centuries-old-mosque-in-thall-draws-crowds-of-tourists"
- },
- {
-  "label": "Floors",
-  "value": "Two storeys; second floor begun in 1998, finished about nine years later",
-  "quote": "In 1998, the work on the second floor of the mosque started, and the construction of the mosque was completed in about nine years.",
-  "source": "Wikipedia: Jamia Masjid Thal",
-  "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
- },
- {
-  "label": "The view",
-  "value": "Green fields and the river seen from the second floor",
-  "quote": "The eye-catching scenery of lush green fields in the surroundings can be seen from the second floor of the mosque.",
-  "source": "The News International (M. Daud Jan, 5 Jan 2020)",
-  "url": "https://www.thenews.com.pk/print/593810-centuries-old-mosque-in-thall-draws-crowds-of-tourists"
- }
+  {
+    "label": "Where",
+    "value": "Thal, Upper Dir District, Khyber Pakhtunkhwa",
+    "quote": "The Jamia Masjid of Thal is a mosque located in Upper Dir District of the Khyber Pakhtunkhwa province in Pakistan.",
+    "source": "Wikipedia: Jamia Masjid Thal",
+    "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
+  },
+  {
+    "label": "Getting there",
+    "value": "The gateway to the Kumrat valley, in Upper Dir district",
+    "quote": "the gateway to the picturesque Kumrat valley in Upper Dir district",
+    "source": "The News International (M. Daud Jan, 5 Jan 2020)",
+    "url": "https://www.thenews.com.pk/print/593810-centuries-old-mosque-in-thall-draws-crowds-of-tourists"
+  },
+  {
+    "label": "History",
+    "value": "Built 1865; a fire in 1950 partly damaged it",
+    "quote": "This mosque was originally built in 1865. In 1950, there was a fire in this mosque, which partially damaged the mosque.",
+    "source": "Wikipedia: Jamia Masjid Thal",
+    "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
+  },
+  {
+    "label": "Material",
+    "value": "Made of pure wood",
+    "quote": "The specialty of this mosque is that it is made of pure wood",
+    "source": "Wikipedia: Jamia Masjid Thal",
+    "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
+  },
+  {
+    "label": "Pillars",
+    "value": "Big wooden pillars carried by local people on their shoulders",
+    "quote": "big wooden pillars carried by the local people on their shoulders were used in the construction of the mosque",
+    "source": "The News International (M. Daud Jan, 5 Jan 2020)",
+    "url": "https://www.thenews.com.pk/print/593810-centuries-old-mosque-in-thall-draws-crowds-of-tourists"
+  },
+  {
+    "label": "Floors",
+    "value": "Work on the second floor began in 1998; construction took about nine years",
+    "quote": "In 1998, the work on the second floor of the mosque started, and the construction of the mosque was completed in about nine years.",
+    "source": "Wikipedia: Jamia Masjid Thal",
+    "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
+  },
+  {
+    "label": "The view",
+    "value": "Lush green fields around the mosque, seen from the second floor",
+    "quote": "The eye-catching scenery of lush green fields in the surroundings can be seen from the second floor of the mosque.",
+    "source": "The News International (M. Daud Jan, 5 Jan 2020)",
+    "url": "https://www.thenews.com.pk/print/593810-centuries-old-mosque-in-thall-draws-crowds-of-tourists"
+  }
 ]

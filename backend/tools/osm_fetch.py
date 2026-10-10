@@ -33,7 +33,9 @@ def get(s, w, n, e, depth=0):
                     f.write_bytes(r.read())
                 break
             except urllib.error.HTTPError as err:
-                if err.code == 400 and depth < 6:          # "too many nodes" or "area too large": split the box
+                # 400 "...too many nodes..." or "...your request was too large..." (probed): split the box; any other 400 is a bad request
+                body = err.read().decode("utf-8", "replace").lower() if err.code == 400 else ""
+                if err.code == 400 and depth < 6 and any(k in body for k in ("too many", "too large", "smaller area")):
                     ms, mw = (s + n) / 2, (w + e) / 2
                     return [x for b in ((s, w, ms, mw), (s, mw, ms, e), (ms, w, n, mw), (ms, mw, n, e)) for x in get(*b, depth + 1)]
                 if err.code in (429, 509, 503, 504) and attempt < 4:
@@ -44,7 +46,11 @@ def get(s, w, n, e, depth=0):
                     raise
                 time.sleep(2 ** (attempt + 1))
         time.sleep(1)                                       # be gentle with the shared API
-    return [ET.parse(f).getroot()]
+    try:
+        return [ET.parse(f).getroot()]
+    except ET.ParseError:                                   # an HTML error page saved as a 200: do not keep it in the cache
+        f.unlink(missing_ok=True)
+        raise
 
 
 def extract(s, w, n, e):

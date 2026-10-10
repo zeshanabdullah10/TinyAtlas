@@ -11,7 +11,7 @@ under "How this model is made".
 ## What the visitor does
 1. **The model.** The site sits on a walnut plinth with cut, banded edges and a brass name plate. Drag to turn it,
    scroll to zoom. The card gives the measured facts (lake level, track length, climb, time by jeep).
-2. **Drive.** "Drive the last 3.5 km" dives the camera into the model and onto a Willys-type jeep at the start of the
+2. **Drive.** "Drive the last 600 m" dives the camera into the model and onto a Willys-type jeep at the start of the
    OSM track. W or ↑ is gas, S or ↓ is brake, A and D steer within the track, C changes the camera (chase, driver,
    trackside), Space toggles cruise, T (or the Pace chip) runs time 1×, 2×, 4× or 8× faster while the jeep keeps its
    real speed. On a touch screen there are on-screen pedals. The gauges show speed, real
@@ -99,8 +99,9 @@ The terrain is shown at true scale with no height exaggeration.
 - The size and number of trees, shrubs, grass tufts and boulders. Their places follow WorldCover.
 
 ## Adding an attraction
-1. Add an entry to `SITES` in `backend/tools/diorama_build.py`: the box (about 5 × 5 km), the lake or place seed,
-   the OSM way ids of the drive and of the whole track, the drive start, and a far box about 20 km across.
+1. Add a site file, `backend/tools/diorama_sites/<site>.json`: the box (about 5 × 5 km), the lake or place seed,
+   the OSM way ids of the drive and of the whole track, the drive start, and a far box about 20 km across. Mahodand
+   and White Palace are the two entries in `SITES` in `backend/tools/diorama_build.py`; every other site is a site file.
 2. Download the DEM and WorldCover tiles that cover the far box and an Overpass extract, run the build, and look at
    the result from the table, along the drive, and at the arrival.
 3. `python -m pytest -q backend/tests/test_diorama.py` checks the files against `meta.json`, that the drive lies on
@@ -113,7 +114,7 @@ URL>` traces the outline from a recent cloud-free scene (NDWI > 0.05, thin chann
 WorldCover 2021. Mahodand uses scene S2C_43SBV_20250921_0_L2A: the lake is a 1.4 km ribbon, 0.08 km².
 
 ### White Palace (`?site=white-palace`)
-The second site has no lake. The drive is the last 3 km of the OSM road up the Marghazar valley to the palace gate
+The second site has no lake. The drive is the last 600 m of the OSM road up the Marghazar valley to the palace gate
 (the build starts it where the road enters the model). OSM maps no footprint for the palace, so `meta.landmark` places
 an illustrative model (`web/js/diorama/palace.js`) laid out after visitors' photos: a white house with a gabled upper
 floor over a columned veranda, cream one-storey wings, a lawn with marble table sets, hedges, a metal arch, trees and

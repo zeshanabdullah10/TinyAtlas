@@ -29,9 +29,9 @@ content is summarised in §8 so you do not need it).
 
 | Item | State |
 |---|---|
-| Branch | `main`, pushed. Only `main` and `gh-pages` remain: the merged branches `swat-illustrated-map`, `travel-companion` (tip `dd58bf0`) and `claude/exciting-edison-k01oo3` (tip `1ba2160`) were deleted 2026-10-04. Releases v2.0.0–v2.4.0 are tagged on GitHub (v2.4.0 tag → `563439c`; v2.3.0 → `e56d398`). `gh-pages` = `2388802` (static site v2.4.0, live-checked: both packs load). The v2.4 feature branch `v2.4-visual-data` was fast-forwarded into `main` and deleted. |
-| Commits since v2.3.0 | `ae5d59a` delegate-and-judge skill · `563439c` v2.4.0 (poster `lower2`, hidden-label style + `--must` in poster_labels, close-view shade + near trees, road classes) · this HANDOFF update |
-| Tests | `python -m pytest -q` → 58 passed (2026-10-04 on v2.4.0; 5 new in `test_road_classes.py`); `python backend/tools/smoke.py [http://localhost:8000]` end-to-end |
+| Branch | Checked 2026-10-10. `origin/main` and local `main` are at `55fa064` (v2.9 tag). `origin/gh-pages` is at `8dfe776` (static site). The checkout was `claude/focused-mayer-6vet7n` (tracks `origin/claude/focused-mayer-6vet7n`), with uncommitted edits to `backend/tools/smoke.py` and `web/sw.js`. Remote branches: `main`, `gh-pages`, `claude/focused-mayer-6vet7n`. Tags (`git tag`): v1.0.0, v2.0.0, v2.1.0, v2.2.0, v2.3.0, v2.4.0 (→ `563439c`), v2.5.0 (→ `a640351`), v2.8 (→ `1c0954d`), v2.9 (→ `55fa064`); there are no v2.6 or v2.7 tags. The text in the banners above this table is the 2026-10-04 state. |
+| Commits since v2.4.0 | 17 commits on `origin/main` after `563439c` (v2.4.0), from the Diorama work (`86014d1` Mahodand, `8df5b6d` White Palace) to `55fa064` (v2.9). Run `git log --oneline 563439c..origin/main` for the list. |
+| Tests | Checked 2026-10-10: `python3 -m pytest -q backend/tests` → 266 passed, 2 failed (the known `test_atlas.py` files.json byte-size checks, owned by the lead). `python backend/tools/smoke.py [http://localhost:8000]` for the end-to-end check. |
 | Live map | `cd backend && uvicorn tinyatlas.api:app --port 8000` → `http://localhost:8000/atlas.html?pack=swat` (and `?pack=swat-lower`). Owner confirmed it runs well in Chrome on real hardware. |
 | Data (gitignored, under `data/`) | bundles `swat`, `swat_far`, `swat_lower`, `swat_lower_far`; packs `data/packs/swat/atlas` (~98 MB), `data/packs/swat-lower/atlas` (~159 MB; cover.webp = 4:3 crop (254,194,2046,1536) of `data/renders/swat-lower/lower_v24_poster.png`, resized to 1280×960 — no tool generates covers); audio `data/audio/swat` (23 clips) and `data/audio/swat-lower` (29 clips), `.m4a` + `.txt` script each; research, photos, models, renders. `data/audio/{deosai,hunza,...}` and `_bakeoff` are leftovers from removed regions / the TTS bake-off. |
 | RunPod | No pods exist (RunPod API checked 2026-10-04). The `.env` `POD_ID=s9p3rr2my88itr` is stale; ignore it. All TTS now runs locally. |
@@ -74,7 +74,7 @@ routes, an audio guide and offline use.
 backend/tinyatlas/        FastAPI app. regions.py (built-in places; swat + swat-lower have "atlas": <pack slug>),
                           atlaspack.py (stops/facts/roads/heights for Atlas regions, read from the pack),
                           planner.py (day planner; Atlas speeds by road class), api.py (/api/*, /packs static, gzip),
-                          narration.py, facts.py, llm.py (OpenRouter), routing.py, sun.py, viewshed.py, ...
+                          narration.py, llm.py (OpenRouter), routing.py, sun.py, ...
 backend/tools/            geo_bundle.py        bbox -> co-registered raster/vector bundle (§4.2)
                           blender/prep.py      bundle -> npy, de-lit albedo, tree points, lakes.json
                           blender/fetch_buildings.py   OSM building footprints (multi-bbox, tiling, retries)
@@ -90,13 +90,13 @@ backend/tools/            geo_bundle.py        bbox -> co-registered raster/vect
                           atlas_shot.py        headless Playwright screenshots of the Atlas (§13)
                           atlas_mock.py        synthetic pack for renderer development
                           pod_run.py, pod_files.py   RunPod via Jupyter (credentials from .env, never argv)
-                          audio.py, tts_setup.sh, tts_worker.py   audio guide TTS on the pod
+                          audio_local.py       audio guide clips (Chatterbox, local); tts_bakeoff.py (TTS comparison)
                           pack.py              static site builder (copies Atlas packs, writes static atlas.html)
 web/atlas.html, web/css/atlas.css, web/js/atlas/*.js   THE NEW APP (Atlas renderer + UI), §7, §8
 web/js/home.js            gallery (Swat cards -> /atlas.html?pack=<slug>)
 web/js/main.js            router; /?region=swat redirects to the Atlas
-web/js/place.js, scene.js, light.js, models.js, views.js, viewshed.js, panorama.js, keepsake.js, ...
-                          OLD Diorama interface. Slated for removal (owner decision, §15).
+web/js/place.js, scene.js, light.js, models.js, views.js, viewshed.js, panorama.js, keepsake.js: deleted in v2.1
+                          (the old Diorama interface; the list is in docs/CLEANUP-v2.1.md).
 web/sw.js                 service worker: shell cache + data cache; /packs/ is data
 docs/atlas-pack-v1.md     pack contract;  docs/HANDOFF.md  this file
 data/ (gitignored)        bundles/, packs/, research/, photos/, models3d/, renders/, atlas_shots/, cache/, assets/

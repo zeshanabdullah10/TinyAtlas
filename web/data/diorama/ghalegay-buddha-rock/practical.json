@@ -1,51 +1,51 @@
 [
- {
-  "label": "Where",
-  "value": "Roadside in Ghalegay village, about 14 km south of Mingora",
-  "quote": "located at a distance of 14 km south of Mingora",
-  "source": "Wikipedia: Ghalegay",
-  "url": "https://en.wikipedia.org/wiki/Ghalegay"
- },
- {
-  "label": "Roadside",
-  "value": "Carved on the right-hand side of the G.T. road when travelling towards Mingora",
-  "quote": "On the way to Mingora there is a statue of Buddha sculptured in a rock on the right side of G.T. road.",
-  "source": "Wikipedia: Ghalegay",
-  "url": "https://en.wikipedia.org/wiki/Ghalegay"
- },
- {
-  "label": "Cave",
-  "value": "Some cave remnants beside the carving",
-  "quote": "There are also some remnants in a cave beside this statue.",
-  "source": "Wikipedia: Ghalegay",
-  "url": "https://en.wikipedia.org/wiki/Ghalegay"
- },
- {
-  "label": "Size",
-  "value": "Colossal Buddha on a boulder, 6.80 m x 3.20 m, 0.85 m deep",
-  "quote": "A colossal Buddha image has been carved on a boulder measuring 6.80m x3.20 with a depth of 0.85m.",
-  "source": "Khyber Pakhtunkhwa DOAM site record 4672",
-  "url": "https://doam.gov.pk/public/sites/4672"
- },
- {
-  "label": "Date",
-  "value": "7th-8th century CE (relative chronology)",
-  "quote": "Relative Chronology: 7th - 8th Century CE",
-  "source": "Khyber Pakhtunkhwa DOAM site record 4672",
-  "url": "https://doam.gov.pk/public/sites/4672"
- },
- {
-  "label": "Condition",
-  "value": "Slightly eroded by weathering",
-  "quote": "Due to vagaries of time, the rock has been slightly eroded.",
-  "source": "Khyber Pakhtunkhwa DOAM site record 4672",
-  "url": "https://doam.gov.pk/public/sites/4672"
- },
- {
-  "label": "Protection",
-  "value": "Protected under the Khyber Pakhtunkhwa Antiquities Act, 2016",
-  "quote": "Protected by The Khyber Pakhtunkhwa Antiquities Act, 2016",
-  "source": "Khyber Pakhtunkhwa DOAM site record 4672",
-  "url": "https://doam.gov.pk/public/sites/4672"
- }
+  {
+    "label": "Where",
+    "value": "Ghalegay village, about 14 km south of Mingora",
+    "quote": "located at a distance of 14 km south of Mingora",
+    "source": "Wikipedia: Ghalegay",
+    "url": "https://en.wikipedia.org/wiki/Ghalegay"
+  },
+  {
+    "label": "Roadside",
+    "value": "Carved on the right side of the G.T. road, on the way to Mingora",
+    "quote": "On the way to Mingora there is a statue of Buddha sculptured in a rock on the right side of G.T. road.",
+    "source": "Wikipedia: Ghalegay",
+    "url": "https://en.wikipedia.org/wiki/Ghalegay"
+  },
+  {
+    "label": "Cave",
+    "value": "Some cave remnants beside the carving",
+    "quote": "There are also some remnants in a cave beside this statue.",
+    "source": "Wikipedia: Ghalegay",
+    "url": "https://en.wikipedia.org/wiki/Ghalegay"
+  },
+  {
+    "label": "Size",
+    "value": "Colossal Buddha on a boulder, 6.80 m x 3.20 m, 0.85 m deep",
+    "quote": "A colossal Buddha image has been carved on a boulder measuring 6.80m x3.20 with a depth of 0.85m.",
+    "source": "Khyber Pakhtunkhwa DOAM site record 4672",
+    "url": "https://doam.gov.pk/public/sites/4672"
+  },
+  {
+    "label": "Date",
+    "value": "7th-8th century CE (relative chronology)",
+    "quote": "Relative Chronology: 7th - 8th Century CE",
+    "source": "Khyber Pakhtunkhwa DOAM site record 4672",
+    "url": "https://doam.gov.pk/public/sites/4672"
+  },
+  {
+    "label": "Condition",
+    "value": "Slightly eroded by weathering",
+    "quote": "Due to vagaries of time, the rock has been slightly eroded.",
+    "source": "Khyber Pakhtunkhwa DOAM site record 4672",
+    "url": "https://doam.gov.pk/public/sites/4672"
+  },
+  {
+    "label": "Protection",
+    "value": "Protected under the Khyber Pakhtunkhwa Antiquities Act, 2016",
+    "quote": "Protected by The Khyber Pakhtunkhwa Antiquities Act, 2016",
+    "source": "Khyber Pakhtunkhwa DOAM site record 4672",
+    "url": "https://doam.gov.pk/public/sites/4672"
+  }
 ]

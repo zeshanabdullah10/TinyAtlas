@@ -280,7 +280,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     tn = re.search(r"N(\d+)_00_E(\d+)", Path(dem_path).name)
     dem_top, dem_left = (int(tn[1]) + dem.shape[0] / 3600, float(tn[2])) if tn else (36.0, 72.0)   # a stacked N34+N35 file is 7200 rows tall
     h = sample_tile(dem, dem_top, dem_left, 1 / 3600, g, 1)
-    wc = tifffile.TiffFile(wc_path).pages[0].asarray()  # 36000x36000, top-left 36N 72E for N33E072
+    with tifffile.TiffFile(wc_path) as tf:
+        wc = tf.pages[0].asarray()  # 36000x36000, top-left 36N 72E for N33E072
     cls = sample_tile(wc, 36.0, 72.0, 1 / 12000, g, 0)
     CV = COVER_TOWN if site.get("built_up") else COVER
     cover = np.vectorize(lambda v: CV.get(int(v), 2))(cls).astype(np.uint8)
@@ -340,7 +341,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     if not has_lake:
         cover[cover == 5] = 2                           # no lake on this site: WorldCover water reads as wet meadow
 
-    ways = {e["id"]: e for e in json.load(open(osm_path, encoding="utf-8"))["elements"] if e["type"] == "way"}
+    with open(osm_path, encoding="utf-8") as fh:
+        ways = {e["id"]: e for e in json.load(fh)["elements"] if e["type"] == "way"}
 
     # The drive: OSM jeep track to the first point within 40 m of the lake, resampled every 4 m.
     line = chain(ways, site["drive_ways"], site["drive_start"])
@@ -371,7 +373,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
     # In a town (Mingora) `buildings_radius_m` keeps only those near the arrival point; a landmark's own footprint
     # (within `clear_m` of its point, default its terrace) is left to the landmark's model.
     buildings = []
-    bc = to_local(g, *(site.get("arrival") or {"point": site.get("lake_seed", (g["s"], g["w"]))})["point"])
+    bc = to_local(g, *(site.get("arrival") or {"point": site["lake_seed"]})["point"])   # every site has one of the two (the SW corner was never right)
     br = site.get("buildings_radius_m", 1e9)
     lmc = to_local(g, *site["landmark"]["point"]) if "landmark" in site else None
     clear = site.get("landmark", {}).get("clear_m", site.get("landmark", {}).get("terrace_m", 58)) if lmc else 0

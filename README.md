@@ -22,13 +22,16 @@ landmarks drawn larger than life) is labelled on the map.
 - **Read a place**: tap a label for its story, timeline and facts, each quoted from its source with a link, plus
   credited photos.
 - **Plan a day** on the real roads: describe the trip, and the planner picks from the map's places; every leg is
-  measured on the pack's roads with times by road type (paved 40, minor 25, jeep 14, track 9 km/h, slope-adjusted),
+  measured on the pack's roads with times by road type (paved 40, minor 25, jeep 14, track 9 km/h; jeep and track
+  times are slope-adjusted),
   shown as estimates, and drawn on the map.
 - **Save a valley for offline** (download button): the whole pack goes into the service worker's cache.
 - **Drive into a diorama** (`/diorama.html?site=mahodand`): a tabletop model of Mahodand Lake from open data. Drive a
-  jeep up the real last 3.5 km of the track, over ruts you can feel, and arrive at the lake. See `docs/diorama-v1.md`.
+  jeep up the real last 600 m of the track, over ruts you can feel, and arrive at the lake. See `docs/diorama-v1.md`.
 
-The audio guide (narration and voices) is in progress and ships in the next release.
+Places with an English audio guide clip show a Listen button in the place panel. The clips are generated locally with
+Chatterbox (Resemble AI, MIT) by `backend/tools/audio_local.py`. Community voice recordings are not in the app yet
+(see `docs/voices-consent.md`).
 
 ## Run
 ```
@@ -52,7 +55,9 @@ python backend/tools/home_data.py                                               
 ```
 Other tools: `collect_photos.py` (licence-filtered Commons photos), `poster_labels.py`, `atlas_shot.py` (headless
 screenshots), `buildings3d.py` + `trellis_*` (landmark shapes on a RunPod GPU), `paintover.py` (parked), `pod_run.py`
-and `pod_files.py` (RunPod via Jupyter), `audio.py` and `tts_*` (audio guide, in progress).
+and `pod_files.py` (RunPod via Jupyter), `audio_local.py` (audio guide clips), `tts_bakeoff.py` (TTS comparison).
+Diorama builds: `diorama_build.py` (site data, from the site files in `backend/tools/diorama_sites/`), `osm_fetch.py`
+(OSM extract when Overpass is unreachable), `diorama_shot.py` (headless diorama screenshots).
 
 ## Static site
 ```
@@ -77,8 +82,9 @@ Replies are cached by prompt hash in `data/llm/` and usage is shown at `/api/sta
 backend/tinyatlas/  api (FastAPI)  regions  atlaspack  planner  routing  sun  llm  narration  stylize (used by paintover)
 backend/tools/      Atlas pipeline, pack.py (static site), smoke.py, home_data.py, RunPod and audio tools
 web/                index.html + js/home.js (landing), atlas.html + js/atlas/* (renderer and UI), planner.js, listen.js,
-                    api.js, dom.js, css/{tokens,home,atlas}.css, sw.js (offline), manifest, data/home.json, img/
-docs/               HANDOFF.md, atlas-pack-v1.md, CLEANUP-v2.1.md
+                    api.js, dom.js, css/{tokens,home,atlas}.css, sw.js (offline), manifest, data/home.json, img/;
+                    diorama.html + js/diorama/* (drivable models), play.html, tripkit.html, voices-consent.html
+docs/               HANDOFF.md, atlas-pack-v1.md, diorama-v1.md, voices-consent.md, CLEANUP-v2.1.md
 ```
 
 ## Design

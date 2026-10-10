@@ -81,7 +81,7 @@ List of
  "photos": [{"file": "photos/<slug>/01.jpg", "attribution": "Photo: X, CC BY-SA 4.0, via Wikimedia Commons", "url": "..."}],
  "model": "models/<slug>.glb|null", "confidence": "high|medium|low"}
 ```
-`tier`: 1 towns, villages and major lakes; 2 peaks ≥ 5,500 m and heritage sites; 3 other lakes; 4 the rest.
+`tier`: 1 towns, villages and major lakes (lakes of 0.15 km² or more, and the named major lakes); 2 peaks at or above 5,500 m (2,500 m in Lower Swat, `peak_tier2_min` in `atlas_pack.py`) and heritage sites; 3 other lakes; 4 the rest.
 `label_elevation_m` follows the poster rule: the sourced value nearest the DEM summit within 250 m, else DEM.
 `short_name` is the label-chip text (name without parentheticals/qualifiers, <= 22 chars, `backend/tools/shortname.py`); `name` stays for the panel.
 Optional `anchor: [x, z]` + `anchor_source: "worldcover-built"` (towns/villages only): centre of the densest 300 m cell of WorldCover built-up pixels within 1.5 km of the node, present only when it has >= 40 built pixels and is > 250 m from `x, z` (which stay the OSM node); use it to place the label over the built-up area.

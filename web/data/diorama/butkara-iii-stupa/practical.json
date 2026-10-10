@@ -1,8 +1,8 @@
 [
  {
   "label": "What is there",
-  "value": "A stupa court, underground chambers and shrines (Area A); six rooms in a row (Area B)",
-  "quote": "Area A, consists of open stupa court, underground chambers and shrines.",
+  "value": "A stupa court, underground chambers and shrines (Area A); houses, six rooms in a row (Area B)",
+  "quote": "Area A, consists of open stupa court, underground chambers and shrines. Area B, consists of houses, 6 rooms in a row.",
   "source": "Department of Archaeology, Khyber Pakhtunkhwa (site 3305)",
   "url": "https://doam.gov.pk/public/sites/3305"
  },
@@ -22,8 +22,8 @@
  },
  {
   "label": "Location",
-  "value": "Swat District, Khyber Pakhtunkhwa: 34.758583, 72.371469",
-  "quote": "Latitude: 34.758583333",
+  "value": "34.758583, 72.371469 (site 3305 coordinates)",
+  "quote": "Latitude: 34.758583333 Longitude: 72.371469444",
   "source": "Department of Archaeology, Khyber Pakhtunkhwa (site 3305)",
   "url": "https://doam.gov.pk/public/sites/3305"
  }

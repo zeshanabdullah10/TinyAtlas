@@ -39,8 +39,8 @@ def fetch(titles):
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
                 return json.load(r)["query"]["pages"].values()
-        except Exception as e:          # rate limit or network: back off and retry
-            print("retry", attempt + 1, e); time.sleep(20 * (attempt + 1))
+        except Exception as e:          # rate limit or network: back off and retry (brief: 60 s on HTTP 429)
+            print("retry", attempt + 1, e); time.sleep(60 if getattr(e, "code", None) == 429 else 20 * (attempt + 1))
     raise SystemExit("the API did not answer")
 
 
