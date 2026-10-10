@@ -5,7 +5,7 @@
 For sites whose build inputs (OSM extract, Sentinel-2 scene) are not in this checkout, so a rebuild would not
 reproduce the same ground. Only words and switches that come from the site entry are touched, the same way
 diorama_build.py writes them: title, subtitle, pack, road, road_kind, built_up, lake_life, and the generic lines in
-`edits` (the lake camp, the buildings, duplicates). Grids, drive, walk, facts and sources are left as built.
+`edits` (the lake camp, the buildings, the road's name for itself, duplicates). Grids, drive, walk, facts and sources are left as built.
 Running it on a freshly built site changes nothing.
 """
 import json
@@ -36,7 +36,12 @@ def sync(name):
     except (OSError, ValueError):
         has_photos = False
     n, edits = len(meta.get("buildings") or []), []
+    way = "road" if site.get("road_kind") == "road" else "jeep track"
     for e in meta["edits"]:
+        if e.startswith("A bench up to 24 m wide is cut along the "):
+            e = f"A bench up to 24 m wide is cut along the {way} to its smoothed profile (the 30 m DSM includes tree canopy)."
+        if e.startswith("Road bumps and ruts in the drive are illustrative"):
+            e = f"Road bumps and ruts in the drive are illustrative; the grade and the line of the {way} are real."
         if e.startswith(CAMP) and not meta.get("lake_life"):
             continue                                        # no camp is drawn where the sources don't describe one
         if n and e.startswith(f"The {n} buildings stand on their OSM footprints") or e.startswith("The building stands on its OSM footprint"):

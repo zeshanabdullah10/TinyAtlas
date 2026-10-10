@@ -198,7 +198,8 @@ export class Hud {
       const x = ((v.x + 1) / 2) * w, y = ((1 - v.y) / 2) * h;
       if (ok) {
         const bw = l.el.offsetWidth || 80, bh = l.el.offsetHeight || 24, r = [x - bw / 2, y - bh, x + bw / 2, y];
-        if (taken.some((t) => r[0] < t[2] + 4 && r[2] > t[0] - 4 && r[1] < t[3] + 2 && r[3] > t[1] - 2)) ok = false;
+        if (r[0] < 0 || r[1] < 0 || r[2] > w || r[3] > h) ok = false;   // a tag cut by the screen edge hides, not half-shows
+        else if (taken.some((t) => r[0] < t[2] + 4 && r[2] > t[0] - 4 && r[1] < t[3] + 2 && r[3] > t[1] - 2)) ok = false;
         else taken.push(r);
       }
       l.el.style.opacity = ok ? 1 : 0;

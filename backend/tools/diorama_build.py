@@ -497,6 +497,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         "box_km": [round(g["W"] / 1000, 2), round(g["H"] / 1000, 2)],
         "arrival_m": round(arrival["y"]),
     }
+    way = "road" if site.get("road_kind") == "road" else "jeep track"   # what the drive is, in the edits' words
     meta = {
         "version": 1, "site": name, "title": site["title"], "subtitle": site["subtitle"], "road": site.get("road", "Mahodand Lake Road"), "pack": site.get("pack", "swat"),
         **({"built_up": True} if site.get("built_up") else {}),
@@ -519,8 +520,8 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
         "edits": [
             *(["Lake bed lowered under the measured water level; the depth shown is illustrative (no published bathymetry)."] if has_lake else []),
             *([f"The river runs through the lake: mapped water more than {site['lake_radius_m']} m from the lake point is the river channel and is not drawn as lake."] if site.get("lake_radius_m") else []),
-            "A bench up to 24 m wide is cut along the jeep track to the smoothed track profile (the 30 m DSM includes tree canopy).",
-            "Road bumps and ruts in the drive are illustrative; the grade and the line of the track are real.",
+            f"A bench up to 24 m wide is cut along the {way} to its smoothed profile (the 30 m DSM includes tree canopy).",
+            f"Road bumps and ruts in the drive are illustrative; the grade and the line of the {way} are real.",
             "Trees, shrubs, grass tufts and boulders are placed where WorldCover maps that cover; their size and number are illustrative.",
             *(["At the lake, the positions of the boats, tents, tea stalls and horses are illustrative (boating is described by the sources and seen in Commons photos)."] if has_lake and site.get("lake_life") else []),
             *(["The shore path is traced 20 m outside the lake outline; it is not a mapped trail."] if has_lake else
@@ -532,7 +533,7 @@ def build(name, dem_path, wc_path, osm_path, s2=None):
                 f"The palace grounds are levelled to a terrace {terrace} m around the place point and kept as lawn.",
                 "The palace is the Atlas's TRELLIS model made from three CC BY-SA Wikimedia Commons photos (palace.attribution.txt), scaled to a 28 m front; the wings, lawn, tables and trees around it are laid out after visitors' photos. None of it is a survey (OSM maps no footprint)."]
               if "landmark" in site else []),
-            *([f"The walk from the end of the jeep track follows the mapped OSM footpath for {walk['mapped_km']} km"
+            *([f"The walk from the end of the {way} follows the mapped OSM footpath for {walk['mapped_km']} km"
                + (f"; the last {walk['traced_km']} km is not mapped and is traced over the ground (easiest slope on the DEM)." if walk["traced_km"] else ".")]
               if walk else []),
             *([("The building stands on its OSM footprint; its" if len(buildings) == 1 else f"The {len(buildings)} buildings stand on their OSM footprints; their")
