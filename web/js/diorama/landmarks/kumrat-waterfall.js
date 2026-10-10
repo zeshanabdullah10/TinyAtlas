@@ -15,11 +15,13 @@ function streaks(seed) {
   const c = document.createElement("canvas");
   c.width = 64; c.height = 256;
   const g = c.getContext("2d");
+  g.fillStyle = "rgba(222,234,240,0.9)";                              // the body of the water: near-white, mostly opaque
+  g.fillRect(0, 0, 64, 256);
   let s = seed * 7919 + 13;
   const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
   for (let i = 0; i < 46; i++) {
     const x = r() * 60, w = 1 + r() * 3.5, y = r() * 256, len = 40 + r() * 150;
-    g.fillStyle = `rgba(255,255,255,${(0.18 + r() * 0.5).toFixed(2)})`;
+    g.fillStyle = `rgba(255,255,255,${(0.6 + r() * 0.4).toFixed(2)})`;
     for (const dy of [0, -256, 256]) g.fillRect(x, y + dy, w, len);   // wrap so the tile has no seam
   }
   const tex = new THREE_.CanvasTexture(c);
@@ -83,8 +85,8 @@ export default function build(ctx) {
     geo.setIndex(idx);
     geo.computeVertexNormals();
     const tex = streaks(fall.length + 1);
-    const mat = new T.MeshStandardMaterial({ color: 0xffffff, map: tex, transparent: true, opacity: 0.8, roughness: 0.3,
-                                             emissive: 0x9fb2ba, emissiveIntensity: 0.3, side: T.DoubleSide, depthWrite: false });
+    const mat = new T.MeshStandardMaterial({ color: 0xffffff, map: tex, transparent: true, opacity: 0.92, roughness: 0.3,
+                                             emissive: 0xc4d4da, emissiveIntensity: 0.5, side: T.DoubleSide, depthWrite: false });
     const m = new T.Mesh(geo, mat);
     m.userData.keep = true;
     g.add(m);
