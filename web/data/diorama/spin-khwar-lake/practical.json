@@ -1,34 +1,51 @@
 [
-  {"label": "Best time", "value": "End of September is the advised trekking time; the Kalam and Swat trekking guide adds the lakes are best in summer",
-   "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
-   "url": "https://www.lostwithpurpose.com/trekking-kalam",
-   "quote": "The best time to go trekking in Kalam and Swat Valley is the end of September."},
-  {"label": "Jeep to the top", "value": "About PKR 6,000 to 7,000 for a jeep; the driver waits until you return (2021 fare, check locally)",
-   "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
-   "url": "https://www.lostwithpurpose.com/trekking-kalam",
-   "quote": "Jeeps to the top are about 6,000 to 7,000 Rs, and they'll wait for you until you return."},
-  {"label": "Access", "value": "Two tracks reach the lake, one from Kundal and one from Ladu Valley",
-   "source": "GuestKor Tourism, Spin Khwar Lake guide (undated)",
-   "url": "https://guestkor.com/browse/blog/714/spin-khwar-lake-swat-valley-pakistan6094df2b99771",
-   "quote": "The lake is accessible through two tracks, one from Kundal and the other from Ladu valley."},
-  {"label": "Hike from Ladu Valley", "value": "About 3 hours of steep climb after the wooden bridge, on whatever tracks are found",
-   "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
-   "url": "https://www.lostwithpurpose.com/trekking-kalam",
-   "quote": "follow whatever tracks you can find straight uphill"},
-  {"label": "Time for the day", "value": "4 to 5 hours for one lake from Ladu Valley",
-   "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
-   "url": "https://www.lostwithpurpose.com/trekking-kalam",
-   "quote": "Time: 4-5 hours for one lake if starting from Ladu Valley."},
-  {"label": "Where to stay", "value": "Kalam town hotels; PTDC Motel rooms about PKR 4,000 a night (2021 price)",
-   "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
-   "url": "https://www.lostwithpurpose.com/trekking-kalam",
-   "quote": "Rooms are around 4,000 Rs, while cottages run around 6,000 Rs per night."},
-  {"label": "Phone signal", "value": "4G coverage across Kalam; Zong is the best network for the valley",
-   "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
-   "url": "https://www.lostwithpurpose.com/trekking-kalam",
-   "quote": "You should have 4G coverage throughout Kalam."},
-  {"label": "Altitude", "value": "About 3,180 m at the place point (Copernicus DEM); the mapped path ends about 140 m lower",
-   "source": "Copernicus GLO-30 DEM, sampled by the TinyAtlas build",
-   "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N35_00_E072_00_DEM/Copernicus_DSM_COG_10_N35_00_E072_00_DEM.tif",
-   "quote": "DEM value sampled at 35.43375, 72.45202 (3180.7 m) and at the path end 35.42289, 72.43378 (3042.1 m)"}
+ {
+  "label": "Best time",
+  "value": "End of September: the best time to go trekking in Kalam and Swat Valley (2021 guide)",
+  "quote": "The best time to go trekking in Kalam and Swat Valley is the end of September.",
+  "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
+  "url": "https://www.lostwithpurpose.com/trekking-kalam"
+ },
+ {
+  "label": "Jeep to the top",
+  "value": "About PKR 6,000 to 7,000 for a jeep to the top (2021 guide, check locally)",
+  "quote": "Jeeps to the top are about 6,000 to 7,000 Rs",
+  "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
+  "url": "https://www.lostwithpurpose.com/trekking-kalam"
+ },
+ {
+  "label": "Access",
+  "value": "Two tracks reach the lake, one from Kundal and one from Ladu Valley",
+  "quote": "The lake is accessible through two tracks, one from Kundal and the other from Ladu valley.",
+  "source": "GuestKor Tourism, Spin Khwar Lake guide (undated)",
+  "url": "https://guestkor.com/browse/blog/714/spin-khwar-lake-swat-valley-pakistan6094df2b99771"
+ },
+ {
+  "label": "Hike from Ladu Valley",
+  "value": "About 3 hours straight uphill after the wooden bridge, on whatever tracks can be found",
+  "quote": "follow whatever tracks you can find straight uphill for about 3 hours",
+  "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
+  "url": "https://www.lostwithpurpose.com/trekking-kalam"
+ },
+ {
+  "label": "Time for the day",
+  "value": "4 to 5 hours for one lake from Ladu Valley",
+  "quote": "Time: 4-5 hours for one lake if starting from Ladu Valley",
+  "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
+  "url": "https://www.lostwithpurpose.com/trekking-kalam"
+ },
+ {
+  "label": "Where to stay",
+  "value": "Mid-range rooms around PKR 4,000 a night, cottages around 6,000 (2021 guide)",
+  "quote": "Rooms are around 4,000 Rs, while cottages run around 6,000 Rs per night.",
+  "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
+  "url": "https://www.lostwithpurpose.com/trekking-kalam"
+ },
+ {
+  "label": "Phone signal",
+  "value": "4G coverage throughout Kalam",
+  "quote": "You should have 4G coverage throughout Kalam.",
+  "source": "Lost With Purpose, Guide to day trekking in Kalam (updated Jan 2021)",
+  "url": "https://www.lostwithpurpose.com/trekking-kalam"
+ }
 ]

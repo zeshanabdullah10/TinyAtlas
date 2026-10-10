@@ -32,8 +32,10 @@
     35.621,
     72.765
   ],
-  "osm_use": "the N-95 Swat road into Kalam",
+  "osm_use": "the N-95 Swat road into Kalam (OSM ref N-95) and the town buildings",
   "road": "N-95",
   "drive_km": 0.6,
-  "pack": "swat"
+  "pack": "swat",
+  "road_kind": "road",
+  "built_up": true
 }

@@ -2,7 +2,7 @@
 // Estimated from the Commons photos (see the site's landmark.edits); local metres, origin at the shrine's centre.
 export default function build(ctx) {
   const { group: g, M, box, cyl, lathe, ground } = ctx;
-  const stone = ctx.mat(0xa27a58, { roughness: 0.95 });   // warm rubble masonry in the photos
+  const stone = ctx.mat(0xa27a58, { roughness: 0.95 });   // warm brick masonry in the photos
   const podium = ctx.mat(0x8c7257, { roughness: 1 });
   const dark = ctx.mat(0x2a2320, { roughness: 1 });
   const top = ctx.mat(0x9c8062, { roughness: 0.9 });
