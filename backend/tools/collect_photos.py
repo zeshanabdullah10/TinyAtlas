@@ -73,6 +73,7 @@ EXCLUDE_FOR = {
     "chakdara-fort": {"File:Swat River Chakdara.jpg"},                                                           # the river
     "swat-museum": {"File:Swat Museum in Mingora city.jpg"},                                                     # Mingora aerial
     "bazira-barikot-ghundai": {"File:Ancient Bazira Barikot Swat Kp Pakistan (2).jpg"},                         # a road sign
+    "mahodand-lake": {"File:Mahodand Lake, Swat Pakistan.jpg"},                                                  # a deodar forest, no lake
 }
 
 
