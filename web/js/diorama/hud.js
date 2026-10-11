@@ -161,6 +161,15 @@ export class Hud {
     }
     this.renderPlaces();
   }
+  /** "Nearby": the hotels OSM names in town.json ([name, x, z]), the closest to `around` first, at most 8, none within 90 m of another. */
+  nearby(town, site, around) {
+    const keep = [];
+    for (const [name, x, z] of [...(town?.hotels || [])].sort((a, b) => Math.hypot(a[1] - around.x, a[2] - around.z) - Math.hypot(b[1] - around.x, b[2] - around.z))) {
+      if (name && keep.length < 8 && keep.every((k) => Math.hypot(k[1] - x, k[2] - z) > 90)) keep.push([name, x, z]);
+    }
+    this.addLabels(keep.map(([name, x, z]) => ({ text: name, name, group: "Nearby", sub: "Hotel, as mapped in OpenStreetMap", cls: "hotel", modes: ["walk", "explore"], range: 450,
+      p: new THREE.Vector3(x, site.heightAt(x, z) + 26, z) })));
+  }
   /** The Places list: every tag, grouped, so nothing has to be found by looking around. */
   renderPlaces() {
     const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);

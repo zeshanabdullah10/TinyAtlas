@@ -2,9 +2,10 @@
 
     python3 backend/tools/diorama_thumbs.py                 # every site (about a minute each on software GL)
     python3 backend/tools/diorama_thumbs.py kalam ushu      # just these
-    options: --az DEG   turn the view round the model (default 0 = the page's own table view)
+    options: --az DEG   turn the view round the model (default 0 = the page's own table-view bearing)
+             --el DEG   camera elevation (default 36; the page's table view is 23, which hides low terrain behind the front wall)
              --fill F   share of the frame the model covers (default 0.9)
-             --pitch    camera elevation from the page's table view is kept; --keep DIR also saves the 1280x800 PNGs
+             --keep DIR also saves the 1280x800 PNGs
 
 Opens diorama.html?site=<site> in Playwright Chromium (software WebGL, one shared render slot), hides all page chrome,
 refits the page's table-view camera to the model's bounds so it fills the picture, and captures the canvas.
@@ -24,16 +25,15 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 HIDE = "body > *:not(#app), #app > *:not(canvas) { display: none !important; } html, body { background: #15120f; overflow: hidden; }"
 
-FIT = """([az, fill]) => {
+FIT = """([az, el, fill]) => {
   const d = window.__diorama, cam = d.camera, V = cam.position.constructor, g = d.site.meta.grid, s = d.site;
   document.getElementById("intro")?.setAttribute("hidden", "");
   cam.clearViewOffset();
-  const x0 = s.x0, x1 = s.x0 + g.width, z0 = s.z0, z1 = s.z0 + g.height, y0 = g.hmin - s.Y0 - 300, y1 = g.hmax - s.Y0;
+  const x0 = s.x0, x1 = s.x0 + g.width, z0 = s.z0, z1 = s.z0 + g.height, y0 = g.hmin - s.Y0 - 120, y1 = g.hmax - s.Y0;
   const corners = [];
   for (const x of [x0, x1]) for (const y of [y0, y1]) for (const z of [z0, z1]) corners.push(new V(x, y, z));
-  const dir = new V(6100, 4700 - 380, 8300 - 300).normalize();   // the page's own table-view direction
-  const a = az * Math.PI / 180, dx = dir.x * Math.cos(a) - dir.z * Math.sin(a), dz = dir.x * Math.sin(a) + dir.z * Math.cos(a);
-  dir.x = dx; dir.z = dz;
+  const a = (az + 37) * Math.PI / 180, e = el * Math.PI / 180;       // az 0 = the page's own table-view bearing (SE)
+  const dir = new V(Math.sin(a) * Math.cos(e), Math.sin(e), Math.cos(a) * Math.cos(e));
   const target = new V((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); let dist = Math.max(g.width, g.height) * 2;
   cam.far = Math.max(cam.far, 60000);
   for (let it = 0; it < 14; it++) {
@@ -65,7 +65,7 @@ def all_sites():
     return sorted(p.parent.name for p in (ROOT / "web" / "data" / "diorama").glob("*/meta.json"))
 
 
-def shoot(browser, port, site, az, fill, keep):
+def shoot(browser, port, site, az, el, fill, keep):
     from PIL import Image
     log = []
     pg = browser.new_page(viewport={"width": 1280, "height": 800})
@@ -77,8 +77,8 @@ def shoot(browser, port, site, az, fill, keep):
         pg.wait_for_timeout(5000)                                   # GLB and module parts settle
         pg.evaluate("window.__diorama.advance(3)")
         pg.add_style_tag(content=HIDE)
-        pg.evaluate(FIT, [az, fill])
-        png = pg.locator("canvas").first.screenshot(timeout=240000)
+        pg.evaluate(FIT, [az, el, fill])
+        png = pg.screenshot(clip={"x": 0, "y": 0, "width": 1280, "height": 800}, timeout=240000)   # chrome is hidden: the page is the canvas
         im = Image.open(io.BytesIO(png)).convert("RGB")
         if im.size != (1280, 800):
             im = im.resize((1280, 800), Image.LANCZOS)
@@ -95,7 +95,7 @@ def shoot(browser, port, site, az, fill, keep):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("sites", nargs="*")
-    ap.add_argument("--az", type=float, default=0); ap.add_argument("--fill", type=float, default=0.9)
+    ap.add_argument("--az", type=float, default=0); ap.add_argument("--el", type=float, default=36); ap.add_argument("--fill", type=float, default=0.9)
     ap.add_argument("--keep", default="")
     a = ap.parse_args()
     from playwright.sync_api import sync_playwright
@@ -109,8 +109,15 @@ def main():
         exe = next((str(x) for x in (Path("/opt/pw-browsers/chromium"),) if x.exists()), None)
         b = p.chromium.launch(executable_path=exe, args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
         for site in todo:
-            with slot("render", 2):
-                errs = shoot(b, port, site, a.az, a.fill, a.keep)
+            for attempt in (1, 2, 3):                                   # software GL under load can time out
+                try:
+                    with slot("render", 2):
+                        errs = shoot(b, port, site, a.az, a.el, a.fill, a.keep)
+                    break
+                except Exception as e:
+                    print(f"{site}: attempt {attempt} failed: {str(e).splitlines()[0][:150]}", flush=True)
+            else:
+                continue
             print(f"{site}: ok" + ("".join("\n  " + e[:200] for e in errs[:5])), flush=True)
         b.close()
 

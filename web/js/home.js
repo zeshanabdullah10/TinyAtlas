@@ -52,8 +52,10 @@ function siteCard(s, packs) {
   const icon = h("span", { class: "site-kind" });
   icon.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[s.kind] || ICONS.viewpoint}"/></svg>`;
   icon.append(s.kind_label);
-  return h("a", { class: "site", href: `${BASE}diorama.html?site=${encodeURIComponent(s.site)}` },
-    icon, h("h3", {}, s.title), s.subtitle && h("p", {}, s.subtitle), packs[s.pack] && h("span", { class: "pk" }, packs[s.pack]));
+  const img = s.thumb && h("img", { class: "site-img", src: BASE + s.thumb, width: 640, height: 400, loading: "lazy", decoding: "async", alt: `${s.title} site model`,
+    ...(s.thumb_small && { srcset: `${BASE}${s.thumb_small} 320w, ${BASE}${s.thumb} 640w`, sizes: "(max-width: 520px) 92vw, 280px" }) });
+  return h("a", { class: "site", href: `${BASE}diorama.html?site=${encodeURIComponent(s.site)}` }, img,
+    h("div", { class: "site-body" }, icon, h("h3", {}, s.title), s.subtitle && h("p", {}, s.subtitle), packs[s.pack] && h("span", { class: "pk" }, packs[s.pack])));
 }
 
 function sitesSection(list, packs) {

@@ -79,12 +79,13 @@ async function refreshPack(filesUrl) {
     const fresh = await fetch(filesUrl, { cache: "no-cache" });
     if (!fresh.ok) return;
     const next = await fresh.clone().json(), prev = await oldRes.clone().json();
-    const sig = (f) => `${f.bytes}:${f.hash || f.sha256 || f.sha1 || f.h || ""}`;
-    const was = new Map(prev.map((f) => [f.path, sig(f)]));
+    const hash = (f) => f.hash || f.sha256 || f.sha1 || f.h || "";
+    const was = new Map(prev.map((f) => [f.path, f]));
+    const changed = (f) => { const o = was.get(f.path); return !o || o.bytes !== f.bytes || (hash(o) && hash(f) && hash(o) !== hash(f)); };   // a list without hashes (older packs) is compared by size only
     const base = filesUrl.slice(0, filesUrl.lastIndexOf("/") + 1);
     const cached = new Set((await data.keys()).map((r) => r.url));
     const hadPhotos = prev.some((f) => f.path.startsWith("photos/") && cached.has(base + f.path)) || !prev.some((f) => f.path.startsWith("photos/"));   // photos were left out of this save: keep leaving them out
-    const todo = next.filter((f) => was.get(f.path) !== sig(f) && (hadPhotos || !f.path.startsWith("photos/")));
+    const todo = next.filter((f) => changed(f) && (hadPhotos || !f.path.startsWith("photos/")));
     let failed = 0;
     await mapPool(todo, 4, async (f) => {
       try { const r = await fetch(base + f.path, { cache: "reload" }); if (!r.ok) throw 0; await data.put(base + f.path, r); } catch { failed++; }
@@ -133,13 +134,13 @@ self.addEventListener("fetch", (e) => {
   const cdn = /(^|\.)cdn\.jsdelivr\.net$|^fonts\.(googleapis|gstatic)\.com$/.test(url.host);
   if (!sameOrigin(url) && !cdn) return;
   const r = rel(url);
-  const saved = isDataPath(r);
-  e.respondWith((async () => {
+  const saved = isDataPath(r), bg = [];                         // background work, kept alive after the response is sent
+  const answer = (async () => {
     if (saved) {                                                // saved data: from the cache first; unsaved data goes to the network and is not kept
       const hit = await (await caches.open(DATA)).match(req, { ignoreVary: true });
       if (hit) {
-        if (r.endsWith("/files.json")) e.waitUntil(refreshPack(url.href));
-        else if (r.startsWith("/data/diorama/")) e.waitUntil(refreshDiorama(url.href.slice(0, url.href.lastIndexOf("/") + 1)));
+        if (r.endsWith("/files.json")) bg.push(refreshPack(url.href));
+        else if (r.startsWith("/data/diorama/")) bg.push(refreshDiorama(url.href.slice(0, url.href.lastIndexOf("/") + 1)));
         return ranged(req, hit);
       }
       return fetch(req);                                        // offline: the page sees a network error and says so
@@ -150,11 +151,13 @@ self.addEventListener("fetch", (e) => {
       const net = fetch(req);
       // a slow or half-dead connection must not hold the page back when a copy is on the device: after 4 s the copy wins
       const res = hit ? await Promise.race([net, new Promise((ok) => setTimeout(() => ok(null), 4000))]) : await net;
-      if (!res) { net.then((x) => x.status === 200 && caches.open(SHELL).then((c) => c.put(req, x))).catch(() => {}); return hit; }
-      if (res.status === 200) e.waitUntil(caches.open(SHELL).then((c) => c.put(req, res.clone())).catch(() => {}));
+      if (!res) { bg.push(net.then((x) => x.status === 200 && caches.open(SHELL).then((c) => c.put(req, x))).catch(() => {})); return hit; }
+      if (res.status === 200) { const copy = res.clone(); bg.push(caches.open(SHELL).then((c) => c.put(req, copy)).catch(() => {})); }
       return res;
     } catch {
       return hit || (req.mode === "navigate" ? (await caches.match(req, { ignoreSearch: true })) || caches.match(`${BASE}index.html`) : Response.error());   // atlas.html?pack=… matches its saved page
     }
-  })());
+  })();
+  e.respondWith(answer);
+  e.waitUntil(answer.then(() => Promise.allSettled(bg), () => {}));
 });

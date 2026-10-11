@@ -25,8 +25,13 @@ def build() -> dict:
     for f in sorted((ROOT / "web" / "data" / "diorama").glob("*/meta.json")):
         m = json.loads(f.read_text(encoding="utf-8"))
         k = kind_of(m)
-        sites.append({"site": m["site"], "title": m["title"], "subtitle": m.get("subtitle", ""), "pack": m.get("pack", ""),
-                      "kind": k, "kind_label": KIND_LABEL.get(k, k.replace("_", " ").capitalize())})
+        e = {"site": m["site"], "title": m["title"], "subtitle": m.get("subtitle", ""), "pack": m.get("pack", ""),
+             "kind": k, "kind_label": KIND_LABEL.get(k, k.replace("_", " ").capitalize())}
+        # rendered by backend/tools/diorama_thumbs.py (640x400 and 320x200 webp, relative to web/)
+        for key, suffix in (("thumb", ""), ("thumb_small", "-320")):
+            if (ROOT / "web" / "img" / "dioramas" / f"{m['site']}{suffix}.webp").exists():
+                e[key] = f"img/dioramas/{m['site']}{suffix}.webp"
+        sites.append(e)
     sites.sort(key=lambda s: s["title"].lower())
     clips = places = 0
     for f in sorted((ROOT / "data" / "audio").glob("*/audio.json")):

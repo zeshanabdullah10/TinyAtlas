@@ -2,8 +2,7 @@
 // Keys are stable; Urdu falls back to English for any missing key.
 
 const KEY = "tinyatlas.lang";
-const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap";
+const FONT_HREF = new URL("../fonts/fonts.css", import.meta.url).href;   // self-hosted; holds the Nastaliq face (works offline)
 
 const cache = {};
 let current = null;
@@ -58,7 +57,7 @@ export function t(key, vars = {}) {
 }
 
 function ensureUrduFont() {
-  if (document.querySelector(`link[data-i18n-font]`)) return;
+  if (document.querySelector(`link[data-i18n-font], link[href$="fonts/fonts.css"]`)) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.href = FONT_HREF;

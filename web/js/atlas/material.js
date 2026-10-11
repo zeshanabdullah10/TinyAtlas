@@ -91,7 +91,8 @@ vec3 rk(vec2 p, mat2 A, mat2 B, vec2 w) {          // w: per-octave weights (fad
   float bias = 2.4 * cliff * fadeM;
   vec2 tuv1 = (clamp((wxz + j1 - uTile.xy) / uTile.zw, 0.0, 1.0) * (uTexPx - 1.0) + 0.5) / uTexPx;
   vec2 tuv2 = (clamp((wxz + j2 - uTile.xy) / uTile.zw, 0.0, 1.0) * (uTexPx - 1.0) + 0.5) / uTexPx;
-  vec3 albT = 0.5 * (texture2D(uAlb, tuv1, bias).rgb + texture2D(uAlb, tuv2, bias).rgb);
+  vec3 albT = texture2D(uAlb, tuv1, bias).rgb;
+  if (fadeM > 0.0) albT = 0.5 * (albT + texture2D(uAlb, tuv2, bias).rgb);   // second tap only where edges are seen up close
   vec3 albO = texture2D(uOv, (wxz + j1) / uGridSize).rgb;
   vec3 alb = mix(albO, albT, uHasTile);
   float aLum = dot(alb, vec3(0.299, 0.587, 0.114));
@@ -100,8 +101,8 @@ vec3 rk(vec2 p, mat2 A, mat2 B, vec2 w) {          // w: per-octave weights (fad
   // fading out where the instanced trees take over.
   float farF = smoothstep(7000.0, 15000.0, camD) * forest;
   if (farF > 0.0) {
-    float crown = noised(wxz / 42.0).x * 0.6 + noised(wxz / 13.0 + 5.0).x * 0.4;
-    float amp = 1.0 - smoothstep(14.0, 45.0, mpp);
+    float amp = 1.0 - smoothstep(8.0, 24.0, mpp), crown = 0.5;
+    if (amp > 0.0) crown = noised(wxz / 42.0).x * 0.6 + noised(wxz / 13.0 + 5.0).x * 0.4;   // sub-pixel at wide zoom: skip
     alb *= mix(vec3(1.0), vec3(0.74, 0.92, 1.06) * (0.84 + amp * 0.5 * (crown - 0.5)), farF);
   }
   vec2 dn = vec2(0.0); float dvar = 0.0; vec3 bump = vec3(0.0);
