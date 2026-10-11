@@ -19,7 +19,10 @@ export class Hud {
     $("#lb-close").addEventListener("click", () => $("#lightbox").close());
     $("#lb-x").addEventListener("click", () => $("#lightbox").close());
     $("#photo-close").addEventListener("click", () => { $("#photo").hidden = true; this.photoShut = this.photoKey; });
-    addEventListener("keydown", (e) => { if (e.key === "Escape") { if (!$("#photo").hidden) { $("#photo").hidden = true; this.photoShut = this.photoKey; } $("#places").hidden = true; document.body.classList.remove("more"); } });
+    // the More sheet: Esc closes it, and so does picking anything that opens something else (it would sit on top of it)
+    const closeMore = () => { if (!document.body.classList.contains("more")) return; document.body.classList.remove("more"); const m = $('[data-act="more"]'); if (m) { m.textContent = "More"; m.setAttribute("aria-pressed", "false"); } };
+    addEventListener("keydown", (e) => { if (e.key === "Escape") { if (!$("#photo").hidden) { $("#photo").hidden = true; this.photoShut = this.photoKey; } $("#places").hidden = true; closeMore(); } });
+    document.querySelector(".dock")?.addEventListener("click", (e) => { if (e.target.closest('#btn-places, [data-offline], [data-act="skip"], [data-act="photo"], [data-act="model"]')) closeMore(); });
     $("#lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox") $("#lightbox").close(); });
     $("#btn-places").addEventListener("click", () => { $("#places").hidden = !$("#places").hidden; });
     $("#places-close").addEventListener("click", () => { $("#places").hidden = true; });

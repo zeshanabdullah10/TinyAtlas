@@ -146,10 +146,10 @@ export class StoryFlight {
     this.card = h("aside", { class: "sf-card", role: "dialog", "aria-label": "Story stop", hidden: true },
       this.kicker, this.name, this.caption, this.sources,
       h("div", { class: "sf-row" },
-        h("button", { type: "button", class: "sf-open", onClick: () => this.openStop() }, "Open"),
-        h("button", { type: "button", class: "sf-x", onClick: () => this.stop("cancelled") }, "End flight")));
+        h("button", { type: "button", class: "sf-open", onClick: () => this.openStop() }, "Open this place")));   // the one End control is on the bar
     this.root.append(this.bar, this.card);
-    this.onKey = () => this.stop("cancelled");
+    // a key on the map ends the flight; Tab and keys used inside the bar/card do not (keyboard users must reach Open/End)
+    this.onKey = (e) => { if (!this.inUi(e.target) && !["Tab", "Shift", "Control", "Alt", "Meta"].includes(e.key)) this.stop("cancelled"); };
     this.onWheel = () => this.stop("cancelled");
     this.down = null;
     this.onDown = (e) => { if (!this.inUi(e.target)) this.down = { x: e.clientX, y: e.clientY }; };
@@ -158,7 +158,9 @@ export class StoryFlight {
   }
 
   inUi(t) { return this.card.contains(t) || this.bar.contains(t); }
-  emit() { document.dispatchEvent(new CustomEvent("storyflight", { detail: { running: this.running, id: this.story?.id ?? null } })); }
+  emit() {
+    document.body.classList.toggle("sf-on", this.running);   // CSS hides the dock and the compass/zoom column while flying
+    document.dispatchEvent(new CustomEvent("storyflight", { detail: { running: this.running, id: this.story?.id ?? null } })); }
 
   /** Start a story ({id, pack, title, stops:[{slug, name, caption, sources}]}). Returns false if it cannot run. */
   start(story) {
@@ -208,11 +210,13 @@ export class StoryFlight {
     removeEventListener("pointerdown", this.onDown, true);
     removeEventListener("pointermove", this.onMove, true);
     removeEventListener("pointerup", this.onUp, true);
+    const hadFocus = this.inUi(document.activeElement);
     this.bar.hidden = true; this.card.hidden = true;
     const c = this.controls.c;
     if (this.look) { c.target.set(...this.look); }
     c.enabled = true; c.update();
     this.emit();
+    if (hadFocus && reason !== "replaced") document.querySelector(".sf-dock")?.focus();   // do not drop keyboard focus on <body>
     this.onEnd({ reason, id: this.story?.id ?? null });
   }
 
@@ -335,7 +339,7 @@ export function storyButton(flight, data, slug) {
   }
   const sync = (e) => {
     const on = !!e.detail?.running && list.some((s) => s.id === e.detail.id);
-    btn.textContent = on ? "End story flight" : "Story flight";
+    btn.textContent = "Story flight";   // hidden while flying; the bar holds the End control
     btn.setAttribute("aria-pressed", on ? "true" : "false");
   };
   document.addEventListener("storyflight", sync);

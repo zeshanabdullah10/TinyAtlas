@@ -114,7 +114,8 @@ export function renderLocalPlanner(root, { pack, lp, start, onShowDay, onSeeMap 
       ...pl.legs.map((l, i) => h("article", { class: "plan-day lp-leg" },
         h("p", { class: "lp-route" }, name(stops[i]), " → ", name(stops[i + 1])),
         l.ok ? h("p", { class: "plan-stats" }, h("b", {}, `${km1(l.km)} km · about ${dur(Math.round(l.minutes))}`), ` — ${basis(l.mix)} · climbs ${l.ascent_m} m`) : h("p", { class: "plan-stats" }, "No mapped road or path joins these two."))),
-      h("p", { class: "lp-total" }, h("b", {}, `Total ${km1(pl.km)} km · about ${dur(pl.minutes)} · climbs ${pl.ascent_m.toLocaleString("en")} m`)),
+      h("p", { class: "lp-total" }, h("b", {}, !pl.legs.some((l) => l.ok) ? "Not timed: no mapped road or path joins these stops."   // never "0.0 km · about 0 min"
+        : `${pl.legs.every((l) => l.ok) ? "Total" : "Timed legs only:"} ${km1(pl.km)} km · about ${dur(pl.minutes)} · climbs ${pl.ascent_m.toLocaleString("en")} m`)),
       sun != null && h("p", { class: "mode" }, `Sunset on ${d.toLocaleDateString("en-GB", { day: "numeric", month: "long" })} is about ${clock(sun)} (Pakistan time, worked out from the date and position).`),
       ...warn.map((w) => h("p", { class: "plan-warn", role: "note" }, w)),
       h("p", { class: "mode" }, FOOT),

@@ -88,7 +88,7 @@ function dur(min) {
   const m = Math.max(5, Math.round(min / 5) * 5), hh = Math.floor(m / 60), mm = m % 60;
   return hh ? `about ${hh} h${mm ? ` ${String(mm).padStart(2, "0")} min` : ""}` : `about ${m} min`;
 }
-const MIX = [["paved", "paved road"], ["minor", "road"], ["jeep", "jeep track"], ["track", "rough track"], ["walk", "on foot"]];
+const MIX = [["paved", "paved road"], ["minor", "minor road"], ["jeep", "jeep track"], ["track", "rough track"], ["walk", "on foot"]];
 const kmText = (k) => `${(+k).toFixed(1)} km`;
 function basis(leg, speeds) {
   const parts = MIX.filter(([k]) => leg.mix && leg.mix[k] > 0)
@@ -116,16 +116,16 @@ function planSection() {
       const b = basis(leg, speeds);
       kids.push(h("p", { class: "leg" },
         h("strong", null, `${nameOf(leg.from)} to ${nameOf(leg.to)}: `),
-        `${kmText(leg.km)} · ${dur(leg.minutes)}`,
+        leg.km == null ? "no mapped road or path joins these two, so this leg is not timed" : `${kmText(leg.km)} · ${dur(leg.minutes)}`,
         leg.ascent_m ? ` · about ${Math.round(leg.ascent_m / 10) * 10} m of climbing` : "",
-        h("span", { class: "basis" }, b ? `Basis: ${b}.` : "Basis: measured road length; time is an estimate.")));
+        leg.km == null ? null : h("span", { class: "basis" }, b ? `Basis: ${b}.` : "Basis: measured road length; time is an estimate.")));
     }
   });
   const km = total && total.km != null ? total.km : legs.reduce((s, l) => s + (l.km || 0), 0);
   const min = total && total.minutes != null ? total.minutes : legs.reduce((s, l) => s + (l.minutes || 0), 0);
   const sp = speeds ? MIX.filter(([k]) => speeds[k]).map(([k, label]) => `${label} ~${speeds[k]} km/h`).join(", ") : "";
   return [h("h2", null, "Day plan"), ...kids,
-    legs.length ? h("p", { class: "totals" }, `Total: ${kmText(km)} · ${dur(min)} on the road`,
+    legs.some((l) => l.km != null) ? h("p", { class: "totals" }, `${legs.every((l) => l.km != null) ? "Total" : "Total of the timed legs"}: ${kmText(km)} · ${dur(min)} on the road`,
       h("small", null, `Distances are measured along mapped roads. Times are estimates from assumed speeds${sp ? ` (${sp})` : ""}, not a timetable, and do not include stops. Road and weather conditions change: ask locally before you set out.`)) : null,
     notes.length ? h("h2", null, "Notes") : null,
     notes.length ? h("ul", null, notes.map((n) => h("li", null, n))) : null].filter(Boolean);

@@ -1124,7 +1124,10 @@
      }
     ]
    },
-   "why": "Wikipedia Chitral; name_ur already set."
+   "why": "Wikipedia Chitral; name_ur already set. Name shown without the internal '(pointer)' note.",
+   "set": {
+    "name": "Chitral"
+   }
   },
   "dir-town": {
    "add": {

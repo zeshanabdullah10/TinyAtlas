@@ -50,14 +50,17 @@ let tier = detectTier();
 
 /** The trip kit (download size, low-data mode, emergency numbers, printable plan) in a modal; Save opens the offline download. */
 function openTripKit(pack) {
-  const close = () => { card.remove(); removeEventListener("keydown", esc); };
+  const opener = document.activeElement;
+  const close = () => { card.remove(); removeEventListener("keydown", esc); if (opener?.isConnected) opener.focus({ preventScroll: true }); };
   const esc = (e) => { if (e.key === "Escape") close(); };
   const kit = tripKitPanel({ pack, places: pack.places, onDownload: () => { close(); openOffline(pack); }, onLowData: () => location.reload() });
   const x = document.createElement("button"); x.type = "button"; x.className = "modal-x"; x.textContent = "Close"; x.onclick = close;
   const card = document.createElement("div"); card.className = "modal"; card.setAttribute("role", "dialog"); card.setAttribute("aria-modal", "true");
   const inner = document.createElement("div"); inner.className = "modal-card"; inner.append(kit, x); card.append(inner);
+  card.setAttribute("aria-label", `Trip kit for ${pack.meta.title}`);
   card.addEventListener("click", (e) => { if (e.target === card) close(); });
   document.body.append(card); addEventListener("keydown", esc);
+  inner.querySelector("button, a[href], input, select")?.focus({ preventScroll: true });   // keyboard and screen readers land in the dialog
 }
 
 /** Build one pack's map. Returns a handle whose dispose() frees every listener, DOM node and GPU resource it made. */
@@ -152,7 +155,7 @@ async function boot(slug, { base, time = null } = {}) {
       controls.flyTo(t, f.dist, controls.heading, -48, 1800);
     },
   });
-  labels.blockers = () => [...document.querySelectorAll(".topright .trow, .topright .light, .dock, .tools, .attrib, .cartouche h1, .cartouche .sub, .cartouche .back, .day-pill")]
+  labels.blockers = () => [...document.querySelectorAll(".topright .trow, .topright .light, .dock, .tools, .attrib, .cartouche h1, .cartouche .sub, .cartouche .back, .day-pill, .sf-card, .sf-bar")]
     .map((e) => { const r = e.getBoundingClientRect(); return [r.left - 4, r.top - 4, r.right + 4, r.bottom + 4]; });
   const settings = {
     time: sky.time, treeScale: trees.scale, landmarkScale: MIN_MULT,   // landmark multiplier on real size (MIN_MULT = default)

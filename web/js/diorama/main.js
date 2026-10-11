@@ -149,7 +149,7 @@ fetch(base + "photos.json").then((r) => (r.ok ? r.json() : [])).then((list) => {
     }
     const b = document.getElementById("before"); b.append(g); b.hidden = false;
   }
-  hud.addLabels(photos.map((p) => ({ text: `📷 ${p.caption}`, name: p.caption, sub: `${p.author}${p.date ? ", " + p.date.slice(0, 4) : ""}`, photo: p, group: "Photos",
+  hud.addLabels(photos.map((p) => ({ text: p.caption, name: p.caption, sub: `${p.author}${p.date ? ", " + p.date.slice(0, 4) : ""}`, photo: p, group: "Photos",
     hint: "Open the photo and walk to where it was taken", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 300 })));
 }).catch(() => {});
 fetch(base + "town.json").then((r) => (r.ok ? r.json() : null)).then((t) => hud.nearby(t, site, lakeC)).catch(() => {});

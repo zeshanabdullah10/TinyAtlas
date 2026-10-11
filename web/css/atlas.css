@@ -58,7 +58,7 @@ button { font-family: inherit; }
 .ibtn:hover, .ibtn[aria-expanded=true] { border-color: var(--saffron); color: var(--saffron); }
 .light { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--glass); border: 1px solid var(--line); border-radius: 999px; font-size: 13px; }
 .light .lbl-k { font: 600 11px var(--font-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-.light input { width: 150px; accent-color: var(--saffron); } .light .lt { min-width: 138px; color: var(--cream); font-variant-numeric: tabular-nums; }
+.light input { width: 150px; accent-color: var(--saffron); } .light .lt { min-width: 138px; color: var(--cream); }
 .settings, .about { width: min(320px, calc(100vw - 20px)); padding: 12px 14px 8px; border-radius: 12px; background: var(--glass); border: 1px solid var(--line); font-size: 13px; box-sizing: border-box; }
 .about p { margin: 0 0 6px; font-size: 11.5px; line-height: 1.45; color: var(--muted); }
 .settings .row { display: grid; grid-template-columns: 1fr 1.2fr 3ch; align-items: center; gap: 10px; margin: 0 0 9px; color: var(--muted); }
@@ -184,8 +184,10 @@ button { font-family: inherit; }
 @media (max-width: 700px) { .pv-stage { padding-top: 60px; } .pv-nav { position: absolute; bottom: 120px; z-index: 2; } .pv-nav.prev { left: 10px; } .pv-nav.next { right: 10px; } }
 
 body.has-panel .topright { right: calc(440px + 24px); }
+body.has-panel .tools { right: calc(440px + clamp(10px, 2vw, 24px)); }   /* the sheet covers the right 440 px: keep the dock and the compass column in the free map */
+body.has-panel .dock, body.has-panel .day-pill, body.has-panel .edge-prompt { left: calc((100vw - 440px) / 2); } body.has-panel .dock { max-width: calc(100vw - 440px - 170px); }
 @media (max-width: 700px) {
-  body.has-panel .topright { right: 10px; }
+  body.has-panel .topright { right: 10px; } body.has-panel .tools { right: 10px; } body.has-panel .dock { left: auto; max-width: none; } body.has-panel .day-pill, body.has-panel .edge-prompt { left: 50%; }
   .panel { top: auto; width: 100vw; max-height: 72vh; border-left: 0; border-top: 1px solid var(--line); border-radius: 16px 16px 0 0; transform: translateY(102%);
     transition: transform .26s var(--ease), max-height .3s var(--ease); }
   .panel.open { transform: none; } .panel.open.peek { max-height: 46vh; }   /* the peek card: kind, name, stats, actions */
@@ -197,7 +199,7 @@ body.has-panel .topright { right: calc(440px + 24px); }
   .pn-grab i { width: 38px; height: 4px; border-radius: 2px; background: var(--line-2); }
   .pn-grab:focus-visible i { background: var(--saffron); }
   .pn-head { display: flex; flex-direction: column; }                        /* the action row rides above the fold */
-  .pn-kind { order: 1; margin: 12px 0 4px; } .pn-title { order: 2; }
+  .pn-kind { order: 1; margin: 12px 0 4px; } .pn-title { order: 2; } .sheet .pn-head .pn-name { order: 2; }   /* kind line above the title, as on desktop */
   .pn-actions { order: 3; margin: 12px 0 2px; } .pn-actions button { min-height: 44px; padding: 10px 16px; }
   .pn-stats { order: 4; } .pn-sum { order: 5; } .pn-listen { order: 6; }
   .topright { left: 10px; align-items: stretch; top: 76px; } .search { width: auto; flex: 1; } .light input { width: 100px; } .light .lt { min-width: 0; }
@@ -223,6 +225,7 @@ body.has-panel .topright { right: calc(440px + 24px); }
 }
 @media (max-width: 520px) {      /* icon-only toolbar: name stays in aria-label and the tooltip; nothing wraps or clips */
   .topright { left: 10px; right: 10px; } body.has-panel .topright { right: 10px; }
+  .settings, .about { width: auto; } .about { max-height: 24vh; overflow-y: auto; }   /* full width over the compass column, never past the screen */
   .ibtn.off-btn { width: 44px; padding: 0; justify-content: center; } .off-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .trow { gap: 6px; } .trow .search { height: 44px; }
 }
@@ -241,6 +244,7 @@ body.has-panel .topright { right: calc(440px + 24px); }
 /* back link, offline button, plan sheet, drawn day, offline dialog */
 .cartouche .back { display: inline-block; margin: 0 0 .55em; pointer-events: auto; color: var(--cream); font: 500 13px var(--font-ui); letter-spacing: .02em; text-decoration: none; padding: 4px 11px 4px 9px;
   border: 1px solid var(--line-2); border-radius: 999px; background: rgba(21, 18, 15, .6); text-shadow: none; }
+.cartouche .back { position: relative; } .cartouche .back::after { content: ""; position: absolute; inset: -9px -2px; }   /* 44 px hit area, same look */
 .cartouche .back:hover, .cartouche .back:focus-visible { border-color: var(--saffron); color: var(--saffron); outline: none; }
 .sheet { z-index: 6; } .sheet .pn-head { padding-top: 22px; } .sheet .pn-name { font-size: 30px; }
 .sheet-body { overflow-y: auto; flex: 1; padding: 0 22px 40px; font: 400 14px/1.5 var(--font-ui); }
@@ -264,7 +268,7 @@ body.has-panel .topright { right: calc(440px + 24px); }
 .sheet .plan-stats { margin: 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .sheet .plan-stops { margin: 0; padding-left: 20px; display: grid; gap: 3px; } .sheet .plan-stops .leg { display: block; color: var(--muted); font-size: 12px; }
 .sheet .plan-notes { margin: 0; font: 400 14px/1.55 var(--font-text); }
-.sheet .plan-warn { margin: 0; font-size: 13px; background: rgba(233, 162, 59, .14); color: #f0c98a; border-left: 3px solid var(--saffron); padding: 6px 10px; border-radius: 4px; }
+.sheet .plan-warn { margin: 0; font-size: 13px; background: rgba(233, 162, 59, .14); color: #f0c98a; border: 1px solid rgba(233, 162, 59, .45); padding: 6px 10px; border-radius: 8px; }   /* no left-border cards (design system) */
 .sheet .mode { color: var(--muted); font-size: 12px; margin: 0; }
 .pn-listen { margin-top: 12px; }
 .pn-actions .listen-btn:disabled { opacity: .55; cursor: not-allowed; border-style: dashed; }
@@ -278,12 +282,13 @@ body.has-panel .topright { right: calc(440px + 24px); }
 .day-mk span { position: absolute; left: -13px; top: -13px; width: 26px; height: 26px; border-radius: 50%; background: var(--saffron); color: var(--on-saffron); border: 2px solid #15120f; box-shadow: 0 2px 8px rgba(0, 0, 0, .55), 0 0 0 1px rgba(243, 235, 221, .6);
   display: grid; place-items: center; font: 700 13px var(--font-ui); }
 .day-pill { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(clamp(34px, 5vh, 52px) + 62px); z-index: 4; display: flex; align-items: center; gap: 10px; padding: 7px 8px 7px 16px; border-radius: 999px; background: var(--glass); border: 1px solid var(--saffron); color: var(--cream); font: 500 13px var(--font-ui); max-width: calc(100vw - 28px); }
+.day-pill button { position: relative; } .day-pill button::after { content: ""; position: absolute; inset: -9px; }   /* 44 px hit area */
 .day-pill[hidden] { display: none; } .day-pill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .day-pill button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line-2); background: transparent; color: var(--cream); cursor: pointer; font-size: 16px; line-height: 1; padding: 0; }
 .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(10, 8, 6, .55); padding: 16px; }
 .modal-card { width: min(440px, 100%); background: var(--glass); border: 1px solid var(--line-2); border-radius: 14px; padding: 22px 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, .6); }
 .modal-card h2 { margin: 0 0 8px; font: 600 26px/1.1 var(--f-title); letter-spacing: .02em; } .modal-card p { margin: 8px 0; font: 400 14px/1.5 var(--font-text); color: var(--muted); }
-.modal-card .ofl-sizes { color: var(--cream); font: 600 18px var(--font-ui); font-variant-numeric: tabular-nums; margin: 14px 0 8px; }
+.modal-card .ofl-sizes { color: var(--cream); font: 600 18px var(--font-ui); margin: 14px 0 8px; }
 .modal-card .chk { display: flex; align-items: center; gap: 10px; font: 500 14px var(--font-ui); cursor: pointer; } .modal-card .chk input { width: 18px; height: 18px; accent-color: var(--saffron); }
 .ofl-bar { height: 6px; border-radius: 3px; background: rgba(243, 235, 221, .15); margin: 14px 0 4px; overflow: hidden; } .ofl-bar[hidden] { display: none; } .ofl-bar i { display: block; height: 100%; width: 0; background: var(--saffron); transition: width .2s; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
@@ -309,7 +314,7 @@ body.has-panel .topright { right: calc(440px + 24px); }
 .sheet .lp-sug { align-items: center; } .sheet .lp-sug .chip, .sheet .lp-opts .chip { min-height: 44px; } .sheet .lp-k { color: var(--muted); font-size: 12.5px; }
 .sheet .lp-opts { flex-wrap: wrap; margin-top: 4px; } .sheet .lp-opts label { display: flex; align-items: center; gap: 6px; }
 .sheet .lp-route { margin: 0; font: 600 14px var(--font-ui); } .sheet .lp-leg { gap: 4px; }
-.sheet .lp-total { margin: 0; padding-top: 10px; border-top: 1px solid var(--line-2); font: 400 15px var(--font-ui); font-variant-numeric: tabular-nums; }
+.sheet .lp-total { margin: 0; padding-top: 10px; border-top: 1px solid var(--line-2); font: 400 15px var(--font-ui); }   /* no tabular-nums: it spaces the decimal point ("7 . 6 km") in this face */
 .sheet .lp-acts { display: flex; flex-wrap: wrap; gap: 8px; } .sheet .lp-acts .btn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; box-sizing: border-box; }
 .sheet .lp-acts .btn:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
 .sheet .lp-more { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 12px; } .sheet .lp-more summary { cursor: pointer; color: var(--muted); min-height: 44px; display: flex; align-items: center; }

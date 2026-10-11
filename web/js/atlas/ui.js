@@ -54,7 +54,9 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   const results = h("ul", { class: "results", role: "listbox", hidden: true });
   const input = h("input", { type: "search", placeholder: "Search places", "aria-label": "Search places", autocomplete: "off", spellcheck: "false" });
   const pick = (pl) => { results.hidden = true; input.value = ""; input.blur(); openPlace(pl); };
-  const find = (q) => { q = q.trim().toLowerCase(); return q ? pack.places.filter((p) => p.name.toLowerCase().includes(q) || (p.area || "").toLowerCase().includes(q)).slice(0, 7) : []; };
+  // name matches rank above area matches, so "Kalam" + Enter opens Kalam, not the first lake whose area says Kalam
+  const rank = (p, q) => { const n = p.name.toLowerCase(); return n === q ? 0 : n.startsWith(q) ? 1 : n.includes(q) ? 2 : (p.area || "").toLowerCase().includes(q) ? 3 : 9; };
+  const find = (q) => { q = q.trim().toLowerCase(); return q ? pack.places.map((p) => [rank(p, q), p]).filter(([r]) => r < 9).sort((a, b) => a[0] - b[0]).slice(0, 7).map(([, p]) => p) : []; };
   input.addEventListener("input", () => {
     const r = find(input.value);
     const q = input.value.trim();
@@ -89,7 +91,7 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   const light2 = h("input", { type: "range", min: 0, max: 1, step: 0.004, value: sky.time, "aria-label": "Time of day" });
   const lt2 = h("output", { class: "lt2" }, "");
   const lightStep = (t, d) => h("button", { class: "stp", type: "button", "aria-label": `Light ${d > 0 ? "later" : "earlier"}`,
-    onClick: () => { light.value = Math.min(1, Math.max(0, +light.value + d * 0.05)); settings.onTime(+light.value); upLight(); lt2s.textContent = lt2.textContent; } }, t);
+    onClick: () => { light.value = Math.min(1, Math.max(0, +light.value + d * 0.05)); settings.onTime(+light.value); upLight(); } }, t);
   const lt2s = h("output", { class: "lt2" }, "");
   const pop = h("div", { class: "settings", hidden: true, role: "group", "aria-label": "Map layers and scale" },
     // Light as a stepper on phone (the pill slider is desktop-only; light2/lt2 stay as synced state holders)
@@ -104,7 +106,7 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   // ---- light pill
   const lightTxt = h("span", { class: "lt" }, "");
   const light = h("input", { type: "range", min: 0, max: 1, step: 0.004, value: sky.time, "aria-label": "Time of day" });
-  const upLight = () => { lightTxt.textContent = clockText(+light.value, sky.el); lt2.textContent = lightTxt.textContent.split(" · ")[1] || ""; light2.value = light.value; };
+  const upLight = () => { lightTxt.textContent = clockText(+light.value, sky.el); lt2.textContent = lt2s.textContent = lightTxt.textContent.split(" · ")[1] || ""; light2.value = light.value; };   // lt2s: the phone stepper shows the time from the start
   light2.addEventListener("input", () => { light.value = light2.value; settings.onTime(+light2.value); upLight(); });
   light.addEventListener("input", () => { settings.onTime(+light.value); upLight(); });
   upLight();

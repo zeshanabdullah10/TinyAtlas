@@ -4,6 +4,9 @@ import { heritageSection } from "./heritage.js";
 import { voicesSection } from "../voices.js";
 import { roadStatusCard, loadRoads } from "../roadstatus.js";
 let ROADS = []; loadRoads().then((r) => { ROADS = r; });
+// The packs name areas by slug; the panel shows their names (the trip kit page uses the same table).
+const AREAS = { "swat-mid": "Mid Swat", "swat-lower": "Lower Swat", gateway: "Swat gateway", "malam-jabba": "Malam Jabba", kalam: "Kalam",
+  kumrat: "Kumrat", "utror-gabral": "Utror and Gabral", "ushu-mahodand": "Ushu and Mahodand" };
 
 const DIORAMA = { "mahodand-lake": "mahodand", "white-palace-marghazar": "white-palace",   // place slug → web/data/diorama/<site>/
   kalam: "kalam", ushu: "ushu", utror: "utror", gabral: "gabral", matiltan: "matiltan",
@@ -84,7 +87,7 @@ export class Panel {
     this.current = place; this.opener = opener;
     const p = place, e = p.label_elevation_m ?? p.ground_m;
     const kind = KIND_LABEL[p.kind] || (p.kind ? p.kind.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Place");
-    const stats = [["Elevation", e != null ? `${Math.round(e).toLocaleString("en")} m` : "—"], ["Area", p.area || "—"], ["Confidence", p.confidence || "—"]];
+    const stats = [["Elevation", e != null ? `${Math.round(e).toLocaleString("en")} m` : "—"], ["Area", AREAS[p.area] || p.area || "—"], ["Confidence", p.confidence || "—"]];
     const hero = this.hero(p);
     this.el.classList.toggle("no-hero", !hero);                              // no photo: the sheet starts at the kind line, no empty band
     const hasStory = !!(p.facts?.length || p.timeline?.length || this.heritage?.[p.slug]);
