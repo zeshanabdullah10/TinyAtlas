@@ -128,7 +128,7 @@ function planSection() {
     legs.length ? h("p", { class: "totals" }, `Total: ${kmText(km)} · ${dur(min)} on the road`,
       h("small", null, `Distances are measured along mapped roads. Times are estimates from assumed speeds${sp ? ` (${sp})` : ""}, not a timetable, and do not include stops. Road and weather conditions change: ask locally before you set out.`)) : null,
     notes.length ? h("h2", null, "Notes") : null,
-    notes.length ? h("ul", null, notes.map((n) => h("li", null, n))) : null];
+    notes.length ? h("ul", null, notes.map((n) => h("li", null, n))) : null].filter(Boolean);
 }
 
 const chosen = want.map((s) => bySlug.get(s)).filter(Boolean);
@@ -149,7 +149,7 @@ if (!hasContent) document.getElementById("print-now").hidden = true;
 document.title = `${plan && plan.title ? plan.title : "Trip plan"} | Tiny Atlas`;
 
 const nums = (emergency && emergency.numbers) || [];
-planBox.replaceChildren(
+planBox.replaceChildren(...[
   h("h1", null, plan && plan.title ? plan.title : hasContent ? "My trip plan" : "Trip plan"),
   h("p", { class: "meta" }, [packName, made ? `Plan made ${made}` : null, hasContent ? `Printed ${today}` : null].filter(Boolean).join(" · ")),
   ...(plan ? planSection() : []),
@@ -165,7 +165,7 @@ planBox.replaceChildren(
     ...nums.map((n) => h("li", null, `${n.source}: `, h("a", { href: n.url, rel: "noopener" }, n.url))),
     h("li", null, `Place names, heights, summaries and access notes: Tiny Atlas map data for ${packName} (open a place on the map for its sources). Heights are measured from terrain data.`),
     h("li", null, "Roads: \u00a9 OpenStreetMap contributors (ODbL). Terrain: Copernicus DEM GLO-30."),
-  ]));
+  ])].filter(Boolean));
 window.__ready = true;
 </script>
 </body>

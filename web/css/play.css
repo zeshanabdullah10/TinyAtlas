@@ -48,5 +48,5 @@ body.play-body { font-family: var(--font-ui); min-height: 100vh; }
 body.play-body { display: flex; flex-direction: column; }
 body.play-body .play-main { flex: 1; width: 100%; }
 body.play-body .site-foot { width: 100%; box-sizing: border-box; }
-.play-credit a { display: inline-block; padding: 10px 2px; }
+.play-credit a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; }
 .play-btn:focus-visible, .play-mode:focus-within { outline: 2px solid var(--saffron); outline-offset: 3px; }

@@ -30,5 +30,5 @@ body.consent .form { white-space: pre-wrap; font: inherit; margin: 0; }
 body.consent a { color: var(--saffron); text-underline-offset: 3px; }
 body.consent .src { font-size: .9rem; }
 body.consent .src li { margin: 0; }
-body.consent .src li a, body.consent .card li > a { display: inline-block; padding: 10px 0; }
+body.consent .src li a, body.consent .card li > a { display: inline-flex; align-items: center; min-height: 44px; }
 body.consent .draft { display: inline-block; font: 600 .75rem var(--font-ui); letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--saffron); color: var(--saffron); border-radius: 6px; padding: 3px 10px; }

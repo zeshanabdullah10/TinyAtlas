@@ -11,7 +11,7 @@ function card(r) {
   const stat = (k, v, note) => h("div", {}, h("dt", {}, k), h("dd", {}, v, note && h("small", {}, note)));
   return h("article", { class: "card" },
     h("a", { class: "card-pic", href: open, tabindex: "-1", "aria-hidden": "true" },
-      h("img", { src: `${BASE}${r.cover}`, alt: "", width: 1280, height: 960, loading: "lazy" })),
+      h("img", { src: `${BASE}${r.cover}`, srcset: `${BASE}img/cover-${r.slug}-640.webp 640w, ${BASE}${r.cover} 1280w`, sizes: "(max-width: 860px) 100vw, 50vw", alt: "", width: 1280, height: 960, loading: "lazy" })),
     h("div", { class: "card-body" },
       h("h3", {}, r.title),
       h("p", { class: "card-sub" }, r.subtitle),
