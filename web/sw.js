@@ -8,7 +8,7 @@
 //          ETag / Last-Modified / Content-Length of each saved file.
 // The page tells the worker what to keep with {type:"save", urls, id}; progress comes back as {type:"save-progress"}.
 
-const SHELL = "tinyatlas-shell-v7";   // v7: self-hosted fonts, diorama offline, background pack refresh; v6: shared header, site models, planner, trip kit print, PNG icons
+const SHELL = "tinyatlas-shell-v8";   // v8: v3.0 release (Urdu for new UI, QA fixes, photos); v7: self-hosted fonts, diorama offline, background pack refresh; v6: shared header, site models, planner, trip kit print, PNG icons
 const DATA = "tinyatlas-data-v1";
 // The site may live under a subpath (GitHub Pages); the scope knows where it is ("/" at a domain root).
 const BASE = new URL(self.registration.scope).pathname;
