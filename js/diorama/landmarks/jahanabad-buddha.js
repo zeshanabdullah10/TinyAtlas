@@ -1,14 +1,16 @@
-// Jahanabad Buddha (Manglawar): a tall reddish sandstone face (Wikipedia's material; the paint is grey) with the seated Buddha in relief in an oval niche, and boulders
-// beside and behind it. Local metres (x right, -z front). Sourced: the Jahan-Abad-i relief is 700 x 500 cm, its throne
-// 120 x 390 cm, relief depth 11 cm, facing north west (Wikipedia, "Buddhist rock carving in Manglawar"). The rock's
-// shape and size, the streaks, the boulders, the niche, the folds, halo and deck are estimated.
+// Jahanabad Buddha (Manglawar): the seated Buddha in relief in an oval niche on the flat north-west face of a great
+// boulder, with boulders beside and behind it (Commons photos 01-05). Local metres (x right, -z front). Sourced
+// (Wikipedia, "Buddhist rock carving in Manglawar", Jahan-Abad-i): the boulder 1180 x 2300 cm (drawn 11.8 m high and
+// 23 m wide, read in the same order as the relief's H x W), the relief 700 x 500 cm, its throne 120 x 390 cm, relief
+// depth 11 cm, facing north west. The boulder's depth and rounded-block form, the streaks, the other boulders, the
+// niche, the folds, halo and deck are estimated. Colours from the photos: weathered buff-grey stone, dark rain streaks.
 import * as THREE from "three";
 
 const RELIEF = 0.11;          // raised depth of the carving (source: D 11 cm)
 const LIFT = 1.0;             // estimated: the throne's base sits 1 m above the foot
 const NICHE_Z = 0.3;          // estimated: the niche floor is set 0.3 m back into the face
 const NICHE = { x: 3.4, y: 4.6, ry: 4.2 };    // estimated oval niche (half-widths) around the figure
-const STREAK_X = [-3.2, -1.1, 1.2, 3.1];      // estimated dark weathering streaks on the face (x, metres)
+const STREAK_X = [-9.5, -7.6, -4.6, -3.2, 3.6, 5.2, 8.1, 9.9];   // estimated dark rain streaks on the face (x, metres)
 
 // Stone surface: three octaves of lumps (unit-sphere input), so the rock reads broken and blocky, not egg-smooth.
 const lump = (x, y, z, seed) => {
@@ -19,63 +21,65 @@ const lump = (x, y, z, seed) => {
   return v * 1.6;
 };
 
-// One stone boulder: a lumped sphere scaled to `s`, centred at `c`, sunk 1 m into the ground.
-// `face` true: the front (-z) is a flat carved face at z = 0, with the niche and the dark streaks.
+// One boulder: a rounded block (superellipsoid, exponent 3), lightly lumped, centred at `c` with half-sizes `s`, its
+// foot sunk into the slope. `face` true: the front (-z) is cut flat at z = 0, with the niche and the rain streaks.
 function boulder(ctx, group, c, s, face, seed) {
-  const tones = [ctx.mat(0x5f5b55, { roughness: 1, flatShading: true }), ctx.mat(0x6e6962, { roughness: 1, flatShading: true }),
-                 ctx.mat(0x8f8a82, { roughness: 1, flatShading: true }), ctx.mat(0xa6a097, { roughness: 1, flatShading: true })];
-  const sph = new THREE.SphereGeometry(1, face ? 72 : 22, face ? 48 : 14).toNonIndexed();   // the face needs detail for the niche
+  const sph = new THREE.SphereGeometry(1, face ? 110 : 30, face ? 72 : 20);
   const p = sph.attributes.position;
-  const bins = [[], [], [], []];
-  const ptsOf = [];
+  const pos = new Float32Array(p.count * 3), col = new Float32Array(p.count * 3);
+  const base = new THREE.Color(0x7c7161), light = new THREE.Color(0x968a76), streak = new THREE.Color(0x4a443b), damp = new THREE.Color(0x625a4d);
+  const niche = new THREE.Color(0x6e6556), k3 = new THREE.Color();
   for (let i = 0; i < p.count; i++) {
-    const ux = p.getX(i), uy = p.getY(i), uz = p.getZ(i);
-    const n = lump(ux, uy, uz, seed);
-    const amp = (face && uz < 0 ? 0.04 : 0.16) * (1 + 0.2 * Math.sign(n));   // the carved face is kept smooth; the rest is broken
-    const top = uy > 0.55 ? 1 - (uy - 0.55) * 0.45 : 1;     // a flatter crown: boulders, not eggs
-    let x = c[0] + ux * s[0] * (1 + amp * n);
-    let y = c[1] + uy * s[1] * top * (1 + amp * n);
-    let z = c[2] + uz * s[2] * (1 + amp * n);
-    if (face && z < 0) z = 0;                                // the flat carved face
-    if (face) {
-      const r = Math.hypot(x / NICHE.x, (y - NICHE.y) / NICHE.ry);
-      if (r < 1 && z < NICHE_Z) z = NICHE_Z;                 // the oval niche is recessed
-    }
+    let ux = p.getX(i), uy = p.getY(i), uz = p.getZ(i);
+    const k = (Math.abs(ux) ** 3 + Math.abs(uy) ** 3 + Math.abs(uz) ** 3) ** (-1 / 3);     // onto the rounded block
+    ux *= k; uy *= k; uz *= k;
+    const n = lump(ux, uy, uz, seed), big = Math.sin(ux * 2.1 + seed) * Math.sin(uz * 1.7 + 0.5 * seed) * Math.cos(uy * 1.3);
+    const onFace = face && uz < -0.2;
+    const amp = onFace ? 0.012 : 0.05;
+    let x = c[0] + ux * s[0] * (1 + amp * n + (onFace ? 0 : 0.08 * big));
+    let y = c[1] + uy * s[1] * (uy > 0.6 ? 0.92 : 1) * (1 + amp * n);
+    let z = c[2] + uz * s[2] * (1 + amp * n + (onFace ? 0 : 0.08 * big));
+    if (face && z < 0) z = 0;                                // the flat face
+    const rn = face ? Math.hypot(x / NICHE.x, (y - NICHE.y) / NICHE.ry) : 9;
+    if (rn < 1 && z < NICHE_Z) z = NICHE_Z;                  // the oval niche is recessed
     const floor = ctx.ground(x, z) - 1.0;                    // sunk 1 m into the slope
     if (y < floor) y = floor;
-    ptsOf.push([x, y, z, n]);
-  }
-  for (let t = 0; t < ptsOf.length; t += 3) {
-    const tri = ptsOf.slice(t, t + 3);
-    const cx = (tri[0][0] + tri[1][0] + tri[2][0]) / 3, cz = (tri[0][2] + tri[1][2] + tri[2][2]) / 3;
-    const cn = (tri[0][3] + tri[1][3] + tri[2][3]) / 3;
-    let b = cn < -0.25 ? 1 : cn > 0.25 ? 3 : 2;
-    if (face && cz < 0.5 && !(Math.hypot(cx / NICHE.x, (tri[0][1] + tri[1][1] + tri[2][1]) / 3 - NICHE.y) / NICHE.ry < 1)) {
-      if (STREAK_X.some((sx) => Math.abs(cx - sx) < 0.35) && cz < 0.5) b = 0;   // dark vertical streaks
+    pos.set([x, y, z], i * 3);
+    // colour: mottled stone, lighter on top, a damp foot, rain streaks running down the face from its upper edge
+    k3.copy(base).lerp(light, Math.min(1, Math.max(0, 0.5 + 0.35 * n + 0.4 * (uy - 0.2))));
+    const foot = y - ctx.ground(x, z);
+    if (foot < 1.8) k3.lerp(damp, (1.8 - foot) / 1.8 * 0.7);
+    if (face && z < 0.6 && rn > 1.04) {
+      for (const sx of STREAK_X) {
+        const w = 0.35 + 0.25 * Math.sin(y * 0.9 + sx * 3), d = Math.abs(x - sx + 0.3 * Math.sin(y * 0.7 + sx));
+        if (d < w) k3.lerp(streak, (1 - d / w) * 0.9 * Math.min(1, Math.max(0, (y - 1) / 5)));
+      }
     }
-    for (const v of tri) bins[b].push(v[0], v[1], v[2]);
+    if (rn < 1.04 && z > 0.1) k3.copy(niche);
+    k3.multiplyScalar(0.94 + 0.12 * Math.abs(Math.sin(x * 1.7 + y * 2.3 + z * 1.1)));
+    col.set([k3.r, k3.g, k3.b], i * 3);
   }
-  bins.forEach((arr, b) => {
-    if (!arr.length) return;
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3));
-    g.computeVertexNormals();
-    const m = new THREE.Mesh(g, tones[b]);
-    m.castShadow = m.receiveShadow = true;
-    group.add(m);
-  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  g.setIndex(sph.index);
+  g.computeVertexNormals();
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }));
+  m.castShadow = m.receiveShadow = true; m.userData.keep = true;           // keeps its colours (a batch drops them)
+  group.add(m);
 }
 
 export default function build(ctx) {
   const { group, M } = ctx;
-  const reliefMat = ctx.mat(0xa29c93, { roughness: 0.95 });
+  const reliefMat = ctx.mat(0xa39782, { roughness: 0.95 });
 
-  // The face: about 9 m wide, 12 m tall, 8 m deep; the carved face is its front (z = 0).
-  boulder(ctx, group, [0, 5.5, 4.0], [4.5, 6.0, 4.0], true, 0);
-  // Boulders beside and behind the face, partly overlapping it (estimated sizes 4-7 m).
-  boulder(ctx, group, [6.2, 2.2, 3.0], [2.8, 2.6, 2.6], false, 2.1);
-  boulder(ctx, group, [-5.6, 1.6, 6.0], [2.4, 2.2, 2.3], false, 4.3);
-  boulder(ctx, group, [-1.0, 4.0, 10.0], [3.4, 3.8, 3.2], false, 6.7);
+  // The boulder: 23 m wide and 11.8 m high (sourced), 12 m deep (estimated); the carved face is its front (z = 0).
+  const g0 = ctx.ground(0, 0);
+  boulder(ctx, group, [0, g0 + 5.4, 5.0], [11.5, 6.4, 6.6], true, 0);
+  // Boulders beside and behind it, partly overlapping (estimated sizes 6-12 m).
+  boulder(ctx, group, [13.5, ctx.ground(13.5, 4) + 2.6, 4.0], [3.6, 3.6, 3.4], false, 2.1);
+  boulder(ctx, group, [-13.8, ctx.ground(-13.8, 6) + 2.2, 6.0], [3.4, 3.2, 3.6], false, 4.3);
+  boulder(ctx, group, [3.0, ctx.ground(3, 15) + 4.0, 15.0], [8.0, 5.0, 5.0], false, 6.7);
 
   // The relief: flat shapes extruded 0.11 m out of the niche floor, standing on yb.
   const yb = ctx.ground(0, 0) + LIFT;

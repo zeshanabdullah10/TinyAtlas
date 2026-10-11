@@ -6,6 +6,18 @@ import { applyI18n, lang, setLang, t } from "./i18n.js";
 // offline support (not in automated test browsers, which must always see fresh files)
 if ("serviceWorker" in navigator && !navigator.webdriver) navigator.serviceWorker.register(`${BASE}sw.js`).catch(() => {});
 
+// "Install the app": shown only when the browser offers it
+let installEvent = null;
+const installBtn = document.getElementById("install");
+addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvent = e; installBtn.hidden = false; });
+addEventListener("appinstalled", () => { installBtn.hidden = true; installEvent = null; });
+installBtn.addEventListener("click", async () => {
+  if (!installEvent) return;
+  installEvent.prompt();
+  await installEvent.userChoice.catch(() => {});
+  installEvent = null; installBtn.hidden = true;
+});
+
 await mountHome();
 await applyI18n("index");
 const toggle = document.querySelector("[data-lang-toggle]");
@@ -16,7 +28,13 @@ document.querySelector("[data-phrases]").addEventListener("click", async () => {
     ...["swat", "swat-lower"].map((p) => fetch(`${BASE}packs/${p}/atlas/places.json`).then((r) => r.json()).catch(() => []))]);
   const box = document.createElement("div"); box.className = "pc-modal"; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true");
   const x = document.createElement("button"); x.type = "button"; x.className = "pc-close"; x.textContent = t("phrases.close") || "Close";
-  x.onclick = () => box.remove(); box.addEventListener("click", (e) => { if (e.target === box) box.remove(); });
+  const opener = document.activeElement;
+  const close = () => { box.remove(); document.removeEventListener("keydown", onKey); opener?.focus?.(); };
+  const onKey = (e) => { if (e.key === "Escape" && !document.querySelector(".pc-driver")) close(); };
+  x.onclick = close; box.addEventListener("click", (e) => { if (e.target === box) close(); });
+  document.addEventListener("keydown", onKey);
+  box.setAttribute("aria-label", t("phrases.title") || "Traveller phrase card");
   box.append(phraseCard(phrases.phrases || phrases, packs.flat()), x); document.body.append(box);
+  (matchMedia("(pointer: fine)").matches ? box.querySelector(".pc-search") : x)?.focus({ preventScroll: true });   // no surprise keyboard on phones
 });
 window.__ready = true;

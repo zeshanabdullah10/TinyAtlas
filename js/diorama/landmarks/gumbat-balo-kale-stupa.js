@@ -2,9 +2,9 @@
 // Estimated from the Commons photos (see the site's landmark.edits); local metres, origin at the shrine's centre.
 export default function build(ctx) {
   const { group: g, M, box, cyl, lathe, ground } = ctx;
-  const stone = ctx.mat(0xa27a58, { roughness: 0.95 });   // warm brick masonry in the photos
-  const podium = ctx.mat(0x8c7257, { roughness: 1 });
-  const dark = ctx.mat(0x2a2320, { roughness: 1 });
+  const stone = ctx.masonry(0x98775a, { alt: 0xab8a69, block: 0.5, course: 0.38 });   // warm stone courses in the photos
+  const podium = ctx.masonry(0x86705a, { alt: 0x957d64, rubble: true, block: 0.5 });
+  const dark = ctx.mat(0x463c34, { roughness: 1 });                                   // openings in shade, never black
   const top = ctx.mat(0x9c8062, { roughness: 0.9 });
 
   // podium: 8 m square, 1.5 m high above the ground (top at y 1.5, where the chamber stands), seated on the real slope

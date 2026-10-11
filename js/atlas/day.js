@@ -2,6 +2,7 @@
 // The planner returns the route in 0..1 coordinates over the pack's extent (u = x / W, v = z / H).
 import * as THREE from "three";
 import { h } from "../dom.js";
+import { tr, placeName } from "../i18n.js";
 import { buildRibbon, ribbonMaterial } from "./ribbon.js";
 
 const SAFFRON = [0.97, 0.66, 0.16], CASING = [0.1, 0.07, 0.04];
@@ -26,10 +27,10 @@ export class DayRoute {
     this.pts = day.route.map(([u, v]) => [u * p.W, v * p.H]);
     this.stops = day.stops.map((s) => p.places.find((q) => q.slug === s.slug)).filter(Boolean)
       .map((q, i) => ({ place: q, n: i + 1, x: q.anchor?.[0] ?? q.x, z: q.anchor?.[1] ?? q.z }));
-    this.title = `Day ${day.n}: ${day.title}`;
+    this.title = tr("day.pill", "Day {n}: {title}", { n: day.n, title: day.title });
     this.build();
-    this.layer.replaceChildren(...this.stops.map((s) => (s.el = h("div", { class: "day-mk", title: `${s.n}. ${s.place.name}` }, h("span", null, String(s.n))))));
-    this.pill.replaceChildren(h("span", null, this.title), h("button", { type: "button", "aria-label": "Clear the route from the map", onClick: () => { this.clear(); this.onClear?.(); } }, "×"));
+    this.layer.replaceChildren(...this.stops.map((s) => (s.el = h("div", { class: "day-mk", title: `${s.n}. ${placeName(s.place)}` }, h("span", null, String(s.n))))));
+    this.pill.replaceChildren(h("span", null, this.title), h("button", { type: "button", "aria-label": tr("day.clear", "Clear the route from the map"), onClick: () => { this.clear(); this.onClear?.(); } }, "×"));
     this.pill.hidden = false;
     return this.frame();
   }

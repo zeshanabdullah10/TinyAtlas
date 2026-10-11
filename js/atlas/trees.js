@@ -78,9 +78,12 @@ export class Trees {
     };
     this.clearings = [];          // [{x, z, r}] around placed landmark models
     this.chunks = new Map();      // key -> {raw, meshes, rect, state}
-    this.visible = true; this.shadowDist = tier === "high" ? 4000 : 2500;
+    this.visible = true; this.shadowDist = 1500;   // only near trees cast: at 15 deg sun mid-range tree shadows streaked the ground
     this.count = 0; this.draws = 0;
     this.frame = 0;
+    // the pack lists its files: chunks without trees have no file, so skip them instead of fetching a 404
+    this.have = fetch(`${pack.base}files.json`).then((r) => (r.ok ? r.json() : null))
+      .then((l) => (Array.isArray(l) ? new Set(l.map((f) => f.path).filter((f) => f.startsWith("trees/"))) : null)).catch(() => null);
   }
 
   key(c) { return `${c.cx}_${c.cy}`; }
@@ -90,6 +93,8 @@ export class Trees {
     const e = { raw: null, meshes: null, c, state: "loading", order: null };
     this.chunks.set(k, e);
     try {
+      const have = await this.have;
+      if (have && !have.has(`trees/${k}.bin`)) throw new Error("no trees");
       const r = await fetch(`${this.pack.base}trees/${k}.bin`);
       if (!r.ok) throw new Error(r.status);
       const f = new Float32Array(await r.arrayBuffer());
@@ -127,10 +132,10 @@ export class Trees {
   _fill(e) {
     const p = this.pack, M = new THREE.Matrix4(), P = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), E = new THREE.Euler(), K = (e.ramp ?? 1) * this.scale;
     const L = (4 * Math.PI) / 180, col = new THREE.Color(), c0 = new THREE.Color(0x1f3a2c), c1 = new THREE.Color(0x2e5236);
-    const write = (m, ids, v) => {
+    const write = (m, ids, v, wide = 1) => {
       for (let q = 0; q < ids.length; q++) {
         const id = ids[q], i = id * 3, x = e.raw[i], z = e.raw[i + 1];
-        const h = 30 * e.raw[i + 2] * K * this.hf[v] * (1 + (rnd(id * 3 + 2) - 0.5) * 0.6), w = h * (0.9 + rnd(id + 5) * 0.25);
+        const h = 30 * e.raw[i + 2] * K * this.hf[v] * (1 + (rnd(id * 3 + 2) - 0.5) * 0.6), w = h * (0.9 + rnd(id + 5) * 0.25) * wide;
         E.set((rnd(id * 5 + 1) - 0.5) * 2 * L, rnd(id) * Math.PI * 2, (rnd(id * 5 + 3) - 0.5) * 2 * L, "YXZ");
         Q.setFromEuler(E);
         M.compose(P.set(x, p.groundY(x, z) - h * 0.03, z), Q, S.set(w, h, w));
@@ -140,7 +145,7 @@ export class Trees {
       m.instanceMatrix.needsUpdate = true; m.instanceColor.needsUpdate = true;
     };
     for (let v = 0; v < 3; v++) {
-      write(e.meshes[v], e.far ? e.far[v] : e.lists[v], v);
+      write(e.meshes[v], e.far ? e.far[v] : e.lists[v], v, e.widen ?? 1);   // drawn-fraction widening (far meshes only)
       if (e.dmeshes) write(e.dmeshes[v], e.nl[v], v);
     }
   }
@@ -200,21 +205,35 @@ export class Trees {
         if (e.nl) for (let v = 0; v < 3; v++) { nD += e.nl[v].length; detTris += e.nl[v].length * this.trisD[v]; }
       }
     }
-    // far instances are thinned (shared factor k) to the instance cap and, on the high tier, to the triangle budget net of the detail trees
-    let farN = 0, farTris = 0, allTris = 0, allN = 0;
-    for (const [e, f] of want) for (let v = 0; v < 3; v++) {
-      const nf = (e.far ? e.far[v].length : e.lists[v].length) * f, na = e.lists[v].length * f;
-      farN += nf; farTris += nf * this.tris[v]; allN += na; allTris += na * this.tris[v];
+    // far instances are thinned to the instance cap and, on the high tier, to the triangle budget net of the detail
+    // trees. Thinning is distance-weighted (factor min(1, k * pri)): the nearest chunks keep their full data density
+    // and the cut falls on distant ones, where the surviving crowns are widened to keep the canopy closed.
+    const pri = (e) => Math.min(1, 2500 / Math.max(1, e.c.dist));
+    const cost = (k) => {
+      let n = 0, t = 0, an = 0, at = 0;
+      for (const [e, f] of want) {
+        const q = f * Math.min(1, k * pri(e));
+        for (let v = 0; v < 3; v++) { const nf = (e.far ? e.far[v].length : e.lists[v].length) * q, na = e.lists[v].length * q; n += nf; t += nf * this.tris[v]; an += na; at += na * this.tris[v]; }
+      }
+      return [n, t, an, at];
+    };
+    let k = 1 / 0.05;                                       // large enough that every chunk is at its full share
+    const [, , aN, aT] = cost(1e3);
+    const nCap = Math.max(0, this.cap - nD), tCap = this.detail && nD ? Math.max(0, 1.04 * aT * Math.min(1, this.cap / Math.max(1, aN)) - detTris) : Infinity;
+    const [n0, t0] = cost(k);
+    if (n0 > nCap || t0 > tCap) {
+      let lo = 0, hi = k;
+      for (let it = 0; it < 22; it++) { const mid = (lo + hi) / 2, [n, t] = cost(mid); if (n > nCap || t > tCap) hi = mid; else lo = mid; }
+      k = lo;
     }
-    let k = farN + nD > this.cap ? Math.max(0, this.cap - nD) / farN : 1;
-    // triangle-neutral: the all-regular-geometry cost (at the instance cap) is the budget; detail trees are paid for by thinning far ones
-    if (this.detail && nD) { const base = 1.04 * allTris * Math.min(1, this.cap / Math.max(1, allN)); k = Math.min(k, Math.max(0, base - detTris) / farTris); }
     let count = 0, draws = 0;
     const live = new Set();
     for (const [e, f] of want) {
       live.add(e);
+      const wb = Math.round(Math.min(1.7, Math.max(1, 1 / Math.sqrt(Math.max(0.05, f * Math.min(1, k * pri(e)))))) * 8) / 8;
+      if (wb !== e.widen) { e.widen = wb; this._fill(e); }
       for (let v = 0; v < 3; v++) {
-        const m = e.meshes[v], n = Math.floor((e.far ? e.far[v].length : e.lists[v].length) * f * k);
+        const m = e.meshes[v], n = Math.floor((e.far ? e.far[v].length : e.lists[v].length) * f * Math.min(1, k * pri(e)));
         m.count = n; m.visible = n > 0; count += n; draws += n > 0 ? 1 : 0;
         m.castShadow = e.c.dist < this.shadowDist;
         if (e.dmeshes) {

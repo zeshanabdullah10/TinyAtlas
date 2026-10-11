@@ -3,10 +3,14 @@
   "short_name": "Tiny Atlas",
   "description": "A true-to-the-ground illustrated 3D map of Swat, Pakistan: Kalam, Ushu, Mahodand, Mingora and the Gandhara heritage, with sourced stories, a day planner and offline use.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#15120f",
   "theme_color": "#15120f",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

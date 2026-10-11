@@ -20,3 +20,27 @@
   --f-sub: "Cormorant Garamond", Georgia, serif;
   --gutter: clamp(18px, 4vw, 56px);
 }
+
+/* Shared page chrome (home footer, play, trip kit, voices consent): slim header and footer, one focus ring, one button. */
+:focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; }
+.site-head { position: relative; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px;
+  padding: 8px var(--gutter); background: var(--ink); border-bottom: 1px solid var(--line); font-family: var(--font-ui); }
+.site-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: var(--cream); text-decoration: none;
+  font: 600 1.05rem var(--f-title); letter-spacing: .14em; text-transform: uppercase; }
+.site-brand img { width: 28px; height: 28px; border-radius: 6px; display: block; }
+.site-nav { display: flex; flex-wrap: wrap; gap: 2px; }
+.site-nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 999px; color: var(--cream);
+  text-decoration: none; font: 500 .9rem var(--font-ui); }
+.site-nav a:hover { background: var(--raise); }
+.site-nav a[aria-current="page"] { color: var(--saffron); }
+.site-foot { max-width: 1280px; margin: 40px auto 0; padding: 24px var(--gutter) 36px; border-top: 1px solid var(--line); font: 400 .85rem/1.6 var(--font-ui); color: var(--muted); }
+.site-foot .site-nav { margin: 0 -14px 8px; }
+.site-foot p { margin: 0; max-width: 62em; }
+.site-foot a { color: var(--saffron); }
+.site-foot .site-nav a { color: var(--cream); }
+.btn-app { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--saffron);
+  background: var(--saffron); color: var(--on-saffron); font: 600 .95rem var(--font-ui); text-decoration: none; cursor: pointer; }
+.btn-app:hover { background: #f3b04f; }
+.btn-app.ghost { background: transparent; color: var(--cream); border-color: var(--line-2); }
+.btn-app.ghost:hover { border-color: var(--saffron); color: var(--saffron); }
+@media print { .site-head, .site-foot { display: none; } }

@@ -21,8 +21,8 @@ import { buildings } from "./buildings.js";
 import { makePostcard, postcardSheet } from "../postcard.js";
 import { roadStatusCard, loadRoads } from "../roadstatus.js";
 import { Herders } from "./herders.js";
-import { applyI18n } from "../i18n.js";
-applyI18n("diorama");
+import { applyI18n, tr } from "../i18n.js";
+await applyI18n("diorama").catch(() => {});
 import { Traffic, Riders } from "./traffic.js";
 import { SEASONS, seasonU, mist } from "./season.js";
 
@@ -37,7 +37,7 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, logarithmicD
 renderer.setPixelRatio(tier === "high" ? Math.min(devicePixelRatio || 1, 2) : 1);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.2;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setClearColor(0x15120f);
 
@@ -149,9 +149,10 @@ fetch(base + "photos.json").then((r) => (r.ok ? r.json() : [])).then((list) => {
     }
     const b = document.getElementById("before"); b.append(g); b.hidden = false;
   }
-  hud.addLabels(photos.map((p) => ({ text: `📷 ${p.caption}`, name: p.caption, sub: `${p.author}${p.date ? ", " + p.date.slice(0, 4) : ""}`, photo: p, group: "Photos",
+  hud.addLabels(photos.map((p) => ({ text: p.caption, name: p.caption, sub: `${p.author}${p.date ? ", " + p.date.slice(0, 4) : ""}`, photo: p, group: "Photos",
     hint: "Open the photo and walk to where it was taken", p: new THREE.Vector3(p.x, site.heightAt(p.x, p.z) + 2.5, p.z), cls: "cam", modes: ["walk"], range: 300 })));
 }).catch(() => {});
+fetch(base + "town.json").then((r) => (r.ok ? r.json() : null)).then((t) => hud.nearby(t, site, lakeC)).catch(() => {});
 const weather = new Weather(latC, (meta.grid.bbox[1] + meta.grid.bbox[3]) / 2, F.arrival_m);
 weather.place = meta.lake ? "the lake" : meta.arrival.name;
 weather.load().then((t) => hud.weather(t)).catch(() => {});
@@ -168,6 +169,15 @@ function lakeView() {           // the overview: high behind the track you came 
   const D = meta.lake ? 1100 : 520;
   const p = look.clone().addScaledVector(dir, D); p.y = look.y + D * 0.62;
   const clear = () => { for (let i = 1; i <= 24; i++) { const q = p.clone().lerp(look, i / 25); if (q.y < site.heightAt(q.x, q.z) + 25) return false; } return true; };
+  if (!meta.lake) {              // a meadow: look AT it from the side with the clearest view (the drive's side first), not into the slope behind the road
+    let ok = false;
+    for (const deg of [0, 40, -40, 80, -80, 120, -120, 160]) {
+      const a = (deg * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
+      p.set(look.x + (dir.x * c - dir.z * s) * D, look.y + D * 0.62, look.z + (dir.x * s + dir.z * c) * D);
+      if ((ok = clear())) break;
+    }
+    if (!ok) p.set(look.x + dir.x * D, look.y + D * 0.62, look.z + dir.z * D);
+  }
   for (let k = 0; k < 40 && !clear(); k++) p.y += 40;
   p.y = Math.max(p.y, site.heightAt(p.x, p.z) + 80);
   _overview = { p, look };
@@ -188,7 +198,7 @@ const labels = [
 ];
 if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, group: "On the map", p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
 hud.makeLabels(labels);
-hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: meta.lake ? "On the shore path" : "On the walk round the grounds", p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
+hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: meta.lake ? tr("diorama.vp.shore", "On the shore path") : tr("diorama.vp.grounds", "On the walk round the grounds"), p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
 hud.addLabels([...life.labels, ...(herders?.labels ?? [])].map((l) => ({ ...l, name: l.text.split(" · ")[0], sub: l.text.split(" · ")[1], group: `At the ${meta.lake ? "lake" : "site"}` })));
 
 // ---- tags and the Places list: go to what was chosen
@@ -217,7 +227,7 @@ function setEnv(e) {
   env = e;
   const real = e === "real";
   sky.dome.visible = real; far.visible = real; table.visible = !real;
-  scene.fog = real ? new THREE.Fog(sky.horizon.clone(), 600, 26000) : null;
+  scene.fog = real ? new THREE.FogExp2(sky.haze.clone(), 1 / 18000) : null;   // aerial perspective (sky.js: 1 / metres)
   document.body.dataset.env = e;
 }
 setEnv("table");
@@ -291,7 +301,7 @@ const PACES = [1, 2, 4, 8];
 let pace = 1;
 hud.on("pace", () => { pace = PACES[(PACES.indexOf(pace) + 1) % PACES.length]; hud.pace(pace); });
 hud.on("sound", () => { sound.start(); sound.mute(!sound.muted); hud.sound(!sound.muted); });
-hud.on("sun", (h) => { sky.set(h); if (scene.fog) scene.fog.color.copy(sky.horizon); });
+hud.on("sun", (h) => { sky.set(h); if (scene.fog) scene.fog.color.copy(sky.haze); });
 hud.on("walk", startWalk);
 hud.on("tour", () => startWalk(vps[0], { tour: true }));
 // The shore tour: glide along the path to each viewpoint in turn, stop, turn to the water, look for a few seconds.
