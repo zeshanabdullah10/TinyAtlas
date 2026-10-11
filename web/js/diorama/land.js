@@ -59,6 +59,13 @@ const GROUND = /* glsl */ `
     vec3 meadow = vec3(0.62, 0.78, 0.30) * (l0 / 0.708), forest = vec3(0.30, 0.52, 0.36) * (l0 / 0.474);
     g_col = mix(g_col, meadow * 1.5 * 1.1, vVeg.x * 0.55 * (1.0 - bare));
     g_col = mix(g_col, forest * 1.5, vVeg.y * 0.5 * (1.0 - bare));
+    // Within ~3 km the satellite's soft ochre would dominate: where WorldCover says meadow/crop or forest, the colour
+    // is the visitors' photos' (uRefM, uRefF) and the satellite only says how much lighter or darker each patch is.
+    float nearT = 1.0 - smoothstep(1200.0, 4500.0, g_dist);
+    vec3 refM = uRefM * mix(1.0, clamp(l0 / uMeanM, 0.6, 1.35), 0.85);
+    vec3 refF = uRefF * mix(1.0, clamp(l0 / uMeanF, 0.6, 1.35), 0.85);
+    g_col = mix(g_col, refM, vVeg.x * 0.9 * (1.0 - bare) * nearT);
+    g_col = mix(g_col, refF, vVeg.y * 0.85 * (1.0 - bare) * nearT);
   }
   float g_lum = dot(g_col, vec3(0.2126, 0.7152, 0.0722));
   float g_sat = (max(g_col.r, max(g_col.g, g_col.b)) - min(g_col.r, min(g_col.g, g_col.b))) / max(max(g_col.r, max(g_col.g, g_col.b)), 1e-3);
@@ -77,11 +84,11 @@ const GROUND = /* glsl */ `
     vec3 rock = vec3(g_lum) * vec3(1.06, 1.0, 0.92) * 1.25 + 0.03;
     g_col = mix(g_col, rock * (0.72 + 0.56 * strata), rockT * (0.35 + 0.35 * g_mid));
     float scree = smoothstep(0.93, 0.84, N0.y) * (1.0 - g_green) * (1.0 - snowT) * (1.0 - rockT);
-    g_col *= 1.0 + g_mid * (0.22 * (fbm(vW.xz * 0.07 + 11.0) - 0.5) + scree * 0.25 * (tn(vW.xz * 0.9) - 0.5));
+    g_col *= 1.0 + g_mid * ((0.22 + 0.16 * g_fine) * (fbm(vW.xz * 0.07 + 11.0) - 0.5) + scree * 0.25 * (tn(vW.xz * 0.9) - 0.5));
   }
   if (g_fine > 0.0) {                           // what you see from the jeep: tufts, bare patches, stones
     float tuft = tn(vW.xz * 1.3) * 0.5 + tn(ROT * vW.xz * 3.9) * 0.3 + tn(vW.xz * 0.37 + 5.0) * 0.2;
-    vec3 grassy = g_col * mix(vec3(0.82, 0.9, 0.7), vec3(1.16, 1.1, 0.86), tuft);
+    vec3 grassy = g_col * mix(vec3(0.74, 0.86, 0.62), vec3(1.2, 1.14, 0.84), tuft);
     g_col = mix(g_col, grassy, g_fine * g_green * (1.0 - rockT));
     float stones = smoothstep(0.86, 0.93, tn(ROT * vW.xz * 3.1)) * (1.0 - g_green) * (1.0 - snowT) * (1.0 - max(vVeg.x, vVeg.y));
     g_col = mix(g_col, vec3(g_lum * 1.3 + 0.03), g_fine * stones * 0.3);
@@ -104,10 +111,19 @@ const GROUND = /* glsl */ `
   g_col = mix(g_col, vec3(0.84, 0.87, 0.93) * (0.94 + 0.08 * tn(vW.xz * 0.05)), snowT * 0.85);
   diffuseColor.rgb = g_col;`;
 
+// Ground colours sampled from the sites' Commons photos (sunlit pixels where G > R and G > B; data/shots/wave2/terrain/
+// photo_samples.json): meadow from Mahodand 2015 and three Kalam photos, sRGB (100, 117, 57); forest from the least hazy
+// stand, "Swat kalam 16" at Mahodand, sRGB (60, 71, 55). Scaled to a material colour that renders back to about them.
+// Saturation is raised 1.2x around the luminance: tone mapping and haze take that much back on screen.
+const refColour = (rgb) => { const c = rgb.map((v) => lin(v) * 1.15), y = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  return new THREE.Color().setRGB(...c.map((v) => Math.max(0, y + (v - y) * 1.2))); };
+const REF = { meadow: refColour([100, 117, 57]), forest: refColour([60, 71, 55]) };
+
 function terrainMaterial({ hole = null } = {}) {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
   const uni = { uAlb: { value: null }, uAlbOn: { value: 0 }, uAlbO: { value: new THREE.Vector2() }, uAlbP: { value: 5 },
-    uAlbN: { value: new THREE.Vector2(1, 1) }, uSnowY: { value: snowY } };
+    uAlbN: { value: new THREE.Vector2(1, 1) }, uSnowY: { value: snowY },
+    uRefM: { value: REF.meadow }, uRefF: { value: REF.forest }, uMeanM: { value: 0.1 }, uMeanF: { value: 0.06 } };
   m.userData.uni = uni;
   m.customProgramCacheKey = () => (hole ? "dio-far2" : "dio-near2");   // same source, different closure: keep the programs apart
   m.onBeforeCompile = (sh) => {
@@ -117,7 +133,7 @@ function terrainMaterial({ hole = null } = {}) {
       .replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz; vNt = mat3(modelMatrix) * objectNormal; vVeg = aVeg;");
     sh.fragmentShader = sh.fragmentShader
       .replace("#include <common>", `#include <common>\n${hole ? "#define DIO_FAR" : ""}\n${DETAIL}\n${BUMP}
-varying vec3 vNt; varying vec2 vVeg; uniform sampler2D uAlb; uniform float uAlbOn, uAlbP, uSnowY; uniform vec2 uAlbO, uAlbN;`)
+varying vec3 vNt; varying vec2 vVeg; uniform sampler2D uAlb; uniform float uAlbOn, uAlbP, uSnowY, uMeanM, uMeanF; uniform vec2 uAlbO, uAlbN; uniform vec3 uRefM, uRefF;`)
       .replace("#include <color_fragment>", `#include <color_fragment>
   ${hole ? `if (abs(vW.x) < ${hole[0].toFixed(1)} && abs(vW.z) < ${hole[1].toFixed(1)}) discard;` : ""}
   float snowT, rockT; vec3 dN;
@@ -152,7 +168,17 @@ export function albedo(site) {
           li.append(a, `: ${ALBEDO_SOURCE.use}. `, sp); ul.append(li);
         }
       }
-      return { near, far };
+      // mean albedo luminance of the meadow and forest cells: the reference for "lighter or darker than usual"
+      const g = site.meta.grid, cv = document.createElement("canvas"); cv.width = g.cols; cv.height = g.rows;
+      const cx = cv.getContext("2d", { willReadFrequently: true }); cx.drawImage(near, 0, 0, g.cols, g.rows);
+      const px = cx.getImageData(0, 0, g.cols, g.rows).data, sum = [0, 0], n = [0, 0];
+      for (let i = 0; i < site.C.length; i++) {
+        const c = site.C[i], k = c === 1 ? 1 : c === 2 || c === 6 || c === 7 ? 0 : -1;
+        if (k < 0) continue;
+        sum[k] += 0.2126 * lin(px[i * 4]) + 0.7152 * lin(px[i * 4 + 1]) + 0.0722 * lin(px[i * 4 + 2]); n[k]++;
+      }
+      const means = [n[0] ? sum[0] / n[0] : 0.1, n[1] ? sum[1] / n[1] : 0.06];
+      return { near, far, means };
     }, () => null));
   }
   return albedoCache.get(key);
@@ -168,7 +194,8 @@ function useAlbedo(mesh, site, which, x0, z0, px) {
   albedo(site).then((a) => {
     if (!a) return;
     const u = mesh.material.userData.uni, img = a[which];
-    u.uAlb.value = texFrom(img); u.uAlbO.value.set(x0, z0); u.uAlbP.value = px; u.uAlbN.value.set(img.width, img.height); u.uAlbOn.value = 1;
+    u.uAlb.value = texFrom(img); u.uAlbO.value.set(x0, z0); u.uAlbP.value = px; u.uAlbN.value.set(img.width, img.height);
+    u.uMeanM.value = Math.max(a.means[0], 0.01); u.uMeanF.value = Math.max(a.means[1], 0.01); u.uAlbOn.value = 1;
   });
 }
 

@@ -34,7 +34,8 @@ CAM = """([mode, dist]) => {
     cam.position.set(x + dx * D * Math.cos(el), gy + D * Math.sin(el), z + dz * D * Math.cos(el));
     cam.lookAt(x, gy + Math.min(D * 0.08, 10), z);
   } else {
-    const px = x + dx * dist, pz = z + dz * dist;
+    let px = x + dx * dist, pz = z + dz * dist;
+    for (let k = 0; k < 200 && d.site.coverAt(px, pz) === 5; k++) { px += dx * 5; pz += dz * 5; }   // never stand in the lake
     cam.position.set(px, d.site.heightAt(px, pz) + 1.7, pz);
     cam.lookAt(x, gy + 4, z);
   }

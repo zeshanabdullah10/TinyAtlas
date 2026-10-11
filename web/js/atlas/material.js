@@ -63,6 +63,11 @@ varying vec3 vWPos;
 uniform sampler2D uGrad, uShadow, uOv, uAlb; uniform vec4 uGridUV, uTile; uniform vec3 uSunDir; uniform vec2 uGridSize;
 uniform float uExag, uDetail, uHasTile, uTexPx, uHmin, uClose, uPx;
 ${NOISE}
+// two-octave rock noise on one projection plane; value + gradient in that plane's (u, v), metres
+vec3 rk(vec2 p, mat2 A, mat2 B) {
+  vec3 a = noised(A * p / 6.0), b = noised(B * p / 23.0 + 3.7);
+  vec2 ga = (a.yz * A) / 6.0, gb = (b.yz * B) / 23.0;
+  return vec3(a.x * 0.45 + b.x * 0.55, ga * 0.45 + gb * 0.55);
 }`)
       .replace("#include <map_fragment>", `
   vec2 guv = (vWPos.xz * uGridUV.x + uGridUV.y) / uGridUV.zw;
@@ -91,11 +96,11 @@ ${NOISE}
   float forest = smoothstep(1.12, 1.45, alb.g / max(alb.r, 1e-3)) * (1.0 - smoothstep(0.045, 0.10, aLum));
   // Wide views: forest canopy reads darker and cooler with a crown-scale mottle (the poster's dense conifers),
   // fading out where the instanced trees take over.
-  float farF = smoothstep(2500.0, 9000.0, camD) * forest;
+  float farF = smoothstep(7000.0, 15000.0, camD) * forest;
   if (farF > 0.0) {
     float mpp = camD * uPx, crown = noised(wxz / 42.0).x * 0.6 + noised(wxz / 13.0 + 5.0).x * 0.4;
     float amp = 1.0 - smoothstep(14.0, 45.0, mpp);
-    alb *= mix(vec3(1.0), vec3(0.80, 0.93, 1.02) * (0.86 + amp * 0.5 * (crown - 0.5)), farF);
+    alb *= mix(vec3(1.0), vec3(0.74, 0.92, 1.06) * (0.84 + amp * 0.5 * (crown - 0.5)), farF);
   }
   vec2 dn = vec2(0.0); float dvar = 0.0; vec3 bump = vec3(0.0);
   if (fadeD > 0.0) {
@@ -114,20 +119,21 @@ ${NOISE}
     // triplanar rock: noise projected on the three axis planes (world y as drawn), blended by the macro normal, so
     // cliffs get crisp, unstretched detail; tone + a bump from the same noise
     vec3 tw = pow(abs(mN), vec3(4.0)); tw /= tw.x + tw.y + tw.z;
-    vec3 P = vWPos / 7.0, Q = vWPos / 26.0;
-    vec3 ax = noised(P.zy) * 0.6 + noised(Q.zy + 3.0) * 0.4, ay = noised(P.xz) * 0.6 + noised(Q.xz + 3.0) * 0.4, az = noised(P.xy) * 0.6 + noised(Q.xy + 3.0) * 0.4;
+    // each plane's lattice is rotated (and the two octaves differently) so no axis-aligned grid shows through
+    const mat2 R1 = mat2(0.80, -0.60, 0.60, 0.80), R2 = mat2(0.28, 0.96, -0.96, 0.28);
+    vec3 ax = rk(vWPos.zy, R1, R2), ay = rk(vWPos.xz, R2, R1), az = rk(vWPos.xy, R1, R2);
     float r = ax.x * tw.x + ay.x * tw.y + az.x * tw.z;
-    float ridge = 1.0 - abs(2.0 * r - 1.0);                         // ridged: dark cracks between lit blocks
-    alb *= mix(1.0, 0.62 + 0.62 * pow(ridge, 1.5), rockF);
-    bump = rockF * fadeD * 0.9 * (tw.x * vec3(0.0, ax.z, ax.y) + tw.y * vec3(ay.y, 0.0, ay.z) + tw.z * vec3(az.y, az.z, 0.0)) / 7.0;
+    alb *= mix(1.0, 0.66 + 0.62 * smoothstep(0.15, 0.85, r), rockF);
+    bump = rockF * fadeD * 0.8 * (tw.x * vec3(0.0, ax.z, ax.y) + tw.y * vec3(ay.y, 0.0, ay.z) + tw.z * vec3(az.y, az.z, 0.0));
   }
   vec3 tN = normalize(vec3(-(G.x * uExag) - dn.x, 1.0, -(G.y * uExag) - dn.y));
-  tN = normalize(tN - 6.0 * (bump - dot(bump, tN) * tN));
+  tN = normalize(tN - 5.0 * (bump - dot(bump, tN) * tN));
   float conc = smoothstep(0.02, 0.45, G.z), conv = smoothstep(0.02, 0.4, -G.z);
   float steep = 1.0 - smoothstep(0.35, 0.8, mN.y);
   float aoT = 1.0 - mix(0.45, 0.3, fadeM) * conc * (0.5 + steep) + 0.10 * conv;   // the 30 m curvature AO is too coarse to lean on up close
   diffuseColor.rgb = alb * aoT * (1.0 + dvar);
   float hLit = texture2D(uShadow, guv).r;`)
+      .replace("#include <lights_fragment_begin>", THREE.ShaderChunk.lights_fragment_begin.replace(/\? getShadow\(/g, "? 0.42 + 0.58 * getShadow("))
       .replace("#include <normal_fragment_begin>", `
   float faceDirection = gl_FrontFacing ? 1.0 : -1.0;
   vec3 normal = normalize((viewMatrix * vec4(tN, 0.0)).xyz);
@@ -136,13 +142,17 @@ ${NOISE}
   {
     vec3 lit0 = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse;
     reflectedLight.directDiffuse *= hLit; reflectedLight.directSpecular *= hLit;
-    float flo = mix(0.45, 0.66, uClose);                              // close views: shade keeps more of its lit luminance
+    float flo = mix(0.45, 0.70, uClose);                              // close views: shade keeps more of its lit luminance
     float def = max(0.0, flo * dot(lit0, vec3(0.299, 0.587, 0.114)) - dot(reflectedLight.directDiffuse + reflectedLight.indirectDiffuse, vec3(0.299, 0.587, 0.114)));
     vec3 chroma = diffuseColor.rgb / max(dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114)), 0.01);   // keep the ground's own saturation in the lift
     vec3 tealC = mix(chroma * vec3(0.70, 1.0, 1.45), vec3(0.45, 1.0, 1.45), 0.25); tealC /= dot(tealC, vec3(0.299, 0.587, 0.114));
-    reflectedLight.indirectDiffuse += def * mix(vec3(0.92, 1.03, 1.1), tealC, uClose);   // sky-tinted; close: albedo chroma shifted toward teal-blue
+    reflectedLight.indirectDiffuse += def * mix(vec3(0.84, 1.02, 1.2), tealC, uClose);   // sky-tinted teal (poster shade); close: albedo chroma shifted toward teal-blue
     float ndl = dot(tN, uSunDir), away = 1.0 - smoothstep(0.0, 0.3, ndl);
     reflectedLight.indirectDiffuse += uClose * 0.12 * max(1.0 - hLit, away) * diffuseColor.rgb * vec3(0.7, 1.0, 1.25);   // albedo-keyed teal fill in cast shadow and on sun-averted slopes
+    // close views look down on flat valley floors that a 15 deg sun barely lights: a gain brings them back toward the
+    // baked albedo (the poster palette) without lifting the shade/lit ratio
+    float gain = 1.0 + 0.32 * uClose;
+    reflectedLight.directDiffuse *= gain; reflectedLight.indirectDiffuse *= gain;
   }`);
   };
   return m;

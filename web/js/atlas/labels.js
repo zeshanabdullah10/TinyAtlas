@@ -90,7 +90,7 @@ export class Labels {
     let chipOk = null;                                                    // zoomed in: only the selected place and its nearest neighbours may be chips
     if (near) {
       const sel = cand.find((it) => it.place.slug === this.selected), cx = sel ? sel.sx : W / 2, cy = sel ? sel.sy : H / 2;
-      chipOk = new Set(cand.filter((it) => it !== sel).sort((a, b) => Math.hypot(a.sx - cx, a.sy - cy) - Math.hypot(b.sx - cx, b.sy - cy)).slice(0, phone ? 4 : 6));
+      chipOk = new Set(cand.filter((it) => it !== sel).sort((a, b) => Math.hypot(a.sx - cx, a.sy - cy) - Math.hypot(b.sx - cx, b.sy - cy)).slice(0, phone ? 2 : 3));
       if (sel) chipOk.add(sel);
     }
     const show = new Set(), mini = new Set(), dots = [];
@@ -100,7 +100,7 @@ export class Labels {
       const occ = !isSel && this.pack.occluded(cp, it.pos, 40 + d * 0.004);
       const asDot = () => {                                               // honesty rule kept: hidden places are hollow dots, never visible-looking
         if (!near || (occ && it.tier >= 3) || dots.some((q) => Math.abs(q[0] - it.sx) < 12 && Math.abs(q[1] - it.sy) < 12)) return;
-        dots.push([it.sx, it.sy]); it.ghost = occ; mini.add(it);
+        dots.push([it.sx, it.sy]); taken.push([it.sx - 7, it.sy - 7, it.sx + 7, it.sy + 7]); it.ghost = occ; mini.add(it);
       };
       if (chipOk && !chipOk.has(it)) { asDot(); continue; }
       const fs = Math.round(Math.min(14.5, Math.max(10.5, 13 * Math.pow(26000 / d, 0.18))) * 2) / 2;
@@ -123,7 +123,7 @@ export class Labels {
         it.el.style.setProperty("--ll", len + "px"); it.el.style.setProperty("--la", Math.atan2(-pos[0], pos[1]) + "rad");
       }
       if (occ && it.tier >= 3) { asDot(); continue; }                                      // tiers 1-2 stay as ghosts
-      it.ghost = occ; taken.push(rect); show.add(it); dots.push([it.sx, it.sy]);
+      it.ghost = occ; taken.push(rect, [it.sx - 7, it.sy - 7, it.sx + 7, it.sy + 7]); show.add(it); dots.push([it.sx, it.sy]);   // later chips keep off this anchor dot
     }
     for (const it of this.items) {
       const on = show.has(it), mn = mini.has(it);

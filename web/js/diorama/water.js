@@ -55,7 +55,7 @@ vec2 lakeMask(vec2 xz) { return texture2D(uMask, vec2((xz.x + ${(grid.width / 2)
   vec3 R = reflect(-V, nW);
   vec3 sky = mix(uSky, uSky * vec3(0.55, 0.7, 1.0), clamp(R.y * 1.6, 0.0, 1.0)) * vec3(0.85, 0.95, 0.95);
   // low reflections hit the valley walls, not the sky: darker, greener, as in the photos from the shore
-  vec3 walls = mix(uDeep, vec3(0.085, 0.1, 0.07), 0.7) + uSky * 0.08;
+  vec3 walls = mix(uDeep, vec3(0.15, 0.17, 0.13), 0.6) + uSky * 0.1;
   vec3 refl = mix(walls, sky, smoothstep(0.06, 0.45, R.y));
   outgoingLight = mix(outgoingLight, refl, fres * 0.8 * (1.0 - uWinter * 0.6));
   float lap = sin(uTime * 1.1 + mk * 40.0 + wn(vW.xz / 4.0).x * 6.0);
@@ -67,14 +67,15 @@ vec2 lakeMask(vec2 xz) { return texture2D(uMask, vec2((xz.x + ${(grid.width / 2)
 }
 
 const lin = (v) => Math.pow(v / 255, 2.2);
-/** Deep and shallow water colours from the mean satellite colour of the open water (linear RGB). */
+/** Deep and shallow water colours. The satellite gives the HUE only (water absorbs, so its brightness says little):
+ *  turquoise for glacial flour, dark green for peaty water. The brightness is set to read like the lakes' own photos
+ *  (open water sRGB ~(98, 107, 94) at Mahodand, ~(77, 88, 94) at Pari, sampled from their Commons photos). */
 function lakeColours(rgb, uni) {
   const L = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-  const t = rgb.map(lin), l = Math.max(L(t), 0.012);
-  const sat = (c, k) => { const y = L(c); return c.map((v) => Math.max(0, y + (v - y) * k)); };
-  // deep water keeps the satellite's hue at a luminance between 0.03 and 0.06; the shelf is about twice as bright
-  const deep = sat(t, 1.25).map((v) => v * Math.min(Math.max(l, 0.03), 0.06) / l);
-  const shallow = sat(t, 1.1).map((v, i) => Math.min(1, v * Math.min(Math.max(l, 0.03), 0.06) / l * 2.1 + [0.02, 0.025, 0.018][i]));
+  const t = rgb.map(lin), l = Math.max(L(t), 0.004);
+  const hue = t.map((v) => 0.35 + 0.65 * Math.min(v / l, 2.2));            // unit-luminance hue, chroma tempered
+  const k = L(hue);
+  const deep = hue.map((v) => (v / k) * 0.16), shallow = hue.map((v, i) => (v / k) * 0.28 + [0.03, 0.028, 0.018][i]);
   uni.uDeep.value.setRGB(...deep); uni.uShallow.value.setRGB(...shallow);
 }
 

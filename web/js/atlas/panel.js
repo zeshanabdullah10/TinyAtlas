@@ -212,8 +212,8 @@ export class Panel {
       h("ol", { class: "pn-facts" }, p.facts.map((f) => {
         const q = f.quote ? h("blockquote", { class: "fq-body", hidden: true }, h("p", null, f.quote), safeUrl(f.source) ? h("cite", null, "Source: ", h("a", { href: f.source, target: "_blank", rel: "noopener noreferrer" }, host(f.source))) : null) : null;
         const tg = q && h("button", { class: "fq", type: "button", "aria-expanded": "false", "aria-label": "What the source says", title: f.quote.length > 160 ? `“${f.quote.slice(0, 157)}…”` : `“${f.quote}”`,
-          onClick: () => { const on = q.hidden; q.hidden = !on; tg.setAttribute("aria-expanded", String(on)); } }, "“”");
-        return h("li", null, h("p", null, f.text, this.src(f.source), tg ? h("sup", { class: "sref" }, tg) : null), q);
+          onClick: () => { const on = q.hidden; q.hidden = !on; tg.setAttribute("aria-expanded", String(on)); } }, "Quote");
+        return h("li", null, h("p", null, f.text, this.src(f.source), tg), q);
       })));
   }
 
