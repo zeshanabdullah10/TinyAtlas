@@ -1,10 +1,54 @@
 {
   "stories": [
     {
+      "id": "kalam-to-ushu",
+      "pack": "swat",
+      "area": "Kalam & Ushu",
+      "title": "Kalam to Ushu by road",
+      "stops": [
+        {
+          "slug": "kalam",
+          "name": "Kalam",
+          "caption": "The metalled road ends here; a shingle road continues to the Ushu and Utror valleys.",
+          "sources": [
+            {
+              "url": "https://en.wikivoyage.org/wiki/Swat_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "matiltan",
+          "name": "Matiltan",
+          "caption": "It is about 11 km from Kalam and Falak Sar can be seen from it.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Matiltan",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "ushu",
+          "name": "Ushu (Usho)",
+          "caption": "It is mainly inhabited by Gawri people. Mahodand Lake lies 27 km from the village.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Usho",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "kalam-to-mahodand",
       "pack": "swat",
       "title": "Kalam to Mahodand by road",
-      "note": "Waypoints are the sourced places in the upper pack; the camera follows the jeep and 4WD road between them.",
+      "note": "Waypoints are the sourced places in the upper pack; the camera follows the road and track lines in the map data between them.",
       "stops": [
         {
           "slug": "kalam",
@@ -59,6 +103,375 @@
             }
           ]
         }
+      ],
+      "area": "Mahodand"
+    },
+    {
+      "id": "kalam-to-gabral",
+      "pack": "swat",
+      "area": "Utror & Gabral",
+      "title": "Kalam to Gabral by Utror",
+      "stops": [
+        {
+          "slug": "kalam",
+          "name": "Kalam",
+          "caption": "The Swat River forms at Kalam from the Gabral and Ushu rivers.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Kalam_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "utror",
+          "name": "Utror",
+          "caption": "It is 16 km from Kalam. Badogai Pass connects it to Upper Dir.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Utror",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "gabral",
+          "name": "Gabral",
+          "caption": "The Gabral River joins the Utror River there. It is about 7 km from Utror by road and 20 km from Kalam.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Gabral,_Kohistan",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Gabral",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "utror-to-kundol",
+      "pack": "swat",
+      "area": "Utror & Gabral",
+      "title": "Utror to Kundol Lake by Laddu",
+      "stops": [
+        {
+          "slug": "kalam",
+          "name": "Kalam",
+          "caption": "The metalled road ends here; a shingle road continues to the Ushu and Utror valleys.",
+          "sources": [
+            {
+              "url": "https://en.wikivoyage.org/wiki/Swat_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "utror",
+          "name": "Utror",
+          "caption": "The valley is surrounded by snow-clad mountains, green pastures and waterfalls. It is one of the Swat Kohistan valleys inhabited by Gawri people.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Utror",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "laddu",
+          "name": "Laddu (Utror side)",
+          "caption": "Ladu is reached by hiking from Utror or by four-wheeler, about two hours.",
+          "sources": [
+            {
+              "url": "https://en.wikivoyage.org/wiki/Swat_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "kundol-lake",
+          "name": "Kundol Lake",
+          "caption": "Elevation 9,950 ft in the north of Utror. Only accessible in summer.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Kundol_Lake",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "thal-to-kala-chashma",
+      "pack": "swat",
+      "area": "Kumrat",
+      "title": "Thal to Kala Chashma up the Kumrat valley",
+      "stops": [
+        {
+          "slug": "jamia-masjid-thal",
+          "name": "Jamia Masjid Thal (wooden mosque)",
+          "caption": "Built of pure wood with huge pillars. Originally built 1865.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "kumrat-valley",
+          "name": "Kumrat Valley",
+          "caption": "Only reachable by four-wheel vehicles. Deodar forests beside the Panjkora.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Kumrat_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "kumrat-waterfall",
+          "name": "Kumrat Waterfall",
+          "caption": "Several waterfalls are in Kumrat.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Kumrat_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "kala-chashma",
+          "name": "Kala Chashma (Black Spring)",
+          "caption": "Kala Chashma (Black Spring) is in Kumrat.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Kumrat_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mingora-saidu-sharif",
+      "pack": "swat-lower",
+      "area": "Mingora & Saidu Sharif",
+      "title": "Mingora and Saidu Sharif sites",
+      "stops": [
+        {
+          "slug": "mingora",
+          "name": "Mingora",
+          "caption": "Mingora is the largest city of Malakand Division. Third largest city in Khyber Pakhtunkhwa, on the Swat River.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Mingora",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "butkara-i-stupa",
+          "name": "Butkara I Stupa",
+          "caption": "The stupa was probably built in the 2nd century BCE, with a possible Ashokan origin. It was enlarged five times, each time by building over the previous structure.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Butkara_Stupa",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "swat-museum",
+          "name": "Swat Museum",
+          "caption": "A new building opened on 11 December 2014. Most holdings come from Butkara I and Odigram.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Swat_Museum",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "saidu-sharif-stupa",
+          "name": "Saidu Sharif I Stupa and Monastery",
+          "caption": "The sacred area has two terraces with a stupa and a monastery. The first period dates from 25 BCE to the end of the 1st century.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Saidu_Sharif_Stupa",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "saidu-sharif",
+          "name": "Saidu Sharif",
+          "caption": "Hub of official buildings: Swat Museum, Saidu Baba's mausoleum, the Wali's palace and Butkara stupa remains.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Saidu_Sharif",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "udegram-to-amluk-dara",
+      "pack": "swat-lower",
+      "area": "Udegram & Barikot",
+      "title": "Udegram to Amluk-Dara by road",
+      "stops": [
+        {
+          "slug": "udegram",
+          "name": "Udegram (Odigram, ancient Ora)",
+          "caption": "Odigram is the site of the Ghaznavid-era mosque. Hindu Shahis made their capital at Udigram.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Odigram",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Swat_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "ghalegay-buddha-rock",
+          "name": "Ghalegay Buddha (rock relief)",
+          "caption": "A Buddha is carved in rock beside the road to Mingora. Ghalegay was chosen as the first capital of Swat in 1849.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Ghalegay",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "barikot",
+          "name": "Barikot",
+          "caption": "Barikot lies on the middle course of the Swat River, about 20 km from Mingora. The entrance town to central Swat, with about 115,045 people.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Barikot",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "bazira-barikot-ghundai",
+          "name": "Bazira (Barikot Ghundai)",
+          "caption": "The Italian mission has excavated Bazira since 1984. Greek accounts of Alexander's 327 BCE attack are identified with Odigram (Ora) and Barikot (Bazira).",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Barikot",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Swat_Valley",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "amluk-dara-stupa",
+          "name": "Amluk-Dara Stupa",
+          "caption": "It is unprotected and damaged by treasure hunters. Described as the best example of a stupa in Swat.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mingora-to-malam-jabba",
+      "pack": "swat-lower",
+      "area": "Malam Jabba",
+      "title": "Mingora to Malam Jabba by road",
+      "stops": [
+        {
+          "slug": "mingora",
+          "name": "Mingora",
+          "caption": "Mingora is the largest city of Malakand Division.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Mingora",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "manglawar",
+          "name": "Manglawar (Manglor)",
+          "caption": "The valley lies about 9 km north-east of Mingora. Sultan Pakhal Swati founded the Kingdom of Swat with Manglawar as its capital.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Manglawar",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "jahanabad-buddha",
+          "name": "Jahanabad Buddha (Manglawar rock relief)",
+          "caption": "Its style is compared to 7th-8th century Tang sculpture. The head was damaged by explosives in 2007 and later restored.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "malam-jabba",
+          "name": "Malam Jabba Ski Resort",
+          "caption": "It is one of Pakistan's two ski resorts. The resort apex is 2,804 m.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Malam_Jabba",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
       ]
     },
     {
@@ -95,6 +508,68 @@
           "slug": "bahrain",
           "name": "Bahrain (Behrain)",
           "caption": "The name means 'two rivers' for the Daral/Swat confluence. It is a base camp for the Daral and Saidgai lakes trail.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Bahrain,_Pakistan",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        }
+      ],
+      "area": "Madyan & Bahrain"
+    },
+    {
+      "id": "khwazakhela-to-bahrain",
+      "pack": "swat-lower",
+      "area": "Madyan & Bahrain",
+      "title": "Khwazakhela to Bahrain by Madyan",
+      "stops": [
+        {
+          "slug": "khwazakhela",
+          "name": "Khwazakhela",
+          "caption": "Second-largest commercial centre in Swat. Draws people from Kalam, Kohistan and Shangla.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Khwazakhela",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "fatehpur-swat",
+          "name": "Fatehpur (Swat)",
+          "caption": "Fatehpur is a union council of Upper Swat.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Fatehpur,_Swat",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "madyan",
+          "name": "Madyan",
+          "caption": "Madyan is primarily inhabited by Torwalis. The Chail and Swat valleys join at Madyan.",
+          "sources": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Madyan,_Pakistan",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/Torwali_people",
+              "checked": "2026-10-08",
+              "quote_verified": true
+            }
+          ]
+        },
+        {
+          "slug": "bahrain",
+          "name": "Bahrain (Behrain)",
+          "caption": "It lies 60 km north of Mingora at 4,700 ft on the right bank of the Swat River. It is known for riverside tourist resorts and local handicrafts.",
           "sources": [
             {
               "url": "https://en.wikipedia.org/wiki/Bahrain,_Pakistan",

@@ -3,7 +3,8 @@
 
 export const ROUNDS_PER_GAME = 10;
 export const MAX_POINTS = 5000;
-const STORE_KEY = "tinyatlas.play.best.v1";
+const SCALE_KM = 15;                         // a pack is about 100 km across, so a 300 km scale gave a blind guess 90 % of the points
+const STORE_KEY = "tinyatlas.play.best.v2";   // v1 scores used the old, looser scale
 
 /** Pick n distinct rounds at random (Fisher-Yates on a copy). */
 export function pickRounds(all, n = ROUNDS_PER_GAME, rnd = Math.random) {
@@ -20,10 +21,10 @@ export function distanceKm(a, b) {
   return Math.hypot(a.x - b.x, a.z - b.z) / 1000;
 }
 
-/** Points for a guess: full marks at 0 km, falling off exponentially (about 37% left at 300 km). */
+/** Points for a guess: full marks at 0 km, falling off exponentially (about 37% left at 15 km, 4% at 50 km). */
 export function scoreFor(km) {
   if (!Number.isFinite(km) || km < 0) return 0;
-  return Math.round(MAX_POINTS * Math.exp(-km / 300));
+  return Math.round(MAX_POINTS * Math.exp(-km / SCALE_KM));
 }
 
 /** Map a point on the mini map (pixels inside a w×h box) to pack metres over the grid [0,sx]×[0,sz]. */
@@ -77,4 +78,21 @@ export function saveGame(total, storage = globalThis.localStorage) {
   const next = { best: Math.max(cur.best, total), games: cur.games + 1 };
   try { storage.setItem(STORE_KEY, JSON.stringify(next)); } catch { /* storage unavailable: keep it in memory only */ }
   return next;
+}
+
+/** Whole number with thousands separators, e.g. 31200 -> "31,200". */
+export const fmt = (n) => Math.round(n).toLocaleString("en-US");
+
+/** Distance for display: one decimal under 10 km, whole km above. */
+export const kmText = (km) => `${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
+
+/** Plain-text result to paste into a message. results: [{name, km, pts}]. */
+export function shareText({ total, results, mode, url }) {
+  const max = results.length * MAX_POINTS;
+  return [
+    "Where is this view? A photo guessing game on Tiny Atlas, Swat valley.",
+    `${fmt(total)} of ${fmt(max)} points over ${results.length} photos (${mode === "choices" ? "four names" : "map"}).`,
+    results.map((r, i) => `${i + 1}. ${r.name}: ${kmText(r.km)}, ${fmt(r.pts)}`).join("\n"),
+    url,
+  ].join("\n");
 }

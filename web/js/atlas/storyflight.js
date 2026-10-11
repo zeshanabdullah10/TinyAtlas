@@ -288,17 +288,56 @@ export class StoryFlight {
   }
 }
 
-/** Dock button for the page's explore bar, or null when the data has no story for this pack. */
+/** Dock button for the page's explore bar, or null when the data has no story for this pack.
+ *  One story: a plain start/end button. Several: the button opens a menu of them, grouped by Explore area. */
 export function storyButton(flight, data, slug) {
-  const story = (data?.stories || []).find((s) => s.pack === slug);
-  if (!story) return null;
-  const btn = h("button", { type: "button", class: "sf-dock", title: story.title, "aria-pressed": "false" }, "Story flight");
+  const list = (data?.stories || []).filter((s) => s.pack === slug);
+  if (!list.length) return null;
+  const btn = h("button", { type: "button", class: "sf-dock", "aria-pressed": "false" }, "Story flight");
+  const running = () => flight.running && list.some((s) => s.id === flight.story?.id);
+  if (list.length === 1) {
+    btn.title = list[0].title;
+    btn.addEventListener("click", () => (running() ? flight.stop("cancelled") : flight.start(list[0])));
+  } else {
+    btn.title = "Fly the camera along a real road between sourced places";
+    btn.setAttribute("aria-haspopup", "true"); btn.setAttribute("aria-expanded", "false");
+    const menu = h("div", { class: "sf-menu", role: "group", "aria-label": "Story flights", hidden: true });
+    const areas = [...new Set(list.map((s) => s.area || ""))];
+    for (const a of areas) {
+      const sec = h("div", { class: "sf-sec" }, a ? h("p", { class: "sf-ah" }, a) : null);
+      for (const st of list.filter((x) => (x.area || "") === a)) {
+        sec.append(h("button", { type: "button", class: "sf-item", onClick: () => { close(false); flight.start(st); } },
+          h("span", { class: "sf-it" }, st.title), h("span", { class: "sf-is" }, `${st.stops.length} stops`)));
+      }
+      menu.append(sec);
+    }
+    flight.root.append(menu);
+    const close = (refocus = true) => {
+      if (menu.hidden) return;
+      menu.hidden = true; btn.setAttribute("aria-expanded", "false");
+      removeEventListener("pointerdown", away, true); removeEventListener("keydown", esc, true);
+      if (refocus) btn.focus();
+    };
+    const away = (e) => { if (!menu.contains(e.target) && !btn.contains(e.target)) close(false); };
+    const esc = (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
+    const open = () => {
+      const r = btn.getBoundingClientRect();
+      menu.hidden = false; btn.setAttribute("aria-expanded", "true");
+      const w = menu.offsetWidth;
+      menu.style.left = `${Math.max(8, Math.min(innerWidth - w - (innerWidth > 700 ? 84 : 8), r.left + r.width / 2 - w / 2))}px`;
+      menu.style.bottom = `${Math.round(innerHeight - r.top + 10)}px`;
+      addEventListener("pointerdown", away, true); addEventListener("keydown", esc, true);
+      menu.querySelector("button")?.focus();
+    };
+    btn.addEventListener("click", () => { if (running()) flight.stop("cancelled"); else if (menu.hidden) open(); else close(); });
+    // the dock button is the toggle for the menu; a started flight closes it
+    document.addEventListener("storyflight", () => close(false));
+  }
   const sync = (e) => {
-    const on = !!e.detail?.running && e.detail.id === story.id;
+    const on = !!e.detail?.running && list.some((s) => s.id === e.detail.id);
     btn.textContent = on ? "End story flight" : "Story flight";
     btn.setAttribute("aria-pressed", on ? "true" : "false");
   };
   document.addEventListener("storyflight", sync);
-  btn.addEventListener("click", () => (flight.running && flight.story?.id === story.id ? flight.stop("cancelled") : flight.start(story)));
   return btn;
 }
