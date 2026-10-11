@@ -37,6 +37,8 @@ body.tk-page { margin: 0; background: var(--ink); color: var(--cream); font: 400
 .plan ul { padding-left: 1.2em; margin: 0; }
 .plan li { margin: 6px 0; }
 .plan a { color: var(--saffron); text-underline-offset: 3px; }
+.plan a.btn-app { color: var(--on-saffron); text-decoration: none; }
+.plan a.btn-app.ghost { color: var(--cream); }
 .plan .sources li a, .plan .emerg a { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; }
 .plan .sources { font: 400 .85rem/1.5 var(--font-ui); color: var(--muted); }
 .plan .empty { padding: 20px 22px; background: var(--raise); border: 1px solid var(--line); border-radius: 12px; }

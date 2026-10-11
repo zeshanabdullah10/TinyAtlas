@@ -2,7 +2,7 @@
 // in full when the visitor presses "Save for offline" (the page posts the list of URLs). Place data is served from
 // the cache first when saved; everything else goes to the network first and falls back to the cache.
 
-const SHELL = "tinyatlas-shell-v5";   // v5: this release's shell changes (dioramas, photo removal); v4: Urdu, trip kit, road status, heritage, voices, postcards, game
+const SHELL = "tinyatlas-shell-v6";   // v6: shared header, site models, planner, trip kit print, PNG icons; v5: this release's shell changes (dioramas, photo removal); v4: Urdu, trip kit, road status, heritage, voices, postcards, game
 const DATA = "tinyatlas-data-v1";
 // The site may live under a subpath (GitHub Pages); the scope knows where it is ("/" at a domain root).
 const BASE = new URL(self.registration.scope).pathname;
@@ -10,7 +10,7 @@ const BASE = new URL(self.registration.scope).pathname;
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll([BASE, `${BASE}index.html`, `${BASE}css/tokens.css`, `${BASE}css/home.css`, `${BASE}js/main.js`, `${BASE}js/home.js`,
     `${BASE}js/api.js`, `${BASE}js/dom.js`, `${BASE}data/home.json`, `${BASE}img/hero-1600.webp`, `${BASE}img/hero-800.webp`, `${BASE}manifest.webmanifest`,
-    `${BASE}icon.svg`, `${BASE}atlas.html`, `${BASE}css/atlas.css`]))   // home + the Atlas shell; js/atlas/*.js and the rest are cached as they are used, or by "Save for offline"
+    `${BASE}icon.svg`, `${BASE}img/icon-192.png`, `${BASE}data/dioramas.json`, `${BASE}atlas.html`, `${BASE}css/atlas.css`]))   // home + the Atlas shell; js/atlas/*.js and the rest are cached as they are used, or by "Save for offline"
     .then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => e.waitUntil(

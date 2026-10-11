@@ -151,7 +151,7 @@ document.title = `${plan && plan.title ? plan.title : "Trip plan"} | Tiny Atlas`
 const nums = (emergency && emergency.numbers) || [];
 planBox.replaceChildren(...[
   h("h1", null, plan && plan.title ? plan.title : hasContent ? "My trip plan" : "Trip plan"),
-  h("p", { class: "meta" }, [packName, made ? `Plan made ${made}` : null, hasContent ? `Printed ${today}` : null].filter(Boolean).join(" · ")),
+  hasContent && h("p", { class: "meta" }, [packName, made ? `Plan made ${made}` : null, hasContent ? `Printed ${today}` : null].filter(Boolean).join(" · ")),
   ...(plan ? planSection() : []),
   ...(chosen.length ? [h("h2", null, plan ? "More places" : "Places"), ...chosen.map((p) => placeBlock(p))] : []),
   hasContent ? null : emptyState,
