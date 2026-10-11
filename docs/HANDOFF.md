@@ -681,6 +681,6 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
 
 ## 16. Attribution block (must appear in the app and posters)
 "Contains modified Copernicus DEM GLO-30 data … · © ESA WorldCover project 2021 (CC BY 4.0) · Imagery: Sentinel-2
-cloudless 2016 by EOX IT Services GmbH (CC BY 4.0) · © OpenStreetMap contributors (ODbL) · Photos via Wikimedia Commons,
-each credited · Sky: Poly Haven (CC0) · 3D shapes: TRELLIS (MIT), procedural stupas · Heights exaggerated ×<n>,
+cloudless 2016 by EOX IT Services GmbH (CC BY 4.0) · © OpenStreetMap contributors (ODbL) · Building footprints in the
+site models: Microsoft Global ML Building Footprints (CDLA Permissive 2.0) · Photos via Wikimedia Commons, each credited · Sky: Poly Haven (CC0) · 3D shapes: TRELLIS (MIT), procedural stupas · Heights exaggerated ×<n>,
 places drawn larger than life."

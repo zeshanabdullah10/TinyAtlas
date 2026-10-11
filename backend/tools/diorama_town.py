@@ -7,7 +7,8 @@ Most Swat villages have no building footprints in OSM. Two open sources fill the
 1. Microsoft Global ML Building Footprints (detected by a model from Bing Maps imagery 2014-2024, CDLA Permissive
    2.0): data/inputs/msbuildings/<quadkey>.csv.gz, the zoom-9 tiles listed in dataset-links.csv there
    (https://minedbuildings.z5.web.core.windows.net/global-buildings/dataset-links.csv). A footprint is kept when no
-   OSM building is within 7 m of it; it is drawn as the rectangle round it (they are rectangles).
+   OSM building is within 7 m of it; it is drawn as the rectangle round it (they are rectangles). Outlines far
+   from a rectangle or bigger than 900 m2 (above ~1,250 m; 1,200 m2 below) are merged neighbours and are dropped.
 2. ESA WorldCover 2021 "built-up" (class 50) cells on the site's own 10 m grid (the same nearest-cell sampling as
    diorama_build.py), where neither source shows a building: at most one illustrative house per cell.
 Both are kept off roads and paths, rivers, the lake, the landmark's grounds and the walking circle; the WorldCover
@@ -201,7 +202,12 @@ def town(name, wc, ml):
         pts = [to_local(g, la, lo) for la, lo in ring]
         x, z, w, dd, rot = rect(pts)
         c, r = int(round((x - x0) / cell)), int(round((z - z0) / cell))
-        if not (2 <= c < cols - 2 and 2 <= r < rows - 2) or w * dd < 12 or w * dd > 2500 or near_osm[r, c] or lane[r, c] or C[r, c] == 5:
+        pa = abs(sum(pts[i][0] * pts[i - 1][1] - pts[i - 1][0] * pts[i][1] for i in range(len(pts)))) / 2
+        if not (2 <= c < cols - 2 and 2 <= r < rows - 2) or near_osm[r, c] or lane[r, c] or C[r, c] == 5:
+            continue
+        # the model merges neighbours into one outline now and then: drop outlines far from a rectangle, and blocks
+        # bigger than a village house or a town block can be (900 m2 above ~1,250 m, 1,200 m2 below)
+        if w * dd < 12 or w * dd > 1.6 * pa or w * dd > (900 if H[r, c] > 1250 else 1200):
             continue
         if radius and dist[r, c] > radius:
             continue
@@ -248,7 +254,7 @@ def town(name, wc, ml):
     if n_ml:
         parts.append(f"{n_ml} buildings {MLMARK} where OSM maps none (detected by a model from Bing Maps imagery, 2014-2024; "
                      f"it can miss or merge houses){', the nearest the arrival within ' + str(radius) + ' m' if radius else ''}: "
-                     "each is drawn as the rectangle round its footprint; storeys, walls and roofs are illustrative.")
+                     "each is drawn as the rectangle round its footprint (outlines that are merged neighbours, far from a rectangle or over 900-1,200 m2, are left out); storeys, walls and roofs are illustrative.")
     if n_wc:
         parts.append(f"{n_wc} {MARK} ({n_built} cells of 10 m in this model) and neither OSM nor the ML footprints show a building within 30 m: at most one per "
                 f"cell{', nearest the arrival, within ' + str(radius) + ' m' if radius else ''}, kept off roads, rivers, the "

@@ -27,7 +27,11 @@ export class Hud {
   }
   on(k, f) { this.ev[k] = f; }
   emit(k, a) { this.ev[k]?.(a); }
-  loading(t) { const el = $("#loading"); el.hidden = !t; if (t) el.textContent = t; }
+  loading(t) {
+    const el = $("#loading"); el.hidden = !t;
+    if (t && /^Could not load/.test(t) && (!navigator.onLine || /Failed to fetch|NetworkError|Load failed/i.test(t))) t = "This diorama is not saved on this device and you are offline. Connect once and choose Save this site for offline.";
+    if (t) el.textContent = t;
+  }
 
   facts(meta) {
     const F = meta.facts;

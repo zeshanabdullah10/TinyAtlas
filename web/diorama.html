@@ -7,9 +7,9 @@
 <meta name="description" content="A tabletop model of Mahodand Lake built from open elevation, land-cover and map data. Drive the last stretch of the jeep track to the lake.">
 <meta name="theme-color" content="#15120f">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2315120f'/%3E%3Cpath d='M5 24 13 9l5 8 3-4 6 11H5Z' fill='%23e9a23b'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&family=Cormorant+SC:wght@600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+<link rel="preload" href="fonts/cormorant-sc-700-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/diorama.css">
 <link rel="stylesheet" href="css/postcard.css">
@@ -38,7 +38,7 @@
       <button class="btn primary" data-act="drive">Drive the last <span id="cta-km">3.5</span> km</button>
       <button class="btn" data-act="explore">Look around the model</button>
     </div>
-    <p class="fine">Sound on for the engine. <button class="link" id="about-open" type="button">How this model is made</button></p>
+    <p class="fine">Sound on for the engine. <button class="link" id="about-open" type="button">How this model is made</button> · <button class="link" data-offline type="button">Save this site for offline</button></p>
   </section>
 
   <a id="back-atlas" class="back" href="atlas.html" title="Back to the map">‹ Map</a>
@@ -64,6 +64,7 @@
     <button class="chip extra" id="btn-places" type="button" aria-controls="places">Places</button>
     <button class="chip extra" id="btn-season" data-act="season" title="Season (illustrative)">Season: <span id="season-name">Summer</span></button>
     <label class="chip sun extra"><span>Sun</span><input id="sun" type="range" min="5.2" max="19.6" step="0.05" value="16.9" aria-label="Time of day"><output id="sun-out"></output></label>
+    <button class="chip extra" data-offline type="button" title="Save this site for offline">Save offline</button>
     <button class="chip not-intro" data-act="model">Whole model</button>
   </nav>
 
@@ -141,11 +142,14 @@
   </dialog>
 </main>
 <script type="module" src="js/diorama/main.js"></script>
+<script type="module" src="js/diorama/offline.js"></script>
 <script>
   // If the page's modules never load (offline, and this diorama was not saved on the device), say so instead of waiting.
   setTimeout(() => { const l = document.getElementById("loading"), first = l && l.dataset.first;
     if (l && !l.hidden && !window.__diorama && l.textContent === first) l.textContent = "Could not open this diorama. If you are offline, it has not been saved on this device."; }, 30000);
   document.getElementById("loading").dataset.first = document.getElementById("loading").textContent;
+  // Offline with nothing saved: the page's code cannot load either, so say it at once rather than after 30 s.
+  document.querySelector('script[src$="diorama/main.js"]').addEventListener("error", () => { document.getElementById("loading").textContent = "This diorama is not saved on this device and you are offline. Connect once and choose Save this site for offline."; });
 </script>
 <noscript><p style="padding:2rem;font-family:system-ui">This diorama is drawn in the browser, so it needs JavaScript.</p></noscript>
 </body>
