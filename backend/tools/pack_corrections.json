@@ -1,22 +1,1426 @@
 {
-  "_doc": "Checked corrections to the Atlas places, applied by atlas_pack.py on every build (backend/tools/pack_corrections.py). Each text edit makes the field say only what its quoted source says, or drops a claim no source supports. Found in the October 2026 sweep; the source of each is named.",
-  "places": {
-    "mingora": {"replace": [["summary", "The largest city of Swat and the district capital, on the Swat River.", "The largest city of Swat, beside Saidu Sharif, the district capital, on the Swat River."]],
-                "why": "Saidu Sharif is the district capital (Wikipedia, Saidu Sharif; kanju fact)."},
-    "malam-jabba": {"replace": [["summary", "The resort was burned in 2008", "The resort was destroyed in June 2008"]],
-                    "why": "Wikipedia, Malam Jabba: 'The resort was destroyed by Taliban militants in June 2008'."},
-    "jahanabad-buddha": {"replace": [["summary", "its face was damaged by explosives in 2007", "its head was damaged by explosives in 2007"]],
-                         "why": "Wikipedia: 'In 2007 the Taliban tried to destroy the head of the relief with explosives'."},
-    "falak-sar": {"replace": [["summary", " seen from Ushu and Matiltan.", "."]], "why": "No source says where it is seen from."},
-    "thalo-zom": {"replace": [["summary", "Glaciated 6,000 m peak", "Glaciated peak"]], "why": "No source gives 6,000 m."},
-    "saidgai-lake": {"replace": [["access", "Trek from Ushirai Dara (Dir, ~6 h) or Lalko", "Trek from Ushirai Dara (Dir) or Lalko"],
-                                 ["facts.0.text", "It is at 3,500 m near the Dir-Swat border.", "It is near the Dir-Swat border."]],
-                     "why": "The trek time contradicts sources (7-8 h is also quoted); the fact's quote does not carry the height."},
-    "gabeen-lake": {"replace": [["facts.0.text", "Gabin Lake", "Gabeen Lake"],
-                                ["summary", "Alpine lake in the Jahaz Banda/Gabeen high country.", "Alpine lake listed near Kundol Lake."]],
-                    "why": "The source (Wikipedia, Kundol Lake) lists 'Gabeen Lake'; nothing places it in Jahaz Banda."},
-    "kala-chashma": {"replace": [["summary", "known as Black Water Spring.", "known as Kala Chashma (Black Spring)."]],
-                     "why": "Wikipedia, Kumrat Valley: 'Kala Chashma (Black Spring)'."},
-    "surkar-pass": {"set": {"kind": "pass"}, "why": "A pass, as its name says (it was filed as a peak)."}
+ "_doc": "Checked corrections to the Atlas places, applied by atlas_pack.py on every build (backend/tools/pack_corrections.py). Each text edit makes the field say only what its quoted source says, or drops a claim no source supports. Found in the October 2026 sweep; the source of each is named.",
+ "places": {
+  "mingora": {
+   "replace": [
+    [
+     "summary",
+     "The largest city of Swat and the district capital, on the Swat River.",
+     "The largest city of Swat, beside Saidu Sharif, the district capital, on the Swat River."
+    ]
+   ],
+   "why": "Saidu Sharif is the district capital (Wikipedia, Saidu Sharif; kanju fact). en.wikipedia Mingora (history section); name_ur already set (ur article مینگورہ).",
+   "add": {
+    "facts": [
+     {
+      "text": "Third largest city in Khyber Pakhtunkhwa, on the Swat River.",
+      "quote": "Located on the Swat River, it is the third largest city in Khyber Pakhtunkhwa and the 26th largest in Pakistan.",
+      "source": "https://en.wikipedia.org/wiki/Mingora"
+     },
+     {
+      "text": "The Butkara Stupa near Mingora is ringed by more than 200 votive stupas.",
+      "quote": "Excavations at the Butkara Stupa near Mingora revealed a large and imposing central stupa surrounded by more than 200 votive stupas",
+      "source": "https://en.wikipedia.org/wiki/Mingora"
+     },
+     {
+      "text": "Italian archaeologists found 475 Indo-Aryan graves here, dated 1520-170 BC.",
+      "quote": "At Loe Banr, Butkara II and Matalai, Italian archaeologists unearthed 475 Indo-Aryan graves dated between 1520 and 170 BC and two horse skeletons.",
+      "source": "https://en.wikipedia.org/wiki/Mingora"
+     },
+     {
+      "text": "A Gandhara grave culture site at Aligrama, near Saidu Sharif airport, dates to 1000 BC.",
+      "quote": "on the opposite side of the river Swat at Aligrama, near the Saidu Sharif airport, a site of Gandhara grave culture was discovered by the Italian archaeologists and dated to 1000 BC.",
+      "source": "https://en.wikipedia.org/wiki/Mingora"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "1520-170 BCE",
+      "event": "475 Indo-Aryan graves excavated at Loe Banr, Butkara II and Matalai",
+      "quote": "At Loe Banr, Butkara II and Matalai, Italian archaeologists unearthed 475 Indo-Aryan graves dated between 1520 and 170 BC and two horse skeletons.",
+      "source": "https://en.wikipedia.org/wiki/Mingora"
+     },
+     {
+      "date": "4th century CE",
+      "event": "Chinese monk Faxian reports a large Buddhist monastery at Mingora",
+      "quote": "In Mingora, the 4th century Chinese Buddhist monk Faxian claimed to have seen the largest Buddhist monastery",
+      "source": "https://en.wikipedia.org/wiki/Mingora"
+     },
+     {
+      "date": "11th century CE",
+      "event": "Hindu Shahi rule ends with the rise of Mahmud Ghaznavi",
+      "quote": "Hindu Shahi rule came to an end with the rise of the Muslim empire of Mahmud Ghaznavi in the 11th century.",
+      "source": "https://en.wikipedia.org/wiki/Mingora"
+     },
+     {
+      "date": "2007",
+      "event": "Taliban take Mingora during the insurgency",
+      "quote": "In 2007 during the rise of the Taliban insurgency, Mingora was invaded by the Taliban",
+      "source": "https://en.wikipedia.org/wiki/Mingora"
+     }
+    ]
+   }
+  },
+  "malam-jabba": {
+   "replace": [
+    [
+     "summary",
+     "The resort was burned in 2008",
+     "The resort was destroyed in June 2008"
+    ]
+   ],
+   "why": "Wikipedia, Malam Jabba: 'The resort was destroyed by Taliban militants in June 2008'."
+  },
+  "jahanabad-buddha": {
+   "replace": [
+    [
+     "summary",
+     "its face was damaged by explosives in 2007",
+     "its head was damaged by explosives in 2007"
+    ]
+   ],
+   "why": "Wikipedia: 'In 2007 the Taliban tried to destroy the head of the relief with explosives'. Buddhist_rock_carving_in_Manglawar, Manglawar",
+   "add": {
+    "facts": [
+     {
+      "text": "Restoration was completed in October 2016, leaving some damage visible.",
+      "quote": "The restoration was completed in October 2016, deliberately leaving some of the damage visible.",
+      "source": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar"
+     },
+     {
+      "text": "Called the second biggest rock-carved Buddha after Bamiyan.",
+      "quote": "it is having the second biggest rock carved Buddha statue (formally called as Budh Ghat) at Jahan Abad (Janabad) in Central Asia after Buddha of Bamiyan.",
+      "source": "https://en.wikipedia.org/wiki/Manglawar"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "October 2016",
+      "event": "Restoration completed",
+      "quote": "The restoration was completed in October 2016, deliberately leaving some of the damage visible.",
+      "source": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar"
+     }
+    ]
+   }
+  },
+  "falak-sar": {
+   "replace": [
+    [
+     "summary",
+     " seen from Ushu and Matiltan.",
+     "."
+    ]
+   ],
+   "why": "No source says where it is seen from. en.wikipedia Falak_Sar, Matiltan; name_ur already set (Urdu article exists: فلک سر (سوات)).",
+   "add": {
+    "facts": [
+     {
+      "text": "5,918 m (19,416 ft) high, in the Hindu Kush.",
+      "quote": "is a 5,918 metres (19,416 ft) high mountain peak located in the Hindu Kush range at the junction of Swat Valley and Kandia Valley in Pakistan.",
+      "source": "https://en.wikipedia.org/wiki/Falak_Sar"
+     },
+     {
+      "text": "Seen from Matiltan.",
+      "quote": "The tallest peak of Swat, Falak Sar can be viewed from it.",
+      "source": "https://en.wikipedia.org/wiki/Matiltan"
+     },
+     {
+      "text": "A Pakistani climber was the first from Pakistan to reach the summit by the north ridge.",
+      "quote": "became the first Pakistani to reach the summit of Falak Sar via the North Ridge",
+      "source": "https://en.wikipedia.org/wiki/Falak_Sar"
+     }
+    ]
+   }
+  },
+  "thalo-zom": {
+   "replace": [
+    [
+     "summary",
+     "Glaciated 6,000 m peak",
+     "Glaciated peak"
+    ]
+   ],
+   "why": "No source gives 6,000 m."
+  },
+  "saidgai-lake": {
+   "replace": [
+    [
+     "access",
+     "Trek from Ushirai Dara (Dir, ~6 h) or Lalko",
+     "Trek from Ushirai Dara (Dir) or Lalko"
+    ],
+    [
+     "facts.0.text",
+     "It is at 3,500 m near the Dir-Swat border.",
+     "It is near the Dir-Swat border."
+    ]
+   ],
+   "why": "The trek time contradicts sources (7-8 h is also quoted); the fact's quote does not carry the height. Wikipedia Saidgai_Lake; name_ur already set.",
+   "add": {
+    "facts": [
+     {
+      "text": "The lake lies at 11,500 ft (3,500 m), northwest of Gabin Jabba.",
+      "quote": "Positioned at an elevation of 11,500 feet (3,500 m), it lies northwest of Gabin Jabba.",
+      "source": "https://en.wikipedia.org/wiki/Saidgai_Lake"
+     },
+     {
+      "text": "It is popular with visitors from June to August.",
+      "quote": "The lake is a popular tourist destination, especially from June to August",
+      "source": "https://en.wikipedia.org/wiki/Saidgai_Lake"
+     }
+    ]
+   }
+  },
+  "gabeen-lake": {
+   "replace": [
+    [
+     "facts.0.text",
+     "Gabin Lake",
+     "Gabeen Lake"
+    ],
+    [
+     "summary",
+     "Alpine lake in the Jahaz Banda/Gabeen high country.",
+     "Alpine lake listed near Kundol Lake."
+    ]
+   ],
+   "why": "The source (Wikipedia, Kundol Lake) lists 'Gabeen Lake'; nothing places it in Jahaz Banda."
+  },
+  "kala-chashma": {
+   "replace": [
+    [
+     "summary",
+     "known as Black Water Spring.",
+     "known as Kala Chashma (Black Spring)."
+    ]
+   ],
+   "why": "Wikipedia, Kumrat Valley: 'Kala Chashma (Black Spring)'."
+  },
+  "surkar-pass": {
+   "set": {
+    "kind": "pass",
+    "summary": "A pass mapped in OpenStreetMap; the terrain data gives 5,056 m at its mapped point."
+   },
+   "why": "A pass, as its name says (it was filed as a peak). data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "jamia-masjid-thal": {
+   "add": {
+    "facts": [
+     {
+      "text": "Second floor begun in 1998; finished about nine years later.",
+      "quote": "In 1998, the work on the second floor of the mosque started, and the construction of the mosque was completed in about nine years.",
+      "source": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
+     },
+     {
+      "text": "Central in Kumrat Valley, on the Panjkora bank.",
+      "quote": "It has a central position in Kumrat Valley, and is situated on the banks of the Panjkora River.",
+      "source": "https://en.wikipedia.org/wiki/Jamia_Masjid_Thal"
+     }
+    ]
+   },
+   "why": "en.wikipedia Jamia_Masjid_Thal; name_ur already set."
+  },
+  "mankial-sar": {
+   "add": {
+    "facts": [
+     {
+      "text": "Glaciated summit, 5,722 m (18,773 ft).",
+      "quote": "Mankial Sar is a 5,722-metre (18,773-foot) glaciated summit in the Hindu Kush.",
+      "source": "https://en.wikipedia.org/wiki/Mankial_Sar"
+     },
+     {
+      "text": "About 80 km north-northeast of Mingora.",
+      "quote": "The mountain is situated 80 kilometres (50 mi) north-northeast of Mingora.",
+      "source": "https://en.wikipedia.org/wiki/Mankial_Sar"
+     },
+     {
+      "text": "Summit rises 3,920 m above the Swat river in 11 km.",
+      "quote": "the summit rises 3,920 metres (12,860 ft) above the Swat River in 11 kilometres (6.8 mi).",
+      "source": "https://en.wikipedia.org/wiki/Mankial_Sar"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "1940",
+      "event": "First ascent of Mankial Sar.",
+      "quote": "The first ascent of the summit was made on June 28, 1940, by R. L. Holdsworth, John Martyn, Jack Gibson, and Rinsing (Sherpa porter).",
+      "source": "https://en.wikipedia.org/wiki/Mankial_Sar"
+     }
+    ]
+   },
+   "why": "en.wikipedia Mankial_Sar; no Urdu interlanguage link, name_ur left out."
+  },
+  "badgoi-pass": {
+   "replace": [
+    [
+     "facts.0.quote",
+     "the winter snow renders Badawi impassable from November through June.",
+     "The high mountain pass is located at 3,523m above sea level."
+    ],
+    [
+     "facts.0.text",
+     "3,523 m high; impassable by snow Nov-June.",
+     "3,523 m above sea level."
+    ]
+   ],
+   "add": {
+    "facts": [
+     {
+      "text": "Impassable by snow from November through June.",
+      "quote": "the winter snow renders Badawi impassable from November through June.",
+      "source": "https://en.wikipedia.org/wiki/Badgoi_Pass"
+     },
+     {
+      "text": "Links Kumrat (Upper Dir) with Utror and Kalam (Swat).",
+      "quote": "is a mountain pass that connects the Kumrat valley of Upper Dir District with Utror and Kalam valleys of Upper Swat District",
+      "source": "https://en.wikipedia.org/wiki/Badgoi_Pass"
+     }
+    ]
+   },
+   "why": "en.wikipedia Badgoi_Pass: 3,523m is in the page ('located at 3,523m above sea level'); quote moved to that sentence, snow fact split out. No Urdu link."
+  },
+  "gabin-jabba": {
+   "add": {
+    "facts": [
+     {
+      "text": "About 65 km from Mingora on the Matta Sakhra road.",
+      "quote": "is located approximately 65 km from Mingora on Matta Sakhra road within the Swat valley",
+      "source": "https://en.wikipedia.org/wiki/Gabin_Jabba"
+     }
+    ]
+   },
+   "why": "en.wikipedia Gabin_Jabba."
+  },
+  "jahaz-banda": {
+   "add": {
+    "facts": [
+     {
+      "text": "Jeep road to Jandrai village, then a trek.",
+      "quote": "it ascends toward Jandrai village via a passable but unpaved road suitable for jeeps.",
+      "source": "https://en.wikipedia.org/wiki/Jahaz_Banda"
+     }
+    ]
+   },
+   "why": "en.wikipedia Jahaz_Banda; name_ur already set."
+  },
+  "lowari-pass": {
+   "add": {
+    "facts": [
+     {
+      "text": "Shortest route from Chitral to Peshawar.",
+      "quote": "Lowari Top remains popular because it is the shortest route from Chitral to Peshawar.",
+      "source": "https://en.wikipedia.org/wiki/Lowari_Pass"
+     }
+    ]
+   },
+   "why": "en.wikipedia Lowari_Pass; name_ur already set."
+  },
+  "lowari-tunnel": {
+   "set": {
+    "name_ur": "لواری سرنگ"
+   },
+   "add": {
+    "facts": [
+     {
+      "text": "Operated by the National Highway Authority on the N-45.",
+      "quote": "It is operated by the National Highway Authority and carries traffic on the N-45 national highway, thus bypassing Lowari Pass.",
+      "source": "https://en.wikipedia.org/wiki/Lowari_Tunnel"
+     },
+     {
+      "text": "Longest tunnel in Pakistan.",
+      "quote": "The tunnel is one of the longest tunnels in South Asia, and is the longest in Pakistan",
+      "source": "https://en.wikipedia.org/wiki/Lowari_Tunnel"
+     }
+    ]
+   },
+   "why": "en.wikipedia Lowari_Tunnel; name_ur = Urdu Wikipedia article لواری سرنگ (interlanguage link)."
+  },
+  "chambargahai": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 4,808 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "chokel-sar": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 4,713 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "godar-sar": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 4,723 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "kandia-kandao": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 5,047 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "kar-bela": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 4,827 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "pofid-pahar": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 4,661 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "richo-kandao": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 4,848 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "shetan-sar": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 4,646 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "tikai-sar": {
+   "set": {
+    "summary": "A peak mapped in OpenStreetMap; the terrain data gives 4,938 m at its mapped point."
+   },
+   "why": "data-only summary (no reliable source found; Wikipedia has no article); from places.json ground_m. No Urdu article."
+  },
+  "saidu-sharif": {
+   "add": {
+    "facts": [
+     {
+      "text": "Capital of Swat District.",
+      "quote": "is the capital of the Swat District, Khyber Pakhtunkhwa, Pakistan.",
+      "source": "https://en.wikipedia.org/wiki/Saidu_Sharif"
+     },
+     {
+      "text": "Hub of official buildings: Swat Museum, Saidu Baba's mausoleum, the Wali's palace and Butkara stupa remains.",
+      "quote": "Saidu Sharif is the hub of several official buildings, and archaeological sites such as the Swat Museum, the mausoleum of Saidu Baba, royal residential palace of the former Wali-e-Swat, and the archaeological remains of the Butkara Buddhist stupa.",
+      "source": "https://en.wikipedia.org/wiki/Saidu_Sharif"
+     },
+     {
+      "text": "Jahanzeb College, the district's largest, was built in 1952.",
+      "quote": "the largest college in the district is P.G Jahanzeb College which was built in 1952.",
+      "source": "https://en.wikipedia.org/wiki/Saidu_Sharif"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "1952",
+      "event": "P.G. Jahanzeb College built",
+      "quote": "the largest college in the district is P.G Jahanzeb College which was built in 1952.",
+      "source": "https://en.wikipedia.org/wiki/Saidu_Sharif"
+     },
+     {
+      "date": "7 July 2010",
+      "event": "First university of the district established here",
+      "quote": "On 7 July 2010, the first university of the district was established in this area.",
+      "source": "https://en.wikipedia.org/wiki/Saidu_Sharif"
+     },
+     {
+      "date": "1915",
+      "event": "Syed Abdul Jabbar Shah elected ruler of Swat; Miangul Abdul Wadud elected two years later",
+      "quote": "In 1915, Syed Abdul Jabbar Shah, another descendant of Pir Baba, was elected as the ruler but he was deposed only two years later and Miangul Abdul Wadud, the grandson of Saidu Baba, was elected by the tribal jirga.",
+      "source": "https://en.wikipedia.org/wiki/Swat_(princely_state)"
+     },
+     {
+      "date": "1969",
+      "event": "Swat state dissolved and incorporated into West Pakistan",
+      "quote": "Swat continued to exist as an autonomous region until it was dissolved in 1969, and incorporated into West Pakistan (now Khyber Pakhtunkhwa province).",
+      "source": "https://en.wikipedia.org/wiki/Swat_(princely_state)"
+     }
+    ]
+   },
+   "why": "en.wikipedia Saidu_Sharif, Swat_(princely_state); name_ur already set."
+  },
+  "barikot": {
+   "add": {
+    "facts": [
+     {
+      "text": "The entrance town to central Swat, with about 115,045 people.",
+      "quote": "It is the entrance town to the central Swat valley with a population of approximately 115,045 people.",
+      "source": "https://en.wikipedia.org/wiki/Barikot"
+     },
+     {
+      "text": "Site of an ancient citadel taken by Alexander; remains go back to c. 1700 BC.",
+      "quote": "Barikot is the location of an ancient citadel captured by Alexander the Great, with chalcolithic remains dating back to c. 1700 BC, and an early-historic period town dating back to c. 600 BC.",
+      "source": "https://en.wikipedia.org/wiki/Barikot"
+     },
+     {
+      "text": "Italian excavations found an Indo-Greek town from the time of King Menander I, 2nd century BC.",
+      "quote": "The Italian expeditions in the 1980s and 90s discovered an Indo-Greek town from around the time of King Menander I in the 2nd century BC.",
+      "source": "https://en.wikipedia.org/wiki/Barikot"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "c. 600 BCE",
+      "event": "Early-historic town founded",
+      "quote": "Barikot is the location of an ancient citadel captured by Alexander the Great, with chalcolithic remains dating back to c. 1700 BC, and an early-historic period town dating back to c. 600 BC.",
+      "source": "https://en.wikipedia.org/wiki/Barikot"
+     }
+    ]
+   },
+   "why": "en.wikipedia Barikot; name_ur already set."
+  },
+  "bazira-barikot-ghundai": {
+   "add": {
+    "facts": [
+     {
+      "text": "The earliest Buddhist apsidal temple was found here, in ancient Bazira.",
+      "quote": "announced the discovery of the earliest Buddhist apsidal temple in Barikot (the ancient Bazira)",
+      "source": "https://en.wikipedia.org/wiki/Barikot"
+     }
+    ]
+   },
+   "why": "en.wikipedia Barikot, Swat_Valley; fact 1 quote widened to the sentence that holds 327 BCE.",
+   "replace": [
+    [
+     "facts.1.quote",
+     "in Greek accounts, these towns are identified as Ora and Bazira, respectively.",
+     "In 327 BCE, Alexander the Great fought his way to Odigram and Barikot and stormed their battlements; in Greek accounts, these towns are identified as Ora and Bazira, respectively."
+    ]
+   ]
+  },
+  "manglawar": {
+   "add": {
+    "facts": [
+     {
+      "text": "Average altitude is 987 m.",
+      "quote": "with an average altitude of 987 meters (3,238.19 feet).",
+      "source": "https://en.wikipedia.org/wiki/Manglawar"
+     },
+     {
+      "text": "The valley lies about 9 km north-east of Mingora.",
+      "quote": "Manglawar (or Manglor) valley in Pakistan is situated about 9 km to north east of Mingora",
+      "source": "https://en.wikipedia.org/wiki/Buddhist_rock_carving_in_Manglawar"
+     },
+     {
+      "text": "Sultan Pakhal Swati founded the Kingdom of Swat with Manglawar as its capital.",
+      "quote": "Sultan Pakhal Swati founded Kingdom of Swat with capital as Manglawar.",
+      "source": "https://en.wikipedia.org/wiki/Manglawar"
+     },
+     {
+      "text": "Has the second biggest rock-carved Buddha after Bamiyan, at Jahanabad.",
+      "quote": "it is having the second biggest rock carved Buddha statue (formally called as Budh Ghat) at Jahan Abad (Janabad) in Central Asia after Buddha of Bamiyan.",
+      "source": "https://en.wikipedia.org/wiki/Manglawar"
+     }
+    ]
+   },
+   "why": "en.wikipedia Manglawar, Buddhist_rock_carving_in_Manglawar; name_ur already set"
+  },
+  "timergara": {
+   "add": {
+    "facts": [
+     {
+      "text": "District headquarters of Lower Dir.",
+      "quote": "is a city and the district headquarters of the Lower Dir district",
+      "source": "https://en.wikipedia.org/wiki/Timergara"
+     },
+     {
+      "text": "Excavated Indo-Aryan graves here date from 1500 to 600 BC.",
+      "quote": "The town is the site of excavated graves of Indo-Aryans, dating from 1500 to 600 BC.",
+      "source": "https://en.wikipedia.org/wiki/Timergara"
+     },
+     {
+      "text": "The excavated site of Balambat lies across the Panjkora.",
+      "quote": "On the west side of the Panjkora River is the excavated site of Balambat.",
+      "source": "https://en.wikipedia.org/wiki/Timergara"
+     },
+     {
+      "text": "Balambat finds include houses from 500 BC and fire altars.",
+      "quote": "Discoveries included houses dating from 500 BC and fire altars",
+      "source": "https://en.wikipedia.org/wiki/Timergara"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "1500-600 BCE",
+      "event": "Indo-Aryan graves of this period excavated at Timergara",
+      "quote": "The town is the site of excavated graves of Indo-Aryans, dating from 1500 to 600 BC.",
+      "source": "https://en.wikipedia.org/wiki/Timergara"
+     }
+    ]
+   },
+   "why": "en.wikipedia Timergara; name_ur already set."
+  },
+  "kanju": {
+   "add": {
+    "facts": [
+     {
+      "text": "Views of the Swat River from Ayub Bridge.",
+      "quote": "There are views of the river Swat from Ayub Bridge in Kanju.",
+      "source": "https://en.wikipedia.org/wiki/Kanju"
+     },
+     {
+      "text": "Saidu Sharif airport lies between Kanju and Dherai.",
+      "quote": "Saidu Sharif airport is situated between Kanju and Dherai.",
+      "source": "https://en.wikipedia.org/wiki/Kanju"
+     }
+    ]
+   },
+   "why": "en.wikipedia Kanju"
+  },
+  "udegram": {
+   "set": {
+    "name_ur": "وڈیگرام"
+   },
+   "add": {
+    "facts": [
+     {
+      "text": "Graves here and at Gogdara show two Gandhara grave culture phases, 1400-1100 and 1000-800 BCE.",
+      "quote": "New research, based on 34 excavated graves in Udegram, and in the nearby site of Gogdara, has uncovered two Gandhara grave culture burial phases, the first between 1400 and 1100 BCE, and the second from 1000 to 800 BCE",
+      "source": "https://en.wikipedia.org/wiki/Gandhara_grave_culture"
+     },
+     {
+      "text": "Its Ghaznavid mosque dates to 1048-49 CE.",
+      "quote": "The Mahmud Ghaznavi Mosque was built in the former Hindu Shahi capital of Odigram shortly after their defeat, and dates to 1048-49 CE.",
+      "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "1048-49 CE",
+      "event": "Mahmud Ghaznavi Mosque built",
+      "quote": "The Mahmud Ghaznavi Mosque was built in the former Hindu Shahi capital of Odigram shortly after their defeat, and dates to 1048-49 CE.",
+      "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "en.wikipedia Odigram (Udegram redirects), Gandhara_grave_culture, Swat_Valley; name_ur from the ur.wikipedia interlanguage link on the Odigram article (وڈیگرام)."
+  },
+  "amluk-dara-stupa": {
+   "add": {
+    "facts": [
+     {
+      "text": "Described as the best example of a stupa in Swat.",
+      "quote": "Though it is the best example of a stupa in Swat, it is unprotected and is being damaged by treasure seekers.",
+      "source": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa"
+     },
+     {
+      "text": "The base is a square plinth about 4 m thick.",
+      "quote": "The foundation of the stupa is a square plinth about 4 meters thick.",
+      "source": "https://en.wikipedia.org/wiki/Amluk-Dara_stupa"
+     }
+    ]
+   },
+   "why": "en.wikipedia Amluk-Dara_stupa; no Urdu link"
+  },
+  "butkara-i-stupa": {
+   "add": {
+    "facts": [
+     {
+      "text": "An Indo-Corinthian capital of a Buddhist devotee is dated to before 20 BCE.",
+      "quote": "An Indo-Corinthian capital representing a Buddhist devotee within foliage has been found which had a reliquary and a coin of Azes II buried at its base, securely dating the sculpture to earlier than 20 BCE.",
+      "source": "https://en.wikipedia.org/wiki/Butkara_Stupa"
+     }
+    ]
+   },
+   "why": "en.wikipedia Butkara_Stupa"
+  },
+  "chakdara-fort": {
+   "add": {
+    "facts": [
+     {
+      "text": "About 240 mostly Indian soldiers held the fort and signal tower.",
+      "quote": "A total of around 240 mostly Indian soldiers were stationed in the fortress and nearby signal tower.",
+      "source": "https://en.wikipedia.org/wiki/Battle_of_Chakdara"
+     }
+    ]
+   },
+   "why": "en.wikipedia Battle_of_Chakdara; fact 1 quote widened to the sentence containing 1897 (replace verified manually).",
+   "set": {
+    "facts.1.quote": "The Battle of Chakdara was a battle and siege of a British military fort by rebel Pashtun tribesmen during the Siege of Malakand in colonial British India's North West Frontier Province in 1897"
+   }
+  },
+  "elum-ghar": {
+   "why": "en.wikipedia Elum_Ghar; fact 0 quote widened to include the 2,800 m sentence (replace verified manually). Urdu name already set; no Urdu link on the English page.",
+   "set": {
+    "facts.0.quote": "Elum Ghar, also known as Mount Elum, is a 2,800 metres (9,200 ft) high mountain located in the Swat and Buner districts of Khyber Pakhtunkhwa, Pakistan. Elum Ghar is the highest peak in the region, and is snow-covered most of the year."
+   }
+  },
+  "ghalegay-buddha-rock": {
+   "add": {
+    "facts": [
+     {
+      "text": "Ghalegay was chosen as the first capital of Swat in 1849.",
+      "quote": "During the recent Pashtun era in 1849, when the first legal government was formed, Ghalegay was chosen as the first capital of Swat because of its suitable geographical location.",
+      "source": "https://en.wikipedia.org/wiki/Ghalegay"
+     }
+    ]
+   },
+   "why": "en.wikipedia Ghalegay; no Urdu link on English article"
+  },
+  "gogdara-rock-carvings": {
+   "add": {
+    "facts": [
+     {
+      "text": "Gandhara grave culture graves at Gogdara include a phase at 1200-900 BCE.",
+      "quote": "with an inter-phase in Gogdara, from 1200 to 900 BCE.",
+      "source": "https://en.wikipedia.org/wiki/Gandhara_grave_culture"
+     }
+    ]
+   },
+   "why": "Gandhara_grave_culture page only (graves, not rock carvings)",
+   "replace": [
+    [
+     "access",
+     "Near Udegram; local guide helpful.",
+     "Near Udegram."
+    ]
+   ]
+  },
+  "gumbat-balo-kale-stupa": {
+   "add": {
+    "facts": [
+     {
+      "text": "A Buddhist stupa about 9 km south of Barikot in the Kandag valley.",
+      "quote": "It is situated about 9 kilometres south of Birkot in the Kandag valley of Gandhara.",
+      "source": "https://en.wikipedia.org/wiki/Gumbat_Stupa"
+     },
+     {
+      "text": "First recorded by Aurel Stein in 1930.",
+      "quote": "The stupa was first recorded by A. Stein in 1930 in which the main stupa and the votive stupas were identified.",
+      "source": "https://en.wikipedia.org/wiki/Gumbat_Stupa"
+     },
+     {
+      "text": "Two terraces and a monastery, ringed by more than 20 smaller stupas.",
+      "quote": "The stupa has two terraces and a monastery and the dome is a double-domed cupola and surrounded by more than 20 smaller stupas.",
+      "source": "https://en.wikipedia.org/wiki/Gumbat_Stupa"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "1930",
+      "event": "Recorded by A. Stein",
+      "quote": "The stupa was first recorded by A. Stein in 1930 in which the main stupa and the votive stupas were identified.",
+      "source": "https://en.wikipedia.org/wiki/Gumbat_Stupa"
+     },
+     {
+      "date": "2nd century CE",
+      "event": "Shrine and buildings built (radiocarbon estimate)",
+      "quote": "The radiocarbon dating estimates the shrine and buildings were built in 2nd century.",
+      "source": "https://en.wikipedia.org/wiki/Gumbat_Stupa"
+     },
+     {
+      "date": "2011-2012",
+      "event": "Ruins restored",
+      "quote": "The ruins was restored in 2011-2012 and about 25% of the terrace was excavated in 2011.",
+      "source": "https://en.wikipedia.org/wiki/Gumbat_Stupa"
+     }
+    ]
+   },
+   "why": "en.wikipedia Gumbat_Stupa (says Birkot, 9 km SOUTH of Barikot; card summary says west: lead to check).",
+   "replace": [
+    [
+     "summary",
+     "in the Kandak valley west of Barikot",
+     "in the Kandag valley south of Barikot"
+    ],
+    [
+     "access",
+     "West of Barikot along the Kandak valley road; short walk.",
+     "South of Barikot, up the Kandag valley road."
+    ]
+   ]
+  },
+  "mahmud-ghaznavi-mosque": {
+   "add": {
+    "facts": [
+     {
+      "text": "Considered the earliest mosque of northern Pakistan.",
+      "quote": "The mosque of Odigram date back to the period of Mahmud or his grandson Maudud (1041-50 A.D.) and is therefore to be considered to be the earliest of northern Pakistan.",
+      "source": "https://en.wikipedia.org/wiki/Mahmud_Ghaznavi_Mosque"
+     }
+    ]
+   },
+   "why": "en.wikipedia Mahmud_Ghaznavi_Mosque; fact 1 quote widened to the 1985-1999 sentence (replace verified manually). No Urdu link on the English article.",
+   "set": {
+    "facts.1.quote": "The excavation carried out in the area between 1985 and 1999 brought to light a hypostyle mosque with supports originally in wood"
+   }
+  },
+  "nimogram-stupa": {
+   "add": {
+    "facts": [
+     {
+      "text": "A track leads from the Hindu Shahi fort to the Nimogram Buddhist monastery and stupa.",
+      "quote": "From this fort a track leads to Nimogram Buddhist Monastery and Stupa.",
+      "source": "https://en.wikipedia.org/wiki/Chakdara"
+     },
+     {
+      "text": "It has three main stupas, which identify three principles of Buddhism.",
+      "quote": "It has three main stupas, which identify three principles of Buddhism",
+      "source": "https://en.wikipedia.org/wiki/Chakdara"
+     }
+    ]
+   },
+   "why": "Chakdara page only"
+  },
+  "raja-gira-castle": {
+   "add": {
+    "facts": [
+     {
+      "text": "The Hindu Shahis ruled Swat from a fortress at Raja Gira.",
+      "quote": "Raja Gira was the site of a fortress from which the Hindu Shahis ruled Swat.",
+      "source": "https://en.wikipedia.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "The nearby mosque was first called the Raja Gira mosque.",
+      "quote": "the mosque was originally called Raja Gira mosque as it was situated in the vicinity of the Raja Gira castle.",
+      "source": "https://en.wikipedia.org/wiki/Mahmud_Ghaznavi_Mosque"
+     }
+    ]
+   },
+   "why": "en.wikipedia Swat_Valley, Mahmud_Ghaznavi_Mosque; no Urdu link"
+  },
+  "saidu-sharif-stupa": {
+   "add": {
+    "facts": [
+     {
+      "text": "Archaeologists divide the sanctuary's life into three periods.",
+      "quote": "The life phase of the sanctuary of Saidu Sharif I was divided by archaeologists in three periods",
+      "source": "https://en.wikipedia.org/wiki/Saidu_Sharif_Stupa"
+     },
+     {
+      "text": "A green schist frieze adorned one of the two cylindrical bodies of the main stupa.",
+      "quote": "One of the two cylindrical bodies of the monument was adorned with a frieze figured in green schist",
+      "source": "https://en.wikipedia.org/wiki/Saidu_Sharif_Stupa"
+     }
+    ]
+   },
+   "why": "en.wikipedia Saidu_Sharif_Stupa; no Urdu link"
+  },
+  "shingardar-stupa": {
+   "add": {
+    "facts": [
+     {
+      "text": "Built of large stones and layers of thin slate.",
+      "quote": "The building of stupa is made of large stones and layers of thin slate.",
+      "source": "https://en.wikipedia.org/wiki/Ghalegay"
+     }
+    ]
+   },
+   "why": "en.wikipedia Ghalegay; no Urdu link"
+  },
+  "swat-museum": {
+   "add": {
+    "facts": [
+     {
+      "text": "Holds Gandharan statuettes and friezes of the Buddha's life, plus seals and reliquaries.",
+      "quote": "The museum contains Gandharan statuettes and friezes depicting the lives of the Buddha along with seals, small reliquaries and other treasures",
+      "source": "https://en.wikipedia.org/wiki/Swat_Museum"
+     },
+     {
+      "text": "Has an ethnographic gallery of carved Swati furniture, jewelry and embroideries.",
+      "quote": "an ethnographic gallery with traditional carved Swati furniture, jewelry and embroideries.",
+      "source": "https://en.wikipedia.org/wiki/Swat_Museum"
+     }
+    ]
+   },
+   "why": "en.wikipedia Swat_Museum; name_ur already set"
+  },
+  "white-palace-marghazar": {
+   "add": {
+    "facts": [
+     {
+      "text": "Marble came from Agra and the palace was completed in 1941.",
+      "quote": "The king brought marble from Agra, bronze from Belgium, and artisans from Turkey who designed and constructed the palace, completing it in 1941.",
+      "source": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"
+     },
+     {
+      "text": "It has 24 active decorated rooms and a royal suite.",
+      "quote": "There are 24 active spacious decorated rooms and the royal suite",
+      "source": "https://en.wikipedia.org/wiki/White_Palace_(Marghazar)"
+     }
+    ]
+   },
+   "why": "en.wikipedia White_Palace_(Marghazar); name_ur already set"
+  },
+  "fizagat": {
+   "add": {
+    "facts": [
+     {
+      "text": "The area is prone to flooding.",
+      "quote": "The area is prone to flooding and residents have complained of lack of action by the government.",
+      "source": "https://en.wikipedia.org/wiki/Fizagat"
+     }
+    ]
+   },
+   "why": "en.wikipedia Fizagat; no Urdu link"
+  },
+  "jahanzeb-college": {
+   "add": {
+    "facts": [
+     {
+      "text": "One of the pioneer institutes of higher education in the Swat Valley.",
+      "quote": "is one of the pioneer institutes of higher education in the Swat Valley, Khyber Pakhtunkhwa, Pakistan.",
+      "source": "https://en.wikipedia.org/wiki/Jahanzeb_College"
+     },
+     {
+      "text": "Its buildings stand on both sides of the Mingora-Saidu Sharif road.",
+      "quote": "The buildings of Jahanzeb College can be seen in clusters sprawling on both sides of the road that links Mingora to Saidu Sharif.",
+      "source": "https://en.wikipedia.org/wiki/Jahanzeb_College"
+     }
+    ]
+   },
+   "why": "en.wikipedia Jahanzeb_College; no Urdu link"
+  },
+  "malakand-pass": {
+   "add": {
+    "facts": [
+     {
+      "text": "It came into prominence in 1895 during the Chitral Expedition.",
+      "quote": "The pass came into prominence in 1895 during the Chitral Expedition",
+      "source": "https://en.wikipedia.org/wiki/Malakand_Pass"
+     },
+     {
+      "text": "The pass road begins at Dargai, 150 km from Islamabad.",
+      "quote": "The pass road begins at Dargai, which is 150 km north-west of Islamabad.",
+      "source": "https://en.wikipedia.org/wiki/Malakand_Pass"
+     }
+    ]
+   },
+   "why": "en.wikipedia Malakand_Pass; name_ur already set"
+  },
+  "shangla-pass": {
+   "add": {
+    "facts": [
+     {
+      "text": "Connects Swat District with Shangla District and onward to Gilgit-Baltistan.",
+      "quote": "Shangla Pass connects Swat district of Khyber Pakhtunkhwa, Pakistan with Shangla district, with further connections beyond to Gilgit Baltistan.",
+      "source": "https://en.wikipedia.org/wiki/Shangla_Pass"
+     }
+    ]
+   },
+   "set": {
+    "summary": "Mountain pass connecting Swat District with Shangla District, with onward links toward Gilgit-Baltistan."
+   },
+   "why": "en.wikipedia Shangla_Pass; no Urdu link; summary rewritten to what the page says",
+   "replace": [
+    [
+     "access",
+     "Paved road; year-round except heavy snow.",
+     "On the Khwazakhela-Alpuri road."
+    ]
+   ]
+  },
+  "butkara-iii-stupa": {
+   "why": "nothing reliable found: no en.wikipedia article; no page on any fetched source mentions it"
+  },
+  "kalam": {
+   "add": {
+    "facts": [
+     {
+      "text": "The metalled road ends here; a shingle road continues to the Ushu and Utror valleys.",
+      "quote": "here, the metalled road ends and shingle road leads to the Ushu and Utrot valleys.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "Two notable lakes, Mahodand and Kundol, are frequently visited because of their easy access routes.",
+      "quote": "Two notable lakes in the Kalam valley are the Mahodand Lake and Kandol Lake, both of which are frequently visited due to their easy access routes.",
+      "source": "https://en.wikipedia.org/wiki/Kalam_Valley"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "19th century",
+      "event": "Kalam was the centre of an independent state.",
+      "quote": "it was the centre of an independent state in the 19th century.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikipedia Kalam_Valley, Wikivoyage Swat_Valley; name_ur already set."
+  },
+  "bahrain": {
+   "add": {
+    "facts": [
+     {
+      "text": "It lies 60 km north of Mingora at 4,700 ft on the right bank of the Swat River.",
+      "quote": "60 km north of Mingora at an elevation of 4,700 ft on the right bank of the Swat River",
+      "source": "https://en.wikipedia.org/wiki/Bahrain,_Pakistan"
+     },
+     {
+      "text": "It is known for riverside tourist resorts and local handicrafts.",
+      "quote": "It is known for its riverside tourist resorts, local handicrafts, and its view of the merging of the Daral and Swat rivers.",
+      "source": "https://en.wikipedia.org/wiki/Bahrain,_Pakistan"
+     },
+     {
+      "text": "Some houses have carved wooden doors, pillars and balconies.",
+      "quote": "Some of the houses have carved wooden doors, pillars and balconies.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikipedia Bahrain,_Pakistan, Wikivoyage Swat_Valley; name_ur already set."
+  },
+  "madyan": {
+   "add": {
+    "facts": [
+     {
+      "text": "It stands at 1,321 m and has many hotels in all price ranges and some good tourist shopping.",
+      "quote": "at 1,321 m (4,335 feet) above sea level, but it is a larger town and has many hotels in all price ranges and some good tourist shopping.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "Shawls, embroidery, tribal jewellery, carved wood and coins are sold along the main street.",
+      "quote": "Antique and modern shawls, traditional embroidery, tribal jewellery, carved wood and antique or reproduced coins are sold along the main street.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "The central mosque has carved wooden pillars with elegant scroll capitals.",
+      "quote": "The central mosque at Madyan has carved wooden pillars with elegant scroll capitals",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikivoyage Swat_Valley; name_ur already set."
+  },
+  "miandam": {
+   "add": {
+    "facts": [
+     {
+      "text": "It is a small summer resort 10 km up a steep side valley, an hour's drive from Saidu Sharif.",
+      "quote": "Miandam is a small summer resort 10 km (6 mi) up a steep side valley and 56 km (35 mi) from Saidu Sharif, making it an hour's drive.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "Miandam is a good place for walkers, with paths following the stream.",
+      "quote": "Miandam is a good place for walkers. Paths follow the stream",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "Graveyards hold carved wooden grave posts with floral designs.",
+      "quote": "In the graveyards are carved wooden grave posts with floral designs",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikivoyage Swat_Valley; name_ur already set."
+  },
+  "matiltan": {
+   "add": {
+    "facts": [
+     {
+      "text": "The valley has large glaciers, thick forests and lofty mountain peaks.",
+      "quote": "The valley has large glaciers, thick forests and lofty mountain peaks.",
+      "source": "https://en.wikipedia.org/wiki/Matiltan"
+     },
+     {
+      "text": "It is home to the 84 MW Matiltan hydropower plant.",
+      "quote": "It is home to 84 MW Matiltan hydropower plant.",
+      "source": "https://en.wikipedia.org/wiki/Matiltan"
+     },
+     {
+      "text": "It is predominantly populated by Gawri people.",
+      "quote": "Matiltan is predominantly populated by Gawri people.",
+      "source": "https://en.wikipedia.org/wiki/Matiltan"
+     }
+    ]
+   },
+   "why": "Wikipedia Matiltan; name_ur already set."
+  },
+  "ushu": {
+   "add": {
+    "facts": [
+     {
+      "text": "It stands at 2,300 m (7,550 ft) in the Swat Kohistan region.",
+      "quote": "in the Swat Kohistan region, at the height of 2,300 meters (7,550 feet).",
+      "source": "https://en.wikipedia.org/wiki/Usho"
+     },
+     {
+      "text": "It is mainly inhabited by Gawri people.",
+      "quote": "Usho is mainly inhabited by the Gawri people.",
+      "source": "https://en.wikipedia.org/wiki/Usho"
+     },
+     {
+      "text": "Mahodand Lake lies 27 km from the village.",
+      "quote": "Mahodand Lake is located 27 kilometers (17 mi) from there.",
+      "source": "https://en.wikipedia.org/wiki/Usho"
+     }
+    ]
+   },
+   "why": "Wikipedia Usho; name_ur already set."
+  },
+  "utror": {
+   "add": {
+    "facts": [
+     {
+      "text": "The valley is surrounded by snow-clad mountains, green pastures and waterfalls.",
+      "quote": "It is surrounded by snow-clad mountains, green pastures and waterfalls.",
+      "source": "https://en.wikipedia.org/wiki/Utror"
+     },
+     {
+      "text": "It is one of the Swat Kohistan valleys inhabited by Gawri people.",
+      "quote": "It is one of the valleys in Swat Kohistan inhabited by the Gawri people.",
+      "source": "https://en.wikipedia.org/wiki/Utror"
+     },
+     {
+      "text": "The valley is 2,300 m at Utror proper and reaches 2,900 m at Kundol Lake.",
+      "quote": "The altitude of the valley at Utror proper is 2,300 metres (7,500 ft) and reaches 2,900 metres (9,500 ft) at Kundol Lake.",
+      "source": "https://en.wikipedia.org/wiki/Utror"
+     }
+    ]
+   },
+   "why": "Wikipedia Utror; name_ur already set."
+  },
+  "gabral": {
+   "add": {
+    "facts": [
+     {
+      "text": "It is about 7 km from Utror by road and 20 km from Kalam.",
+      "quote": "It is about 7 kilometres (4.3 mi) northwest (by road) from Utror, 20 kilometres (12 mi) west of Kalam",
+      "source": "https://en.wikipedia.org/wiki/Gabral"
+     },
+     {
+      "text": "The valley's altitude ranges from 2,580 m at Baila to 5,160 m at Karkaray Lake top.",
+      "quote": "The altitude of the valley ranges from 2580 m at Baila to 5160 m at Karkaray Lake top.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "44 medicinal plants are collected in Utror and Gabral from May to August.",
+      "quote": "In Utror and Gabral, 44 medicinal plants are collected during the months of May, June, July and August.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikipedia Gabral, Wikivoyage Swat_Valley; name_ur already set."
+  },
+  "chitral-town": {
+   "add": {
+    "facts": [
+     {
+      "text": "Chitral is the capital of Lower Chitral district and was earlier capital of Chitral state.",
+      "quote": "It serves as the capital of the Lower Chitral District, and was previously the capital of Chitral District, and before that, the capital of Chitral State",
+      "source": "https://en.wikipedia.org/wiki/Chitral"
+     },
+     {
+      "text": "The Kator dynasty made it capital of the kingdom of Chitral from 1571.",
+      "quote": "From 1571 onwards Chitral was the capital of the Kingdom of Chitral under the rule of the Katūr dynasty.",
+      "source": "https://en.wikipedia.org/wiki/Chitral"
+     },
+     {
+      "text": "A British garrison endured a month-long siege at Chitral Fort in 1895.",
+      "quote": "The British garrison faced a month-long siege at Chitral Fort by the Chitralis in 1895 during the Chitral Expedition.",
+      "source": "https://en.wikipedia.org/wiki/Chitral"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "1571",
+      "event": "Chitral became the capital of the Kingdom of Chitral under the Katur dynasty.",
+      "quote": "From 1571 onwards Chitral was the capital of the Kingdom of Chitral under the rule of the Katūr dynasty.",
+      "source": "https://en.wikipedia.org/wiki/Chitral"
+     },
+     {
+      "date": "1895",
+      "event": "The British garrison at Chitral Fort was besieged by the Chitralis during the Chitral Expedition.",
+      "quote": "The British garrison faced a month-long siege at Chitral Fort by the Chitralis in 1895 during the Chitral Expedition.",
+      "source": "https://en.wikipedia.org/wiki/Chitral"
+     }
+    ]
+   },
+   "why": "Wikipedia Chitral; name_ur already set. Name shown without the internal '(pointer)' note.",
+   "set": {
+    "name": "Chitral"
+   }
+  },
+  "dir-town": {
+   "add": {
+    "facts": [
+     {
+      "text": "Dir was the capital of the princely state of Dir until its full incorporation into Pakistan in 1969.",
+      "quote": "It was the capital of the former princely state of Dir, until its full incorporation into Pakistan in 1969.",
+      "source": "https://en.wikipedia.org/wiki/Dir,_Pakistan"
+     },
+     {
+      "text": "The former royal palace stands on a hill above the city.",
+      "quote": "The former royal palace is on a hill above the city.",
+      "source": "https://en.wikipedia.org/wiki/Dir,_Pakistan"
+     },
+     {
+      "text": "The town lies along the Dir River, a tributary of the Panjkora.",
+      "quote": "It lies along the Dir River, a tributary of the Panjkora River.",
+      "source": "https://en.wikipedia.org/wiki/Dir,_Pakistan"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "1969",
+      "event": "Dir state was fully incorporated into Pakistan.",
+      "quote": "It was the capital of the former princely state of Dir, until its full incorporation into Pakistan in 1969.",
+      "source": "https://en.wikipedia.org/wiki/Dir,_Pakistan"
+     }
+    ]
+   },
+   "why": "Wikipedia Dir,_Pakistan; name_ur already set."
+  },
+  "izmis-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "The lake can be reached after about 3-6 hours of trekking from the end of the jeep road.",
+      "quote": "The lake can be accessed from here after trekking for almost 3-6 hours.",
+      "source": "https://en.wikipedia.org/wiki/Izmis_Lake"
+     },
+     {
+      "text": "Izmis Lake is harder to enter than Mahodand and Kundol and needs trekking.",
+      "quote": "Other lakes in the region, such as Izmis Lake, are harder to enter and need to be done so through trekking.",
+      "source": "https://en.wikipedia.org/wiki/Kalam_Valley"
+     }
+    ]
+   },
+   "why": "Wikipedia Izmis_Lake, Kalam_Valley; name_ur already set."
+  },
+  "jabba-zomalu-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "It is an alpine glacial lake in the Ushu valley of Swat Kohistan.",
+      "quote": "Jabba Lake, also known as Jaba Lake is an alpine glacial lake located in the Ushu valley of Swat Kohistan region in northern Pakistan.",
+      "source": "https://en.wikipedia.org/wiki/Jabba_Zomalu_Lake"
+     },
+     {
+      "text": "The lake is at about 14,000 ft above sea level.",
+      "quote": "Elevation of lake is about 14,000 feet above sea level.",
+      "source": "https://en.wikipedia.org/wiki/Jabba_Zomalu_Lake"
+     }
+    ]
+   },
+   "why": "Wikipedia Jabba_Zomalu_Lake; no Urdu Wikipedia interlanguage link, name_ur left out."
+  },
+  "jandrai": {
+   "add": {
+    "facts": [
+     {
+      "text": "A passable but unpaved road suitable for jeeps climbs to Jandrai village.",
+      "quote": "From there, it ascends toward Jandrai village via a passable but unpaved road suitable for jeeps.",
+      "source": "https://en.wikipedia.org/wiki/Jahaz_Banda"
+     }
+    ]
+   },
+   "set": {
+    "summary": "Village on the unpaved jeep road to Jahaz Banda, where the road ends and the trek begins."
+   },
+   "why": "Wikipedia Jahaz_Banda; no Urdu Wikipedia link for Jandrai. Summary replaces OSM-based text."
+  },
+  "katora-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "The lake sits at 11,500 ft (3,500 m).",
+      "quote": "surface elevation 11,500 ft (3,500 m)",
+      "source": "https://en.wikipedia.org/wiki/Katora_Lake"
+     },
+     {
+      "text": "The lake is fed by snowmelt from the surrounding glaciers.",
+      "quote": "The lake is fed by the snowmelt from the surrounding glaciers.",
+      "source": "https://en.wikipedia.org/wiki/Katora_Lake"
+     }
+    ]
+   },
+   "why": "Wikipedia Katora_Lake; name_ur already set."
+  },
+  "khwazakhela": {
+   "add": {
+    "facts": [
+     {
+      "text": "The Lwar-e-Jamat mosque in the area dates to the 12th century.",
+      "quote": "One important historical site in the area is the Lwar-e-Jamat Mosque, which was built in the 12th century by Mahmud of Ghazni during his visit.",
+      "source": "https://en.wikipedia.org/wiki/Khwazakhela"
+     },
+     {
+      "text": "It is well known for the graves of religious saints.",
+      "quote": "Khwazakhela is well known for the graves of religious saints (Awliya).",
+      "source": "https://en.wikipedia.org/wiki/Khwazakhela"
+     },
+     {
+      "text": "It had a population of 57,113 in the 2023 census.",
+      "quote": "As of the 2023 census, Khwazakhela had a population of 57,113.",
+      "source": "https://en.wikipedia.org/wiki/Khwazakhela"
+     }
+    ],
+    "timeline": [
+     {
+      "date": "12th century",
+      "event": "The Lwar-e-Jamat Mosque was built near Khwazakhela by Mahmud of Ghazni during his visit.",
+      "quote": "One important historical site in the area is the Lwar-e-Jamat Mosque, which was built in the 12th century by Mahmud of Ghazni during his visit.",
+      "source": "https://en.wikipedia.org/wiki/Khwazakhela"
+     }
+    ]
+   },
+   "why": "Wikipedia Khwazakhela; name_ur already set."
+  },
+  "kundol-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "It is 19 km from Kalam.",
+      "quote": "It is 19 kilometres (12 mi) away from the Kalam valley.",
+      "source": "https://en.wikipedia.org/wiki/Kundol_Lake"
+     },
+     {
+      "text": "The lake gives rise to the Utror Khwar, a major right tributary of the Swat River.",
+      "quote": "It gives rise to Utror Khwar, the major right tributary of the Swat River.",
+      "source": "https://en.wikipedia.org/wiki/Kundol_Lake"
+     }
+    ]
+   },
+   "why": "Wikipedia Kundol_Lake; name_ur already set."
+  },
+  "laddu": {
+   "add": {
+    "facts": [
+     {
+      "text": "Ladu is reached by hiking from Utror or by four-wheeler, about two hours.",
+      "quote": "You can either hike to Ladu from Utror or take a four-wheeler to ease and minimize your journey. It consumes almost two hours to reach the beautiful valley of Ladu.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "There is a small hut in Ladu serving tea and food.",
+      "quote": "There is also a small hut in Ladu where you can take tea and get something for eating.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "Summer residents plough the land and harvest potatoes and turnips.",
+      "quote": "The people who take temporary residency over here during summer plow the open land and harvest potatoes and turnips",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "set": {
+    "summary": "Summer hamlet in the Ladu valley above Utror, known for potatoes and turnips; the road head and trailhead for Kundol Lake and Spin Khwar Lake.",
+    "access": "Hike or 4x4 from Utror, about two hours."
+   },
+   "why": "Wikivoyage Swat_Valley; no Urdu link found. Summary/access replace OSM-based text."
+  },
+  "mahodand-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "It is reached by four-wheel drive and is a good resort for fishing, boating and camping.",
+      "quote": "It is accessible with a four-wheel drive vehicle, and is a good resort for fishing, boating and camping.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "The lake is fed by melting glaciers and springs.",
+      "quote": "The Mahodand Lake is fed by melting glaciers and springs of the mount Hindu Kush.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "Its Pashto name means lake of fishes.",
+      "quote": "lake of fishes",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikivoyage Swat_Valley; name_ur already set."
+  },
+  "sheringal": {
+   "add": {
+    "facts": [
+     {
+      "text": "Sheringal is a union council of Upper Dir district.",
+      "quote": "Sheringal is an administrative unit, known as Union Council, of Upper Dir District",
+      "source": "https://en.wikipedia.org/wiki/Sheringal"
+     },
+     {
+      "text": "It lies at an elevation of 1,369 m (4,491 ft).",
+      "quote": "Elevation 1,369 m (4,491 ft)",
+      "source": "https://en.wikipedia.org/wiki/Sheringal"
+     }
+    ]
+   },
+   "why": "Wikipedia Sheringal (stub); name_ur already set."
+  },
+  "spin-khwar-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "The lake lies north of Kundol Lake and east of Utror valley.",
+      "quote": "Spin Khwar (white stream) lake is a beautiful lake hidden in the lap of mountains towards the north of Kundal lake and east of Utror valley.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "It is reached by two tracks, one from Kundol and one from Ladu.",
+      "quote": "The lake is accessible through two tracks, one from Kundal and the other from Ladu valley.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "Grazers have built small huts and a mosque near the lake.",
+      "quote": "The grazers in the area have built small huts and a mosque",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikivoyage Swat_Valley; no Urdu Wikipedia link found."
+  },
+  "bashigram-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "The road to Bashigram valley is partly metaled and can be driven in an ordinary vehicle.",
+      "quote": "The road to this valley is partly metaled and can be plied by a four by four or any ordinary vehicle.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "The trek from Bashigram to the lake takes four to five hours.",
+      "quote": "trekking of four to five hours, depending on professionalism and enthusiasm of the trekkers lands you in the realm of a serene and enchanting lake of Bashigram.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikivoyage Swat_Valley; no Urdu Wikipedia link."
+  },
+  "daral-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "The lake lies at 3,505.2 m (11,500 ft).",
+      "quote": "at an elevation of 3,505.2 m (11,500 ft)",
+      "source": "https://en.wikipedia.org/wiki/Daral_Lake"
+     },
+     {
+      "text": "From Bahrain the trek takes three to four hours.",
+      "quote": "it can be accessed from Bahrain in three to four hours of trekking on bare mountains",
+      "source": "https://en.wikipedia.org/wiki/Daral_Lake"
+     },
+     {
+      "text": "The lake looks like a giant amoeba.",
+      "quote": "The lake appears as a giant amoeba in shape.",
+      "source": "https://en.wikipedia.org/wiki/Daral_Lake"
+     }
+    ]
+   },
+   "replace": [
+    [
+     "facts.0.text",
+     "It is at 3,505 m and only accessible in summer.",
+     "It is accessible only during the summer."
+    ]
+   ],
+   "why": "Wikipedia Daral_Lake; fixed fact 0 by dropping unquoted 3,505 and adding a separate elevation fact; name_ur already set."
+  },
+  "pari-lake": {
+   "add": {
+    "facts": [
+     {
+      "text": "The name Pari comes from a belief that fairies live and bathe in the lake.",
+      "quote": "The name Pari or Khapiro is given to the lake due to the widespread belief that the lake is the abode of fairies",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     },
+     {
+      "text": "Two tracks from Kundol and Izmis lakes lead to it, about five hours each.",
+      "quote": "Two ascending tracks lead to this lake from Kundal and Izmis lakes taking almost five hours to reach this roof top of Swat.",
+      "source": "https://en.wikivoyage.org/wiki/Swat_Valley"
+     }
+    ]
+   },
+   "why": "Wikivoyage Swat_Valley; no Urdu Wikipedia link."
   }
+ }
 }

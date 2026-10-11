@@ -1,0 +1,399 @@
+{
+ "stats": {
+  "site_models": 39,
+  "audio_clips": 52,
+  "audio_places": 52
+ },
+ "sites": [
+  {
+   "site": "amluk-dara-stupa",
+   "title": "Amluk-Dara Stupa",
+   "subtitle": "Buddhist stupa south of the Swat River, near Barikot, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "stupa",
+   "kind_label": "Stupa",
+   "thumb": "img/dioramas/amluk-dara-stupa.webp",
+   "thumb_small": "img/dioramas/amluk-dara-stupa-320.webp"
+  },
+  {
+   "site": "bahrain",
+   "title": "Bahrain",
+   "subtitle": "Bahrain bazaar, Swat River, Upper Swat",
+   "pack": "swat-lower",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/bahrain.webp",
+   "thumb_small": "img/dioramas/bahrain-320.webp"
+  },
+  {
+   "site": "bashigram-lake",
+   "title": "Bashigram Lake",
+   "subtitle": "Alpine glacial lake above Bashigram village, east of Madyan",
+   "pack": "swat-lower",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/bashigram-lake.webp",
+   "thumb_small": "img/dioramas/bashigram-lake-320.webp"
+  },
+  {
+   "site": "bazira-barikot-ghundai",
+   "title": "Bazira (Barikot Ghundai)",
+   "subtitle": "Indo-Greek city and Italian excavations at Barikot, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "archaeological_site",
+   "kind_label": "Archaeological site",
+   "thumb": "img/dioramas/bazira-barikot-ghundai.webp",
+   "thumb_small": "img/dioramas/bazira-barikot-ghundai-320.webp"
+  },
+  {
+   "site": "butkara-i-stupa",
+   "title": "Butkara I Stupa",
+   "subtitle": "Buddhist stupa and votive court on the eastern edge of Mingora, Swat",
+   "pack": "swat-lower",
+   "kind": "stupa",
+   "kind_label": "Stupa",
+   "thumb": "img/dioramas/butkara-i-stupa.webp",
+   "thumb_small": "img/dioramas/butkara-i-stupa-320.webp"
+  },
+  {
+   "site": "butkara-iii-stupa",
+   "title": "Butkara III",
+   "subtitle": "Minor stupa court on the Mingora outskirts, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "stupa",
+   "kind_label": "Stupa",
+   "thumb": "img/dioramas/butkara-iii-stupa.webp",
+   "thumb_small": "img/dioramas/butkara-iii-stupa-320.webp"
+  },
+  {
+   "site": "daral-lake",
+   "title": "Daral Lake",
+   "subtitle": "Glacial lake above Bahrain, trek from Gabin Jabba, Upper Swat",
+   "pack": "swat-lower",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/daral-lake.webp",
+   "thumb_small": "img/dioramas/daral-lake-320.webp"
+  },
+  {
+   "site": "desan-meadows",
+   "title": "Desan Meadows",
+   "subtitle": "High meadow above Kalam, Upper Swat",
+   "pack": "swat",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/desan-meadows.webp",
+   "thumb_small": "img/dioramas/desan-meadows-320.webp"
+  },
+  {
+   "site": "gabin-jabba",
+   "title": "Gabin Jabba",
+   "subtitle": "Forested meadow plateau above Lalko, Matta tehsil, Swat",
+   "pack": "swat-lower",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/gabin-jabba.webp",
+   "thumb_small": "img/dioramas/gabin-jabba-320.webp"
+  },
+  {
+   "site": "gabral",
+   "title": "Gabral",
+   "subtitle": "Gabral valley above Utror, Upper Swat",
+   "pack": "swat",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/gabral.webp",
+   "thumb_small": "img/dioramas/gabral-320.webp"
+  },
+  {
+   "site": "ghalegay-buddha-rock",
+   "title": "Ghalegay Buddha",
+   "subtitle": "Seated Buddha carved in a rock face beside the Mingora-Barikot road, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "rock_carving",
+   "kind_label": "Rock carving",
+   "thumb": "img/dioramas/ghalegay-buddha-rock.webp",
+   "thumb_small": "img/dioramas/ghalegay-buddha-rock-320.webp"
+  },
+  {
+   "site": "gogdara-rock-carvings",
+   "title": "Gogdara Rock Carvings",
+   "subtitle": "Prehistoric petroglyphs and a Buddhist addition in Gogdara, a hamlet of Udegram, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "rock_carving",
+   "kind_label": "Rock carving",
+   "thumb": "img/dioramas/gogdara-rock-carvings.webp",
+   "thumb_small": "img/dioramas/gogdara-rock-carvings-320.webp"
+  },
+  {
+   "site": "gumbat-balo-kale-stupa",
+   "title": "Gumbat Stupa (Balo Kale)",
+   "subtitle": "Buddhist stupa on the Kandak valley road west of Barikot, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "stupa",
+   "kind_label": "Stupa",
+   "thumb": "img/dioramas/gumbat-balo-kale-stupa.webp",
+   "thumb_small": "img/dioramas/gumbat-balo-kale-stupa-320.webp"
+  },
+  {
+   "site": "izmis-lake",
+   "title": "Izmis Lake",
+   "subtitle": "Above Utror, Upper Swat",
+   "pack": "swat",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/izmis-lake.webp",
+   "thumb_small": "img/dioramas/izmis-lake-320.webp"
+  },
+  {
+   "site": "jabba-zomalu-lake",
+   "title": "Jabba Zomalu Lake",
+   "subtitle": "Below Falak Sar, Upper Swat",
+   "pack": "swat",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/jabba-zomalu-lake.webp",
+   "thumb_small": "img/dioramas/jabba-zomalu-lake-320.webp"
+  },
+  {
+   "site": "jahanabad-buddha",
+   "title": "Jahanabad Buddha",
+   "subtitle": "Manglawar rock relief up the Malam Jabba road, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "rock_carving",
+   "kind_label": "Rock carving",
+   "thumb": "img/dioramas/jahanabad-buddha.webp",
+   "thumb_small": "img/dioramas/jahanabad-buddha-320.webp"
+  },
+  {
+   "site": "jamia-masjid-thal",
+   "title": "Jamia Masjid Thal",
+   "subtitle": "Wooden mosque on the Panjkora bank, Thal village, Kumrat",
+   "pack": "swat",
+   "kind": "mosque",
+   "kind_label": "Mosque",
+   "thumb": "img/dioramas/jamia-masjid-thal.webp",
+   "thumb_small": "img/dioramas/jamia-masjid-thal-320.webp"
+  },
+  {
+   "site": "kalam",
+   "title": "Kalam",
+   "subtitle": "Swat River at the Gabral–Ushu confluence, Upper Swat",
+   "pack": "swat",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/kalam.webp",
+   "thumb_small": "img/dioramas/kalam-320.webp"
+  },
+  {
+   "site": "kharkhari-lake",
+   "title": "Kharkhari Lake",
+   "subtitle": "Small lake at the head of the Gabral valley, Upper Swat",
+   "pack": "swat",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/kharkhari-lake.webp",
+   "thumb_small": "img/dioramas/kharkhari-lake-320.webp"
+  },
+  {
+   "site": "kumrat-waterfall",
+   "title": "Kumrat Waterfall",
+   "subtitle": "Roadside fall in the Kumrat valley, Upper Dir",
+   "pack": "swat",
+   "kind": "waterfall",
+   "kind_label": "Waterfall",
+   "thumb": "img/dioramas/kumrat-waterfall.webp",
+   "thumb_small": "img/dioramas/kumrat-waterfall-320.webp"
+  },
+  {
+   "site": "kundol-lake",
+   "title": "Kundol Lake",
+   "subtitle": "Above Laddu, Utror valley, Upper Swat",
+   "pack": "swat",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/kundol-lake.webp",
+   "thumb_small": "img/dioramas/kundol-lake-320.webp"
+  },
+  {
+   "site": "madyan",
+   "title": "Madyan",
+   "subtitle": "Swat River on the N-95, Upper Swat",
+   "pack": "swat-lower",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/madyan.webp",
+   "thumb_small": "img/dioramas/madyan-320.webp"
+  },
+  {
+   "site": "mahmud-ghaznavi-mosque",
+   "title": "Mahmud Ghaznavi Mosque",
+   "subtitle": "Excavated 11th-century mosque below Raja Gira Castle, Udegram, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "mosque",
+   "kind_label": "Mosque",
+   "thumb": "img/dioramas/mahmud-ghaznavi-mosque.webp",
+   "thumb_small": "img/dioramas/mahmud-ghaznavi-mosque-320.webp"
+  },
+  {
+   "site": "mahodand",
+   "title": "Mahodand Lake",
+   "subtitle": "Ushu valley, Upper Swat",
+   "pack": "swat",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/mahodand.webp",
+   "thumb_small": "img/dioramas/mahodand-320.webp"
+  },
+  {
+   "site": "malam-jabba",
+   "title": "Malam Jabba Ski Resort",
+   "subtitle": "Pakistan's ski resort above Manglawar, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "ski_resort",
+   "kind_label": "Ski resort",
+   "thumb": "img/dioramas/malam-jabba.webp",
+   "thumb_small": "img/dioramas/malam-jabba-320.webp"
+  },
+  {
+   "site": "matiltan",
+   "title": "Matiltan",
+   "subtitle": "Falak Sar in view, Ushu valley, Upper Swat",
+   "pack": "swat",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/matiltan.webp",
+   "thumb_small": "img/dioramas/matiltan-320.webp"
+  },
+  {
+   "site": "miandam",
+   "title": "Miandam",
+   "subtitle": "Hill resort in the Miandam valley, Upper Swat",
+   "pack": "swat-lower",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/miandam.webp",
+   "thumb_small": "img/dioramas/miandam-320.webp"
+  },
+  {
+   "site": "mighty-22-falls",
+   "title": "Mighty 22 Falls",
+   "subtitle": "Waterfall beside the Mahodand jeep road, Ushu, Upper Swat",
+   "pack": "swat",
+   "kind": "waterfall",
+   "kind_label": "Waterfall",
+   "thumb": "img/dioramas/mighty-22-falls.webp",
+   "thumb_small": "img/dioramas/mighty-22-falls-320.webp"
+  },
+  {
+   "site": "mushroom-lake",
+   "title": "Mushroom Lake",
+   "subtitle": "High lake above Shahi Bagh, Gabral valley, Upper Swat",
+   "pack": "swat",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/mushroom-lake.webp",
+   "thumb_small": "img/dioramas/mushroom-lake-320.webp"
+  },
+  {
+   "site": "pari-lake",
+   "title": "Pari Lake",
+   "subtitle": "Above Kundol, Utror valley, Upper Swat",
+   "pack": "swat",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/pari-lake.webp",
+   "thumb_small": "img/dioramas/pari-lake-320.webp"
+  },
+  {
+   "site": "raja-gira-castle",
+   "title": "Raja Gira Castle",
+   "subtitle": "Ruined hill fort above Udegram (Odigram), Lower Swat",
+   "pack": "swat-lower",
+   "kind": "fort_ruin",
+   "kind_label": "Fort ruin",
+   "thumb": "img/dioramas/raja-gira-castle.webp",
+   "thumb_small": "img/dioramas/raja-gira-castle-320.webp"
+  },
+  {
+   "site": "saidu-sharif-stupa",
+   "title": "Saidu Sharif I Stupa",
+   "subtitle": "Buddhist stupa on the edge of Saidu Sharif, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "stupa",
+   "kind_label": "Stupa",
+   "thumb": "img/dioramas/saidu-sharif-stupa.webp",
+   "thumb_small": "img/dioramas/saidu-sharif-stupa-320.webp"
+  },
+  {
+   "site": "shahi-bagh",
+   "title": "Shahi Bagh",
+   "subtitle": "Meadow at the head of the Gabral valley, Upper Swat",
+   "pack": "swat",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/shahi-bagh.webp",
+   "thumb_small": "img/dioramas/shahi-bagh-320.webp"
+  },
+  {
+   "site": "shingardar-stupa",
+   "title": "Shingardar Stupa",
+   "subtitle": "Buddhist stupa beside the N-95 between Ghalegay and Barikot, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "stupa",
+   "kind_label": "Stupa",
+   "thumb": "img/dioramas/shingardar-stupa.webp",
+   "thumb_small": "img/dioramas/shingardar-stupa-320.webp"
+  },
+  {
+   "site": "spin-khwar-lake",
+   "title": "Spin Khwar Lake",
+   "subtitle": "Above Utror, Upper Swat",
+   "pack": "swat",
+   "kind": "lake",
+   "kind_label": "Lake",
+   "thumb": "img/dioramas/spin-khwar-lake.webp",
+   "thumb_small": "img/dioramas/spin-khwar-lake-320.webp"
+  },
+  {
+   "site": "swat-museum",
+   "title": "Swat Museum",
+   "subtitle": "Gandhara collection on the Mingora-Saidu Sharif road, Lower Swat",
+   "pack": "swat-lower",
+   "kind": "museum",
+   "kind_label": "Museum",
+   "thumb": "img/dioramas/swat-museum.webp",
+   "thumb_small": "img/dioramas/swat-museum-320.webp"
+  },
+  {
+   "site": "ushu",
+   "title": "Ushu Forest",
+   "subtitle": "Ushu valley, Upper Swat",
+   "pack": "swat",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/ushu.webp",
+   "thumb_small": "img/dioramas/ushu-320.webp"
+  },
+  {
+   "site": "utror",
+   "title": "Utror",
+   "subtitle": "Utror valley, Upper Swat",
+   "pack": "swat",
+   "kind": "viewpoint",
+   "kind_label": "Viewpoint",
+   "thumb": "img/dioramas/utror.webp",
+   "thumb_small": "img/dioramas/utror-320.webp"
+  },
+  {
+   "site": "white-palace",
+   "title": "White Palace",
+   "subtitle": "Marghazar, Swat",
+   "pack": "swat-lower",
+   "kind": "palace",
+   "kind_label": "Palace",
+   "thumb": "img/dioramas/white-palace.webp",
+   "thumb_small": "img/dioramas/white-palace-320.webp"
+  }
+ ]
+}

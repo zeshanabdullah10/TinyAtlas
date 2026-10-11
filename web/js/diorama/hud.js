@@ -1,5 +1,6 @@
 // Diorama page chrome: intro card, driving gauges and elevation profile, touch pedals, arrival card, labels, about.
 import * as THREE from "three";
+import { tr } from "../i18n.js";
 
 const $ = (s) => document.querySelector(s);
 const fmt = (n, d = 0) => Number(n).toLocaleString("en", { maximumFractionDigits: d, minimumFractionDigits: d });
@@ -19,7 +20,10 @@ export class Hud {
     $("#lb-close").addEventListener("click", () => $("#lightbox").close());
     $("#lb-x").addEventListener("click", () => $("#lightbox").close());
     $("#photo-close").addEventListener("click", () => { $("#photo").hidden = true; this.photoShut = this.photoKey; });
-    addEventListener("keydown", (e) => { if (e.key === "Escape") { if (!$("#photo").hidden) { $("#photo").hidden = true; this.photoShut = this.photoKey; } $("#places").hidden = true; document.body.classList.remove("more"); } });
+    // the More sheet: Esc closes it, and so does picking anything that opens something else (it would sit on top of it)
+    const closeMore = () => { if (!document.body.classList.contains("more")) return; document.body.classList.remove("more"); const m = $('[data-act="more"]'); if (m) { m.textContent = "More"; m.setAttribute("aria-pressed", "false"); } };
+    addEventListener("keydown", (e) => { if (e.key === "Escape") { if (!$("#photo").hidden) { $("#photo").hidden = true; this.photoShut = this.photoKey; } $("#places").hidden = true; closeMore(); } });
+    document.querySelector(".dock")?.addEventListener("click", (e) => { if (e.target.closest('#btn-places, [data-offline], [data-act="skip"], [data-act="photo"], [data-act="model"]')) closeMore(); });
     $("#lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox") $("#lightbox").close(); });
     $("#btn-places").addEventListener("click", () => { $("#places").hidden = !$("#places").hidden; });
     $("#places-close").addEventListener("click", () => { $("#places").hidden = true; });
@@ -27,7 +31,11 @@ export class Hud {
   }
   on(k, f) { this.ev[k] = f; }
   emit(k, a) { this.ev[k]?.(a); }
-  loading(t) { const el = $("#loading"); el.hidden = !t; if (t) el.textContent = t; }
+  loading(t) {
+    const el = $("#loading"); el.hidden = !t;
+    if (t && /^Could not load/.test(t) && (!navigator.onLine || /Failed to fetch|NetworkError|Load failed/i.test(t))) t = tr("diorama.not_saved", "This diorama is not saved on this device and you are offline. Connect once and choose Save this site for offline.");
+    if (t) el.textContent = t;
+  }
 
   facts(meta) {
     const F = meta.facts;
@@ -157,6 +165,15 @@ export class Hud {
     }
     this.renderPlaces();
   }
+  /** "Nearby": the hotels OSM names in town.json ([name, x, z]), the closest to `around` first, at most 8, none within 90 m of another or repeating another's name. */
+  nearby(town, site, around) {
+    const keep = [];
+    for (const [name, x, z] of [...(town?.hotels || [])].sort((a, b) => Math.hypot(a[1] - around.x, a[2] - around.z) - Math.hypot(b[1] - around.x, b[2] - around.z))) {
+      if (name && keep.length < 8 && keep.every((k) => Math.hypot(k[1] - x, k[2] - z) > 90 && !k[0].startsWith(name) && !name.startsWith(k[0]))) keep.push([name, x, z]);
+    }
+    this.addLabels(keep.map(([name, x, z]) => ({ text: name, name, group: "Nearby", sub: tr("diorama.nearby.sub", "Hotel, as mapped in OpenStreetMap"), cls: "hotel", modes: ["walk", "explore"], range: 450,
+      p: new THREE.Vector3(x, site.heightAt(x, z) + 26, z) })));
+  }
   /** The Places list: every tag, grouped, so nothing has to be found by looking around. */
   renderPlaces() {
     const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -166,7 +183,7 @@ export class Hud {
     box.replaceChildren();
     for (const [g, items] of groups) {
       const sec = document.createElement("section");
-      sec.innerHTML = `<h3>${esc(g)} <small>${items.length}</small></h3>`;
+      sec.innerHTML = `<h3>${esc(tr("diorama.group." + g.toLowerCase().replace(/\W+/g, "_"), g))} <small>${items.length}</small></h3>`;   // groups are keyed by their English name
       const ul = document.createElement("ul");
       for (const l of items) {
         const li = document.createElement("li"), b = document.createElement("button");

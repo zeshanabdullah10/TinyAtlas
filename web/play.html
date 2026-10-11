@@ -2,18 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="play.title">Where is this view? | Tiny Atlas</title>
+<meta name="description" content="Guess where a credited photo of the Swat valley was taken. Ten rounds, real photographs, a true map.">
+<meta name="theme-color" content="#15120f">
+<link rel="canonical" href="https://zeshanabdullah10.github.io/TinyAtlas/play.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tiny Atlas">
+<meta property="og:title" content="Where is this view? | Tiny Atlas">
+<meta property="og:description" content="Guess where a credited photo of the Swat valley was taken. Ten rounds, real photographs, a true map.">
+<meta property="og:url" content="https://zeshanabdullah10.github.io/TinyAtlas/play.html">
+<meta property="og:image" content="https://zeshanabdullah10.github.io/TinyAtlas/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Where is this view? · Tiny Atlas</title>
-<meta name="description" content="Guess where a credited photo of the Swat valley was taken.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Literata:opsz,wght@7..72,400;7..72,500&family=Schibsted+Grotesk:wght@400;500;600&display=swap">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="preload" href="fonts/cormorant-sc-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/play.css">
+<link rel="stylesheet" href="css/i18n.css">
 </head>
 <body class="play-body">
+<header class="site-head">
+  <a class="site-brand" href="./" aria-label="Tiny Atlas, home" data-i18n-attr="aria-label:site.brand.aria"><img src="icon.svg" alt="" width="28" height="28"><span data-i18n="index.brand">Tiny Atlas</span></a>
+  <nav class="site-nav" aria-label="Main" data-i18n-attr="aria-label:site.nav.main"><a href="atlas.html?pack=swat" data-i18n="site.nav.swat">Swat Valley</a><a href="atlas.html?pack=swat-lower" data-i18n="site.nav.lower">Lower Swat</a><a href="play.html" aria-current="page" data-i18n="site.nav.play">Play</a><a href="tripkit.html" data-i18n="site.nav.tripkit">Trip kit</a></nav>
+</header>
 <main id="play" class="play-main"></main>
+<footer class="site-foot">
+  <nav class="site-nav" aria-label="Footer" data-i18n-attr="aria-label:site.nav.footer"><a href="./" data-i18n="site.foot.home">Home</a><a href="./#credits" data-i18n="site.foot.credits">Credits and licences</a><a href="voices-consent.html" data-i18n="site.foot.voices">Voices and consent</a><a href="https://github.com/zeshanabdullah10/tinyatlas" rel="noopener" data-i18n="site.foot.github">GitHub</a></nav>
+  <p><span data-i18n="site.foot.note1">Tiny Atlas is open source. Terrain, roads and places come from open data, each credited on the </span><a href="./#credits" data-i18n="site.foot.credits">credits and licences</a><span data-i18n="site.foot.note2"> section of the home page.</span></p>
+</footer>
 <script type="module">
   import { mountGame } from "./js/play/game.js";
+  import { applyI18n } from "./js/i18n.js";
+  await applyI18n("play").catch(() => {});          // sets lang/dir and the marked header and footer; the game text comes from tr() in game.js
   mountGame(document.getElementById("play"), { atlasUrl: "atlas.html" });
 </script>
 </body>

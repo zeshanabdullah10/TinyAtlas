@@ -50,7 +50,8 @@ VARIANTS = {
 # mushrooms, Pearl Harbor, Pari Mahal in Srinagar and the Qutb Shahi tombs (Oct 2026); a museum card must not show
 # objects held by another museum.
 ELSEWHERE = re.compile(r"srinagar|kashmir|dal lake|chash?ma.?shahi|mughal.?garden|hyderabad|telangana|qutb|qutub|peshawar|armenia|harbor|harbour|weser|"
-                       r"cargo ship|british museum|metropolitan museum|\bmet\b museum|musée|museum of (?!swat)", re.I)
+                       r"cargo ship|british museum|metropolitan museum|\bmet\b museum|musée|museum of (?!swat)|"
+                       r"saif.?ul.?muluk|sanaullah lake|saifullah lake|naran|kaghan", re.I)   # Naran's lake, mislabelled as Kalam
 # Files checked by eye and found to be of another place or thing; never pick them again.
 EXCLUDE = {
     "File:Kevin Bazira Software Engineer Image.jpg", "File:Mama Maombi Pondamali,Bazira Joeel responsables des survivants.jpg",

@@ -1,0 +1,501 @@
+{
+ "_doc": "Commons photos for place cards, each looked at by a person and found to show the place (backend/tools/pack_photos.py apply). Captions say what the photo shows.",
+ "kalam": [
+  {
+   "title": "File:Kalam town, Swat District, KPK (Pakistan).jpg",
+   "caption": "Kalam town on its terrace above the Swat River"
+  },
+  {
+   "title": "File:View of Kalam town and Swat River from Buyon, Swat District.jpg",
+   "caption": "Kalam and the Swat River from Buyon, above the town"
+  },
+  {
+   "title": "File:Swat River and Honeymoon Hotel in Kalam, near Mingora, Swat, KPK.jpg",
+   "caption": "Hotels by the Swat River at Kalam, snow peaks behind"
+  },
+  {
+   "title": "File:View of hotels along the Swat River from Honeymoon Hotel in Kalam.jpg",
+   "caption": "Hotels along the Swat River in Kalam"
+  },
+  {
+   "title": "File:Winter in Kalam town hotel, Swat District,.jpg",
+   "caption": "Kalam in winter snow"
+  }
+ ],
+ "bahrain": [
+  {
+   "title": "File:Bahrain town in Swat.jpg",
+   "caption": "Bahrain's riverside buildings along the Swat River"
+  },
+  {
+   "title": "File:Bahrain \"Swat Valley\" 03.jpg",
+   "caption": "Bahrain town in its valley, from the slope above"
+  },
+  {
+   "title": "File:Bahrain of Swat Valley, Pakistan.jpg",
+   "caption": "Bahrain town on both banks of the river"
+  },
+  {
+   "title": "File:Bahrain swat.jpg",
+   "caption": "The footbridge and riverfront in Bahrain"
+  },
+  {
+   "title": "File:Bahrain Valley, Swat, Pakistan.jpg",
+   "caption": "Bahrain's bazaar street"
+  },
+  {
+   "title": "File:Torwali elders in Bahrain Swat in 1979.jpg",
+   "caption": "Torwali elders in Bahrain, 1979"
+  }
+ ],
+ "chitral-town": [
+  {
+   "title": "File:The City of Chitral and Tirich Mir.jpg",
+   "caption": "Chitral town below Tirich Mir"
+  },
+  {
+   "title": "File:Chitral City view.JPG",
+   "caption": "Chitral town from above"
+  },
+  {
+   "title": "File:Chitral Mosque.JPG",
+   "caption": "A mosque in Chitral"
+  },
+  {
+   "title": "File:GOL National Park Chitral Pakistan.JPG",
+   "caption": "The Chitral valley from Chitral Gol National Park"
+  },
+  {
+   "title": "File:Chitral City (27410923324).jpg",
+   "caption": "The Chitral River beside the town"
+  }
+ ],
+ "gabral": [
+  {
+   "title": "File:Gabral Valley, Swat, Khyber Pakhtunkhwa.jpg",
+   "caption": "The Gabral river through its valley"
+  },
+  {
+   "title": "File:Gabral Valley, Swat.jpg",
+   "caption": "The upper Gabral valley in spring snow"
+  },
+  {
+   "title": "File:Gabral.jpg",
+   "caption": "Huts by the river in Gabral, snow peaks behind"
+  },
+  {
+   "title": "File:Ghabral swatvalley x003.JPG",
+   "caption": "Snow peaks above Gabral"
+  },
+  {
+   "title": "File:Gabral valley.jpg",
+   "caption": "Gabral in winter"
+  }
+ ],
+ "madyan": [
+  {
+   "title": "File:Photo of Madyan - Swat (11).jpg",
+   "caption": "Madyan town below its wooded hills"
+  },
+  {
+   "title": "File:Photo of Madyan - Swat (4).jpg",
+   "caption": "The Swat River and a hillside village at Madyan"
+  },
+  {
+   "title": "File:Photo of Madyan - Swat (2).jpg",
+   "caption": "The valley and the river at Madyan"
+  },
+  {
+   "title": "File:Swat madyan 04.jpg",
+   "caption": "A house with a carved wooden veranda in Madyan"
+  },
+  {
+   "title": "File:Swat madyan 05.jpg",
+   "caption": "Rapids on the Swat River at Madyan"
+  }
+ ],
+ "matiltan": [
+  {
+   "title": "File:Valley of Matiltan swat.jpg",
+   "caption": "The Matiltan valley, snow peaks at its head"
+  },
+  {
+   "title": "File:Ushu River in Matiltan 2015-05-17.jpg",
+   "caption": "The Ushu River at Matiltan"
+  },
+  {
+   "title": "File:Matiltan waterfall, a grandiose shower.jpg",
+   "caption": "The waterfall at Matiltan"
+  },
+  {
+   "title": "File:Kalam - Matiltan - Nasr Rahman.jpg",
+   "caption": "Matiltan in winter below the peaks"
+  },
+  {
+   "title": "File:Matiltan valley swat kalam.jpg",
+   "caption": "Fields on the Matiltan valley floor"
+  }
+ ],
+ "miandam": [
+  {
+   "title": "File:Miandam, Swat (Kpk).jpg",
+   "caption": "Terraced fields and houses in the Miandam valley"
+  },
+  {
+   "title": "File:Miandam Swat valley.jpg",
+   "caption": "Miandam village on its hillside"
+  },
+  {
+   "title": "File:Miandam Swat Sub-valley.JPG",
+   "caption": "A village in the Miandam side valley"
+  },
+  {
+   "title": "File:SWAT - Miandam Snowy Day.jpg",
+   "caption": "Miandam on a snowy day"
+  },
+  {
+   "title": "File:Camping and Fast Food at Miandam, Swat, Pakistan.jpg",
+   "caption": "Camping and food stalls at Miandam"
+  }
+ ],
+ "khwazakhela": [
+  {
+   "title": "File:KhwazakhelaSwat.jpg",
+   "caption": "Men outside shops in Khwazakhela"
+  },
+  {
+   "title": "File:Suvastu river near khwazakhela.JPG",
+   "caption": "The Swat River near Khwazakhela"
+  }
+ ],
+ "laddu": [
+  {
+   "title": "File:Laddu, Utror Valley, Swat.jpg",
+   "caption": "The river below the forest at Laddu"
+  },
+  {
+   "title": "File:Laddu Utroor Upper Swat.jpg",
+   "caption": "A cascade at Laddu"
+  }
+ ],
+ "thal-kumrat": [
+  {
+   "title": "File:Thal Village in Upper Dir District of Pakistan.jpg",
+   "caption": "Thal village and the Panjkora valley"
+  },
+  {
+   "title": "File:Wooden mosque Thal bazar dir kohistan.jpg",
+   "caption": "The wooden mosque in Thal bazaar"
+  }
+ ],
+ "ushu": [
+  {
+   "title": "File:Ushu Forest, Kalam, Swat, Pakistan.jpg",
+   "caption": "The meadow in the Ushu forest, snow peaks behind"
+  },
+  {
+   "title": "File:Ushu Valley, Swat, KPK.JPG",
+   "caption": "The road up the Ushu valley"
+  },
+  {
+   "title": "File:Ushu River,Swat, Pakistan.jpg",
+   "caption": "The Ushu River under a snow bridge"
+  },
+  {
+   "title": "File:Ushu, Kalam, Swat, Pakistan.jpg",
+   "caption": "A building at Ushu below the peaks"
+  },
+  {
+   "title": "File:Ushu water fall, swat Pakistan, by Dr.Nadeem.jpg",
+   "caption": "A waterfall in the Ushu valley"
+  }
+ ],
+ "utror": [
+  {
+   "title": "File:Utror Valley, Kalam Swat VAlley.jpg",
+   "caption": "Tents on a meadow in the Utror valley"
+  },
+  {
+   "title": "File:Utror Swat Kalam.jpg",
+   "caption": "A hotel by the river in Utror"
+  },
+  {
+   "title": "File:Utror Valley, Swat, Khyber Pakhtunkhwa.jpg",
+   "caption": "The Utror river and a rest house"
+  },
+  {
+   "title": "File:Utror forest swat.jpg",
+   "caption": "A forest meadow above Utror"
+  },
+  {
+   "title": "File:Utroor Upper Swat river.jpg",
+   "caption": "The river at Utror"
+  }
+ ],
+ "falak-sar": [
+  {
+   "title": "File:Mount Falak Sher view from Kalam.JPG",
+   "caption": "Falak Sar (Falak Sher) from Kalam"
+  },
+  {
+   "title": "File:Falak Sher (Kalaam).jpg",
+   "caption": "Falak Sar through the forest near Kalam"
+  },
+  {
+   "title": "File:Image of falakser.jpg",
+   "caption": "The Falak Sar massif under snow"
+  },
+  {
+   "title": "File:Hamza Anees on summit of Falak Sar.jpg",
+   "caption": "A climber on the summit of Falak Sar"
+  }
+ ],
+ "mankial-sar": [
+  {
+   "title": "File:Mankial Sar.jpg",
+   "caption": "Mankial Sar"
+  },
+  {
+   "title": "File:Mankial Mountains.jpg",
+   "caption": "The snow summit of Mankial"
+  },
+  {
+   "title": "File:Mankial swat valley 00.JPG",
+   "caption": "Houses in the Mankial valley below the peak"
+  },
+  {
+   "title": "File:Mankial swat valley 808.JPG",
+   "caption": "The Mankial valley"
+  }
+ ],
+ "kumrat-valley": [
+  {
+   "title": "File:Kumrat Valley 3.jpg",
+   "caption": "The open meadow of the Kumrat valley"
+  },
+  {
+   "title": "File:Kumrat Valley.jpg",
+   "caption": "The Panjkora running through the Kumrat forest"
+  },
+  {
+   "title": "File:Inside Kumrat Valley August 2016.jpg",
+   "caption": "Deodar forest and meadow in Kumrat, August"
+  },
+  {
+   "title": "File:Kumrat Valley in Pakistan.jpg",
+   "caption": "A stream through the Kumrat forest"
+  },
+  {
+   "title": "File:Kumrat Valley Dir Upper.jpg",
+   "caption": "The Kumrat valley and its peaks"
+  }
+ ],
+ "lowari-pass": [
+  {
+   "title": "File:Lowari Pass top.jpg",
+   "caption": "The road over Lowari Pass"
+  },
+  {
+   "title": "File:Lowari Top Chitral.jpg",
+   "caption": "Snow on the slopes at Lowari Top"
+  },
+  {
+   "title": "File:Lowari Top mountain.jpg",
+   "caption": "Hairpin bends below Lowari Top in cloud"
+  },
+  {
+   "title": "File:Digging out from a landslide - Lowari Pass Chitral.jpg",
+   "caption": "Clearing a landslide on the Lowari road"
+  },
+  {
+   "title": "File:Lowari top.jpg",
+   "caption": "Lowari Top in spring snow"
+  }
+ ],
+ "lowari-tunnel": [
+  {
+   "title": "File:Lowari Tunnel,1.jpg",
+   "caption": "Driving through the Lowari Tunnel"
+  },
+  {
+   "title": "File:Lowari tunnel, Chitral, Pakistan.jpg",
+   "caption": "A portal of the Lowari Tunnel and its bridge"
+  },
+  {
+   "title": "File:Lawariii.jpg",
+   "caption": "Jeeps at the tunnel portal in winter"
+  }
+ ],
+ "barikot": [
+  {
+   "title": "File:Barikot Swat.jpg",
+   "caption": "Barikot town and its hill from above"
+  },
+  {
+   "title": "File:Swat KPK pakistan.jpg",
+   "caption": "The bridge over the Swat River near Barikot"
+  },
+  {
+   "title": "File:Barikot - panoramio.jpg",
+   "caption": "The Swat River at Barikot"
+  },
+  {
+   "title": "File:Ancient Bazira Barikot Swat Kp Pakistan.jpg",
+   "caption": "The excavated site of ancient Bazira below the Barikot hill"
+  }
+ ],
+ "bazira-barikot-ghundai": [
+  {
+   "title": "File:Barikot Ghundai Ruins.JPG",
+   "caption": "Excavated houses and lanes of ancient Bazira"
+  },
+  {
+   "title": "File:Barikot Ghundai Place of Worship.JPG",
+   "caption": "An excavated room with an arched niche"
+  },
+  {
+   "title": "File:Barikot Ghundai Ruins Wall.JPG",
+   "caption": "Dry-stone walls of the city, Barikot hill behind"
+  }
+ ],
+ "kanju": [
+  {
+   "title": "File:Kanju Township, Swat, KPK.JPG",
+   "caption": "Kanju township and the Swat valley at dusk"
+  },
+  {
+   "title": "File:Kanju Mingora Swat 03.JPG",
+   "caption": "Fields by the Swat River at Kanju"
+  },
+  {
+   "title": "File:Kanju Mingora Swat 01.JPG",
+   "caption": "The braided Swat River at Kanju"
+  }
+ ],
+ "mingora": [
+  {
+   "title": "File:Swat Museum in Mingora city.jpg",
+   "caption": "Mingora and Saidu Sharif from above at sunset"
+  },
+  {
+   "title": "File:Mingora, Swat Valley at night.jpg",
+   "caption": "A Mingora bazaar street at dusk"
+  },
+  {
+   "title": "File:Mingora, Swat, Pakistan.jpg",
+   "caption": "Rooftops of Mingora below the hills"
+  },
+  {
+   "title": "File:River Swat near Mingora, Swat, Pakistan.jpg",
+   "caption": "The Swat River near Mingora"
+  }
+ ],
+ "saidu-sharif": [
+  {
+   "title": "File:Saidu-sharif-mountain.JPG",
+   "caption": "Saidu Sharif below its mountain"
+  },
+  {
+   "title": "File:Saidu Sharif x 004.jpg",
+   "caption": "A main road in Saidu Sharif"
+  },
+  {
+   "title": "File:Saidu Sharif in Swat Valley-1234.jpg",
+   "caption": "Rice fields at Saidu Sharif"
+  },
+  {
+   "title": "File:Saidu Sharif, Swat.JPG",
+   "caption": "An old shopfront in Saidu Sharif"
+  }
+ ],
+ "manglawar": [
+  {
+   "title": "File:Jahan Abad Buddha Manglawar swat.jpg",
+   "caption": "The Jahanabad Buddha on its cliff above Manglawar"
+  },
+  {
+   "title": "File:Manglor Swat KPK.jpg",
+   "caption": "A weir on the river at Manglawar"
+  },
+  {
+   "title": "File:Mian SHikh Baba Manglawar Mingora 02.jpg",
+   "caption": "The stream at Mian Shikh Baba, Manglawar"
+  }
+ ],
+ "timergara": [
+  {
+   "title": "File:Viw of Timergara in Summer. JPG.jpg",
+   "caption": "Timergara on the Panjkora plain in summer"
+  },
+  {
+   "title": "File:Timergara in March.jpg",
+   "caption": "Timergara in March"
+  },
+  {
+   "title": "File:Timergara 19.jpg",
+   "caption": "The Panjkora valley near Timergara from the hills"
+  }
+ ],
+ "udegram": [
+  {
+   "title": "File:Raja Gira Castle3.jpg",
+   "caption": "Udegram and the Swat valley from the Raja Gira castle hill"
+  },
+  {
+   "title": "File:General View of the Udegram Mosque - Claimed to have been one of the earliest mosques in Northwestern Pakistan.JPG",
+   "caption": "The excavated Mahmud Ghaznavi mosque at Udegram"
+  }
+ ],
+ "swat-museum": [
+  {
+   "title": "File:Swat Museum, Swat.jpg",
+   "caption": "The entrance of the Swat Museum"
+  },
+  {
+   "title": "File:Gandhara Corinthian Capital, mid 1st century CE, Butkara I Excavations, Swat Museum, Pakistan.jpg",
+   "caption": "A Gandhara Corinthian capital from Butkara I, mid 1st century CE, in the museum"
+  }
+ ],
+ "fizagat": [
+  {
+   "title": "File:Fizagat Kp Swat Pakistan.jpg",
+   "caption": "The Swat River and the park at Fizagat"
+  },
+  {
+   "title": "File:Fizagat view.jpg",
+   "caption": "Boats on the Swat River at Fizagat, evening"
+  },
+  {
+   "title": "File:Fizza Ghat - Swat Vallily.jpg",
+   "caption": "Riverside huts at Fizagat"
+  },
+  {
+   "title": "File:SunSet Fizagat.jpg",
+   "caption": "Sunset over the river at Fizagat"
+  }
+ ],
+ "malakand-pass": [
+  {
+   "title": "File:View from Top of Malakand Pass.jpg",
+   "caption": "The Swat valley side from the top of Malakand Pass"
+  },
+  {
+   "title": "File:Malakand Tunnel.jpg",
+   "caption": "The Malakand tunnel on the pass road"
+  }
+ ],
+ "shangla-pass": [
+  {
+   "title": "File:Aasmani Mor Shangla Swat Pakistan.JPG",
+   "caption": "Aasmani Mor, a hairpin on the Shangla Pass road"
+  },
+  {
+   "title": "File:Shangla top.JPG",
+   "caption": "The road through the forest at Shangla Top"
+  },
+  {
+   "title": "File:Shangla Top Curves Road.jpg",
+   "caption": "Bends on the Shangla Top road"
+  }
+ ]
+}

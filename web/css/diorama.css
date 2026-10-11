@@ -151,6 +151,9 @@ body.is-walking #btn-pace { display: inline-flex !important; }
 @media (max-width: 640px) { body:not(.is-walking) .lbl-illus { display: none; } }
 
 .lbl-cam { background: rgba(233, 162, 59, .92); color: var(--on-saffron); font: 600 12.5px var(--font-ui); padding: 5px 10px; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.lbl-cam::before { content: ""; display: inline-block; width: 13px; height: 13px; margin-right: 5px; vertical-align: -2px; background: currentColor;   /* camera icon (no emoji) */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 7.5h4l2-3h6l2 3h4V19H3z'/%3E%3Ccircle cx='12' cy='12.8' r='3.6'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 7.5h4l2-3h6l2 3h4V19H3z'/%3E%3Ccircle cx='12' cy='12.8' r='3.6'/%3E%3C/svg%3E") center / contain no-repeat; }
 .lbl-cam::after { content: ""; position: absolute; left: 50%; bottom: -5px; border: 5px solid transparent; border-bottom: 0; border-top-color: rgba(233, 162, 59, .92); transform: translateX(-50%); }
 .places { position: absolute; top: 64px; right: 14px; bottom: 14px; width: min(360px, calc(100vw - 28px)); overflow: auto; background: var(--glass); border: 1px solid var(--line);
   border-radius: 16px; padding: 16px 16px 8px; box-shadow: 0 24px 60px rgba(0,0,0,.45); z-index: 5; }
@@ -206,7 +209,7 @@ body.is-driving:not(.more) .dock .extra { display: none !important; }
   body.is-driving .hud { left: 10px; right: auto; grid-template-columns: auto auto; padding: 7px 10px 5px; }
   body.is-driving .gauge.alt, body.is-driving .gauge:nth-child(4) { display: none; }
   body.is-driving .prof { width: 150px; height: 18px; }
-  body.is-driving .dock { top: max(10px, env(safe-area-inset-top)); bottom: auto; left: auto; right: 10px; max-width: calc(100vw - 214px); justify-content: flex-start; }
+  body.is-driving .dock { top: calc(max(10px, env(safe-area-inset-top)) + 90px); bottom: auto; left: 10px; right: auto; max-width: calc(100vw - 20px); justify-content: flex-start; }   /* own row under the gauges: More and Whole model were scrolled out of a 176 px strip */
   body.is-driving.more .dock { flex-wrap: wrap; max-width: calc(100vw - 20px); left: 10px; top: 92px; justify-content: flex-start; }
   .roadtip { bottom: 150px; }
   .toast { top: auto; bottom: 200px; }
@@ -242,3 +245,9 @@ body.is-driving.more .pedals, body.is-driving.more .roadtip { visibility: hidden
 /* photos of the place without a location: a credited strip under "Before you go" */
 .photo-strip { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 2px; }
 .photo-strip img { height: 72px; width: auto; border-radius: 6px; display: block; }
+/* touch: every control is at least 44 px (the compact desktop chips stay compact for a mouse) */
+@media (pointer: coarse) {
+  .chip, body.is-driving .dock .chip, .back { min-height: 44px; }
+  .chip.sun input { height: 44px; margin: 0; }
+  .x { width: 44px; height: 44px; }
+}

@@ -60,9 +60,24 @@ export function sweepShadow(grid, az, el, exag = 1, out = null) {
       }
       S[o] = sup > hh ? sup : hh;
       const cover = sup - hh;                     // metres of relief between this cell and the sun
-      const v = cover <= -4 ? 1 : cover >= 60 ? 0 : 1 - (cover + 4) / 64;
+      // a few metres of cover are DEM noise on flat valley floors (it striped them along the sun): count it as lit
+      const v = cover <= 3 ? 1 : cover >= 60 ? 0 : 1 - (cover - 3) / 57;
       out[o] = Math.round(v * v * (3 - 2 * v) * 255);
     }
   }
-  return out;
+  return soften(out, w, h);
+}
+
+/** 3x3 box blur (separable, in place): the sweep is cell-sharp, which reads as streaks along the sun at close range. */
+function soften(a, w, h) {
+  const t = new Uint8Array(a.length);
+  for (let j = 0; j < h; j++) {
+    const r = j * w;
+    for (let i = 0; i < w; i++) t[r + i] = (a[r + Math.max(0, i - 1)] + a[r + i] + a[r + Math.min(w - 1, i + 1)]) / 3;
+  }
+  for (let j = 0; j < h; j++) {
+    const u = Math.max(0, j - 1) * w, r = j * w, d = Math.min(h - 1, j + 1) * w;
+    for (let i = 0; i < w; i++) a[r + i] = (t[u + i] + t[r + i] + t[d + i]) / 3;
+  }
+  return a;
 }

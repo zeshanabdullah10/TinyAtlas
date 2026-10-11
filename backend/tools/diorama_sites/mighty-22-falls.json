@@ -25,9 +25,9 @@
     "terrace_m": 0,
     "top_m": 6,
     "edits": [
-      "The fall follows the mapped stream down the DEM slope; its height and form are illustrative (no published height).",
-      "The ribbons, foam, spray, pool and wet boulders are illustrative; the boulders are placed by a fixed seed.",
-      "No cliff or structure is drawn: nothing rises more than about 4 m above the ground."
+      "The fall is drawn on the mapped stream (OSM way 345806360) where the DEM along it falls steepest: 156 m over 200 m of stream, from about 2,790 m to 2,634 m above sea level, 130 to 330 m upstream of the waterfall node; steepest over 33 m, where it falls 32 m (2,768 to 2,736 m). Measured on the Copernicus DEM as the page reads it; no published height was found.",
+      "The DEM's 30 m cells smooth any vertical step, so the free fall over that steepest stretch, the grey cliff band either side of the water, the outcrops, the plunge pool held by fallen rock, the spray and the wet rock are illustrative; the boulders are placed by a fixed seed.",
+      "Below the fall the water runs on down the mapped line to the ford on the jeep road, where a small pool is drawn (illustrative)."
     ],
     "sources": [
       {

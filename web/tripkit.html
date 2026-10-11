@@ -2,57 +2,181 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trip plan | Tiny Atlas</title>
+<meta name="description" content="Print your Swat day plan: stops, road legs with distances and time estimates, emergency numbers and sources.">
+<meta name="theme-color" content="#15120f">
+<link rel="canonical" href="https://zeshanabdullah10.github.io/TinyAtlas/tripkit.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tiny Atlas">
+<meta property="og:title" content="Trip plan | Tiny Atlas">
+<meta property="og:description" content="Print your Swat day plan: stops, road legs with distances and time estimates, emergency numbers and sources.">
+<meta property="og:url" content="https://zeshanabdullah10.github.io/TinyAtlas/tripkit.html">
+<meta property="og:image" content="https://zeshanabdullah10.github.io/TinyAtlas/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Trip plan</title>
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="preload" href="fonts/cormorant-sc-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/tripkit.css">
+<link rel="stylesheet" href="css/i18n.css">
 </head>
-<body>
-<div class="no-print" style="padding:12px;display:flex;gap:8px;align-items:center">
-  <button type="button" id="print-now" style="min-height:44px;padding:0 14px">Print</button>
-  <span style="font-size:13px;color:#555">Use A4 paper. Choose "Save as PDF" to keep a copy.</span>
+<body class="tk-page">
+<div class="no-print">
+<header class="site-head">
+  <a class="site-brand" href="./" aria-label="Tiny Atlas, home" data-i18n-attr="aria-label:site.brand.aria"><img src="icon.svg" alt="" width="28" height="28"><span data-i18n="index.brand">Tiny Atlas</span></a>
+  <nav class="site-nav" aria-label="Main" data-i18n-attr="aria-label:site.nav.main"><a href="atlas.html?pack=swat" data-i18n="site.nav.swat">Swat Valley</a><a href="atlas.html?pack=swat-lower" data-i18n="site.nav.lower">Lower Swat</a><a href="play.html" data-i18n="site.nav.play">Play</a><a href="tripkit.html" aria-current="page" data-i18n="site.nav.tripkit">Trip kit</a></nav>
+</header>
 </div>
-<main class="plan" id="plan"><p>Loading your plan…</p></main>
+<main class="tk-main">
+  <div class="tk-bar no-print">
+    <button type="button" class="btn-app" id="print-now" data-i18n="tk.print">Print or save as PDF</button>
+    <a class="btn-app ghost" id="back-map" href="atlas.html?pack=swat" data-i18n="tk.back">Back to the map</a>
+    <p class="hint" data-i18n="tk.hint">Use A4 paper. In the print window choose &ldquo;Save as PDF&rdquo; to keep a copy for when you have no signal.</p>
+  </div>
+  <article class="plan" id="plan"><p data-i18n="tk.loading">Loading your plan…</p></article>
+</main>
+<div class="no-print">
+<footer class="site-foot">
+  <nav class="site-nav" aria-label="Footer" data-i18n-attr="aria-label:site.nav.footer"><a href="./" data-i18n="site.foot.home">Home</a><a href="./#credits" data-i18n="site.foot.credits">Credits and licences</a><a href="voices-consent.html" data-i18n="site.foot.voices">Voices and consent</a><a href="https://github.com/zeshanabdullah10/tinyatlas" rel="noopener" data-i18n="site.foot.github">GitHub</a></nav>
+  <p><span data-i18n="site.foot.note1">Tiny Atlas is open source. Terrain, roads and places come from open data, each credited on the </span><a href="./#credits" data-i18n="site.foot.credits">credits and licences</a><span data-i18n="site.foot.note2"> section of the home page.</span></p>
+</footer>
+</div>
 <script type="module">
 import { h } from "./js/dom.js";
+import { applyI18n, tr, placeName, isUr, ltr } from "./js/i18n.js";
+await applyI18n("tripkit").catch(() => {});      // lang/dir, the marked header, footer and buttons; the plan text below comes from tr()
 
 const q = new URLSearchParams(location.search);
-const pack = q.get("pack") || "swat";
 const want = (q.get("slugs") || "").split(",").filter(Boolean);
-const base = `/packs/${encodeURIComponent(pack)}/atlas/`;
-const plan = document.getElementById("plan");
+const planBox = document.getElementById("plan");
 document.getElementById("print-now").addEventListener("click", () => print());
 
-async function json(url) { try { return await (await fetch(url)).json(); } catch { return null; } }
+async function json(url) { try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch { return null; } }
 
-const [places, emergency, files] = await Promise.all([
-  json(`${base}places.json`), json("data/emergency.json"), json(`${base}files.json`)]);
-const today = new Date().toISOString().slice(0, 10);
-const chosen = (places || []).filter((p) => !want.length || want.includes(p.slug));
+// the plan the Atlas planner saved on this device (?plan=1)
+function savedPlan() {
+  if (q.get("plan") !== "1") return null;
+  try {
+    const p = JSON.parse(localStorage.getItem("tinyatlas.dayplan") || "null");
+    return p && Array.isArray(p.stops) && p.stops.length ? p : null;
+  } catch { return null; }
+}
+const plan = savedPlan();
+const pack = (plan && plan.pack) || q.get("pack") || "swat";
+const base = `packs/${encodeURIComponent(pack)}/atlas/`;          // relative: works under /TinyAtlas/ on GitHub Pages too
+document.getElementById("back-map").href = `atlas.html?pack=${encodeURIComponent(pack)}`;
 
-const placeBlock = (p) => h("div", { class: "place" },
-  h("h3", null, p.name, p.name_ur ? h("span", { class: "ur", lang: "ur" }, `  ${p.name_ur}`) : null),
-  h("p", { class: "meta" }, [
-    p.ground_m != null ? `Ground ${Math.round(p.ground_m)} m` : null,
-    p.kind ? p.kind : null, p.area ? p.area : null].filter(Boolean).join(" · ")),
-  p.access ? h("p", null, h("strong", null, "Access: "), p.access) : null,
-  p.summary ? h("p", null, p.summary) : null);
+const AREAS = { "swat-mid": "Mid Swat", "swat-lower": "Lower Swat", gateway: "Swat gateway", "malam-jabba": "Malam Jabba", kalam: "Kalam",
+  kumrat: "Kumrat", "utror-gabral": "Utror and Gabral", "ushu-mahodand": "Ushu and Mahodand" };
+const title = (s) => s.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+const areaName = (a) => (a ? tr(`area.${a}`, AREAS[a] || title(a)) : "");
+const kindName = (k) => (k ? tr(`kind.${k}`, k.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase())) : "");
+const num = (n) => Math.round(n).toLocaleString("en");
 
-plan.replaceChildren(
-  h("h1", null, "My trip plan"),
-  h("p", { class: "meta" }, `Printed ${today}. Map: ${pack}. Heights are measured from the terrain data; access notes are estimates.`),
-  h("h2", null, "Places"),
-  ...(chosen.length ? chosen.map(placeBlock) : [h("p", null, "No places were chosen. Pick places in the trip kit and print again.")]),
-  h("h2", null, "Emergency numbers"),
-  h("ul", null, (emergency?.numbers || []).map((n) => h("li", null, `${n.name}: ${n.number} (${n.covers}). Checked ${n.checked}.`))),
-  h("p", { class: "meta" }, "Numbers are listed only when confirmed on an official page. Check them again before travel."),
-  h("h2", null, "Sources"),
+const [placesRaw, emergency, meta] = await Promise.all([json(`${base}places.json`), json("data/emergency.json"), json(`${base}meta.json`)]);
+const places = Array.isArray(placesRaw) ? placesRaw : (placesRaw && placesRaw.places) || [];
+const bySlug = new Map(places.map((p) => [p.slug, p]));
+const packName = tr(`region.${pack}`, (meta && meta.title) || title(pack));
+const fmtDate = (d) => d.toLocaleDateString(tr("locale.date", "en-GB"), { day: "numeric", month: "long", year: "numeric" });
+const today = fmtDate(new Date());
+const nameOf = (slug) => bySlug.get(slug) ? placeName(bySlug.get(slug)) : title(slug);
+
+// "about 40 min", "about 1 h 05 min": estimates, so rounded to 5 minutes
+function dur(min) {
+  const m = Math.max(5, Math.round(min / 5) * 5), hh = Math.floor(m / 60), mm = m % 60;
+  const one = hh === 1 ? "1" : "";                                              // Urdu: 1 گھنٹہ, 2 گھنٹے
+  return hh ? (mm ? tr("dur.about_hm" + one, "about {h} h {mm} min", { h: hh, mm: String(mm).padStart(2, "0") }) : tr("dur.about_h" + one, "about {h} h", { h: hh }))
+    : tr("dur.about_m", "about {m} min", { m });
+}
+const MIX = [["paved", tr("road.paved", "paved road")], ["minor", tr("road.minor", "minor road")], ["jeep", tr("road.jeep", "jeep track")],
+  ["track", tr("road.track", "rough track")], ["walk", tr("road.walk", "on foot")]];
+const kmText = (k) => ltr(`${(+k).toFixed(1)} km`);
+const sep = tr("list.sep", ", ");
+function basis(leg, speeds) {
+  const parts = MIX.filter(([k]) => leg.mix && leg.mix[k] > 0)
+    .map(([k, label]) => speeds && speeds[k] ? tr("basis.part", "{km} km {label} at ~{speed} km/h", { km: (+leg.mix[k]).toFixed(1), label, speed: speeds[k] })
+      : tr("basis.part_nospeed", "{km} km {label}", { km: (+leg.mix[k]).toFixed(1), label }));
+  return parts.length ? parts.join(sep) : "";
+}
+
+const urName = (p) => p.name_ur || (isUr() && placeName(p) !== p.name ? placeName(p) : null);   // the card's Urdu name, else the draft transliteration
+const placeBlock = (p, n) => h("div", { class: "place" },
+  h("h3", null, n ? h("span", { class: "num" }, String(n)) : null, p.name,
+    urName(p) ? h("span", { class: "ur", lang: "ur" }, urName(p)) : null),
+  h("p", { class: "meta" }, [p.ground_m != null ? tr("tk.ground", "Ground height {n} m", { n: num(p.ground_m) }) : null,
+    kindName(p.kind), areaName(p.area)].filter(Boolean).join(" · ")),
+  p.summary ? h("p", { dir: "auto" }, p.summary) : null,
+  p.access ? h("p", { dir: "auto" }, h("strong", null, tr("tk.access", "Access: ")), p.access) : null);
+const missingBlock = (slug, n) => placeBlock({ name: nameOf(slug) }, n);
+
+function planSection() {
+  const { stops, legs = [], total, notes = [], speeds } = plan;
+  const kids = [];
+  stops.forEach((slug, i) => {
+    const p = bySlug.get(slug);
+    kids.push(p ? placeBlock(p, i + 1) : missingBlock(slug, i + 1));
+    const leg = legs[i];
+    if (leg && i < stops.length - 1) {
+      const b = basis(leg, speeds);
+      kids.push(h("p", { class: "leg" },
+        h("strong", null, tr("tk.leg_title", "{from} to {to}: ", { from: nameOf(leg.from), to: nameOf(leg.to) })),
+        leg.km == null ? tr("tk.leg_none", "no mapped road or path joins these two, so this leg is not timed") : `${kmText(leg.km)} · ${dur(leg.minutes)}`,
+        leg.ascent_m ? tr("tk.leg_climb", " · about {m} m of climbing", { m: Math.round(leg.ascent_m / 10) * 10 }) : "",
+        leg.km == null ? null : h("span", { class: "basis" }, b ? tr("tk.basis", "Basis: {b}.", { b }) : tr("tk.basis_generic", "Basis: measured road length; time is an estimate."))));
+    }
+  });
+  const km = total && total.km != null ? total.km : legs.reduce((s, l) => s + (l.km || 0), 0);
+  const min = total && total.minutes != null ? total.minutes : legs.reduce((s, l) => s + (l.minutes || 0), 0);
+  const sp = speeds ? MIX.filter(([k]) => speeds[k]).map(([k, label]) => tr("speed.part", "{label} ~{speed} km/h", { label, speed: speeds[k] })).join(sep) : "";
+  return [h("h2", null, tr("tk.dayplan", "Day plan")), ...kids,
+    legs.some((l) => l.km != null) ? h("p", { class: "totals" }, tr("tk.total_line", "{t}: {km} km · {d} on the road", { t: legs.every((l) => l.km != null) ? tr("tk.total", "Total") : tr("tk.total_timed", "Total of the timed legs"), km: (+km).toFixed(1), d: dur(min) }),
+      h("small", null, tr("tk.caveat", "Distances are measured along mapped roads. Times are estimates from assumed speeds{sp}, not a timetable, and do not include stops. Road and weather conditions change: ask locally before you set out.", { sp: sp ? tr("tk.caveat_speeds", " ({sp})", { sp }) : "" }))) : null,
+    notes.length ? h("h2", null, tr("tk.notes", "Notes")) : null,
+    notes.length ? h("ul", null, notes.map((n) => h("li", null, n))) : null].filter(Boolean);
+}
+
+const chosen = want.map((s) => bySlug.get(s)).filter(Boolean);
+const hasContent = plan || chosen.length;
+const made = plan && plan.made && !isNaN(new Date(plan.made)) ? fmtDate(new Date(plan.made)) : null;
+
+const emptyState = h("div", { class: "empty" },
+  h("p", { style: "margin-top:0" }, h("strong", null, tr("tk.empty.h", "No plan to print yet."))),
+  h("p", null, tr("tk.empty.p", "Make one on the map, then come back here:")),
+  h("ol", null,
+    h("li", null, tr("tk.empty.1", "Open a valley map and choose Plan a day. Pick the places and the day is drawn along the real roads.")),
+    h("li", null, tr("tk.empty.2", "To print places without a route, tick them in the Trip kit on the map and choose Print my trip."))),
+  h("div", { class: "row" },
+    h("a", { class: "btn-app", href: "atlas.html?pack=swat" }, tr("tk.open_swat", "Open Swat Valley")),
+    h("a", { class: "btn-app ghost", href: "atlas.html?pack=swat-lower" }, tr("tk.open_lower", "Open Lower Swat"))));
+
+if (!hasContent) document.getElementById("print-now").hidden = true;
+document.title = `${plan && plan.title ? plan.title : tr("tk.title.default", "Trip plan")} | ${tr("index.brand", "Tiny Atlas")}`;
+
+const nums = (emergency && emergency.numbers) || [];
+planBox.replaceChildren(...[
+  h("h1", null, plan && plan.title ? plan.title : hasContent ? tr("tk.title.mine", "My trip plan") : tr("tk.title.default", "Trip plan")),
+  hasContent && h("p", { class: "meta" }, [packName, made ? tr("tk.made", "Plan made {d}", { d: made }) : null, hasContent ? tr("tk.printed", "Printed {d}", { d: today }) : null].filter(Boolean).join(" · ")),
+  ...(plan ? planSection() : []),
+  ...(chosen.length ? [h("h2", null, plan ? tr("tk.more_places", "More places") : tr("tk.places", "Places")), ...chosen.map((p) => placeBlock(p))] : []),
+  hasContent ? null : emptyState,
+  placesRaw ? null : h("p", { class: "meta" }, tr("tk.no_places", "Place details could not be loaded. Open this page once online to keep them.")),
+  h("h2", null, tr("tk.emergency", "Emergency numbers")),
+  nums.length ? h("ul", { class: "emerg" }, nums.map((n) => h("li", { dir: "auto" }, h("a", { href: `tel:${n.number}` }, `${n.name}: ${n.number}`),
+    tr("tk.checked", " ({covers}). Checked {date}.", { covers: n.covers, date: n.checked })))) : h("p", null, tr("tk.no_numbers", "No verified numbers are listed.")),
+  h("p", { class: "meta" }, tr("tk.numbers_note", "Numbers are listed only when confirmed on an official page. Check them again before travel.")),
+  h("h2", null, tr("tk.sources", "Sources")),
   h("ul", { class: "sources" }, [
-    ...(emergency?.numbers || []).map((n) => h("li", null, `${n.source}: ${n.url}`)),
-    h("li", null, `Place summaries and access notes: Tiny Atlas map data for ${pack} (see each place in the atlas for its sources).`),
-    files ? h("li", null, `Map files: ${files.length} files in the offline pack.`) : null,
-  ]));
+    ...nums.map((n) => h("li", { dir: "auto" }, `${n.source}: `, h("a", { href: n.url, rel: "noopener" }, n.url))),
+    h("li", null, tr("tk.src.places", "Place names, heights, summaries and access notes: Tiny Atlas map data for {pack} (open a place on the map for its sources). Heights are measured from terrain data.", { pack: packName })),
+    h("li", null, tr("tk.src.roads", "Roads: \u00a9 OpenStreetMap contributors (ODbL). Terrain: Copernicus DEM GLO-30.")),
+  ])].filter(Boolean));
+window.__ready = true;
 </script>
 </body>
 </html>

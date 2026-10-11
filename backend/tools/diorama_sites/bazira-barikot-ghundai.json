@@ -29,9 +29,9 @@
     "footpath": true,
     "edits": [
       "The excavation is the OSM archaeological_site outline (historic=archaeological_site, unnamed, about 3,100 m2, 67 by 75 m), about 290 m south-west of the Ancient Bazira node; the landmark point is its centre. That node is the Wikidata point for Barikot and is not used as the dig. No Commons photo is geotagged.",
-      "The walls, rooms and broken walls are estimated from Commons photos 01 and 03 (the layout, the tan wall colour and the low heights); no plan of the dig is in the sources. The rooms are of varied size, the walls 0.8 to 1.2 m thick and 0.6 to 2.5 m high, and some walls have gaps.",
-      "The bare-earth floor follows the DEM, coloured ochre (#b89a6e) from photo 03.",
-      "One stretch of town wall, 50 m long with one rectangular bastion about 8 m along and 4 m proud of the wall, is drawn beside the excavation to show the kind of wall the sources describe (Wikipedia Barikot: a defensive wall with massive rectangular bastions). Its line is not mapped; its height, thickness and placement are estimated.",
+      "The rooms and streets inside the OSM outline are estimated from Commons photos 01 and 03 (the grid of rooms along streets, the wall colours, the low heights); no plan of the dig is in the sources. Two streets 4 m wide cross the dig; the rooms are 3.5 to 9 m; the walls are 0.7 to 1.3 m thick and about 0.4 to 2.8 m high, higher towards the dig's edge, with gaps and missing pieces.",
+      "The excavated floor follows the DEM inside the outline, coloured pale earth from photo 03. An earth bank about 1 to 1.7 m high and 5 m wide is drawn along the outside of the outline to show that the dig lies below the ground round it: the page cannot lower the DEM, and the dig's depth is not measured (estimated).",
+      "One stretch of town wall, 50 m long, 3 m thick and about 2.6 to 3.2 m high, with one rectangular bastion about 8 m along and 5.5 m deep, is drawn beside the excavation to show the kind of wall the sources describe (Wikipedia Barikot: a defensive wall with massive rectangular bastions). Its line is not mapped; its height, thickness and placement are estimated.",
       "The trailhead is the OSM Mingora Road node nearest the dig, about 134 m away on the same side of the Swat river channel. The walk is traced over the DEM and does not cross the river (the nearest river is about 317 m away)."
     ],
     "sources": [

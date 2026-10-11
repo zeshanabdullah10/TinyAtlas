@@ -38,7 +38,8 @@ def static_index(html: str, live_api: str | None, base: str = "", base_url: str 
         html = re.sub(r'(href|src)="/', rf'\1="{base}', html)
     if base_url:
         html = html.replace('content="img/', f'content="{base_url}/img/')
-        html = html.replace("</head>", f'<link rel="canonical" href="{base_url}/">\n</head>', 1)
+        if 'rel="canonical"' not in html:                          # pages that set their own keep it
+            html = html.replace("</head>", f'<link rel="canonical" href="{base_url}/">\n</head>', 1)
     return html.replace("<script type=\"module\"", f"<script>window.TINYATLAS = {cfg};</script>\n<script type=\"module\"", 1)
 
 

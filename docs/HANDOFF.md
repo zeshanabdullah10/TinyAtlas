@@ -16,7 +16,30 @@ content is summarised in §8 so you do not need it).
 > hygiene and token economy. Load it at the start of any session that delegates or reviews work. §11–§12 below are the
 > project-specific detail behind it.
 >
-> **Latest (2026-10-10):** v2.10 released: 20 more dioramas (39 in all, every one linked from its Atlas card), then
+> **Latest (2026-10-11):** v3.0, the production release. Six audits (home/UX, Atlas visuals, Atlas content, dioramas,
+> offline/performance, trip planning) drove waves of delegated work, each judged on renders and data:
+> - **Planner works with no backend:** `web/js/atlas/localplan.js` routes over the pack's road graph (speeds per road
+>   class, stated on every leg), best order, warnings, saffron route; prints to `tripkit.html?plan=1` (subpath-safe).
+> - **Content:** 154 more facts and timeline events on the cards; every one of the 296 quotes is checked on its page by
+>   `backend/tools/verify_facts.py` (curl, cached; Wikimedia's APIs answer 429/403 here, pages work). Corrections live
+>   in `pack_corrections.json` (`add`/`set`/`replace`/`drop_facts`, idempotent).
+> - **Photos:** `backend/tools/pack_photos.py` (Commons pages via curl) — `find` makes a contact sheet, a person approves
+>   files in `pack_photos.json`, `apply` adds them to the built packs with captions; then `pack_optimize.py` turns pack
+>   photos into WebP ≤ 1280 px and writes file hashes. Run order at release: pack_corrections → pack_photos apply →
+>   pack_optimize (both packs) → pack_optimize --dioramas.
+> - **Dioramas:** real Sentinel-2 ground colour (`diorama_albedo.py`), graded to site photos by land cover; depth-shaded
+>   lakes, haze, clouds; towns from OSM + Microsoft ML footprints (CDLA Permissive 2.0) + illustrative houses only on
+>   WorldCover built-up (`diorama_town.py`); rebuilt Butkara I/III, Bazira, Mighty 22, Jahanabad; real thumbnails
+>   (`diorama_thumbs.py`) on the home page; nearby hotel labels; saveable offline.
+> - **Atlas:** landmarks sized by zoom and spacing (no giant museum), close-range terrain detail, white water; photo
+>   gallery with captions, sourced fact quotes, label declutter, phone toolbar; 10 story flights with a picker.
+> - **Pages:** shared header/footer, Play is a finished game, self-hosted fonts, PNG icons, share meta; offline save of
+>   packs and dioramas with background refresh; `test_offline_shell.py` guards the shell list.
+> Open: audio exists for 52 places only (TTS needs the GPU setup in §9.1); Urdu is a draft for native review; Dir,
+> Fatehpur, Andrab/Pearl/Laddu lakes, minor peaks and the airport have no verified photos; tags must be pushed by the
+> owner (this environment's git proxy refuses tag pushes).
+>
+> **Earlier (2026-10-10):** v2.10 released: 20 more dioramas (39 in all, every one linked from its Atlas card), then
 > a deep sweep with 16 checking agents. Fixes: practical quotes made verbatim, values cut back to what their quotes
 > say; more than 30 photos of other places removed (rules in `collect_photos.py` `EXCLUDE`/`EXCLUDE_FOR`/`ELSEWHERE`, text
 > fixes in `pack_corrections.json`); the lake camp (boats, tents, stalls, horses, boat and horse rides) is drawn only
@@ -681,6 +704,6 @@ Headless screenshots use SwiftShader: FPS from them is meaningless; draw calls /
 
 ## 16. Attribution block (must appear in the app and posters)
 "Contains modified Copernicus DEM GLO-30 data … · © ESA WorldCover project 2021 (CC BY 4.0) · Imagery: Sentinel-2
-cloudless 2016 by EOX IT Services GmbH (CC BY 4.0) · © OpenStreetMap contributors (ODbL) · Photos via Wikimedia Commons,
-each credited · Sky: Poly Haven (CC0) · 3D shapes: TRELLIS (MIT), procedural stupas · Heights exaggerated ×<n>,
+cloudless 2016 by EOX IT Services GmbH (CC BY 4.0) · © OpenStreetMap contributors (ODbL) · Building footprints in the
+site models: Microsoft Global ML Building Footprints (CDLA Permissive 2.0) · Photos via Wikimedia Commons, each credited · Sky: Poly Haven (CC0) · 3D shapes: TRELLIS (MIT), procedural stupas · Heights exaggerated ×<n>,
 places drawn larger than life."

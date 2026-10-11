@@ -7,6 +7,12 @@ const TIER_MAX_DIST = { 1: Infinity, 2: 75000, 3: 30000, 4: 15000 };   // camera
 const LEAD = 24;
 const DIRS = [[0, -1], [1, -1], [-1, -1], [1, 0], [-1, 0], [0, 1], [1, 1], [-1, 1]];
 const DISTS = [60, 100, 140];
+const NEAR_DIST = 14000;                       // zoomed in at least this far: selected chip + nearest neighbours only, the rest become dots
+const hitsSeg = (b, x0, y0, x1, y1) => {       // does the leader (x0,y0)-(x1,y1) cross rect b? sampled every ~6 px, plenty for 1 px lines
+  const n = Math.max(2, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 6));
+  for (let i = 0; i <= n; i++) { const x = x0 + (x1 - x0) * i / n, y = y0 + (y1 - y0) * i / n; if (x > b[0] && x < b[2] && y > b[1] && y < b[3]) return true; }
+  return false;
+};
 const HERITAGE = new Set(["stupa", "monastery", "palace", "museum", "archaeological_site", "mosque", "fort_ruin", "rock_carving", "temple", "fort"]);
 const tierOf = (p) => (HERITAGE.has(p.kind) && p.tier > 1 ? Math.min(p.tier, 1.5) : p.tier);        // heritage ranks just after tier 1
 const TIER_KEY = (t) => (t === 1.5 ? 2 : t);
@@ -40,7 +46,7 @@ export class Labels {
     const e = p.label_elevation_m;
     const chip = h("button", { class: "chip", type: "button", "aria-label": p.name, onClick: (ev) => { ev.stopPropagation(); this.onPick?.(p); } },
       h("span", { class: "nm" }, icon(p.kind), p.short_name || p.name), ELEV_KINDS.has(p.kind) && e != null ? h("span", { class: "el" }, `${Math.round(e).toLocaleString("en")} m`) : null);
-    const el = h("div", { class: "lbl off", dataset: { tier: tierOf(p) } }, chip, h("i", { class: "lead" }), h("i", { class: "dot" }));
+    const el = h("div", { class: "lbl off", dataset: { tier: tierOf(p) } }, chip, h("i", { class: "lead" }), h("i", { class: "dot", onClick: (ev) => { ev.stopPropagation(); this.onPick?.(p); } }));
     this.layer.append(el);
     return { place: p, tier: tierOf(p), ox: 0, oy: -(LEAD + 5), el, chip, w: 80, h: 28, fs: 0, shown: false, want: false, sx: 0, sy: 0, vis: false, fade: 0 };
   }
@@ -75,25 +81,40 @@ export class Labels {
     const blockers = [...(this.block ? [this.block] : []), ...(this.blockers?.() ?? [])];
     const taken = [];
     const pad = 5, clash = (r) => taken.some((o) => r[0] < o[2] + pad && r[2] > o[0] - pad && r[1] < o[3] + pad && r[3] > o[1] - pad);
+    const inBlock = (x, y) => blockers.some((b) => x > b[0] && x < b[2] && y > b[1] && y < b[3]);
+    const near = camDist <= NEAR_DIST, phone = W <= 700;
     const cand = this.items.filter((it) => it.onscreen && it.sx > 0 && it.sx < W && it.sy > 0 && it.sy < H &&   // anchor dot must be in the viewport: a chip leadered 140 px in from an off-screen anchor points at nothing
-      (it.place.slug === this.selected || camDist <= (TIER_MAX_DIST[TIER_KEY(it.tier)] ?? 15000)));
+      (it.place.slug === this.selected || camDist <= (TIER_MAX_DIST[TIER_KEY(it.tier)] ?? 15000)) &&
+      (it.place.slug === this.selected || !inBlock(it.sx, it.sy)));                                              // an anchor under the title or toolbar would be a stray dot
     cand.sort((a, b) => (a.place.slug === this.selected ? -1 : b.place.slug === this.selected ? 1 : a.tier - b.tier || cp.distanceToSquared(a.pos) - cp.distanceToSquared(b.pos)));
-    const show = new Set();
+    let chipOk = null;                                                    // zoomed in: only the selected place and its nearest neighbours may be chips
+    if (near) {
+      const sel = cand.find((it) => it.place.slug === this.selected), cx = sel ? sel.sx : W / 2, cy = sel ? sel.sy : H / 2;
+      chipOk = new Set(cand.filter((it) => it !== sel).sort((a, b) => Math.hypot(a.sx - cx, a.sy - cy) - Math.hypot(b.sx - cx, b.sy - cy)).slice(0, phone ? 2 : 3));
+      if (sel) chipOk.add(sel);
+    }
+    const show = new Set(), mini = new Set(), dots = [];
     for (const it of cand) {
       const d = cp.distanceTo(it.pos);
+      const isSel = it.place.slug === this.selected;
+      const occ = !isSel && this.pack.occluded(cp, it.pos, 40 + d * 0.004);
+      const asDot = () => {                                               // honesty rule kept: hidden places are hollow dots, never visible-looking
+        if (!near || (occ && it.tier >= 3) || dots.some((q) => Math.abs(q[0] - it.sx) < 12 && Math.abs(q[1] - it.sy) < 12)) return;
+        dots.push([it.sx, it.sy]); taken.push([it.sx - 7, it.sy - 7, it.sx + 7, it.sy + 7]); it.ghost = occ; mini.add(it);
+      };
+      if (chipOk && !chipOk.has(it)) { asDot(); continue; }
       const fs = Math.round(Math.min(14.5, Math.max(10.5, 13 * Math.pow(26000 / d, 0.18))) * 2) / 2;
       if (fs !== it.fs) { it.fs = fs; it.el.style.setProperty("--fs", `${fs}px`); it.w = it.chip.offsetWidth; it.h = it.chip.offsetHeight; }
-      const isSel = it.place.slug === this.selected;
       const mk = (ox, oy) => [it.sx + ox - it.w / 2, it.sy + oy - it.h, it.sx + ox + it.w / 2, it.sy + oy];   // the chip itself; the dot may sit under UI
-      const bad = (r) => r[0] < W * 0.04 || r[2] > W * 0.96 || r[1] < H * 0.04 || r[3] > H * 0.96 ||
-        blockers.some((b) => r[2] > b[0] && r[0] < b[2] && r[3] > b[1] && r[1] < b[3]) || (!isSel && clash(r));
+      const bad = (r, ox, oy) => r[0] < W * 0.04 || r[2] > W * 0.96 || r[1] < H * 0.04 || r[3] > H * 0.96 ||
+        blockers.some((b) => r[2] > b[0] && r[0] < b[2] && r[3] > b[1] && r[1] < b[3] || hitsSeg(b, it.sx, it.sy, it.sx + ox, it.sy + oy)) || (!isSel && clash(r));   // chips AND leaders stay off the title and toolbars
       let pos = [0, -(LEAD + 5)], rect = mk(pos[0], pos[1]);
-      if (bad(rect)) {
+      if (bad(rect, pos[0], pos[1])) {
         pos = null;
         if (it.tier <= 1 || isSel) {                                      // tier 1: try 8 directions x 3 leader lengths before dropping
-          for (const L of DISTS) { for (const [dx, dy] of DIRS) { const q = [dx * L * (dx && dy ? 0.75 : 1), dy * L * (dx && dy ? 0.75 : 1)]; const r = mk(q[0], q[1]); if (!bad(r)) { pos = q; rect = r; break; } } if (pos) break; }
+          for (const L of near && !isSel ? DISTS.slice(0, 2) : DISTS) { for (const [dx, dy] of DIRS) { const q = [dx * L * (dx && dy ? 0.75 : 1), dy * L * (dx && dy ? 0.75 : 1)]; const r = mk(q[0], q[1]); if (!bad(r, q[0], q[1])) { pos = q; rect = r; break; } } if (pos) break; }
         }
-        if (!pos) continue;
+        if (!pos) { asDot(); continue; }
       }
       if (it.ox !== pos[0] || it.oy !== pos[1]) {
         it.ox = pos[0]; it.oy = pos[1];
@@ -101,14 +122,14 @@ export class Labels {
         it.el.style.setProperty("--ox", pos[0] + "px"); it.el.style.setProperty("--oy", pos[1] + "px");
         it.el.style.setProperty("--ll", len + "px"); it.el.style.setProperty("--la", Math.atan2(-pos[0], pos[1]) + "rad");
       }
-      const occ = !isSel && this.pack.occluded(cp, it.pos, 40 + d * 0.004);
-      if (occ && it.tier >= 3) continue;                                                  // tiers 1-2 stay as ghosts
-      it.ghost = occ; taken.push(rect); show.add(it);
+      if (occ && it.tier >= 3) { asDot(); continue; }                                      // tiers 1-2 stay as ghosts
+      it.ghost = occ; taken.push(rect, [it.sx - 7, it.sy - 7, it.sx + 7, it.sy + 7]); show.add(it); dots.push([it.sx, it.sy]);   // later chips keep off this anchor dot
     }
     for (const it of this.items) {
-      const on = show.has(it);
-      if (on !== it.shown) { it.shown = on; it.el.classList.toggle("off", !on); }
-      it.el.classList.toggle("ghost", on && !!it.ghost);
+      const on = show.has(it), mn = mini.has(it);
+      if ((on || mn) !== it.shown) { it.shown = on || mn; it.el.classList.toggle("off", !(on || mn)); }
+      it.el.classList.toggle("mini", mn);
+      it.el.classList.toggle("ghost", (on || mn) && !!it.ghost);
     }
   }
 }
