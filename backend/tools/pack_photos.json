@@ -1,0 +1,10 @@
+{
+ "_doc": "Commons photos for place cards, each looked at by a person and found to show the place (backend/tools/pack_photos.py apply). Captions say what the photo shows.",
+ "kalam": [
+  {"title": "File:Kalam town, Swat District, KPK (Pakistan).jpg", "caption": "Kalam town on its terrace above the Swat River"},
+  {"title": "File:View of Kalam town and Swat River from Buyon, Swat District.jpg", "caption": "Kalam and the Swat River from Buyon, above the town"},
+  {"title": "File:Swat River and Honeymoon Hotel in Kalam, near Mingora, Swat, KPK.jpg", "caption": "Hotels by the Swat River at Kalam, snow peaks behind"},
+  {"title": "File:View of hotels along the Swat River from Honeymoon Hotel in Kalam.jpg", "caption": "Hotels along the Swat River in Kalam"},
+  {"title": "File:Winter in Kalam town hotel, Swat District,.jpg", "caption": "Kalam in winter snow"}
+ ]
+}

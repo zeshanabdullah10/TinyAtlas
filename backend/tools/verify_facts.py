@@ -1,7 +1,7 @@
 """Check that every fact's quote appears word for word on its source page.
 
     python backend/tools/verify_facts.py [<pack> ...]             # facts on the built packs' place cards
-    python backend/tools/verify_facts.py --file <proposals.json>   # {"<slug>": {"facts": [{text, quote, source}]}}
+    python backend/tools/verify_facts.py --file <proposals.json>   # pack_corrections.json shape: {"places": {slug: {"add": {"facts": [...]}}}}
 
 Pages are fetched once with curl (Wikimedia refuses other clients from this machine; one request every 2 s, a
 minute's wait on 429) and cached under data/cache/wiki/html/. A quote passes when it is in the page's visible text
@@ -24,7 +24,9 @@ def norm(s):
     s = s.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
     s = re.sub(r"[‐-―−]", "-", s)
     s = s.replace(" ", " ").replace(" ", " ")
-    return re.sub(r"\s+", " ", s).strip().lower()
+    s = re.sub(r"\s+", " ", s)
+    s = re.sub(r" ([.,;:!?)\]'\"])", r"\1", s).replace("( ", "(")   # tags stripped to spaces leave gaps before punctuation
+    return s.strip().lower()
 
 
 _pages = {}
@@ -52,9 +54,9 @@ def check(slug, f):
     text = page_text(src)
     if not text:
         return f"could not fetch {src}"
-    if norm(q) not in text:
+    if norm(q) not in text and norm(q).replace(" ", "") not in text.replace(" ", ""):   # superscripts: "km2" is "km 2"
         return f"quote not on page: {q[:80]!r}"
-    extra = numbers(f.get("text", "")) - numbers(q)
+    extra = numbers(f.get("text") or f"{f.get('date', '')} {f.get('event', '')}") - numbers(q)   # a fact or a timeline event
     if extra:
         return f"numbers not in quote: {sorted(extra)}"
     return ""
@@ -63,7 +65,10 @@ def check(slug, f):
 def main(argv):
     bad = n = 0
     if argv[:1] == ["--file"]:
-        items = [(s, f) for s, r in json.loads(Path(argv[1]).read_text(encoding="utf-8")).items() for f in r.get("facts", [])]
+        doc = json.loads(Path(argv[1]).read_text(encoding="utf-8"))
+        doc = doc.get("places", doc)                        # a pack_corrections.json-shaped file, or a bare {slug: rule}
+        items = [(s, f) for s, r in doc.items() if isinstance(r, dict)
+                 for f in r.get("facts", []) + r.get("add", {}).get("facts", []) + r.get("add", {}).get("timeline", [])]
     else:
         packs = argv or sorted(x.name for x in PACKS.iterdir() if (x / "atlas" / "places.json").exists())
         items = [(p["slug"], f) for pk in packs for p in places(pk)[1] for f in p.get("facts", [])]

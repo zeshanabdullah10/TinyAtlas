@@ -4,7 +4,8 @@
 
 atlas_pack.py calls apply() on every build, so a correction survives a rebuild from the research files. A replacement
 only happens when the old text is there (re-running is harmless); a field path is "summary", "access", "kind" or
-"facts.<i>.text". Photos of other places are filtered elsewhere (collect_photos.wrong_photo).
+"facts.<i>.text". "set" puts a value (e.g. "name_ur"), "add" appends facts or timeline events not already there, and
+"drop_facts" removes facts by their text. Every added fact carries a verbatim quote (checked by verify_facts.py). Photos of other places are filtered elsewhere (collect_photos.wrong_photo).
 """
 import json
 import sys
@@ -45,6 +46,16 @@ def apply(places):
         for path, value in rule.get("set", {}).items():
             if _get(pl, path) != value:
                 _set(pl, path, value); n += 1
+        for path, items in rule.get("add", {}).items():           # "facts" / "timeline": appended once, matched by text
+            cur = pl.setdefault(path, [])
+            have = {json.dumps(x, sort_keys=True) for x in cur} | {x.get("text") for x in cur if isinstance(x, dict)}
+            for it in items:
+                if json.dumps(it, sort_keys=True) not in have and it.get("text") not in have:
+                    cur.append(it); n += 1
+        if rule.get("drop_facts"):
+            keep = [f for f in pl.get("facts", []) if f.get("text") not in rule["drop_facts"]]
+            n += len(pl.get("facts", [])) - len(keep)
+            pl["facts"] = keep
     return n
 
 
