@@ -41,7 +41,7 @@ def apply(places):
             continue
         for path, old, new in rule.get("replace", []):
             cur = _get(pl, path)
-            if isinstance(cur, str) and old in cur:
+            if isinstance(cur, str) and old in cur and new not in cur:   # a new text holding the old one is applied once
                 _set(pl, path, cur.replace(old, new)); n += 1
         for path, value in rule.get("set", {}).items():
             if _get(pl, path) != value:
