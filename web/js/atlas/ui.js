@@ -57,8 +57,10 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   const find = (q) => { q = q.trim().toLowerCase(); return q ? pack.places.filter((p) => p.name.toLowerCase().includes(q) || (p.area || "").toLowerCase().includes(q)).slice(0, 7) : []; };
   input.addEventListener("input", () => {
     const r = find(input.value);
-    results.replaceChildren(...r.map((p) => h("li", { role: "option" }, h("button", { type: "button", onClick: () => pick(p) }, h("span", null, p.name), h("small", null, (p.kind || "").replace(/_/g, " "))))));
-    results.hidden = !r.length;
+    const q = input.value.trim();
+    results.replaceChildren(...(r.length ? r.map((p) => h("li", { role: "option" }, h("button", { type: "button", onClick: () => pick(p) }, h("span", null, p.name), h("small", null, (p.kind || "").replace(/_/g, " ")))))
+      : [h("li", { class: "empty", role: "presentation" }, `No place matches “${q}”`)]));
+    results.hidden = !q;
   });
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") { const r = find(input.value)[0]; if (r) pick(r); } if (e.key === "Escape") { results.hidden = true; input.blur(); } });
   const search = h("div", { class: "search" }, svgIcon(ICON.search), input, results);
@@ -108,7 +110,7 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   upLight();
   const pill = h("div", { class: "light" }, h("span", { class: "lbl-k" }, "Light"), light, lightTxt);
 
-  const offBtn = onOffline && h("button", { class: "ibtn off-btn", type: "button", "aria-label": `Trip kit for ${m.title}: save it offline, emergency numbers, print`, title: "Trip kit: save offline, emergency numbers, print", onClick: () => onOffline() }, svgIcon(ICON.down), h("span", { class: "off-lbl" }, "Trip kit"));
+  const offBtn = onOffline && h("button", { class: "ibtn off-btn", type: "button", "aria-label": `Trip kit for ${m.title}: save it offline, emergency numbers, print`, title: "Trip kit: save offline, emergency numbers, print", onClick: () => onOffline() }, svgIcon(ICON.down), h("span", { class: "off-lbl" }, "Trip kit"));   // below ~520 px the label hides (CSS): icon-only, name stays in aria-label/title
   const top = h("div", { class: "topright" }, h("div", { class: "trow" }, search, offBtn, gear, menu), pill, pop, about);
 
   // ---- explore dock

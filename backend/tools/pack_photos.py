@@ -76,7 +76,7 @@ def get(url, cache=False):
     f = HTML / (hashlib.md5(url.encode()).hexdigest() + ".html")
     if cache and f.exists():
         return f.read_bytes()
-    for i in range(5):
+    for i in range(3):
         time.sleep(max(0.0, 2 - (time.time() - _last[0])))
         _last[0] = time.time()
         # curl, not httpx: Wikimedia refuses httpx's requests ("respect our robot policy") and answers curl's
@@ -90,7 +90,7 @@ def get(url, cache=False):
                 f.write_bytes(body)
             return body
         if code in (429, 503):
-            time.sleep(60); continue
+            time.sleep(20 * (i + 1)); continue
         if code:
             print("  ", code, url[:120]); return None
         time.sleep(4 * (i + 1))
@@ -140,7 +140,7 @@ def cmd_find(slug, qs):
     pack, p = find_place(slug)
     lat, lon = latlon(pack, p)
     qs = qs or [p["name"]]
-    titles = list(dict.fromkeys(t for q in qs for t in search(q)))[:40]
+    titles = list(dict.fromkeys(t for q in qs for t in search(q)))[:32]
     out = []
     for t in titles:
         if wrong_photo(t, "", slug):
@@ -157,7 +157,7 @@ def cmd_find(slug, qs):
     (d / "candidates.json").write_text(json.dumps({"place": p["name"], "lat": lat, "lon": lon, "candidates": out},
                                                   ensure_ascii=False, indent=1), encoding="utf-8")
     tiles = []
-    for n, c in enumerate(out[:24]):
+    for n, c in enumerate(out[:20]):
         b = get(c["thumb"])
         if b:
             im = Image.open(io.BytesIO(b)).convert("RGB")

@@ -81,6 +81,9 @@ export class Trees {
     this.visible = true; this.shadowDist = tier === "high" ? 4000 : 2500;
     this.count = 0; this.draws = 0;
     this.frame = 0;
+    // the pack lists its files: chunks without trees have no file, so skip them instead of fetching a 404
+    this.have = fetch(`${pack.base}files.json`).then((r) => (r.ok ? r.json() : null))
+      .then((l) => (Array.isArray(l) ? new Set(l.map((f) => f.path).filter((f) => f.startsWith("trees/"))) : null)).catch(() => null);
   }
 
   key(c) { return `${c.cx}_${c.cy}`; }
@@ -90,6 +93,8 @@ export class Trees {
     const e = { raw: null, meshes: null, c, state: "loading", order: null };
     this.chunks.set(k, e);
     try {
+      const have = await this.have;
+      if (have && !have.has(`trees/${k}.bin`)) throw new Error("no trees");
       const r = await fetch(`${this.pack.base}trees/${k}.bin`);
       if (!r.ok) throw new Error(r.status);
       const f = new Float32Array(await r.arrayBuffer());
