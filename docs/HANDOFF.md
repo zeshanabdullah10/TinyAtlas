@@ -16,7 +16,7 @@ content is summarised in §8 so you do not need it).
 > hygiene and token economy. Load it at the start of any session that delegates or reviews work. §11–§12 below are the
 > project-specific detail behind it.
 >
-> **Latest (2026-10-11):** v3.0, the production release. Six audits (home/UX, Atlas visuals, Atlas content, dioramas,
+> **Latest (2026-10-11):** v3.0, the production release (main `069727a`, gh-pages `6e4e9e9`; the v3.0 tag is local to the build session — push it from a clone). Live check: home, atlas, diorama, play and trip kit load with no errors. Six audits (home/UX, Atlas visuals, Atlas content, dioramas,
 > offline/performance, trip planning) drove waves of delegated work, each judged on renders and data:
 > - **Planner works with no backend:** `web/js/atlas/localplan.js` routes over the pack's road graph (speeds per road
 >   class, stated on every leg), best order, warnings, saffron route; prints to `tripkit.html?plan=1` (subpath-safe).
