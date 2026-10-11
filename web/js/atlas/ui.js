@@ -108,7 +108,7 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   upLight();
   const pill = h("div", { class: "light" }, h("span", { class: "lbl-k" }, "Light"), light, lightTxt);
 
-  const offBtn = onOffline && h("button", { class: "ibtn off-btn", type: "button", "aria-label": `Save ${m.title} for offline`, title: `Save ${m.title} for offline`, onClick: () => onOffline() }, svgIcon(ICON.down));
+  const offBtn = onOffline && h("button", { class: "ibtn off-btn", type: "button", "aria-label": `Trip kit for ${m.title}: save it offline, emergency numbers, print`, title: "Trip kit: save offline, emergency numbers, print", onClick: () => onOffline() }, svgIcon(ICON.down), h("span", { class: "off-lbl" }, "Trip kit"));
   const top = h("div", { class: "topright" }, h("div", { class: "trow" }, search, offBtn, gear, menu), pill, pop, about);
 
   // ---- explore dock

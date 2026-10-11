@@ -9,12 +9,16 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Swat Valley: a true illustrated 3D map">
 <meta property="og:description" content="Every ridge, river, road and stupa of Swat where it really is. Kalam, Utror, Ushu, Mahodand, Mingora and the Gandhara heritage.">
-<meta property="og:image" content="img/og.jpg">
+<meta property="og:url" content="https://zeshanabdullah10.github.io/TinyAtlas/">
+<meta property="og:site_name" content="Tiny Atlas">
+<link rel="canonical" href="https://zeshanabdullah10.github.io/TinyAtlas/">
+<meta property="og:image" content="https://zeshanabdullah10.github.io/TinyAtlas/img/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="An illustrated oblique view over the snow peaks and forested valleys of upper Swat">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="preload" as="image" href="img/hero-1600.webp" media="(min-width: 701px)" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,11 +37,11 @@
     <span>Tiny Atlas</span>
   </a>
   <nav aria-label="Sections">
-    <a href="#valleys">The valleys</a>
-    <a href="#through-time">Through time</a>
-    <a href="#how">How it is made</a>
-    <a href="https://github.com/zeshanabdullah10/tinyatlas" rel="noopener">GitHub</a>
+    <a class="sec" href="#valleys">The valleys</a>
+    <a class="sec" href="#sites">Site models</a>
+    <a class="sec" href="#through-time">Through time</a>
     <a href="play.html">Play</a>
+    <a href="tripkit.html">Trip kit</a>
     <button type="button" class="lang-btn" data-lang-toggle lang="ur">اردو</button>
     <button type="button" class="lang-btn" data-phrases>Phrases</button>
   </nav>
@@ -57,6 +61,8 @@
         <a class="btn btn-primary" href="atlas.html?pack=swat">Open the map</a>
         <a class="btn btn-ghost" href="atlas.html?pack=swat-lower">Lower Swat &amp; the Gandhara heritage</a>
       </p>
+      <dl class="hero-stats" id="hero-stats" aria-label="What is in the atlas" hidden></dl>
+      <p class="offline-note">Works offline: save a valley from its map. <button type="button" class="install" id="install" hidden>Install the app</button></p>
     </div>
     <p class="hero-cap">Upper Swat seen from the south, heights exaggerated. Drawn from open elevation data.</p>
   </section>
@@ -67,6 +73,13 @@
     <div class="cards" id="regions">
       <noscript><p><a class="btn btn-primary" href="atlas.html?pack=swat">Open Swat Valley</a> <a class="btn btn-ghost" href="atlas.html?pack=swat-lower">Open Lower Swat</a></p></noscript>
     </div>
+  </section>
+
+  <section class="band" id="sites" aria-labelledby="h-sites" hidden>
+    <h2 id="h-sites">Site models</h2>
+    <p class="band-sub">Walk up to a stupa, a lake or a viewpoint: each is a small 3D model built on the same terrain data.</p>
+    <div class="sites" id="site-grid"></div>
+    <p class="sites-more"><button type="button" class="btn btn-ghost" id="sites-more" hidden aria-expanded="false"></button></p>
   </section>
 
   <section class="band" aria-labelledby="h-do">
@@ -118,8 +131,10 @@
   </section>
 </main>
 
-<footer class="foot">
+<footer class="foot" id="credits">
   <p class="cta"><a class="btn btn-primary" href="atlas.html?pack=swat">Open the map</a></p>
+  <nav class="site-nav" aria-label="Footer"><a href="atlas.html?pack=swat">Swat Valley</a><a href="atlas.html?pack=swat-lower">Lower Swat</a><a href="play.html">Play</a><a href="tripkit.html">Trip kit</a><a href="voices-consent.html">Voices and consent</a></nav>
+  <h2 class="foot-h">Credits and licences</h2>
   <p>Contains modified Copernicus DEM GLO-30 data, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA · © ESA WorldCover project 2021 (CC BY 4.0) · Imagery: Sentinel-2 cloudless 2016 by EOX IT Services GmbH (CC BY 4.0) · © OpenStreetMap contributors (ODbL) · Photos via Wikimedia Commons, each credited · Sky: Poly Haven (CC0) · 3D shapes: TRELLIS (MIT), procedural stupas · Heights exaggerated, places drawn larger than life.</p>
   <p><a class="link" href="https://github.com/zeshanabdullah10/tinyatlas" rel="noopener">Source code on GitHub</a> · Tiny Atlas is open source.</p>
 </footer>

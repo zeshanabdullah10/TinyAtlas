@@ -43,3 +43,10 @@ body.play-body { font-family: var(--font-ui); min-height: 100vh; }
   .play-choices { grid-template-columns: 1fr; }
   .play-actions .play-btn { flex: 1 1 100%; }
 }
+
+/* app shell: header, main, footer fill the screen */
+body.play-body { display: flex; flex-direction: column; }
+body.play-body .play-main { flex: 1; width: 100%; }
+body.play-body .site-foot { width: 100%; box-sizing: border-box; }
+.play-credit a { display: inline-block; padding: 10px 2px; }
+.play-btn:focus-visible, .play-mode:focus-within { outline: 2px solid var(--saffron); outline-offset: 3px; }
