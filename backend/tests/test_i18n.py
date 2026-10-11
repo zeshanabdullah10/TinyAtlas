@@ -75,3 +75,65 @@ def test_place_phrases_have_placeholders():
     for p in load(PHRASES)["phrases"]:
         if "{place}" in p["en"]:
             assert p.get("placeholder") == "place" and "{place_ur}" in p["ur"] or "{place}" in p["roman_ur"]
+
+
+def _web_files():
+    return list((ROOT / "js").rglob("*.js")) + list(ROOT.glob("*.html"))
+
+
+def test_data_i18n_marks_use_known_keys():
+    en, ur = load(EN), load(UR)["strings"]
+    bad = []
+    for f in ROOT.glob("*.html"):
+        soup = BeautifulSoup(f.read_text(encoding="utf-8"), "html.parser")
+        for el in soup.select("[data-i18n]"):
+            bad += [(f.name, el["data-i18n"])] if el["data-i18n"] not in en or el["data-i18n"] not in ur else []
+        for el in soup.select("[data-i18n-attr]"):
+            for pair in el["data-i18n-attr"].split(";"):
+                k = pair.split(":")[1].strip()
+                bad += [(f.name, k)] if k not in en or k not in ur else []
+    assert not bad, bad
+
+
+def test_tr_calls_match_the_english_table():
+    """tr("key", "English") in code: the key must exist in both tables and the English text must equal en.json (no drift)."""
+    import re
+    en, ur = load(EN), load(UR)["strings"]
+    rx = re.compile(r'\btr\(\s*"([A-Za-z0-9_.\-]+)"\s*,\s*"((?:[^"\\]|\\.)*)"')
+    bad = []
+    for f in _web_files():
+        if f.name == "i18n.js":
+            continue
+        for k, fb in rx.findall(f.read_text(encoding="utf-8")):
+            fb = json.loads(f'"{fb}"') if "\\" in fb else fb
+            if k not in en or k not in ur or en[k] != fb:
+                bad.append((f.name, k))
+    assert not bad, bad
+
+
+def test_urdu_keeps_the_placeholders():
+    import re
+    en, ur = load(EN), load(UR)["strings"]
+    ph = lambda s: sorted(re.findall(r"\{(\w+)\}", s))
+    bad = [k for k in en if k in ur and ph(en[k]) != ph(ur[k])]
+    assert not bad, bad
+
+
+@pytest.mark.parametrize("page", list(PAGES))
+def test_map_entries_still_point_at_their_english_text(page):
+    """A selector that shifts when markup is added would put the wrong sentence on an element; the English must still match."""
+    soup = BeautifulSoup((ROOT / PAGES[page]).read_text(encoding="utf-8"), "html.parser")
+    en = load(EN)
+    norm = lambda s: " ".join(str(s).split())
+    bad = []
+    for e in load(MAP)[page]:
+        el = soup.select(e["sel"])[0]
+        if e.get("attr"):
+            cur = el.get(e["attr"], "")
+        elif "text" in e:
+            cur = [s for s in el.find_all(string=True, recursive=False) if s.strip()][e["text"]]
+        else:
+            cur = el.get_text()
+        if norm(cur) != norm(en[e["key"]]):
+            bad.append((e["sel"][-50:], norm(cur)[:40], e["key"]))
+    assert not bad, bad

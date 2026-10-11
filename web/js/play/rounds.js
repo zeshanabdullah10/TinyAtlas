@@ -86,13 +86,15 @@ export const fmt = (n) => Math.round(n).toLocaleString("en-US");
 /** Distance for display: one decimal under 10 km, whole km above. */
 export const kmText = (km) => `${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
 
-/** Plain-text result to paste into a message. results: [{name, km, pts}]. */
-export function shareText({ total, results, mode, url }) {
+/** Plain-text result to paste into a message. results: [{name, km, pts}]. `tr(key, english, vars)` is optional (the page passes
+ *  its translator); without it the English below is used, so this file stays checkable in node. */
+export function shareText({ total, results, mode, url, tr = (_k, en, vars) => en.replace(/\{(\w+)\}/g, (_, k) => vars[k]), ltr = (s) => s }) {
   const max = results.length * MAX_POINTS;
   return [
-    "Where is this view? A photo guessing game on Tiny Atlas, Swat valley.",
-    `${fmt(total)} of ${fmt(max)} points over ${results.length} photos (${mode === "choices" ? "four names" : "map"}).`,
-    results.map((r, i) => `${i + 1}. ${r.name}: ${kmText(r.km)}, ${fmt(r.pts)}`).join("\n"),
+    tr("play.share.head", "Where is this view? A photo guessing game on Tiny Atlas, Swat valley.", {}),
+    tr("play.share.line", "{total} of {max} points over {n} photos ({mode}).", { total: ltr(fmt(total)), max: ltr(fmt(max)), n: results.length,
+      mode: mode === "choices" ? tr("play.share.mode_choices", "four names", {}) : tr("play.share.mode_map", "map", {}) }),
+    results.map((r, i) => tr("play.share.row", "{i}. {name}: {km}, {pts}", { i: i + 1, name: r.name, km: ltr(kmText(r.km)), pts: ltr(fmt(r.pts)) })).join("\n"),
     url,
   ].join("\n");
 }

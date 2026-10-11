@@ -3,6 +3,7 @@
 // crawl() follows a page's imports so no file the code needs is forgotten, saveUrls() talks to the worker.
 import { h, toast } from "../dom.js";
 import { api, STATIC, BASE } from "../api.js";
+import { tr } from "../i18n.js";
 
 export const DATA_CACHE = "tinyatlas-data-v1";
 export const MB = (b) => `${Math.max(1, Math.round(b / 1e6))} MB`;
@@ -88,7 +89,7 @@ async function controller() {
  *  to show) if there is no worker yet. */
 export async function saveUrls(urls, onProgress = () => {}) {
   const sw = await controller();
-  if (!sw) throw new Error("Offline saving needs this page to be opened once more. Reload it, then try again.");
+  if (!sw) throw new Error(tr("ofl.need_sw", "Offline saving needs this page to be opened once more. Reload it, then try again."));
   const id = Math.random().toString(36).slice(2);
   return new Promise((res) => {
     const onMsg = (e) => {
@@ -118,28 +119,28 @@ export async function dioramaList(slug) {
 }
 
 export async function openOffline(pack, { onClose } = {}) {
-  const slug = pack.slug, name = pack.meta.title;
+  const slug = pack.slug, name = tr(`region.${pack.slug}`, pack.meta.title);
   let files = [];
   try { files = await (await fetch(`${pack.base}files.json`)).json(); } catch { /* shown below */ }
   const total = files.reduce((a, f) => a + f.bytes, 0), noPhotos = files.filter((f) => !f.path.startsWith("photos/")).reduce((a, f) => a + f.bytes, 0);
   const sites = await dioramaList(slug), dioBytes = sites.reduce((a, s) => a + s.bytes, 0);
   const photos = h("input", { type: "checkbox", checked: true });
   const dios = h("input", { type: "checkbox", checked: false });
-  const sizes = h("p", { class: "ofl-sizes" }, files.length ? `~${MB(total)} · without photos ~${MB(noPhotos)}` : "The file list for this map is missing, so it can't be saved.");
+  const sizes = h("p", { class: "ofl-sizes" }, files.length ? tr("ofl.sizes", "~{total} · without photos ~{nophotos}", { total: MB(total), nophotos: MB(noPhotos) }) : tr("ofl.nofiles", "The file list for this map is missing, so it can't be saved."));
   const status = h("p", { class: "ofl-status", role: "status", "aria-live": "polite" }, "");
   const bar = h("div", { class: "ofl-bar", hidden: true }, h("i"));
-  const save = h("button", { class: "primary", type: "button", disabled: !files.length }, "Save for offline");
+  const save = h("button", { class: "primary", type: "button", disabled: !files.length }, tr("kit.save", "Save for offline"));
   const close = () => { card.remove(); removeEventListener("keydown", esc); onClose?.(); };
   const esc = (e) => { if (e.key === "Escape") close(); };
   const card = h("div", { class: "modal", role: "dialog", "aria-modal": "true", "aria-labelledby": "ofl-t" },
     h("div", { class: "modal-card" },
-      h("h2", { id: "ofl-t" }, `Save ${name} for offline`),
-      h("p", null, "Keeps the terrain, ground colour, places and stories on this device so the map opens with no signal. Trip planning and the guide still need a connection."),
+      h("h2", { id: "ofl-t" }, tr("ofl.title", "Save {name} for offline", { name })),
+      h("p", null, tr("ofl.p", "Keeps the terrain, ground colour, places and stories on this device so the map opens with no signal. Trip planning and the guide still need a connection.")),
       sizes,
-      h("label", { class: "row chk" }, photos, h("span", null, "Include photos")),
-      sites.length ? h("label", { class: "row chk" }, dios, h("span", null, `Also save its ${sites.length} dioramas${dioBytes ? ` (~${MB(dioBytes)} more)` : ""}`)) : null,
+      h("label", { class: "row chk" }, photos, h("span", null, tr("ofl.photos", "Include photos"))),
+      sites.length ? h("label", { class: "row chk" }, dios, h("span", null, tr("ofl.dios", "Also save its {n} dioramas{more}", { n: sites.length, more: dioBytes ? tr("ofl.dios_more", " (~{mb} more)", { mb: MB(dioBytes) }) : "" }))) : null,
       bar, status,
-      h("div", { class: "modal-actions" }, save, h("button", { type: "button", onClick: close }, "Close"))));
+      h("div", { class: "modal-actions" }, save, h("button", { type: "button", onClick: close }, tr("kit.close", "Close")))));
   card.addEventListener("pointerdown", (e) => { if (e.target === card) close(); });
   addEventListener("keydown", esc);
   document.getElementById("app").append(card);
@@ -147,7 +148,7 @@ export async function openOffline(pack, { onClose } = {}) {
 
   save.addEventListener("click", async () => {
     if (save.dataset.done) return close();
-    save.disabled = photos.disabled = dios.disabled = true; status.textContent = "Preparing…"; bar.hidden = false;
+    save.disabled = photos.disabled = dios.disabled = true; status.textContent = tr("ofl.preparing", "Preparing…"); bar.hidden = false;
     const keep = files.filter((f) => photos.checked || !f.path.startsWith("photos/"));
     const clips = await api.audio(slug).catch(() => ({}));
     const audioList = STATIC ? `${BASE}packs/${encodeURIComponent(slug)}/audio.json` : `/api/audio/${encodeURIComponent(slug)}`;   // the clip list itself, or no clip would be found offline
@@ -164,11 +165,11 @@ export async function openOffline(pack, { onClose } = {}) {
       const r = await saveUrls(all, ({ done, total }) => {
         const f = done / total;
         bar.firstChild.style.width = `${Math.round(f * 100)}%`;
-        status.textContent = `Saving ${Math.round(f * 100)}%`;
+        status.textContent = tr("ofl.saving", "Saving {n}%", { n: Math.round(f * 100) });
       });
-      status.textContent = r.failed ? `Saved, but ${r.failed} files were missing.` : "Saved. This map now opens offline.";
-      toast(r.failed ? `Saved, but ${r.failed} files were missing` : `${name} saved for offline`);
-      save.textContent = "Done"; save.dataset.done = "1"; save.disabled = false; photos.disabled = dios.disabled = false;
+      status.textContent = r.failed ? tr("ofl.partial", "Saved, but {n} files were missing.", { n: r.failed }) : tr("ofl.done", "Saved. This map now opens offline.");
+      toast(r.failed ? tr("ofl.toast_partial", "Saved, but {n} files were missing", { n: r.failed }) : tr("ofl.toast_done", "{name} saved for offline", { name }));
+      save.textContent = tr("ofl.done_btn", "Done"); save.dataset.done = "1"; save.disabled = false; photos.disabled = dios.disabled = false;
     } catch (err) {
       status.textContent = err.message; save.disabled = photos.disabled = dios.disabled = false; bar.hidden = true;
     }

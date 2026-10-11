@@ -21,8 +21,8 @@ import { buildings } from "./buildings.js";
 import { makePostcard, postcardSheet } from "../postcard.js";
 import { roadStatusCard, loadRoads } from "../roadstatus.js";
 import { Herders } from "./herders.js";
-import { applyI18n } from "../i18n.js";
-applyI18n("diorama");
+import { applyI18n, tr } from "../i18n.js";
+await applyI18n("diorama").catch(() => {});
 import { Traffic, Riders } from "./traffic.js";
 import { SEASONS, seasonU, mist } from "./season.js";
 
@@ -198,7 +198,7 @@ const labels = [
 ];
 if (river) { const m = river.pts[Math.floor(river.pts.length * 0.6)]; labels.push({ text: river.name, group: "On the map", p: new THREE.Vector3(m[0], site.heightAt(m[0], m[1]) + 25, m[1]), cls: "river" }); }
 hud.makeLabels(labels);
-hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: meta.lake ? "On the shore path" : "On the walk round the grounds", p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
+hud.addLabels(vps.map((v) => ({ text: v.name, vp: v, group: "Viewpoints", sub: meta.lake ? tr("diorama.vp.shore", "On the shore path") : tr("diorama.vp.grounds", "On the walk round the grounds"), p: new THREE.Vector3(v.x, v.y + 3.2, v.z), cls: "vp", modes: ["walk"], range: 450 })));
 hud.addLabels([...life.labels, ...(herders?.labels ?? [])].map((l) => ({ ...l, name: l.text.split(" · ")[0], sub: l.text.split(" · ")[1], group: `At the ${meta.lake ? "lake" : "site"}` })));
 
 // ---- tags and the Places list: go to what was chosen

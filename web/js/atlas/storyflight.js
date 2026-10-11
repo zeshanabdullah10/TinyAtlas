@@ -4,6 +4,9 @@
 // Captions and sources come only from web/data/stories/*.json, which quote places.json; nothing is generated here.
 import * as THREE from "three";
 import { h } from "../dom.js";
+import { tr, placeName, isUr } from "../i18n.js";
+const stopName = (s) => (isUr() ? placeName(s.place) : s.name || s.place.name);   // card name_ur, else the draft transliteration; captions stay as sourced
+const storyTitle = (s) => tr(`story.title.${s.id}`, s.title);
 
 const SNAP_M = 15, JOIN_M = 120, JOIN_PENALTY = 1.5, STOP_MAX_M = 1500;   // road graph
 const ALT_M = 900, BACK_M = 700, LOOK_M = 1200;                           // camera: height above ground, offset behind, look-ahead (real metres)
@@ -138,15 +141,15 @@ export class StoryFlight {
     this.cur = null; this.look = null; this.stopsData = [];
     this.bar = h("div", { class: "sf-bar", role: "status", "aria-live": "polite", hidden: true });
     this.barText = h("span", { class: "sf-bt" });
-    this.bar.append(this.barText, h("button", { type: "button", class: "sf-x", onClick: () => this.stop("cancelled") }, "End flight"));
+    this.bar.append(this.barText, h("button", { type: "button", class: "sf-x", onClick: () => this.stop("cancelled") }, tr("sf.end", "End flight")));
     this.kicker = h("p", { class: "sf-k" });
     this.name = h("h2", { class: "sf-n" });
-    this.caption = h("p", { class: "sf-c" });
+    this.caption = h("p", { class: "sf-c", dir: "auto" });   // the sourced caption stays English; auto keeps its punctuation on the right side
     this.sources = h("p", { class: "sf-src" });
-    this.card = h("aside", { class: "sf-card", role: "dialog", "aria-label": "Story stop", hidden: true },
+    this.card = h("aside", { class: "sf-card", role: "dialog", "aria-label": tr("sf.stop_label", "Story stop"), hidden: true },
       this.kicker, this.name, this.caption, this.sources,
       h("div", { class: "sf-row" },
-        h("button", { type: "button", class: "sf-open", onClick: () => this.openStop() }, "Open this place")));   // the one End control is on the bar
+        h("button", { type: "button", class: "sf-open", onClick: () => this.openStop() }, tr("sf.open", "Open this place"))));   // the one End control is on the bar
     this.root.append(this.bar, this.card);
     // a key on the map ends the flight; Tab and keys used inside the bar/card do not (keyboard users must reach Open/End)
     this.onKey = (e) => { if (!this.inUi(e.target) && !["Tab", "Shift", "Control", "Alt", "Meta"].includes(e.key)) this.stop("cancelled"); };
@@ -230,8 +233,8 @@ export class StoryFlight {
   showStop(i) {
     const s = this.stopsData[i];
     this.shownStop = i;
-    this.kicker.textContent = `Stop ${i + 1} of ${this.stopsData.length}`;
-    this.name.textContent = s.name || s.place.name;
+    this.kicker.textContent = tr("sf.kicker", "Stop {i} of {n}", { i: i + 1, n: this.stopsData.length });
+    this.name.textContent = stopName(s);
     this.caption.textContent = s.caption || "";
     this.sources.replaceChildren(...(s.sources || []).map((src) => h("a", { href: src.url, target: "_blank", rel: "noopener" }, src.url.replace(/^https?:\/\//, ""))));
     this.card.hidden = false;
@@ -272,14 +275,14 @@ export class StoryFlight {
     if (ph.kind === "pause") {
       s = this.route.cum[this.route.stopIdx[ph.stop]];
       if (this.shownStop !== ph.stop || this.card.hidden) this.showStop(ph.stop);
-      this.barText.textContent = `${this.story.title} · stop ${ph.stop + 1} of ${this.stopsData.length}`;
+      this.barText.textContent = tr("sf.bar_stop", "{title} · stop {i} of {n}", { title: storyTitle(this.story), i: ph.stop + 1, n: this.stopsData.length });
     } else {
       if (!this.card.hidden) this.card.hidden = true;
       const e = u * u * (3 - 2 * u);                         // ease in and out at each stop
       s = ph.leg.s0 + (ph.leg.s1 - ph.leg.s0) * e;
-      const a = this.stopsData[ph.leg.i].name, b = this.stopsData[ph.leg.i + 1].name;
-      glideNote = ph.leg.road ? "" : ` · no road path between ${a} and ${b} in this pack, so the camera glides straight`;
-      this.barText.textContent = `${this.story.title} · ${a} to ${b}${glideNote}`;
+      const a = stopName(this.stopsData[ph.leg.i]), b = stopName(this.stopsData[ph.leg.i + 1]);
+      glideNote = ph.leg.road ? "" : tr("sf.glide", " · no road path between {a} and {b} in this pack, so the camera glides straight", { a, b });
+      this.barText.textContent = tr("sf.bar_move", "{title} · {a} to {b}", { title: storyTitle(this.story), a, b }) + glideNote;
     }
     const { cam, look } = this.poseAt(s);
     this.look = look.toArray();
@@ -297,21 +300,21 @@ export class StoryFlight {
 export function storyButton(flight, data, slug) {
   const list = (data?.stories || []).filter((s) => s.pack === slug);
   if (!list.length) return null;
-  const btn = h("button", { type: "button", class: "sf-dock", "aria-pressed": "false" }, "Story flight");
+  const btn = h("button", { type: "button", class: "sf-dock", "aria-pressed": "false" }, tr("sf.dock", "Story flight"));
   const running = () => flight.running && list.some((s) => s.id === flight.story?.id);
   if (list.length === 1) {
-    btn.title = list[0].title;
+    btn.title = storyTitle(list[0]);
     btn.addEventListener("click", () => (running() ? flight.stop("cancelled") : flight.start(list[0])));
   } else {
-    btn.title = "Fly the camera along a real road between sourced places";
+    btn.title = tr("sf.menu_title", "Fly the camera along a real road between sourced places");
     btn.setAttribute("aria-haspopup", "true"); btn.setAttribute("aria-expanded", "false");
-    const menu = h("div", { class: "sf-menu", role: "group", "aria-label": "Story flights", hidden: true });
+    const menu = h("div", { class: "sf-menu", role: "group", "aria-label": tr("sf.menu_label", "Story flights"), hidden: true });
     const areas = [...new Set(list.map((s) => s.area || ""))];
     for (const a of areas) {
-      const sec = h("div", { class: "sf-sec" }, a ? h("p", { class: "sf-ah" }, a) : null);
+      const sec = h("div", { class: "sf-sec" }, a ? h("p", { class: "sf-ah" }, tr(`story.area.${a}`, a)) : null);
       for (const st of list.filter((x) => (x.area || "") === a)) {
         sec.append(h("button", { type: "button", class: "sf-item", onClick: () => { close(false); flight.start(st); } },
-          h("span", { class: "sf-it" }, st.title), h("span", { class: "sf-is" }, `${st.stops.length} stops`)));
+          h("span", { class: "sf-it" }, storyTitle(st)), h("span", { class: "sf-is" }, tr("sf.stops", "{n} stops", { n: st.stops.length }))));
       }
       menu.append(sec);
     }
@@ -339,7 +342,7 @@ export function storyButton(flight, data, slug) {
   }
   const sync = (e) => {
     const on = !!e.detail?.running && list.some((s) => s.id === e.detail.id);
-    btn.textContent = "Story flight";   // hidden while flying; the bar holds the End control
+    btn.textContent = tr("sf.dock", "Story flight");   // hidden while flying; the bar holds the End control
     btn.setAttribute("aria-pressed", on ? "true" : "false");
   };
   document.addEventListener("storyflight", sync);

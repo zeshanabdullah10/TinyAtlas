@@ -2,6 +2,7 @@
 // web/data/diorama/<site>/* on this device through the service worker. Self-mounting: diorama.html loads this module and any
 // element with [data-offline] opens the dialog. dioramaUrls(site) is also what the Atlas dialog uses to save a map's dioramas.
 import { crawl, saveUrls, savedUnder, forget, abs, MB, CDN } from "../atlas/offline.js";
+import { tr } from "../i18n.js";
 
 // What no import names: shared data the diorama fetches by URL, and the page itself.
 const SHARED = ["diorama.html", "index.html", "atlas.html", "fonts/fonts.css", "manifest.webmanifest", "icon.svg", "img/icon-192.png", "data/i18n/en.json", "data/i18n/ur.json", "data/i18n/map.json", "data/roads.json", "data/diorama/herders.json", "data/dioramas.json"];
@@ -51,13 +52,14 @@ async function open() {
   if (!document.getElementById("offline-style")) document.head.append(Object.assign(document.createElement("style"), { id: "offline-style", textContent: STYLE }));
   document.getElementById("offline")?.remove();
   const d = document.createElement("dialog"); d.id = "offline"; d.className = "about";
-  d.innerHTML = `<h2>Save this site for offline</h2>
-    <p>Keeps this model (terrain, ground colour, the code that draws it and the three.js library) on this device so it opens with no signal. It is checked for updates in the background whenever you are online.</p>
-    <p class="fine">Photo thumbnails are loaded from Wikimedia Commons and still need a connection. The weather line needs one too.</p>
-    <p class="ofl-sizes" id="ofl-size">Checking the size…</p>
+  const T = (k, en) => tr(k, en).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);   // text only, whatever the table holds
+  d.innerHTML = `<h2>${T("diorama.offline.h", "Save this site for offline")}</h2>
+    <p>${T("diorama.offline.p", "Keeps this model (terrain, ground colour, the code that draws it and the three.js library) on this device so it opens with no signal. It is checked for updates in the background whenever you are online.")}</p>
+    <p class="fine">${T("diorama.offline.fine", "Photo thumbnails are loaded from Wikimedia Commons and still need a connection. The weather line needs one too.")}</p>
+    <p class="ofl-sizes" id="ofl-size">${T("diorama.offline.checking", "Checking the size…")}</p>
     <div class="ofl-bar" id="ofl-bar" hidden><i></i></div>
     <p class="ofl-status" id="ofl-status" role="status" aria-live="polite"></p>
-    <div class="row"><button class="btn primary" id="ofl-save" type="button" disabled>Save this site for offline</button><button class="btn" id="ofl-remove" type="button" hidden>Remove the saved copy</button><button class="btn" id="ofl-close" type="button">Close</button></div>`;
+    <div class="row"><button class="btn primary" id="ofl-save" type="button" disabled>${T("diorama.offline.save", "Save this site for offline")}</button><button class="btn" id="ofl-remove" type="button" hidden>${T("diorama.offline.remove", "Remove the saved copy")}</button><button class="btn" id="ofl-close" type="button">${T("diorama.offline.close", "Close")}</button></div>`;
   document.getElementById("app").append(d);
   const $ = (s) => d.querySelector(s);
   $("#ofl-close").addEventListener("click", () => d.close());
@@ -66,26 +68,27 @@ async function open() {
 
   const files = await siteFiles(site);
   const known = files.reduce((a, f) => a + f.bytes, 0);
-  $("#ofl-size").textContent = `${files.length} data files${known ? `, about ${known < 1e6 ? "1 MB" : MB(known)}` : ""}, plus the page's code and fonts (shared with the other dioramas).`;
+  $("#ofl-size").textContent = tr("diorama.offline.size", "{n} data files{known}, plus the page's code and fonts (shared with the other dioramas).",
+    { n: files.length, known: known ? tr("diorama.offline.known", ", about {mb}", { mb: known < 1e6 ? "1 MB" : MB(known) }) : "" });
   const refresh = async () => {
     const n = (await savedUnder(dir)).length;
     $("#ofl-remove").hidden = !n;
-    $("#ofl-save").textContent = n ? "Save again (update)" : "Save this site for offline";
-    if (n && !$("#ofl-status").textContent) $("#ofl-status").textContent = "Already saved on this device.";
+    $("#ofl-save").textContent = n ? tr("diorama.offline.again", "Save again (update)") : tr("diorama.offline.save", "Save this site for offline");
+    if (n && !$("#ofl-status").textContent) $("#ofl-status").textContent = tr("diorama.offline.already", "Already saved on this device.");
   };
   $("#ofl-save").disabled = !files.length; await refresh();
   $("#ofl-save").addEventListener("click", async () => {
     const save = $("#ofl-save"), bar = $("#ofl-bar"), status = $("#ofl-status");
-    save.disabled = true; bar.hidden = false; status.textContent = "Preparing…";
+    save.disabled = true; bar.hidden = false; status.textContent = tr("diorama.offline.preparing", "Preparing…");
     try {
       const urls = await dioramaUrls(site);
-      const r = await saveUrls(urls, ({ done, total }) => { bar.firstChild.style.width = `${Math.round((done / total) * 100)}%`; status.textContent = `Saving ${Math.round((done / total) * 100)}%`; });
-      status.textContent = r.failed ? `Saved, but ${r.failed} of ${r.total} files could not be fetched.` : `Saved: ${r.total} files. This model now opens offline.`;
-    } catch (e) { status.textContent = e.message || "Could not save."; bar.hidden = true; }
+      const r = await saveUrls(urls, ({ done, total }) => { bar.firstChild.style.width = `${Math.round((done / total) * 100)}%`; status.textContent = tr("diorama.offline.saving", "Saving {n}%", { n: Math.round((done / total) * 100) }); });
+      status.textContent = r.failed ? tr("diorama.offline.partial", "Saved, but {f} of {t} files could not be fetched.", { f: r.failed, t: r.total }) : tr("diorama.offline.saved", "Saved: {t} files. This model now opens offline.", { t: r.total });
+    } catch (e) { status.textContent = e.message || tr("diorama.offline.fail", "Could not save."); bar.hidden = true; }
     save.disabled = false; await refresh();
   });
   $("#ofl-remove").addEventListener("click", async () => {
-    await forget(dir); $("#ofl-status").textContent = "Removed. Shared code and fonts stay."; $("#ofl-bar").hidden = true; await refresh();
+    await forget(dir); $("#ofl-status").textContent = tr("diorama.offline.removed", "Removed. Shared code and fonts stay."); $("#ofl-bar").hidden = true; await refresh();
   });
 }
 

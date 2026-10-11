@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { h } from "../dom.js";
 import { BASE } from "../api.js";
+import { tr, placeName, isUr } from "../i18n.js";
 import { MIN_MULT } from "./landmarks.js";
 
 const SVGNS = "http://www.w3.org/2000/svg";
@@ -27,41 +28,42 @@ function svgIcon(d) {
   return s;
 }
 function word(t) {      // large first letters, small caps rest, like the poster
+  if (isUr()) return t.split(/\s+/).map((w) => h("span", { class: "w" }, w));     // Urdu joins letters: a word must stay one run
   return t.split(/\s+/).map((w) => h("span", { class: "w" }, h("b", null, w[0]), w.slice(1)));
 }
 /** Clock time for the sun arc (0 = sunrise 5:20, 1 = sunset 19:10) and a mood word from the elevation. */
 export function clockText(s, el) {
   const mins = Math.round(5 * 60 + 20 + s * 776), hh = Math.floor(mins / 60), mm = String(mins % 60).padStart(2, "0");
-  const t = `${((hh + 11) % 12) + 1}:${mm} ${hh < 12 ? "am" : "pm"}`;
-  const mood = el < 4 ? "Twilight" : el < 22 ? "Golden hour" : el < 45 ? (s < 0.5 ? "Morning" : "Afternoon") : "Midday";
+  const t = `${((hh + 11) % 12) + 1}:${mm} ${tr(hh < 12 ? "ui.am" : "ui.pm", hh < 12 ? "am" : "pm")}`;
+  const mood = el < 4 ? tr("ui.mood.twilight", "Twilight") : el < 22 ? tr("ui.mood.golden", "Golden hour") : el < 45 ? (s < 0.5 ? tr("ui.mood.morning", "Morning") : tr("ui.mood.afternoon", "Afternoon")) : tr("ui.mood.midday", "Midday");
   return `${mood} · ${t}`;
 }
 
 export function buildUI(root, { pack, controls, settings, tier, showFps, sky, openPlace, areas, neighbors = [], onNeighbor, onOffline }) {
   const m = pack.meta;
-  const loading = h("div", { class: "loading", role: "status" }, h("p", { class: "ld-t" }, m.title), h("div", { class: "ld-bar" }, h("i")), h("p", { class: "ld-l" }, "Opening the map"));
+  const loading = h("div", { class: "loading", role: "status" }, h("p", { class: "ld-t" }, m.title), h("div", { class: "ld-bar" }, h("i")), h("p", { class: "ld-l" }, tr("ui.opening", "Opening the map")));
   const bar = loading.querySelector("i"), label = loading.querySelector(".ld-l");
-  const cart = h("header", { class: "cartouche" }, h("a", { class: "back", href: BASE || "./" }, "← All places"), h("h1", null, word(m.title)),
-    h("p", { class: "sub" }, h("span", { class: "rule" }), h("em", null, m.subtitle || ""), h("span", { class: "rule" })));
+  const cart = h("header", { class: "cartouche" }, h("a", { class: "back", href: BASE || "./" }, tr("ui.back", "← All places")), h("h1", null, word(tr(`region.${pack.slug}`, m.title))),
+    h("p", { class: "sub" }, h("span", { class: "rule" }), h("em", null, tr(`region.${pack.slug}.sub`, m.subtitle || "")), h("span", { class: "rule" })));
   // Phone: the cartouche is one compact line; tapping the title reveals the subtitle again.
   const title = cart.querySelector("h1");
-  title.setAttribute("tabindex", "0"); title.setAttribute("role", "button"); title.setAttribute("aria-label", "Show the map subtitle");
+  title.setAttribute("tabindex", "0"); title.setAttribute("role", "button"); title.setAttribute("aria-label", tr("ui.subtitle_toggle", "Show the map subtitle"));
   const cartToggle = () => { if (matchMedia("(max-width: 700px)").matches) document.body.classList.toggle("cart-open"); };
   title.addEventListener("click", cartToggle);
   title.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cartToggle(); } });
 
   // ---- search
   const results = h("ul", { class: "results", role: "listbox", hidden: true });
-  const input = h("input", { type: "search", placeholder: "Search places", "aria-label": "Search places", autocomplete: "off", spellcheck: "false" });
+  const input = h("input", { type: "search", placeholder: tr("ui.search_ph", "Search places"), "aria-label": tr("ui.search_ph", "Search places"), autocomplete: "off", spellcheck: "false" });
   const pick = (pl) => { results.hidden = true; input.value = ""; input.blur(); openPlace(pl); };
   // name matches rank above area matches, so "Kalam" + Enter opens Kalam, not the first lake whose area says Kalam
-  const rank = (p, q) => { const n = p.name.toLowerCase(); return n === q ? 0 : n.startsWith(q) ? 1 : n.includes(q) ? 2 : (p.area || "").toLowerCase().includes(q) ? 3 : 9; };
+  const rank = (p, q) => { const n = p.name.toLowerCase(); return n === q ? 0 : n.startsWith(q) ? 1 : n.includes(q) || (p.name_ur || "").includes(q) ? 2 : (p.area || "").toLowerCase().includes(q) ? 3 : 9; };
   const find = (q) => { q = q.trim().toLowerCase(); return q ? pack.places.map((p) => [rank(p, q), p]).filter(([r]) => r < 9).sort((a, b) => a[0] - b[0]).slice(0, 7).map(([, p]) => p) : []; };
   input.addEventListener("input", () => {
     const r = find(input.value);
     const q = input.value.trim();
-    results.replaceChildren(...(r.length ? r.map((p) => h("li", { role: "option" }, h("button", { type: "button", onClick: () => pick(p) }, h("span", null, p.name), h("small", null, (p.kind || "").replace(/_/g, " ")))))
-      : [h("li", { class: "empty", role: "presentation" }, `No place matches “${q}”`)]));
+    results.replaceChildren(...(r.length ? r.map((p) => h("li", { role: "option" }, h("button", { type: "button", onClick: () => pick(p) }, h("span", null, placeName(p)), h("small", null, tr(`kind.${p.kind}`, (p.kind || "").replace(/_/g, " "))))))
+      : [h("li", { class: "empty", role: "presentation" }, tr("ui.no_match", "No place matches “{q}”", { q }))]));
     results.hidden = !q;
   });
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") { const r = find(input.value)[0]; if (r) pick(r); } if (e.key === "Escape") { results.hidden = true; input.blur(); } });
@@ -78,55 +80,55 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
     const set = (v, fin) => { v = Math.min(max, Math.max(min, Math.round(v / step) * step)); paint(v); apply(v, fin); };
     sIn.addEventListener("input", () => { paint(+sIn.value); apply(+sIn.value, false); });
     sIn.addEventListener("change", () => apply(+sIn.value, true));
-    const stp = (t, d) => h("button", { class: "stp", type: "button", "aria-label": `${lab} ${d > 0 ? "more" : "less"}`, onClick: () => set(+sIn.value + d * step, true) }, t);
+    const stp = (t, d) => h("button", { class: "stp", type: "button", "aria-label": tr(d > 0 ? "ui.more" : "ui.less", d > 0 ? "{lab} more" : "{lab} less", { lab }), onClick: () => set(+sIn.value + d * step, true) }, t);
     return [
       h("label", { class: "row desk-only" }, h("span", null, lab), sIn, sOut),
       h("div", { class: "row stp-row mob-only" }, h("span", null, lab), h("span", { class: "stp-grp" }, stp("−", -1), pOut, stp("+", 1))),
     ];
   };
-  const exP = paired("Height exaggeration", 1, 2.2, 0.05, pack.exag, (v, fin) => settings.onExag(v, fin));
-  const trP = paired("Tree size", 0.5, 5, 0.1, settings.treeScale, (v) => settings.onTrees(v));
-  const lmP = paired("Landmark size", MIN_MULT, 80, 5, settings.landmarkScale, (v) => settings.onLandmarks(v));
-  const routesRow = check("Routes", settings.onRoutes, false), routesBox = routesRow.querySelector("input");
-  const light2 = h("input", { type: "range", min: 0, max: 1, step: 0.004, value: sky.time, "aria-label": "Time of day" });
+  const exP = paired(tr("ui.exag", "Height exaggeration"), 1, 2.2, 0.05, pack.exag, (v, fin) => settings.onExag(v, fin));
+  const trP = paired(tr("ui.trees", "Tree size"), 0.5, 5, 0.1, settings.treeScale, (v) => settings.onTrees(v));
+  const lmP = paired(tr("ui.landmarks", "Landmark size"), MIN_MULT, 80, 5, settings.landmarkScale, (v) => settings.onLandmarks(v));
+  const routesRow = check(tr("ui.routes", "Routes"), settings.onRoutes, false), routesBox = routesRow.querySelector("input");
+  const light2 = h("input", { type: "range", min: 0, max: 1, step: 0.004, value: sky.time, "aria-label": tr("ui.time_of_day", "Time of day") });
   const lt2 = h("output", { class: "lt2" }, "");
-  const lightStep = (t, d) => h("button", { class: "stp", type: "button", "aria-label": `Light ${d > 0 ? "later" : "earlier"}`,
+  const lightStep = (t, d) => h("button", { class: "stp", type: "button", "aria-label": tr(d > 0 ? "ui.light_later" : "ui.light_earlier", d > 0 ? "Light later" : "Light earlier"),
     onClick: () => { light.value = Math.min(1, Math.max(0, +light.value + d * 0.05)); settings.onTime(+light.value); upLight(); } }, t);
   const lt2s = h("output", { class: "lt2" }, "");
-  const pop = h("div", { class: "settings", hidden: true, role: "group", "aria-label": "Map layers and scale" },
+  const pop = h("div", { class: "settings", hidden: true, role: "group", "aria-label": tr("ui.layers_label", "Map layers and scale") },
     // Light as a stepper on phone (the pill slider is desktop-only; light2/lt2 stay as synced state holders)
-    h("div", { class: "row stp-row mob-only" }, h("span", null, "Light"), h("span", { class: "stp-grp" }, lightStep("−", -1), lt2s, lightStep("+", 1))),
+    h("div", { class: "row stp-row mob-only" }, h("span", null, tr("ui.light", "Light")), h("span", { class: "stp-grp" }, lightStep("−", -1), lt2s, lightStep("+", 1))),
     ...exP, ...trP, ...lmP,
-    check("Place labels", settings.onLabels), routesRow, check("Roads and buildings", settings.onRoads), check("Trees", settings.onTreesOn),
-    h("p", { class: "tier" }, `Quality: ${tier}`));
-  const gear = h("button", { class: "ibtn layers-btn", type: "button", "aria-label": "Layers and scale", "aria-expanded": "false", title: "Layers", onClick: () => { pop.hidden = !pop.hidden; gear.setAttribute("aria-expanded", String(!pop.hidden)); } }, svgIcon(ICON.layers));
+    check(tr("ui.labels", "Place labels"), settings.onLabels), routesRow, check(tr("ui.roads", "Roads and buildings"), settings.onRoads), check(tr("ui.trees_on", "Trees"), settings.onTreesOn),
+    h("p", { class: "tier" }, tr("ui.quality", "Quality: {t}", { t: tier })));
+  const gear = h("button", { class: "ibtn layers-btn", type: "button", "aria-label": tr("ui.layers_btn", "Layers and scale"), "aria-expanded": "false", title: tr("ui.layers_title", "Layers"), onClick: () => { pop.hidden = !pop.hidden; gear.setAttribute("aria-expanded", String(!pop.hidden)); } }, svgIcon(ICON.layers));
   const about = h("div", { class: "about", hidden: true }, h("p", null, (m.attribution || []).join(" · ")));
-  const menu = h("button", { class: "ibtn", type: "button", "aria-label": "About this map", title: "About and credits", onClick: () => { about.hidden = !about.hidden; if (matchMedia("(max-width: 700px)").matches) pop.hidden = about.hidden; } }, svgIcon(ICON.menu));
+  const menu = h("button", { class: "ibtn", type: "button", "aria-label": tr("ui.about_btn", "About this map"), title: tr("ui.about_title", "About and credits"), onClick: () => { about.hidden = !about.hidden; if (matchMedia("(max-width: 700px)").matches) pop.hidden = about.hidden; } }, svgIcon(ICON.menu));
 
   // ---- light pill
   const lightTxt = h("span", { class: "lt" }, "");
-  const light = h("input", { type: "range", min: 0, max: 1, step: 0.004, value: sky.time, "aria-label": "Time of day" });
+  const light = h("input", { type: "range", min: 0, max: 1, step: 0.004, value: sky.time, "aria-label": tr("ui.time_of_day", "Time of day") });
   const upLight = () => { lightTxt.textContent = clockText(+light.value, sky.el); lt2.textContent = lt2s.textContent = lightTxt.textContent.split(" · ")[1] || ""; light2.value = light.value; };   // lt2s: the phone stepper shows the time from the start
   light2.addEventListener("input", () => { light.value = light2.value; settings.onTime(+light2.value); upLight(); });
   light.addEventListener("input", () => { settings.onTime(+light.value); upLight(); });
   upLight();
-  const pill = h("div", { class: "light" }, h("span", { class: "lbl-k" }, "Light"), light, lightTxt);
+  const pill = h("div", { class: "light" }, h("span", { class: "lbl-k" }, tr("ui.light", "Light")), light, lightTxt);
 
-  const offBtn = onOffline && h("button", { class: "ibtn off-btn", type: "button", "aria-label": `Trip kit for ${m.title}: save it offline, emergency numbers, print`, title: "Trip kit: save offline, emergency numbers, print", onClick: () => onOffline() }, svgIcon(ICON.down), h("span", { class: "off-lbl" }, "Trip kit"));   // below ~520 px the label hides (CSS): icon-only, name stays in aria-label/title
+  const offBtn = onOffline && h("button", { class: "ibtn off-btn", type: "button", "aria-label": tr("ui.tripkit_aria", "Trip kit for {title}: save it offline, emergency numbers, print", { title: tr(`region.${pack.slug}`, m.title) }), title: tr("ui.tripkit_title", "Trip kit: save offline, emergency numbers, print"), onClick: () => onOffline() }, svgIcon(ICON.down), h("span", { class: "off-lbl" }, tr("ui.tripkit", "Trip kit")));   // below ~520 px the label hides (CSS): icon-only, name stays in aria-label/title
   const top = h("div", { class: "topright" }, h("div", { class: "trow" }, search, offBtn, gear, menu), pill, pop, about);
 
   // ---- explore dock
-  const dock = h("nav", { class: "dock", "aria-label": "Explore" }, h("span", { class: "dk" }, "Explore"));
+  const dock = h("nav", { class: "dock", "aria-label": tr("ui.explore", "Explore") }, h("span", { class: "dk" }, tr("ui.explore", "Explore")));
   let sel = null;
   for (const a of areas) {
-    const b = h("button", { type: "button", onClick: () => { sel?.classList.remove("sel"); sel = b; b.classList.add("sel"); a.go(); } }, a.name);
+    const b = h("button", { type: "button", onClick: () => { sel?.classList.remove("sel"); sel = b; b.classList.add("sel"); a.go(); } }, tr(`story.area.${a.name}`, a.name));
     dock.append(b);
   }
   const ARROW = { north: "↑", south: "↓", east: "→", west: "←" };
-  for (const n of neighbors) dock.append(h("button", { type: "button", class: "nb", title: `Switch to ${n.title}`, onClick: () => onNeighbor(n.slug) }, `${n.title} ${ARROW[n.edge] || ""}`));
+  for (const n of neighbors) dock.append(h("button", { type: "button", class: "nb", title: tr("ui.switch_to", "Switch to {title}", { title: tr(`region.${n.slug}`, n.title) }), onClick: () => onNeighbor(n.slug) }, `${tr(`region.${n.slug}`, n.title)} ${ARROW[n.edge] || ""}`));
   // The dock scrolls horizontally on a phone; a right-edge fade on the wrapper hints at it and disappears at the end.
   const dockWrap = h("div", { class: "dockwrap" }, dock);
-  const dockEnd = () => dockWrap.classList.toggle("end", dock.scrollLeft + dock.clientWidth >= dock.scrollWidth - 6);
+  const dockEnd = () => dockWrap.classList.toggle("end", Math.abs(dock.scrollLeft) + dock.clientWidth >= dock.scrollWidth - 6);
   dock.addEventListener("scroll", dockEnd, { passive: true });
   const edgeBtn = h("button", { class: "edge-prompt", type: "button", hidden: true }, "");
   let edgeN = null;
@@ -135,24 +137,24 @@ export function buildUI(root, { pack, controls, settings, tier, showFps, sky, op
   controls.c.addEventListener("start", deselect);
 
   // ---- bottom right
-  const compass = h("button", { class: "compass", type: "button", "aria-label": "Compass. Reset the view to north", title: "Reset north", onClick: () => controls.resetNorth() }, compassSVG());
+  const compass = h("button", { class: "compass", type: "button", "aria-label": tr("ui.compass", "Compass. Reset the view to north"), title: tr("ui.reset_north", "Reset north"), onClick: () => controls.resetNorth() }, compassSVG());
   const rose = compass.querySelector(".rose");
   const btn = (txt, lab, fn, cls = "") => h("button", { class: `mbtn ${cls}`, type: "button", "aria-label": lab, title: lab, onClick: fn }, txt);
   const zoom = (f) => () => controls.flyTo(controls.target.clone(), Math.min(90000, Math.max(1000, controls.distance * f)), controls.heading, controls.pitchDeg(), 450);
-  const tools = h("div", { class: "tools" }, compass, h("div", { class: "zoomgrp" }, btn("+", "Zoom in", zoom(0.6)), btn("−", "Zoom out", zoom(1.6))), btn("⌂", "Home view", () => { deselect(); controls.goHome(); }, "home"));
+  const tools = h("div", { class: "tools" }, compass, h("div", { class: "zoomgrp" }, btn("+", tr("ui.zoom_in", "Zoom in"), zoom(0.6)), btn("−", tr("ui.zoom_out", "Zoom out"), zoom(1.6))), btn("⌂", tr("ui.home", "Home view"), () => { deselect(); controls.goHome(); }, "home"));
 
-  const foot = h("footer", { class: "attrib" }, (m.attribution || []).join(" · "), " · Heights exaggerated ×", h("span", { class: "exv" }, pack.exag.toFixed(1)));
+  const foot = h("footer", { class: "attrib" }, (m.attribution || []).join(" · "), tr("ui.exag_foot", " · Heights exaggerated ×"), h("span", { class: "exv" }, pack.exag.toFixed(1)));
   const stats = showFps ? h("pre", { class: "fps" }, "") : null;
   root.append(cart, top, dockWrap, edgeBtn, tools, foot, loading, stats);
   requestAnimationFrame(dockEnd);
   return {
-    setProgress(f, text) { bar.style.width = `${Math.round(f * 100)}%`; if (text) label.textContent = `Loading ${text}`; },
+    setProgress(f, text) { bar.style.width = `${Math.round(f * 100)}%`; if (text) label.textContent = tr("ui.loading", "Loading {what}", { what: tr(`ui.ld.${text.replace(/ /g, "_")}`, text) }); },
     done() { loading.classList.add("gone"); setTimeout(() => loading.remove(), 700); },
     compass(deg) { rose.style.transform = `rotate(${-deg}deg)`; rose.style.transformOrigin = "0 0"; },
     exag(v) { foot.querySelector(".exv").textContent = v.toFixed(1); },
     stats(t) { if (stats) stats.textContent = t; },
-    tier(t) { pop.querySelector(".tier").textContent = `Quality: ${t}`; },
-    edge(n) { if (n === edgeN) return; edgeN = n; edgeBtn.hidden = !n; if (n) edgeBtn.textContent = `Continue to ${n.title} ${ARROW[n.edge] || ""}`; },
+    tier(t) { pop.querySelector(".tier").textContent = tr("ui.quality", "Quality: {t}", { t }); },
+    edge(n) { if (n === edgeN) return; edgeN = n; edgeBtn.hidden = !n; if (n) edgeBtn.textContent = tr("ui.continue", "Continue to {title} {arrow}", { title: tr(`region.${n.slug}`, n.title), arrow: ARROW[n.edge] || "" }); },
     routes(on) { routesBox.checked = on; settings.onRoutes(on); },
     refreshLight() { light.value = sky.time; upLight(); },
   };

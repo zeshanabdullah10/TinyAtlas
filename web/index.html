@@ -38,12 +38,12 @@
   </a>
   <nav aria-label="Sections">
     <a class="sec" href="#valleys">The valleys</a>
-    <a class="sec" href="#sites">Site models</a>
+    <a class="sec" href="#sites" data-i18n="index.nav.sites">Site models</a>
     <a class="sec" href="#through-time">Through time</a>
-    <a href="play.html">Play</a>
-    <a href="tripkit.html">Trip kit</a>
+    <a href="play.html" data-i18n="site.nav.play">Play</a>
+    <a href="tripkit.html" data-i18n="site.nav.tripkit">Trip kit</a>
     <button type="button" class="lang-btn" data-lang-toggle lang="ur">اردو</button>
-    <button type="button" class="lang-btn" data-phrases>Phrases</button>
+    <button type="button" class="lang-btn" data-phrases data-i18n="index.nav.phrases">Phrases</button>
   </nav>
 </header>
 
@@ -61,8 +61,8 @@
         <a class="btn btn-primary" href="atlas.html?pack=swat">Open the map</a>
         <a class="btn btn-ghost" href="atlas.html?pack=swat-lower">Lower Swat &amp; the Gandhara heritage</a>
       </p>
-      <dl class="hero-stats" id="hero-stats" aria-label="What is in the atlas" hidden></dl>
-      <p class="offline-note">Works offline: save a valley from its map. <button type="button" class="install" id="install" hidden>Install the app</button></p>
+      <dl class="hero-stats" id="hero-stats" aria-label="What is in the atlas" data-i18n-attr="aria-label:index.stats.aria" hidden></dl>
+      <p class="offline-note"><span data-i18n="index.offline">Works offline: save a valley from its map.</span> <button type="button" class="install" id="install" data-i18n="index.install" hidden>Install the app</button></p>
     </div>
     <p class="hero-cap">Upper Swat seen from the south, heights exaggerated. Drawn from open elevation data.</p>
   </section>
@@ -74,8 +74,8 @@
       <noscript><p><a class="btn btn-primary" href="atlas.html?pack=swat">Open Swat Valley</a> <a class="btn btn-ghost" href="atlas.html?pack=swat-lower">Open Lower Swat</a></p></noscript>
     </div>
     <div class="sites-wrap" id="sites" hidden>
-      <h2 id="h-sites">Site models</h2>
-      <p class="band-sub">Walk up to a stupa, a lake or a viewpoint: each is a small 3D model built on the same terrain data.</p>
+      <h2 id="h-sites" data-i18n="index.sites.title">Site models</h2>
+      <p class="band-sub" data-i18n="index.sites.sub">Walk up to a stupa, a lake or a viewpoint: each is a small 3D model built on the same terrain data.</p>
       <div class="sites" id="site-grid"></div>
       <p class="sites-more"><button type="button" class="btn btn-ghost" id="sites-more" hidden aria-expanded="false"></button></p>
     </div>
@@ -132,8 +132,8 @@
 
 <footer class="foot" id="credits">
   <p class="cta"><a class="btn btn-primary" href="atlas.html?pack=swat">Open the map</a></p>
-  <nav class="site-nav" aria-label="Footer"><a href="atlas.html?pack=swat">Swat Valley</a><a href="atlas.html?pack=swat-lower">Lower Swat</a><a href="play.html">Play</a><a href="tripkit.html">Trip kit</a><a href="voices-consent.html">Voices and consent</a></nav>
-  <h2 class="foot-h">Credits and licences</h2>
+  <nav class="site-nav" aria-label="Footer" data-i18n-attr="aria-label:site.nav.footer"><a href="atlas.html?pack=swat" data-i18n="site.nav.swat">Swat Valley</a><a href="atlas.html?pack=swat-lower" data-i18n="site.nav.lower">Lower Swat</a><a href="play.html" data-i18n="site.nav.play">Play</a><a href="tripkit.html" data-i18n="site.nav.tripkit">Trip kit</a><a href="voices-consent.html" data-i18n="site.foot.voices">Voices and consent</a></nav>
+  <h2 class="foot-h" data-i18n="site.foot.credits">Credits and licences</h2>
   <p>Contains modified Copernicus DEM GLO-30 data, © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018, provided under COPERNICUS by the European Union and ESA · © ESA WorldCover project 2021 (CC BY 4.0) · Imagery: Sentinel-2 cloudless 2016 by EOX IT Services GmbH (CC BY 4.0) · © OpenStreetMap contributors (ODbL) · Building footprints in the site models: Microsoft Global ML Building Footprints (CDLA Permissive 2.0) · Photos via Wikimedia Commons, each credited · Sky: Poly Haven (CC0) · 3D shapes: TRELLIS (MIT), procedural stupas · Heights exaggerated, places drawn larger than life.</p>
   <p><a class="link" href="https://github.com/zeshanabdullah10/tinyatlas" rel="noopener">Source code on GitHub</a> · Tiny Atlas is open source.</p>
 </footer>

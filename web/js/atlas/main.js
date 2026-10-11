@@ -23,8 +23,8 @@ import { tripKitPanel, lowDataMode } from "../tripkit.js";
 import { loadHeritage } from "./heritage.js";
 import { StoryFlight, storyButton } from "./storyflight.js";
 import { loadVoices } from "../voices.js";
-import { applyI18n } from "../i18n.js";
-applyI18n("atlas");
+import { applyI18n, tr } from "../i18n.js";
+await applyI18n("atlas").catch(() => {});           // the Urdu table is in before any panel, planner or dialog builds its text
 
 // offline support (not in automated test browsers, which must always see fresh files)
 if ("serviceWorker" in navigator && !navigator.webdriver) navigator.serviceWorker.register(`${BASE}sw.js`).catch(() => {});
@@ -54,10 +54,10 @@ function openTripKit(pack) {
   const close = () => { card.remove(); removeEventListener("keydown", esc); if (opener?.isConnected) opener.focus({ preventScroll: true }); };
   const esc = (e) => { if (e.key === "Escape") close(); };
   const kit = tripKitPanel({ pack, places: pack.places, onDownload: () => { close(); openOffline(pack); }, onLowData: () => location.reload() });
-  const x = document.createElement("button"); x.type = "button"; x.className = "modal-x"; x.textContent = "Close"; x.onclick = close;
+  const x = document.createElement("button"); x.type = "button"; x.className = "modal-x"; x.textContent = tr("kit.close", "Close"); x.onclick = close;
   const card = document.createElement("div"); card.className = "modal"; card.setAttribute("role", "dialog"); card.setAttribute("aria-modal", "true");
   const inner = document.createElement("div"); inner.className = "modal-card"; inner.append(kit, x); card.append(inner);
-  card.setAttribute("aria-label", `Trip kit for ${pack.meta.title}`);
+  card.setAttribute("aria-label", tr("kit.label", "Trip kit for {title}", { title: tr(`region.${pack.slug}`, pack.meta.title) }));
   card.addEventListener("click", (e) => { if (e.target === card) close(); });
   document.body.append(card); addEventListener("keydown", esc);
   inner.querySelector("button, a[href], input, select")?.focus({ preventScroll: true });   // keyboard and screen readers land in the dialog
@@ -71,8 +71,8 @@ async function boot(slug, { base, time = null } = {}) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(36, 1, 50, 600000);
   const loadingEl = document.createElement("div");
-  loadingEl.className = "loading"; loadingEl.textContent = "Opening the map"; root.append(loadingEl);
-  const pack = await loadPack(base || `${BASE || "/"}packs/${slug}/atlas/`, (f, t) => { loadingEl.textContent = `Loading ${t}`; }).catch((e) => {
+  loadingEl.className = "loading"; loadingEl.textContent = tr("ui.opening", "Opening the map"); root.append(loadingEl);
+  const pack = await loadPack(base || `${BASE || "/"}packs/${slug}/atlas/`, (f, t) => { loadingEl.textContent = tr("ui.loading", "Loading {what}", { what: tr(`ui.ld.${t.replace(/ /g, "_")}`, t) }); }).catch((e) => {
     loadingEl.textContent = `Could not load the map pack (${e.message}).`; throw e;
   });
   loadingEl.remove();

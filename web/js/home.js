@@ -2,26 +2,29 @@
 // the region cards (stats read from the packs) and the "Swat through time" strip. Everything else is plain HTML.
 import { h } from "./dom.js";
 import { BASE } from "./api.js";
+import { tr, ready, siteTitle } from "./i18n.js";
 
 const nf = (n) => n.toLocaleString("en");
 const sourceName = (url) => decodeURIComponent(url.split("/").pop() || "").replace(/_/g, " ");
+const regionName = (slug, title) => tr(`region.${slug}`, title);
 
 function card(r) {
   const open = `${BASE}atlas.html?pack=${encodeURIComponent(r.slug)}`;
-  const stat = (k, v, note) => h("div", {}, h("dt", {}, k), h("dd", {}, v, note && h("small", {}, note)));
+  const stat = (k, v, note) => h("div", {}, h("dt", {}, k), h("dd", {}, h("bdi", { dir: "ltr" }, v), note && h("small", {}, note)));   // numbers and units keep their order in right-to-left text
+  const title = regionName(r.slug, r.title);
   return h("article", { class: "card" },
     h("a", { class: "card-pic", href: open, tabindex: "-1", "aria-hidden": "true" },
       h("img", { src: `${BASE}${r.cover}`, srcset: `${BASE}img/cover-${r.slug}-640.webp 640w, ${BASE}${r.cover} 1280w`, sizes: "(max-width: 860px) 100vw, 50vw", alt: "", width: 1280, height: 960, loading: "lazy" })),
     h("div", { class: "card-body" },
-      h("h3", {}, r.title),
-      h("p", { class: "card-sub" }, r.subtitle),
+      h("h3", {}, title),
+      h("p", { class: "card-sub" }, tr(`home.card_sub.${r.slug}`, r.subtitle)),
       h("dl", { class: "stats" },
-        stat("Area", `${r.size_km[0]} × ${r.size_km[1]} km`),
-        stat("Places", nf(r.places)),
-        stat("Heritage sites", nf(r.heritage)),
-        stat("Lakes", nf(r.lakes)),
-        r.peak && stat("Highest peak", `${r.peak.name}, ${nf(r.peak.m)} m`, `Height from ${r.peak.source}`)),
-      h("a", { class: "btn btn-primary", href: open }, `Open ${r.title}`)));
+        stat(tr("index.card.area", "Area"), `${r.size_km[0]} × ${r.size_km[1]} km`),
+        stat(tr("index.card.places", "Places"), nf(r.places)),
+        stat(tr("index.card.heritage", "Heritage sites"), nf(r.heritage)),
+        stat(tr("index.card.lakes", "Lakes"), nf(r.lakes)),
+        r.peak && stat(tr("index.card.peak", "Highest peak"), `${tr(`home.peak.${r.slug}`, r.peak.name)}, ${nf(r.peak.m)} m`, tr("index.card.peak_src", "Height from {src}", { src: r.peak.source }))),
+      h("a", { class: "btn btn-primary", href: open }, tr("index.card.open", "Open {title}", { title }))));
 }
 
 function era(e) {
@@ -29,7 +32,7 @@ function era(e) {
     h("h3", {}, e.era), h("p", { class: "years" }, e.years),
     h("ul", {}, ...e.events.map((v) => h("li", {},
       h("b", {}, v.date), " ", v.text, " ",
-      h("a", { href: v.source, rel: "noopener", "aria-label": `Source for ${v.date}: ${sourceName(v.source)}` }, `Source: ${sourceName(v.source)}`)))));
+      h("a", { href: v.source, rel: "noopener", "aria-label": tr("index.era.source_aria", "Source for {date}: {name}", { date: v.date, name: sourceName(v.source) }) }, tr("index.era.source", "Source: {name}", { name: sourceName(v.source) }))))));
 }
 
 // 24x24 line glyphs for the kind of site; a typographic card, not an invented picture
@@ -51,11 +54,11 @@ const SHOWN = 12;
 function siteCard(s, packs) {
   const icon = h("span", { class: "site-kind" });
   icon.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[s.kind] || ICONS.viewpoint}"/></svg>`;
-  icon.append(s.kind_label);
-  const img = s.thumb && h("img", { class: "site-img", src: BASE + s.thumb, width: 640, height: 400, loading: "lazy", decoding: "async", alt: `${s.title} site model`,
+  icon.append(tr(`kind.${s.kind}`, s.kind_label));
+  const img = s.thumb && h("img", { class: "site-img", src: BASE + s.thumb, width: 640, height: 400, loading: "lazy", decoding: "async", alt: tr("index.sites.alt", "{title} site model", { title: siteTitle(s.site, s.title) }),
     ...(s.thumb_small && { srcset: `${BASE}${s.thumb_small} 320w, ${BASE}${s.thumb} 640w`, sizes: "(max-width: 520px) 92vw, 280px" }) });
   return h("a", { class: "site", href: `${BASE}diorama.html?site=${encodeURIComponent(s.site)}` }, img,
-    h("div", { class: "site-body" }, icon, h("h3", {}, s.title), s.subtitle && h("p", {}, s.subtitle), packs[s.pack] && h("span", { class: "pk" }, packs[s.pack])));
+    h("div", { class: "site-body" }, icon, h("h3", {}, siteTitle(s.site, s.title)), s.subtitle && h("p", {}, s.subtitle), packs[s.pack] && h("span", { class: "pk" }, regionName(s.pack, packs[s.pack]))));
 }
 
 function sitesSection(list, packs) {
@@ -66,12 +69,13 @@ function sitesSection(list, packs) {
   section.hidden = false;
   if (cards.length > SHOWN) {
     more.hidden = false;
-    more.textContent = `Show all ${cards.length} site models`;
+    const all = tr("index.sites.all", "Show all {n} site models", { n: cards.length });
+    more.textContent = all;
     more.addEventListener("click", () => {
       const open = more.getAttribute("aria-expanded") !== "true";
       cards.forEach((c, i) => { if (i >= SHOWN) c.hidden = !open; });
       more.setAttribute("aria-expanded", String(open));
-      more.textContent = open ? "Show fewer" : `Show all ${cards.length} site models`;
+      more.textContent = open ? tr("index.sites.fewer", "Show fewer") : all;
     });
   }
 }
@@ -84,6 +88,7 @@ function statsStrip(parts) {
 }
 
 export async function mountHome() {
+  await ready;                                   // the Urdu table, before any string is built
   const get = (f) => fetch(`${BASE}data/${f}`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   const [data, models] = await Promise.all([get("home.json"), get("dioramas.json")]);
   if (data) {
@@ -92,6 +97,6 @@ export async function mountHome() {
   }
   const packs = Object.fromEntries((data?.regions || []).map((r) => [r.slug, r.title]));
   if (models?.sites?.length) sitesSection(models.sites, packs);
-  statsStrip([[data?.regions.length || 0, "valleys"], [data?.regions.reduce((n, r) => n + r.places, 0) || 0, "places"],
-    [models?.stats.site_models || 0, "site models"], [models?.stats.audio_clips || 0, "audio clips"]]);
+  statsStrip([[data?.regions.length || 0, tr("index.stats.valleys", "valleys")], [data?.regions.reduce((n, r) => n + r.places, 0) || 0, tr("index.stats.places", "places")],
+    [models?.stats.site_models || 0, tr("index.stats.models", "site models")], [models?.stats.audio_clips || 0, tr("index.stats.audio", "audio clips")]]);
 }
