@@ -35,9 +35,9 @@
     "footpath": true,
     "edits": [
       "The excavated sacred court is drawn from the Atlas photos (Front View of the main stupa, Votive Stupa Court): a rectangular flagged court about 60 x 50 m with a low edging wall. The court size is ESTIMATED from the photos. The court's depth below the surrounding ground is not measured and is NOT modelled: the court is drawn at ground level.",
-      "The main stupa is a rough stepped circular core about 19 m across, built of stacked courses with lighter bands (photos 01-03) and a broken top of rubble. No published dimensions were found (the Wikipedia article gives none): the diameter, the 6 m drum and the top are ESTIMATED from the photos.",
-      "The votive stupas are square stepped plinths 2 to 5 m across and 0.6 to 1.5 m high, in rows round the main stupa; most are ruined to the plinth and about one in six carries a small drum and dome. Their sizes, number and places are ESTIMATED from photos 01, 02 and 04 and invented to read as the court, not surveyed.",
-      "The whitewashed band on the lower front drum follows photo 03. Shades vary by about 8% between plinths. The paving slabs are a drawn texture, not surveyed.",
+      "The main stupa is drawn as three dressed, stepped rings about 19 m across at the foot (1.3, 1.1 and 1.0 m high) with a stair up the front, and the broken rubble core above them as a low, flat-topped mound, higher and more ragged at the back (photos 01-03). No published dimensions were found (the Wikipedia article gives none): every size is ESTIMATED from the photos.",
+      "The votive stupas are plinths of coursed schist slabs 1.8 to 4.2 m across and 0.5 to 1.6 m high, packed in rows with lanes between; most are ruined to an uneven top, a few are stepped at the front and about one in eight keeps the stump of a drum. Their sizes, number and places are ESTIMATED from photos 01, 02 and 04 and arranged to read as the court, not surveyed.",
+      "The stone colours (grey-green schist slabs, buff dressed stone, lime plaster) are sampled from the photos; the courses, joints and flagstones are drawn by the material, not surveyed. The plaster patch on the lowest ring follows photo 03.",
       "The OSM building tagged as the site (tourism=museum, 36 m from the point) and every other building within 80 m are dropped and replaced by this model. The ground within 70 m is levelled (a terrace); the rest is the real DEM slope.",
       "The earlier generic Atlas maquette (a ~22 m plinth with a ruined drum) is not used: it is not a record of this stupa."
     ],

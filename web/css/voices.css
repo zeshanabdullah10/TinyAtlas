@@ -1,7 +1,7 @@
 /* Voices of the valley section. Uses tokens from tokens.css. */
 .vo-section { display: grid; gap: 10px; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .vo-section * { min-width: 0; box-sizing: border-box; }
-.vo-section h3 { margin: 0; font-size: 1rem; color: var(--accent, #e9a23b); }
+.vo-section h3 { margin: 26px 0 10px; font: 600 11.5px var(--font-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }   /* same as the other panel sections */
 .vo-section h4 { margin: 8px 0 4px; font-size: .9rem; }
 .vo-langs { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
 .vo-langs li, .vo-lang { min-width: 0; overflow-wrap: anywhere; }

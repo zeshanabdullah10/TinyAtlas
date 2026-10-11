@@ -30,7 +30,7 @@ button { font-family: inherit; }
 .lbl.mini .dot::after { content: ""; position: absolute; inset: -16px; }
 .lbl.mini.ghost .dot { opacity: .8; }
 .lbl .chip:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
-.lbl.sel { z-index: 2; }
+.lbl.sel { z-index: 2; } .lbl.sel .chip .kic { color: var(--on-saffron); }
 .lbl.sel .chip { background: var(--saffron); color: var(--on-saffron); border-color: var(--saffron); } .lbl.sel .chip .el { color: #3a2a12; }
 
 /* title cartouche */

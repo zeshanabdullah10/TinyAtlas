@@ -36,9 +36,11 @@ function clipToLakes(items, lakes) {
   for (const it of items) {
     const near = polys.some((q) => it.pts.some(([x, z]) => x >= q.x0 - 500 && x <= q.x1 + 500 && z >= q.z0 - 500 && z <= q.z1 + 500));
     if (!near) { out.push(it); continue; }
+    const nearLake = (x, z) => polys.some((q) => x >= q.x0 - 200 && x <= q.x1 + 200 && z >= q.z0 - 200 && z <= q.z1 + 200);
     let run = [];
     for (let i = 0; i < it.pts.length; i++) {
-      const a = it.pts[Math.max(0, i - 1)], b = it.pts[i], n = i ? Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 12) : 1;
+      const a = it.pts[Math.max(0, i - 1)], b = it.pts[i];
+      const n = !i ? 1 : nearLake(a[0], a[1]) || nearLake(b[0], b[1]) ? Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 12) : 1;   // densify only by lakes
       for (let k = 1; k <= n; k++) {
         const t = k / n, x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t;
         if (wet(x, z)) { if (run.length > 1) out.push({ ...it, pts: run }); run = []; }

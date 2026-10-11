@@ -64,10 +64,10 @@ uniform sampler2D uGrad, uShadow, uOv, uAlb; uniform vec4 uGridUV, uTile; unifor
 uniform float uExag, uDetail, uHasTile, uTexPx, uHmin, uClose, uPx;
 ${NOISE}
 // two-octave rock noise on one projection plane; value + gradient in that plane's (u, v), metres
-vec3 rk(vec2 p, mat2 A, mat2 B) {
+vec3 rk(vec2 p, mat2 A, mat2 B, vec2 w) {          // w: per-octave weights (fade by on-screen size)
   vec3 a = noised(A * p / 6.0), b = noised(B * p / 23.0 + 3.7);
   vec2 ga = (a.yz * A) / 6.0, gb = (b.yz * B) / 23.0;
-  return vec3(a.x * 0.45 + b.x * 0.55, ga * 0.45 + gb * 0.55);
+  return vec3(mix(0.5, a.x, w.x) * 0.45 + mix(0.5, b.x, w.y) * 0.55, ga * (0.45 * w.x) + gb * (0.55 * w.y));
 }`)
       .replace("#include <map_fragment>", `
   vec2 guv = (vWPos.xz * uGridUV.x + uGridUV.y) / uGridUV.zw;
@@ -75,7 +75,9 @@ vec3 rk(vec2 p, mat2 A, mat2 B) {
   float camD = length(cameraPosition - vWPos);
   float slope = length(G.xy);                                        // tan of the REAL slope (30 m height field)
   vec3 mN = normalize(vec3(-G.x * uExag, 1.0, -G.y * uExag));        // macro normal (exaggerated, as drawn)
-  float fadeD = 1.0 - smoothstep(700.0, 3200.0, camD);               // close-range detail, all tiers
+  float mpp = max(camD * uPx, 0.05);                                 // metres per pixel here
+  float fadeD = 1.0 - smoothstep(3500.0, 9000.0, camD);              // close-range detail, all tiers; each octave also
+  #define OCT(l) smoothstep(2.0, 5.0, (l) / mpp)                      // fades out once it is under ~3 px (no shimmer)
   float fadeM = 1.0 - smoothstep(1500.0, 7000.0, camD);              // mid-range: soft landcover edges, rock break-up
   // Landcover edges: two jittered taps of the albedo turn the 10 m texel staircase into an irregular, soft edge.
   vec2 wxz = vWPos.xz, j1 = vec2(0.0), j2 = vec2(0.0);
@@ -86,7 +88,7 @@ vec3 rk(vec2 p, mat2 A, mat2 B) {
   }
   // On cliffs the planar 10 m albedo stretches over tall faces: read a blurrier mip there (detail comes back below).
   float cliff = smoothstep(0.62, 1.0, slope);                       // ~32 deg -> 45 deg real
-  float bias = 1.6 * cliff * fadeM;
+  float bias = 2.4 * cliff * fadeM;
   vec2 tuv1 = (clamp((wxz + j1 - uTile.xy) / uTile.zw, 0.0, 1.0) * (uTexPx - 1.0) + 0.5) / uTexPx;
   vec2 tuv2 = (clamp((wxz + j2 - uTile.xy) / uTile.zw, 0.0, 1.0) * (uTexPx - 1.0) + 0.5) / uTexPx;
   vec3 albT = 0.5 * (texture2D(uAlb, tuv1, bias).rgb + texture2D(uAlb, tuv2, bias).rgb);
@@ -98,21 +100,24 @@ vec3 rk(vec2 p, mat2 A, mat2 B) {
   // fading out where the instanced trees take over.
   float farF = smoothstep(7000.0, 15000.0, camD) * forest;
   if (farF > 0.0) {
-    float mpp = camD * uPx, crown = noised(wxz / 42.0).x * 0.6 + noised(wxz / 13.0 + 5.0).x * 0.4;
+    float crown = noised(wxz / 42.0).x * 0.6 + noised(wxz / 13.0 + 5.0).x * 0.4;
     float amp = 1.0 - smoothstep(14.0, 45.0, mpp);
     alb *= mix(vec3(1.0), vec3(0.74, 0.92, 1.06) * (0.84 + amp * 0.5 * (crown - 0.5)), farF);
   }
   vec2 dn = vec2(0.0); float dvar = 0.0; vec3 bump = vec3(0.0);
   if (fadeD > 0.0) {
     // fine colour variation (luminance + a slight warm/cool drift), isotropic so no bands (lesson 7)
-    vec3 n1 = noised(wxz / 5.0), n2 = noised(wxz / 19.0 + 17.0), n3 = noised(wxz / 61.0 - 4.0);
-    float flat_ = 1.0 - cliff;
-    dn = fadeD * flat_ * (n1.yz * (0.8 / 5.0) + n2.yz * (2.6 / 19.0)) * mix(0.55, 1.0, uDetail);
-    dvar = fadeD * ((n1.x - 0.5) * 0.10 + (n2.x - 0.5) * 0.12 + (n3.x - 0.5) * 0.10);
+    const mat2 RD = mat2(0.80, -0.60, 0.60, 0.80);
+    vec3 n1 = noised(wxz / 4.0), n2 = noised(RD * wxz / 13.0 + 17.0), n3 = noised(wxz / 41.0 - 4.0), n4 = noised(RD * wxz / 130.0 + 9.0);
+    float w1 = OCT(4.0), w2 = OCT(13.0), w3 = OCT(41.0), flat_ = 1.0 - cliff;
+    dn = fadeD * flat_ * (w1 * n1.yz * (0.7 / 4.0) + w2 * (n2.yz * RD) * (2.2 / 13.0) + w3 * n3.yz * (3.5 / 41.0)) * mix(0.55, 1.0, uDetail);
+    dvar = fadeD * (w1 * (n1.x - 0.5) * 0.08 + w2 * (n2.x - 0.5) * 0.11 + w3 * (n3.x - 0.5) * 0.12 + (n4.x - 0.5) * 0.12);
+    n3 = n4;
     alb *= mix(vec3(1.0), mix(vec3(1.05, 1.0, 0.93), vec3(0.95, 1.0, 1.06), n3.x), 0.6 * fadeD * (1.0 - forest));
     // scree on steep (25-40 deg) non-forest slopes: pale speckle with dark gaps
     float scree = smoothstep(0.42, 0.7, slope) * (1.0 - cliff) * (1.0 - forest) * fadeD;
-    if (scree > 0.0) { float sp = noised(wxz / 2.3 + 9.0).x; alb *= 1.0 + scree * (0.35 * smoothstep(0.55, 0.85, sp) - 0.18 * smoothstep(0.45, 0.15, sp)); }
+    scree *= OCT(2.5);
+    if (scree > 0.0) { float sp = noised(wxz / 2.5 + 9.0).x; alb *= 1.0 + scree * (0.35 * smoothstep(0.55, 0.85, sp) - 0.18 * smoothstep(0.45, 0.15, sp)); }
   }
   float rockF = cliff * (1.0 - 0.7 * forest) * max(fadeM, 0.0);
   if (rockF > 0.0) {
@@ -121,9 +126,10 @@ vec3 rk(vec2 p, mat2 A, mat2 B) {
     vec3 tw = pow(abs(mN), vec3(4.0)); tw /= tw.x + tw.y + tw.z;
     // each plane's lattice is rotated (and the two octaves differently) so no axis-aligned grid shows through
     const mat2 R1 = mat2(0.80, -0.60, 0.60, 0.80), R2 = mat2(0.28, 0.96, -0.96, 0.28);
-    vec3 ax = rk(vWPos.zy, R1, R2), ay = rk(vWPos.xz, R2, R1), az = rk(vWPos.xy, R1, R2);
+    vec2 wo = vec2(OCT(6.0), OCT(23.0));
+    vec3 ax = rk(vWPos.zy, R1, R2, wo), ay = rk(vWPos.xz, R2, R1, wo), az = rk(vWPos.xy, R1, R2, wo);
     float r = ax.x * tw.x + ay.x * tw.y + az.x * tw.z;
-    alb *= mix(1.0, 0.66 + 0.62 * smoothstep(0.15, 0.85, r), rockF);
+    alb *= mix(1.0, 0.70 + 0.60 * r, rockF);                        // soft tone (value-noise lattice shows if contrast is pushed)
     bump = rockF * fadeD * 0.8 * (tw.x * vec3(0.0, ax.z, ax.y) + tw.y * vec3(ay.y, 0.0, ay.z) + tw.z * vec3(az.y, az.z, 0.0));
   }
   vec3 tN = normalize(vec3(-(G.x * uExag) - dn.x, 1.0, -(G.y * uExag) - dn.y));

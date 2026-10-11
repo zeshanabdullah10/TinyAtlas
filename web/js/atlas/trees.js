@@ -78,7 +78,7 @@ export class Trees {
     };
     this.clearings = [];          // [{x, z, r}] around placed landmark models
     this.chunks = new Map();      // key -> {raw, meshes, rect, state}
-    this.visible = true; this.shadowDist = tier === "high" ? 4000 : 2500;
+    this.visible = true; this.shadowDist = 1500;   // only near trees cast: at 15 deg sun mid-range tree shadows streaked the ground
     this.count = 0; this.draws = 0;
     this.frame = 0;
     // the pack lists its files: chunks without trees have no file, so skip them instead of fetching a 404

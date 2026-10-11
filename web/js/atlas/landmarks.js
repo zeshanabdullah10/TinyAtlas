@@ -3,14 +3,14 @@
 // CAP_M, and never wider than NEIGH × the gap to the nearest other mapped place, so a hero-scaled model can not cover
 // its neighbours (the ×20-fixed scale drew the 45 m Swat Museum as a ~900 m box over Saidu Sharif and Butkara).
 // Shown inside 15 km with an opacity fade. On slopes the base is cut part-way into the hill and a stone terrace
-// fills the downhill side, so nothing floats and the uphill side is never buried by more than BURY of its height.
+// fills the downhill side, so nothing floats and the uphill side is never cut deeper than BURY of its height.
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { shared } from "./material.js";
 
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 export const SHOW_KM = 15, CAP_M = 300, MIN_MULT = 20;
-const PX = 58, NEIGH = 0.55, BURY = 0.22, QK = Math.log(1.04);
+const PX = 58, NEIGH = 0.55, BURY = 0.35, QK = Math.log(1.04);
 const rad = (d) => (d * Math.PI) / 180;
 
 /** Model yaw (radians about +y). The TRELLIS GLBs face +z (checked by rendering them from four sides), not −z as the
@@ -36,7 +36,8 @@ function contactDisc() {
 }
 
 const terraceMat = new THREE.MeshStandardMaterial({ color: 0xb59c78, roughness: 0.95, metalness: 0 });   // dry-stone terrace, warm ochre
-const terraceGeo = new THREE.BoxGeometry(1, 1, 1).translate(0, -0.5, 0);
+// unit square frustum, top at y=0 (1 x 1), battered sides widening to 1.35 at y=-1
+const terraceGeo = new THREE.CylinderGeometry(Math.SQRT1_2, Math.SQRT1_2 * 1.35, 1, 4, 1).rotateY(Math.PI / 4).translate(0, -0.5, 0);
 
 export class Landmarks {
   constructor(pack, scene, { tier = "high" } = {}) {
@@ -94,8 +95,8 @@ export class Landmarks {
     return Math.max(1, Math.min((PX * s * mpp) / it.foot, kMax));
   }
 
-  /** Stand the model at scale k: sample the ground over its (rotated) footprint; the base sits between the centre
-   *  ground and the highest ground but buries at most BURY of the height; a terrace box fills down to the lowest ground. */
+  /** Stand the model at scale k: sample the ground over its (rotated) footprint; the base sits on the centre ground,
+   *  raised so the uphill side is cut at most BURY of the height into the hill; a terrace fills down to the lowest ground. */
   place(it, k) {
     const p = this.pack, x = it.place.x, z = it.place.z, yaw = it.inner.rotation.y, c = Math.cos(yaw), s = Math.sin(yaw);
     const hx = (it.sx * k) / 2 * 0.9, hz = (it.sz * k) / 2 * 0.9, H = it.height * k;
@@ -104,7 +105,7 @@ export class Landmarks {
       const u = (a / 2) * hx, v = (b / 2) * hz, y = p.groundY(x + u * c + v * s, z - u * s + v * c);
       lo = Math.min(lo, y); hi = Math.max(hi, y);
     }
-    const gc = p.groundY(x, z), base = Math.max(gc + 0.5 * (hi - gc), hi - BURY * H, lo) - 0.3;
+    const gc = p.groundY(x, z), base = Math.max(gc, hi - BURY * H, lo) - 0.3;
     it.obj.position.set(x, base, z);
     it.inner.scale.setScalar(k);
     const drop = base - lo;
