@@ -30,6 +30,9 @@ SITES = ROOT / "web" / "data" / "diorama"
 PACKS = ROOT / "data" / "packs"
 CC, PXC, RES = 128, 384, 30.0          # chunk cells, L0 tile px, pack cell metres (docs/atlas-pack-v1.md "Chunks")
 NEAR_PX, FAR_PX = 5.0, 30.0
+# Registration: across the sites where the check has a clear signal (lakes, paved roads with contrast > 0.02) the
+# image sat a median 5 m south of cover.bin's lakes and the OSM roads (half a 10 m source pixel), so it is read 5 m south.
+SHIFT_Z = 5.0
 SOURCE = {"name": "Sentinel-2 cloudless 2016 by EOX IT Services GmbH", "use": "ground colour",
           "licence": "CC BY 4.0, contains modified Copernicus Sentinel data 2016", "url": "https://s2maps.eu"}
 
@@ -128,7 +131,7 @@ def site_points(m, which):
     if which == "near":
         nx, ny, step = 2 * g["cols"] - 1, 2 * g["rows"] - 1, NEAR_PX
         lon = fr["w"] + np.arange(nx) * step / fr["mx"]
-        lat = fr["n"] - np.arange(ny) * step / fr["my"]
+        lat = fr["n"] - (np.arange(ny) * step + SHIFT_Z) / fr["my"]
     else:
         f = m["far"]
         # the far ring was sampled in its own box's frame (diorama_build geo(site, "far_bbox")) and placed at its NW corner
@@ -137,7 +140,7 @@ def site_points(m, which):
         ff = frame((fn - (f["rows"] - 1) * f["cell"] / fr["my"], fw, fn, fw + 1))
         nx, ny, step = 2 * f["cols"] - 1, 2 * f["rows"] - 1, FAR_PX
         lon = fw + np.arange(nx) * step / ff["mx"]
-        lat = fn - np.arange(ny) * step / ff["my"]
+        lat = fn - (np.arange(ny) * step + SHIFT_Z) / ff["my"]
     LON, LAT = np.meshgrid(lon, lat)
     return LAT, LON
 
@@ -184,9 +187,9 @@ def deshade(col, heights, step, cell):
     shade = np.asarray(Image.fromarray(shade.astype(np.float32)).resize((col.shape[1], col.shape[0]), Image.BILINEAR))
     L = lum(col) + 1e-3
     ok = L < 0.5                                       # not snow (saturated) or cloud
-    # how strongly the image follows the DEM shading, fitted on log luminance, then removed at that strength (<= 0.7)
+    # how strongly the image follows the DEM shading, fitted on log luminance, then removed at that strength (<= 0.3: aspect also changes what grows)
     ls, ll = np.log(shade[ok]), np.log(L[ok])
-    k = float(np.clip(np.cov(ls, ll)[0, 1] / max(np.var(ls), 1e-6), 0, 0.7)) if ok.sum() > 1000 else 0.0
+    k = float(np.clip(np.cov(ls, ll)[0, 1] / max(np.var(ls), 1e-6), 0, 0.3)) if ok.sum() > 1000 else 0.0
     f = np.clip(shade ** -k, 0.6, 1.8)[..., None]
     return np.clip(col * f, 0, 1), k
 
@@ -225,7 +228,7 @@ def check(site):
     g = m["grid"]
     img = lum(srgb2lin(np.asarray(Image.open(d / "albedo.webp").convert("RGB"), np.float32) / 255))[..., None]
     at = lambda x, z: bilinear(img, (x + g["width"] / 2) / NEAR_PX, (z + g["height"] / 2) / NEAR_PX)[0][..., 0]
-    shifts = np.arange(-40, 40.1, 2.5)
+    shifts = np.arange(-30, 30.1, 2.5)
     res = {}
     if (C == 5).sum() > 30:
         from scipy.ndimage import binary_dilation
@@ -262,9 +265,16 @@ def main():
     a = ap.parse_args()
     sites = sorted(p.name for p in SITES.iterdir() if (p / "meta.json").exists()) if a.all or not a.sites else a.sites
     if a.check:
+        strong = []
         for s in sites:
             r = check(s)
             print(s, json.dumps(r), flush=True)
+            strong += [(v["dx"], v["dz"]) for k, v in r.items() if k == "lake" or v["contrast0"] > 0.02]
+        if strong:
+            dx, dz = np.median(np.array(strong), axis=0)
+            off = np.hypot(*np.array(strong).T)
+            print(f"{len(strong)} clear signals: median offset dx {dx:+.1f} m, dz {dz:+.1f} m; |offset| median {np.median(off):.1f} m, "
+                  f"<= 10 m (1 cell) in {np.mean(off <= 10):.0%}")
         return
     packs = {p.name: Pack(p.name) for p in PACKS.iterdir() if (p / "atlas" / "meta.json").exists()}
     tot = sum(bake(s, packs) for s in sites)

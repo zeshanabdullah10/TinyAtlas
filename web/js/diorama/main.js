@@ -37,7 +37,7 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, logarithmicD
 renderer.setPixelRatio(tier === "high" ? Math.min(devicePixelRatio || 1, 2) : 1);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.2;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setClearColor(0x15120f);
 
@@ -217,7 +217,7 @@ function setEnv(e) {
   env = e;
   const real = e === "real";
   sky.dome.visible = real; far.visible = real; table.visible = !real;
-  scene.fog = real ? new THREE.Fog(sky.horizon.clone(), 600, 26000) : null;
+  scene.fog = real ? new THREE.FogExp2(sky.haze.clone(), 1 / 18000) : null;   // aerial perspective (sky.js: 1 / metres)
   document.body.dataset.env = e;
 }
 setEnv("table");
@@ -291,7 +291,7 @@ const PACES = [1, 2, 4, 8];
 let pace = 1;
 hud.on("pace", () => { pace = PACES[(PACES.indexOf(pace) + 1) % PACES.length]; hud.pace(pace); });
 hud.on("sound", () => { sound.start(); sound.mute(!sound.muted); hud.sound(!sound.muted); });
-hud.on("sun", (h) => { sky.set(h); if (scene.fog) scene.fog.color.copy(sky.horizon); });
+hud.on("sun", (h) => { sky.set(h); if (scene.fog) scene.fog.color.copy(sky.haze); });
 hud.on("walk", startWalk);
 hud.on("tour", () => startWalk(vps[0], { tour: true }));
 // The shore tour: glide along the path to each viewpoint in turn, stop, turn to the water, look for a few seconds.

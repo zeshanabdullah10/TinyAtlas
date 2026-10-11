@@ -35,49 +35,153 @@ float tn(vec2 x) { vec2 i = floor(x), f = fract(x), u = f * f * (3.0 - 2.0 * f);
   return mix(mix(th(i), th(i + vec2(1, 0)), u.x), mix(th(i + vec2(0, 1)), th(i + vec2(1, 1)), u.x), u.y); }
 float fbm(vec2 p) { float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * tn(p); p *= 2.03; a *= 0.5; } return s; }`;
 
+// Value noise with its gradient (for the detail normal), two octaves, rotated so the lattice never lines up.
+const BUMP = /* glsl */ `
+vec3 tnd(vec2 x) { vec2 i = floor(x), f = fract(x), u = f * f * (3.0 - 2.0 * f), du = 6.0 * f * (1.0 - f);
+  float a = th(i), b = th(i + vec2(1, 0)), c = th(i + vec2(0, 1)), d = th(i + vec2(1, 1));
+  return vec3(a + (b - a) * u.x + (c - a) * u.y + (a - b - c + d) * u.x * u.y, du * (vec2(b - a, c - a) + (a - b - c + d) * u.yx)); }
+const mat2 ROT = mat2(0.8, -0.6, 0.6, 0.8);
+vec3 bump2(vec2 p) { vec3 a = tnd(p); vec3 b = tnd(ROT * p * 2.7 + 3.1); b.yz = b.yz * ROT * 2.7;
+  return a * vec3(1.0, 1.0, 1.0) + b * vec3(0.45, 0.45, 0.45); }`;
+
+const GROUND = /* glsl */ `
+  vec3 N0 = normalize(vNt);
+  float g_dist = distance(vW, cameraPosition);
+  vec3 g_col = diffuseColor.rgb;
+  if (uAlbOn > 0.5) {                        // Sentinel-2 cloudless 2016 ground colour (diorama_albedo.py)
+    g_col = texture2D(uAlb, ((vW.xz - uAlbO) / uAlbP + 0.5) / uAlbN).rgb;
+    float l0 = dot(g_col, vec3(0.2126, 0.7152, 0.0722));
+    // the mosaic is darker and flatter than the ground: lift the darks (forest, meadow) more than pale towns and snow
+    g_col = max(mix(vec3(l0), g_col, 1.15), 0.0) * mix(1.5, 1.08, smoothstep(0.12, 0.4, l0));
+    // The pack's albedo was graded toward the poster's ochre; where WorldCover maps meadow or forest, take the hue
+    // back toward the green the visitors' photos show, keeping the satellite's brightness and every patch in it.
+    float bare = smoothstep(0.30, 0.55, l0);                      // bright: snow, scree, fields in stubble keep their colour
+    vec3 meadow = vec3(0.62, 0.78, 0.30) * (l0 / 0.708), forest = vec3(0.30, 0.52, 0.36) * (l0 / 0.474);
+    g_col = mix(g_col, meadow * 1.5 * 1.1, vVeg.x * 0.55 * (1.0 - bare));
+    g_col = mix(g_col, forest * 1.5, vVeg.y * 0.5 * (1.0 - bare));
+  }
+  float g_lum = dot(g_col, vec3(0.2126, 0.7152, 0.0722));
+  float g_sat = (max(g_col.r, max(g_col.g, g_col.b)) - min(g_col.r, min(g_col.g, g_col.b))) / max(max(g_col.r, max(g_col.g, g_col.b)), 1e-3);
+  // snow: what the satellite saw white, plus high gentle ground above the site's snow line (season.js adds winter)
+  snowT = smoothstep(0.38, 0.6, g_lum) * (1.0 - smoothstep(0.12, 0.3, g_sat));
+  snowT = max(snowT, smoothstep(uSnowY, uSnowY + 300.0, vW.y) * smoothstep(0.72, 0.9, N0.y) * smoothstep(0.12, 0.3, g_lum));
+  // rock where the real slope passes ~35 degrees: the local colour, greyed and lightened, with strata across the face
+  rockT = smoothstep(0.84, 0.74, N0.y) * (1.0 - snowT) * (1.0 - 0.75 * max(vVeg.x, vVeg.y));   // grass and trees hold on steep ground too
+  float g_green = clamp((g_col.g - max(g_col.r, g_col.b)) / max(g_lum, 0.02) * 2.5, 0.0, 1.0);
+  float g_fine = 1.0 - smoothstep(30.0, 320.0, g_dist), g_mid = 1.0 - smoothstep(200.0, 2600.0, g_dist);
+#ifndef DIO_FAR
+  vec3 g_w3 = pow(abs(N0), vec3(4.0)); g_w3 /= dot(g_w3, vec3(1.0));
+  if (g_mid > 0.0) {
+    // triplanar on steep faces: the top-down albedo stretches there, the strata and cracks do not
+    float strata = g_w3.x * fbm(vW.zy * vec2(0.09, 0.45)) + g_w3.z * fbm(vW.xy * vec2(0.09, 0.45)) + g_w3.y * fbm(vW.xz * 0.12);
+    vec3 rock = vec3(g_lum) * vec3(1.06, 1.0, 0.92) * 1.25 + 0.03;
+    g_col = mix(g_col, rock * (0.72 + 0.56 * strata), rockT * (0.35 + 0.35 * g_mid));
+    float scree = smoothstep(0.93, 0.84, N0.y) * (1.0 - g_green) * (1.0 - snowT) * (1.0 - rockT);
+    g_col *= 1.0 + g_mid * (0.22 * (fbm(vW.xz * 0.07 + 11.0) - 0.5) + scree * 0.25 * (tn(vW.xz * 0.9) - 0.5));
+  }
+  if (g_fine > 0.0) {                           // what you see from the jeep: tufts, bare patches, stones
+    float tuft = tn(vW.xz * 1.3) * 0.5 + tn(ROT * vW.xz * 3.9) * 0.3 + tn(vW.xz * 0.37 + 5.0) * 0.2;
+    vec3 grassy = g_col * mix(vec3(0.82, 0.9, 0.7), vec3(1.16, 1.1, 0.86), tuft);
+    g_col = mix(g_col, grassy, g_fine * g_green * (1.0 - rockT));
+    float stones = smoothstep(0.86, 0.93, tn(ROT * vW.xz * 3.1)) * (1.0 - g_green) * (1.0 - snowT) * (1.0 - max(vVeg.x, vVeg.y));
+    g_col = mix(g_col, vec3(g_lum * 1.3 + 0.03), g_fine * stones * 0.3);
+    g_col *= 1.0 + g_fine * 0.16 * (tn(vW.xz * 6.1) - 0.5);
+  }
+  dN = vec3(0.0);
+  // detail normal: hummocks (~9 m) out to a few km, tufts and ruts (~2 m) close up; triplanar strata on rock faces
+  if (g_mid > 0.0) {
+    vec3 hm = bump2(vW.xz * 0.11) * 0.11, tf = bump2(ROT * vW.xz * 0.45) * 0.45;
+    vec2 gxz = hm.yz * 0.55 * g_mid + (tf.yz * ROT) * 0.16 * g_fine;
+    dN = vec3(gxz.x, 0.0, gxz.y) * g_w3.y * (1.0 - 0.7 * snowT);
+    if (rockT > 0.01) {
+      vec3 bx = bump2(vW.zy * vec2(0.12, 0.5)), bz = bump2(vW.xy * vec2(0.12, 0.5));
+      dN += (vec3(0.0, bx.z * 0.5, bx.y * 0.12) * g_w3.x + vec3(bz.y * 0.12, bz.z * 0.5, 0.0) * g_w3.z) * rockT * 0.35 * g_mid;
+    }
+  }
+#else
+  dN = vec3(0.0);
+#endif
+  g_col = mix(g_col, vec3(0.84, 0.87, 0.93) * (0.94 + 0.08 * tn(vW.xz * 0.05)), snowT * 0.85);
+  diffuseColor.rgb = g_col;`;
+
 function terrainMaterial({ hole = null } = {}) {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
-  m.customProgramCacheKey = () => (hole ? "dio-far" : "dio-near");   // same source, different closure: keep the programs apart
+  const uni = { uAlb: { value: null }, uAlbOn: { value: 0 }, uAlbO: { value: new THREE.Vector2() }, uAlbP: { value: 5 },
+    uAlbN: { value: new THREE.Vector2(1, 1) }, uSnowY: { value: snowY } };
+  m.userData.uni = uni;
+  m.customProgramCacheKey = () => (hole ? "dio-far2" : "dio-near2");   // same source, different closure: keep the programs apart
   m.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, uni);
     sh.vertexShader = sh.vertexShader
-      .replace("#include <common>", "#include <common>\nvarying vec3 vW;")
-      .replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
+      .replace("#include <common>", "#include <common>\nvarying vec3 vW; varying vec3 vNt; attribute vec2 aVeg; varying vec2 vVeg;")
+      .replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz; vNt = mat3(modelMatrix) * objectNormal; vVeg = aVeg;");
     sh.fragmentShader = sh.fragmentShader
-      .replace("#include <common>", `#include <common>\n${DETAIL}`)
+      .replace("#include <common>", `#include <common>\n${hole ? "#define DIO_FAR" : ""}\n${DETAIL}\n${BUMP}
+varying vec3 vNt; varying vec2 vVeg; uniform sampler2D uAlb; uniform float uAlbOn, uAlbP, uSnowY; uniform vec2 uAlbO, uAlbN;`)
       .replace("#include <color_fragment>", `#include <color_fragment>
   ${hole ? `if (abs(vW.x) < ${hole[0].toFixed(1)} && abs(vW.z) < ${hole[1].toFixed(1)}) discard;` : ""}
-  // bare ground (ochre) gets the meadow's life: grass breaking through in patches, scree and stones, not flat sand
-  float bare = smoothstep(1.05, 1.35, diffuseColor.r / max(diffuseColor.g, 0.01)) * (1.0 - smoothstep(0.5, 0.7, diffuseColor.b));
-  if (bare > 0.0) {
-    float turf = smoothstep(0.36, 0.6, fbm(vW.xz / 16.0 + 7.3));
-    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.20, 0.27, 0.07), bare * turf * 0.85);
-    float stones = smoothstep(0.78, 0.9, tn(vW.xz * 1.7)) * (1.0 - turf);
-    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.26, 0.24, 0.22), bare * stones * 0.6);
-  }
-  float patchy = fbm(vW.xz / 55.0);
-  float grain = tn(vW.xz * 0.9) * 0.6 + tn(vW.xz * 3.7) * 0.4;
-  diffuseColor.rgb *= 0.82 + 0.3 * patchy + 0.14 * (grain - 0.5);
-  float close = 1.0 - smoothstep(25.0, 260.0, distance(vW, cameraPosition));
-  if (close > 0.0) {                              // ground detail you only see from the jeep
-    float tuft = tn(vW.xz * 1.3) * 0.45 + tn(vW.xz * 4.1) * 0.35 + tn(vW.xz * 0.47) * 0.2;
-    float clump = fbm(vW.xz * 0.21);
-    diffuseColor.rgb *= 1.0 + close * (0.55 * (tuft - 0.5) + 0.35 * (clump - 0.5));
-    diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(1.12, 1.0, 0.7), close * smoothstep(0.55, 0.8, clump) * 0.6);
-  }
-  float snow = smoothstep(0.75, 0.9, diffuseColor.g) * step(0.75, diffuseColor.b);
-  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.86, 0.88, 0.92), snow * 0.3);`);
+  float snowT, rockT; vec3 dN;
+  ${GROUND}`)
+      // after season.js's terms: winter snow at a snow-like 0.75, so the sun still models it instead of blowing it out
+      .replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor, 0.72, max(snowT, uWinter));\n  diffuseColor.rgb *= 1.0 - 0.2 * uWinter;")
+      .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+  normal = normalize((viewMatrix * vec4(normalize(N0 - dN), 0.0)).xyz);`);
   };
   return m;
 }
 
+// ---- real ground colour: web/data/diorama/<site>/albedo.webp (near, 5 m/px) and albedo_far.webp (far ring, 30 m/px)
+export const ALBEDO_SOURCE = { name: "Sentinel-2 cloudless 2016 by EOX IT Services GmbH", use: "ground colour (via the Atlas pack)",
+  licence: "CC BY 4.0, contains modified Copernicus Sentinel data 2016", url: "https://s2maps.eu" };
+const albedoCache = new Map();
+/** Both albedo images for a site, or null when the files are missing. Credits EOX in meta.sources (and the About list). */
+export function albedo(site) {
+  const key = site.meta.site;
+  if (!albedoCache.has(key)) {
+    const dir = new URL(`data/diorama/${key}/`, location.href).href;
+    const img = (f) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = dir + f; });
+    albedoCache.set(key, Promise.all([img("albedo.webp"), img("albedo_far.webp")]).then(([near, far]) => {
+      const src = site.meta.sources;
+      if (src && !src.some((s) => s.url === ALBEDO_SOURCE.url)) {
+        src.push(ALBEDO_SOURCE);
+        const ul = document.getElementById("about-sources");      // already drawn by hud.facts: add the line
+        if (ul?.childElementCount) {
+          const li = document.createElement("li"), a = document.createElement("a"), sp = document.createElement("span");
+          a.href = ALBEDO_SOURCE.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = ALBEDO_SOURCE.name;
+          sp.textContent = ALBEDO_SOURCE.licence;
+          li.append(a, `: ${ALBEDO_SOURCE.use}. `, sp); ul.append(li);
+        }
+      }
+      return { near, far };
+    }, () => null));
+  }
+  return albedoCache.get(key);
+}
+
+function texFrom(img) {
+  const t = new THREE.Texture(img);
+  t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 8;
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.needsUpdate = true;
+  return t;
+}
+function useAlbedo(mesh, site, which, x0, z0, px) {
+  albedo(site).then((a) => {
+    if (!a) return;
+    const u = mesh.material.userData.uni, img = a[which];
+    u.uAlb.value = texFrom(img); u.uAlbO.value.set(x0, z0); u.uAlbP.value = px; u.uAlbN.value.set(img.width, img.height); u.uAlbOn.value = 1;
+  });
+}
+
 function gridGeometry(cols, rows, cell, x0, z0, heights, covers, yOff = 0) {
-  const n = cols * rows, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  const n = cols * rows, pos = new Float32Array(n * 3), col = new Float32Array(n * 3), veg = new Uint8Array(n * 2);
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
     const i = r * cols + c, h = heights[i];
     pos[i * 3] = x0 + c * cell; pos[i * 3 + 1] = h + yOff; pos[i * 3 + 2] = z0 + r * cell;
     const hx = heights[r * cols + Math.min(c + 1, cols - 1)] - heights[r * cols + Math.max(c - 1, 0)];
     const hz = heights[Math.min(r + 1, rows - 1) * cols + c] - heights[Math.max(r - 1, 0) * cols + c];
     colourAt(covers[i], h, Math.hypot(hx, hz) / (2 * cell), col, i * 3);
+    const cv = covers[i];                                   // WorldCover: meadow (grass, moss, shrub) and forest, for the grade
+    veg[i * 2] = cv === 2 || cv === 6 || cv === 7 ? 255 : 0; veg[i * 2 + 1] = cv === 1 ? 255 : 0;
   }
   const idx = new Uint32Array((cols - 1) * (rows - 1) * 6);
   let k = 0;
@@ -88,6 +192,7 @@ function gridGeometry(cols, rows, cell, x0, z0, heights, covers, yOff = 0) {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
   geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  geo.setAttribute("aVeg", new THREE.BufferAttribute(veg, 2, true));
   geo.setIndex(new THREE.BufferAttribute(idx, 1));
   geo.computeVertexNormals();
   return geo;
@@ -98,6 +203,7 @@ export function nearTerrain(site) {
   const g = site.meta.grid;
   const mesh = new THREE.Mesh(gridGeometry(g.cols, g.rows, g.cell, site.x0, site.z0, site.H, site.C), seasonize(terrainMaterial(), "ground"));
   mesh.receiveShadow = true; mesh.castShadow = true;
+  useAlbedo(mesh, site, "near", site.x0, site.z0, g.cell / 2);
   return mesh;
 }
 
@@ -107,6 +213,7 @@ export function farTerrain(site) {
   const mesh = new THREE.Mesh(gridGeometry(f.cols, f.rows, f.cell, f.x0, f.z0, site.FH, site.FC, -2),
     seasonize(terrainMaterial({ hole: [g.width / 2 - 4, g.height / 2 - 4] }), "ground"));
   mesh.receiveShadow = false;
+  useAlbedo(mesh, site, "far", f.x0, f.z0, f.cell / 2);
   return mesh;
 }
 

@@ -237,3 +237,4 @@ body.has-panel .topright { right: calc(440px + 24px); }
 .sheet .lp-acts .btn:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
 .sheet .lp-more { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 12px; } .sheet .lp-more summary { cursor: pointer; color: var(--muted); min-height: 44px; display: flex; align-items: center; }
 .sheet .lp-more summary:focus-visible { outline: 2px solid var(--saffron); }
+.trow .ibtn { flex: none; } .off-lbl { white-space: nowrap; } .trow .search { min-width: 0; }

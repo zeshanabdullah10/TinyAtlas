@@ -1,10 +1,51 @@
 {
  "_doc": "Commons photos for place cards, each looked at by a person and found to show the place (backend/tools/pack_photos.py apply). Captions say what the photo shows.",
  "kalam": [
-  {"title": "File:Kalam town, Swat District, KPK (Pakistan).jpg", "caption": "Kalam town on its terrace above the Swat River"},
-  {"title": "File:View of Kalam town and Swat River from Buyon, Swat District.jpg", "caption": "Kalam and the Swat River from Buyon, above the town"},
-  {"title": "File:Swat River and Honeymoon Hotel in Kalam, near Mingora, Swat, KPK.jpg", "caption": "Hotels by the Swat River at Kalam, snow peaks behind"},
-  {"title": "File:View of hotels along the Swat River from Honeymoon Hotel in Kalam.jpg", "caption": "Hotels along the Swat River in Kalam"},
-  {"title": "File:Winter in Kalam town hotel, Swat District,.jpg", "caption": "Kalam in winter snow"}
+  {
+   "title": "File:Kalam town, Swat District, KPK (Pakistan).jpg",
+   "caption": "Kalam town on its terrace above the Swat River"
+  },
+  {
+   "title": "File:View of Kalam town and Swat River from Buyon, Swat District.jpg",
+   "caption": "Kalam and the Swat River from Buyon, above the town"
+  },
+  {
+   "title": "File:Swat River and Honeymoon Hotel in Kalam, near Mingora, Swat, KPK.jpg",
+   "caption": "Hotels by the Swat River at Kalam, snow peaks behind"
+  },
+  {
+   "title": "File:View of hotels along the Swat River from Honeymoon Hotel in Kalam.jpg",
+   "caption": "Hotels along the Swat River in Kalam"
+  },
+  {
+   "title": "File:Winter in Kalam town hotel, Swat District,.jpg",
+   "caption": "Kalam in winter snow"
+  }
+ ],
+ "bahrain": [
+  {
+   "title": "File:Bahrain town in Swat.jpg",
+   "caption": "Bahrain's riverside buildings along the Swat River"
+  },
+  {
+   "title": "File:Bahrain \"Swat Valley\" 03.jpg",
+   "caption": "Bahrain town in its valley, from the slope above"
+  },
+  {
+   "title": "File:Bahrain of Swat Valley, Pakistan.jpg",
+   "caption": "Bahrain town on both banks of the river"
+  },
+  {
+   "title": "File:Bahrain swat.jpg",
+   "caption": "The footbridge and riverfront in Bahrain"
+  },
+  {
+   "title": "File:Bahrain Valley, Swat, Pakistan.jpg",
+   "caption": "Bahrain's bazaar street"
+  },
+  {
+   "title": "File:Torwali elders in Bahrain Swat in 1979.jpg",
+   "caption": "Torwali elders in Bahrain, 1979"
+  }
  ]
 }

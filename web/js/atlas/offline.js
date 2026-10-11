@@ -6,7 +6,7 @@ import { api, BASE } from "../api.js";
 const MB = (b) => `${Math.max(1, Math.round(b / 1e6))} MB`;
 const SHELL = ["atlas.html", "css/tokens.css", "css/atlas.css", "css/tripkit.css", "css/heritage.css", "css/voices.css", "css/roadstatus.css", "css/storyflight.css",
   "tripkit.html", "data/emergency.json", "img/icon-192.png", "js/dom.js", "js/api.js", "js/i18n.js", "js/planner.js", "js/listen.js", "js/tripkit.js", "js/voices.js", "js/roadstatus.js", "data/stories/swat-road.json",
-  ...["main", "controls", "day", "dispose", "heritage", "labels", "landmarks", "material", "offline", "pack", "panel", "ribbon", "roads", "shade", "sheet", "sky", "storyflight", "terrain", "trees", "ui", "water"].map((n) => `js/atlas/${n}.js`)];
+  ...["main", "controls", "day", "dispose", "heritage", "labels", "landmarks", "localplan", "material", "offline", "pack", "panel", "ribbon", "roads", "shade", "sheet", "sky", "storyflight", "terrain", "trees", "ui", "water"].map((n) => `js/atlas/${n}.js`)];
 const CDN = ["https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js"];
 
 async function controller() {

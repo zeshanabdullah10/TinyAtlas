@@ -9,8 +9,8 @@ import { seasonize } from "./season.js";
 function painted(geo, rgb) {
   const g = geo.index ? geo.toNonIndexed() : geo, n = g.attributes.position.count, c = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) {
-    const y = g.attributes.position.getY(i);
-    const k = typeof rgb === "function" ? rgb(y) : rgb;
+    const P = g.attributes.position, y = P.getY(i);
+    const k = typeof rgb === "function" ? rgb(y, P.getX(i), P.getZ(i)) : rgb;
     c.set(k, i * 3);
   }
   g.setAttribute("color", new THREE.BufferAttribute(c, 3));
@@ -19,23 +19,53 @@ function painted(geo, rgb) {
 }
 const L = (r, g, b) => [r, g, b].map((v) => Math.pow(v / 255, 2.2));
 
+// Foliage normals point out from the crown's core, not along each facet, so a low-poly crown shades like a soft mass.
+function crownNormals(g, cx, cy, cz, up = 0.5) {
+  const p = g.attributes.position, n = g.attributes.normal, v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.set(p.getX(i) - cx, (p.getY(i) - cy) * 0.6 + up, p.getZ(i) - cz).normalize();
+    n.setXYZ(i, v.x, v.y, v.z);
+  }
+  return g;
+}
+/** Jitter a crown's vertices (deterministic), so no two tiers share a perfect silhouette. */
+function rough(g, amt, seed) {
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), k = Math.round(x * 97 + y * 31 + z * 53);   // shared corners move together
+    const f = 1 + (hash(k, seed) - 0.5) * 2 * amt;
+    p.setXYZ(i, x * f, y + (hash(k, seed + 1) - 0.5) * amt * 1.2, z * f);
+  }
+  return g;
+}
+
+// A Himalayan conifer (blue pine, fir, deodar): a slender spire of five drooping tiers, darker inside and below.
 function pineGeometry() {
-  const trunk = painted(new THREE.CylinderGeometry(0.18, 0.32, 3.2, 5).translate(0, 1.6, 0), L(92, 64, 44));
-  const tiers = [[2.7, 5.2, 2.4], [2.1, 4.6, 4.9], [1.45, 4.0, 7.2], [0.8, 3.0, 9.4]].map(([r, h, y], i) =>
-    painted(new THREE.ConeGeometry(r, h, 7, 1).translate(0, y + h / 2, 0), (yy) => {
-      const t = (yy - y) / h;
-      return L(38 + 30 * t + i * 6, 74 + 34 * t + i * 6, 64 + 20 * t);
-    }));
+  const trunk = painted(new THREE.CylinderGeometry(0.16, 0.34, 4.2, 5, 1, true).translate(0, 2.1, 0), L(86, 60, 42));
+  const T = [[2.5, 3.8, 1.9], [2.15, 3.6, 4.0], [1.75, 3.4, 6.0], [1.3, 3.2, 8.0], [0.75, 3.0, 10.0]];
+  const tiers = T.map(([r, h, y], i) => {
+    const g = rough(new THREE.ConeGeometry(r, h, 6, 1).translate(0, y + h / 2, 0).toNonIndexed(), 0.16, 40 + i);
+    g.rotateY(i * 0.9);
+    crownNormals(g, 0, y + h * 0.15, 0, r * 0.45);
+    return painted(g, (yy, xx, zz) => {
+      const t = Math.min(1, Math.max(0, (yy - y) / h)), rim = Math.min(1, Math.hypot(xx, zz) / r);
+      const k = 0.78 + 0.22 * (i / 4) + 0.12 * rim - 0.1 * (1 - t);     // lower tiers and the shaded underside darker
+      return L((30 + 26 * t) * k, (62 + 34 * t) * k, (52 + 18 * t) * k);
+    });
+  });
   return mergeGeometries([trunk, ...tiers]);
 }
 
 function broadleafGeometry() {
-  const trunk = painted(new THREE.CylinderGeometry(0.22, 0.38, 4.2, 5).translate(0, 2.1, 0), L(96, 74, 56));
-  const crowns = [[0, 6.4, 0, 3.3], [1.5, 5.4, 0.9, 2.4], [-1.4, 5.6, -0.8, 2.5], [0.3, 8.3, -0.4, 2.2]].map(([x, y, z, r], i) =>
-    painted(new THREE.IcosahedronGeometry(r, 0).scale(1, 0.85, 1).translate(x, y, z), (yy) => {
-      const t = Math.min(1, Math.max(0, (yy - 3) / 7));
-      return L(56 + 40 * t + i * 4, 88 + 40 * t + i * 5, 40 + 18 * t);
-    }));
+  const trunk = painted(new THREE.CylinderGeometry(0.22, 0.38, 4.2, 5, 1, true).translate(0, 2.1, 0), L(96, 74, 56));   // caps hidden: open
+  const crowns = [[0, 6.4, 0, 3.3], [1.5, 5.4, 0.9, 2.4], [-1.4, 5.6, -0.8, 2.5], [0.2, 8.2, 0.3, 2.3]].map(([x, y, z, r], i) => {
+    const g = rough(new THREE.IcosahedronGeometry(r, 0).scale(1, 0.85, 1), 0.18, 60 + i).translate(x, y, z);
+    crownNormals(g, 0, 6.2, 0, 1.2);
+    return painted(g, (yy, xx, zz) => {
+      const t = Math.min(1, Math.max(0, (yy - 3) / 7)), side = 0.85 + 0.15 * Math.min(1, Math.hypot(xx, zz) / 3.5);
+      return L((52 + 44 * t + i * 4) * side, (84 + 46 * t + i * 5) * side, (38 + 20 * t) * side);
+    });
+  });
   return mergeGeometries([trunk, ...crowns]);
 }
 /** Broadleaf below about 1,700 m above sea level, pines above, mixed between 1,500 and 1,900 m. */
@@ -73,8 +103,8 @@ export function flora(site, path, tier) {
   const up = new THREE.Vector3(0, 1, 0);
 
   // pines in 800 m tiles, so the main and shadow passes skip what is off screen
-  const pineGeo = pineGeometry(), pineMat = seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, flatShading: true }), "pine");
-  const leafGeo = broadleafGeometry(), leafMat = seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true }), "shrub");
+  const pineGeo = pineGeometry(), pineMat = seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 }), "pine");
+  const leafGeo = broadleafGeometry(), leafMat = seasonize(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), "shrub");
   const TILE = 800 / g.cell, tiles = new Map();
   pines.forEach((p, i) => {
     const x = site.x0 + p[0] * g.cell, z = site.z0 + p[1] * g.cell, leaf = broadleafAt(site.heightAt(x, z) + site.Y0, i);
@@ -88,12 +118,15 @@ export function flora(site, path, tier) {
       const [c, r] = pines[i];
       const x = site.x0 + c * g.cell, z = site.z0 + r * g.cell;
       const sz = (1.05 + 0.85 * hash(i, 3)) * grow;
-      // the DSM is the canopy top in forest, so the trees are set down into it by part of their height
-      v.set(x, site.heightAt(x, z) - 7.5 * sz * 0.55, z);
+      // Seated on the lowest ground under the trunk, so it meets the slope; the DSM is the canopy top in forest, so the
+      // tree also sinks a modest 1 m (scaled) into it rather than standing on its own crown.
+      const gy = Math.min(site.heightAt(x, z), site.heightAt(x + 0.6, z), site.heightAt(x - 0.6, z), site.heightAt(x, z + 0.6), site.heightAt(x, z - 0.6));
+      v.set(x, gy - 0.25 - 1.0 * sz, z);
       q.setFromAxisAngle(up, hash(i, 4) * 6.28);
       s.set(sz * (0.85 + 0.3 * hash(i, 5)), sz, sz * (0.85 + 0.3 * hash(i, 5)));
       mesh.setMatrixAt(j, m.compose(v, q, s));
-      mesh.setColorAt(j, col.setScalar(0.82 + 0.36 * hash(i, 6)));
+      const shade = 0.8 + 0.34 * hash(i, 6);                  // each tree its own green: some bluer, some more olive
+      mesh.setColorAt(j, col.setRGB(shade * (0.92 + 0.16 * hash(i, 17)), shade, shade * (0.9 + 0.2 * hash(i, 18))));
     });
     mesh.computeBoundingSphere();
     mesh.castShadow = true; mesh.receiveShadow = true;

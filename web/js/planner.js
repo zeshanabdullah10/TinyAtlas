@@ -82,7 +82,7 @@ export function renderLocalPlanner(root, { pack, lp, start, onShowDay, onSeeMap 
   function render() {
     fill(list, ...stops.map((p, i) => h("li", {}, h("span", { class: "n" }, String(i + 1)), h("span", { class: "lp-name" }, name(p)),
       sb("↑", `Move ${name(p)} earlier`, () => move(i, -1), i === 0), sb("↓", `Move ${name(p)} later`, () => move(i, 1), i === stops.length - 1),
-      sb("×", `Remove ${name(p)}`, () => { stops.splice(i, 1); render(); })));
+      sb("×", `Remove ${name(p)}`, () => { stops.splice(i, 1); render(); }))));
     const full = stops.length >= MAX_STOPS, last = stops[stops.length - 1];
     find.disabled = full; find.placeholder = full ? `Up to ${MAX_STOPS} stops` : stops.length ? "Add a stop: type a place" : "Choose where to start: type a place";
     const rest = places.filter((p) => !stops.includes(p));
@@ -95,7 +95,7 @@ export function renderLocalPlanner(root, { pack, lp, start, onShowDay, onSeeMap 
 
   function suggest() {
     const full = stops.length >= MAX_STOPS;
-    fill(hits, ...(q && !full ? places.filter((p) => !stops.includes(p) && (p.name + " " + (p.short_name || "")).toLowerCase().includes(q)).slice(0, 6).map((p) => h("li", {}, h("button", { type: "button", onclick: () => add(p) }, p.name, h("small", {}, ` ${p.kind}`)))) : []));
+    fill(hits, ...(q && !full ? places.filter((p) => !stops.includes(p) && (p.name + " " + (p.short_name || "")).toLowerCase().includes(q)).sort((a, b) => (+b.name.toLowerCase().startsWith(q) - +a.name.toLowerCase().startsWith(q)) || a.tier - b.tier).slice(0, 6).map((p) => h("li", {}, h("button", { type: "button", onclick: () => add(p) }, p.name, h("small", {}, ` ${p.kind}`)))) : []));
   }
 
   function summary() {
