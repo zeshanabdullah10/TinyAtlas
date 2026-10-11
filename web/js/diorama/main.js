@@ -169,6 +169,15 @@ function lakeView() {           // the overview: high behind the track you came 
   const D = meta.lake ? 1100 : 520;
   const p = look.clone().addScaledVector(dir, D); p.y = look.y + D * 0.62;
   const clear = () => { for (let i = 1; i <= 24; i++) { const q = p.clone().lerp(look, i / 25); if (q.y < site.heightAt(q.x, q.z) + 25) return false; } return true; };
+  if (!meta.lake) {              // a meadow: look AT it from the side with the clearest view (the drive's side first), not into the slope behind the road
+    let ok = false;
+    for (const deg of [0, 40, -40, 80, -80, 120, -120, 160]) {
+      const a = (deg * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
+      p.set(look.x + (dir.x * c - dir.z * s) * D, look.y + D * 0.62, look.z + (dir.x * s + dir.z * c) * D);
+      if ((ok = clear())) break;
+    }
+    if (!ok) p.set(look.x + dir.x * D, look.y + D * 0.62, look.z + dir.z * D);
+  }
   for (let k = 0; k < 40 && !clear(); k++) p.y += 40;
   p.y = Math.max(p.y, site.heightAt(p.x, p.z) + 80);
   _overview = { p, look };
